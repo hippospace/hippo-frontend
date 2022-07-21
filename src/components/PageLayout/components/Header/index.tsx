@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Antd, WalletConnector } from 'components';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { routes } from 'App.routes';
 import LogoIcon from 'components/LogoIcon';
 import cx from 'classnames';
 import styles from './Header.module.scss';
+import useCurrentPage from 'hooks/useCurrentPage';
+import { useScrollYPosition } from 'react-use-scroll-position';
+import classNames from 'classnames';
+import GithubIcon from 'resources/icons/GitHub-Mark-Light-120px-plus.png';
 
 const { Header } = Antd.Layout;
 
-const PageHeader: React.FC = () => {
-  const { pathname } = useLocation();
-  const [selectedKey, setSelectedKey] = useState<string>('');
+const SiteBadge = () => {
+  return (
+    <div className={styles.siteBadge}>
+      <img src={GithubIcon} className="w-6 inline-block" /> Coming soon
+    </div>
+  );
+};
 
-  const getNavSelected = useCallback(() => {
-    const rootPath = pathname.split('/')[1];
-    const pageName = routes?.find((r) => r?.path === rootPath)?.name || routes[0].name;
-    if (pageName !== selectedKey) {
-      setSelectedKey(pageName);
-    }
-  }, [pathname, selectedKey, setSelectedKey]);
+const PageHeader: React.FC = () => {
+  const [currentPageName] = useCurrentPage();
 
   const renderNavItems = () => {
     return routes.map(({ name, path, hidden }) => {
@@ -40,12 +42,13 @@ const PageHeader: React.FC = () => {
     });
   };
 
-  useEffect(() => {
-    getNavSelected();
-  }, [getNavSelected]);
+  const scrollY = useScrollYPosition();
 
   return (
-    <Header className="fixed z-20 w-full px-16 pt-12 pb-8 bg-primary h-auto">
+    <Header
+      className={classNames('fixed z-20 w-full px-16 pt-12 pb-8 bg-transparent h-auto', {
+        [styles.blur]: scrollY > 64
+      })}>
       <div className="mx-auto h-[72px] top-0 left-0 flex items-center">
         <div className="grow h-full">
           <Link
@@ -58,12 +61,13 @@ const PageHeader: React.FC = () => {
           <Antd.Menu
             mode="horizontal"
             theme="dark"
-            className={cx(styles.menu, 'h-full min-w-[200px]')}
-            selectedKeys={[selectedKey]}>
+            className={cx(styles.menu, 'h-full min-w-[200px] w-full !bg-transparent')}
+            selectedKeys={[currentPageName]}>
             {renderNavItems()}
           </Antd.Menu>
         </div>
-        <WalletConnector />
+        {currentPageName !== 'Home' && <WalletConnector />}
+        {currentPageName === 'Home' && <SiteBadge />}
         <div />
       </div>
     </Header>

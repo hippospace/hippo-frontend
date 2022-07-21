@@ -3,26 +3,36 @@ import { Navigate, RouteObject, useRoutes } from 'react-router-dom';
 import Pool from 'pages/Pool';
 import Swap from 'pages/Swap';
 import Faucet from 'pages/Faucet';
+import Home from 'pages/Home';
 
-type TRoute = RouteObject & {
-  name: string;
+export type TRoute = RouteObject & {
+  name: 'Home' | 'Pools' | 'Swap' | '404' | 'Faucet';
   hidden?: boolean; //to hide the visibility in header menu
 };
 
 export const routes: TRoute[] = [
   {
+    path: '',
+    name: 'Home',
+    hidden: true,
+    element: <Home />
+  },
+  {
     path: 'swap',
     name: 'Swap',
+    hidden: true,
     element: <Swap />
   },
   {
     path: 'pools',
     name: 'Pools',
+    hidden: true,
     element: <Pool />
   },
   {
     path: 'faucet',
     name: 'Faucet',
+    hidden: true,
     element: <Faucet />
   },
   // {
@@ -48,7 +58,7 @@ export const routes: TRoute[] = [
   {
     path: '*',
     name: '404',
-    element: <Navigate replace to="/swap" />
+    element: <Navigate replace to="/" />
   }
 ];
 

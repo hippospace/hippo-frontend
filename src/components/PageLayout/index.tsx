@@ -6,12 +6,14 @@ import { Footer, Header } from './components';
 import { getLayoutHeight } from 'modules/common/reducer';
 import { useSelector } from 'react-redux';
 import HippoLogoBg from 'resources/img/hippo-logo-bg.png';
+import useCurrentPage from 'hooks/useCurrentPage';
+import classNames from 'classnames';
 // import styles from './PageLayout.module.scss';
 
 const { Content } = Antd.Layout;
 
 const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const contentHeight = useSelector(getLayoutHeight);
 
@@ -20,16 +22,29 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       dispatch(commonAction.SET_LAYOUT_HEIGHT(containerRef?.current?.clientHeight));
   }, [containerRef, contentHeight, dispatch]);
 
+  const [currentPageName] = useCurrentPage();
+
   return (
-    <Antd.Layout className="relative min-h-screen bg-primary">
+    <Antd.Layout
+      className={classNames('relative min-h-screen bg-primary', {
+        'bg-white': currentPageName === 'Home'
+      })}>
       <Header />
-      <Content className="mt-32 px-16 py-16" ref={containerRef}>
-        <div className="relative z-10">{children}</div>
-        <img
-          src={HippoLogoBg}
-          alt=""
-          className="absolute right-0 bottom-0 w-[824.49px] h-[818px] z-0"
-        />
+      <Content
+        className={classNames('pt-[152px] px-16', {
+          'bg-home1': currentPageName === 'Home'
+        })}>
+        <div
+          className={classNames('py-16', {
+            'bg-home-icons bg-contain bg-no-repeat bg-top': currentPageName === 'Home'
+          })}
+          ref={containerRef}>
+          <div className="relative z-10">{children}</div>
+        </div>
+        {currentPageName === 'Home' && (
+          <div className="bg-home1 absolute w-full h-full left-0 top-0 rotate-180 -z-0"></div>
+        )}
+        <img src={HippoLogoBg} className="absolute right-0 bottom-0 w-[824.49px] h-[818px] z-0" />
       </Content>
       <Footer />
     </Antd.Layout>
