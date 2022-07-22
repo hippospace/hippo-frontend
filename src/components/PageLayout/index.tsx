@@ -26,12 +26,12 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <Antd.Layout
-      className={classNames('relative min-h-screen bg-primary', {
+      className={classNames('relative min-h-screen bg-primary overflow-x-hidden', {
         'bg-white': currentPageName === 'Home'
       })}>
       <Header />
       <Content
-        className={classNames('pt-[152px] px-16', {
+        className={classNames('pt-[136px] px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]', {
           'bg-home1': currentPageName === 'Home'
         })}>
         <div
@@ -44,9 +44,12 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {currentPageName === 'Home' && (
           <div className="bg-home1 absolute w-full h-full left-0 top-0 rotate-180 -z-0"></div>
         )}
-        <img src={HippoLogoBg} className="absolute right-0 bottom-0 w-[824.49px] h-[818px] z-0" />
       </Content>
       <Footer />
+      <img
+        src={HippoLogoBg}
+        className="absolute right-0 bottom-0 w-[824.49px] h-auto z-0 laptop:w-[33%] mobile:w-[40%]"
+      />
     </Antd.Layout>
   );
 };

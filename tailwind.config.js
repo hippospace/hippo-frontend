@@ -28,6 +28,12 @@ module.exports = {
         home1: 'radial-gradient(88.17% 88.17% at 87.73% 7.97%, rgba(110, 108, 202, 0.17) 0%, rgba(151, 71, 255, 0) 63.69%, rgba(151, 71, 255, 0) 100%)'
       }
     },
+    screens: {
+      desktop: { max: '99999px'}, // desktop first
+      laptop: { max: '1535px'},
+      tablet: { max: '1279px' },
+      mobile: { max: '767px' }
+    },
     backgroundColor: theme => ({
       ...theme('colors'),
       primary: '#F6F8FA',
@@ -39,7 +45,6 @@ module.exports = {
       primeBlack80: 'rgba(45, 45, 45, 0.8)',
       input: '#F8F8F8',
       transparent: 'transparent',
-      header: 'rgba(246, 248, 250, 0.1)',
       grey: {
         100: '#F8F8F8',
         300: '#D5D5D5',
@@ -112,6 +117,7 @@ module.exports = {
         }
       });
     }),
-    require('@tailwindcss/line-clamp')
+    require('@tailwindcss/line-clamp'),
+    require('@tailwindcss/aspect-ratio')
   ]
 };

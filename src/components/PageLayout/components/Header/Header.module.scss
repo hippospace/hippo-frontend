@@ -36,25 +36,11 @@
 
 .blur {
   --fallback-background: #fbf5ff;
-  --background: rgba(246, 248, 250, 0.1);;
   background-color: var(--fallback-background) !important; /* Fallback */
 }
 @supports (backdrop-filter: blur()) {
   .blur {
-    background-color: var(--background) !important;
     backdrop-filter: blur(40px);
+    @apply bg-primeBlack #{!important};
   }
-}
-
-.siteBadge {
-  background: #fe6e65;
-  width: 300px;
-  color: white;
-  text-align: center;
-  font-weight: bold;
-  font-size: 22px;
-  height: 44px;
-  line-height: 44px;
-  transform: translateX(150px) rotate(45deg);
-  padding-right: 15px;
 }
