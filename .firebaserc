@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "hippo-ui-test"
+    "default": "hippo-ui-test",
+    "production": "hippospace-2f590"
   }
 }
