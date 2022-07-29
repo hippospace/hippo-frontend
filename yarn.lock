@@ -1690,10 +1690,10 @@
     ts-jest "^28.0.5"
     tslib "^2.4.0"
 
-"@fewcha/web3@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.1.4.tgz#8e2cc409284e7fa49a9754ad8ac2e8aa0542702a"
-  integrity sha512-/8h0ZDyP93rPNDT4MPROx69Vj3Vlb1iE5SKPKwTpzIva/1NDrli7thE5F/0ofmPJqUoaSouSpgG995ahzBjFxw==
+"@fewcha/web3@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.1.6.tgz#3f159fd44c9ad800fb6e7747c071516b55dea7bb"
+  integrity sha512-XOi931bWIPBNDvLoMdIQheujSHrdG0cs09SBTyqKYi6U1lukVxHTtg+kBl4RPaxzv89IJEC5YaG0s/0A3VxM9Q==
   dependencies:
     aptos "^1.2.0"
     buffer "^6.0.3"
@@ -2207,27 +2207,27 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@^0.1.15":
-  version "0.1.15"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.1.15.tgz#417834594be0fd7910be56818d3f73f848f1474d"
-  integrity sha512-Rq3Aio3mVo/KUyfmSnxTYAamKRvsOiQyIDghlkK1rqGKvghw/O06IZAxJRC35giEN4l0ApwizHrJ44W3luGtxg==
+"@manahippo/aptos-wallet-adapter@^0.1.16":
+  version "0.1.16"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.1.16.tgz#53e374f698337dbc4a61b990613023ab9964ec18"
+  integrity sha512-o9dWzIomOjtBaNJlgivrjbfD2nqywZFCsxKhSEES7kDIud+IONXR5bWMZKD0AMFtXY68WRTs3TnJ5qKuc7hhoA==
   dependencies:
-    "@fewcha/web3" "^0.1.4"
+    "@fewcha/web3" "^0.1.6"
 
-"@manahippo/hippo-sdk@^0.0.31":
-  version "0.0.31"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.0.31.tgz#c8317b7be6f1b5ac52c1c3bae3880fede5191894"
-  integrity sha512-pN7e9nOMFOOhtET4QVkQ1MA75rdc0K+s0VrmNn/FR9IELutaNlQAAQ3FiLHipN0rFpVM6mn72FVvX2HewYJm6w==
+"@manahippo/hippo-sdk@^0.0.32":
+  version "0.0.32"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.0.32.tgz#460af7e88601f192c818aa8a0121cb521e547fa7"
+  integrity sha512-waAYmhxo28YJ7UVIwOV4VJTPljFr5E/dRP1nHSnkpf0vsT86yrwcMvlziKecck4tVrY/ZBlcSFGgv4n/v4BPxQ==
   dependencies:
-    "@manahippo/move-to-ts" "^0.0.57"
+    "@manahippo/move-to-ts" "^0.0.60"
     aptos "1.2.0"
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@^0.0.57":
-  version "0.0.57"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.0.57.tgz#96407d5c96dc1907b51dd1183c7c26877a67c9b2"
-  integrity sha512-a6mB4IpTxZBMP46RzSE4GYP8gxjT3/uGxXaY34ew9UIO+2892Vejanuzkwcmn6PWRyi+60yDmC/iCznIuKlWxA==
+"@manahippo/move-to-ts@^0.0.60":
+  version "0.0.60"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.0.60.tgz#161644f35ed4784dba9d2154b70dacd0e17d8f88"
+  integrity sha512-glnSA4mKerNTCreO9We6TOwb81kK6ny2ElBY0wnpXts1aMCVXJQ2jv3ZHZZghqD1Vy8yUQwgRyg0temsVQ3OGw==
   dependencies:
     aptos "^1.2.0"
     big-integer "^1.6.51"
