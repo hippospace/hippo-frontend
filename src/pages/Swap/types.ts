@@ -1,15 +1,15 @@
-import { ITokenInfo } from 'types/tokenList';
+import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
 
 export interface ISwapSettings {
   slipTolerance: number;
   trasactionDeadline: number;
   currencyFrom?: {
-    token: ITokenInfo;
+    token?: TokenInfo;
     amount?: number;
     balance: number;
   };
   currencyTo?: {
-    token: ITokenInfo;
+    token?: TokenInfo;
     amount?: number;
     balance: number;
   };

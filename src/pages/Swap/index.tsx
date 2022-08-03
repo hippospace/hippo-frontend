@@ -9,7 +9,6 @@ import styles from './Swap.module.scss';
 import { useSelector } from 'react-redux';
 import { getSwapSettings } from 'modules/swap/reducer';
 import TokenSwap from './components/TokenSwap';
-import useFetchToken from 'hooks/useFetchToken';
 import useHippoClient from 'hooks/useHippoClient';
 import { ISwapSettings } from './types';
 
@@ -35,7 +34,6 @@ const Swap: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const swapSettings = useSelector(getSwapSettings);
   const { hippoSwap, hippoWallet, requestSwap } = useHippoClient();
-  useFetchToken();
 
   const renderCardHeader = useMemo(
     () => (
@@ -58,16 +56,16 @@ const Swap: React.FC = () => {
   );
 
   const onSubmitSwap = useCallback(
-    async (values: ISwapSettings, formikHelper: FormikHelpers<ISwapSettings>) => {
-      const fromSymbol = values.currencyFrom?.token.symbol;
-      const toSymbol = values.currencyTo?.token.symbol;
+    (values: ISwapSettings, formikHelper: FormikHelpers<ISwapSettings>) => {
+      const fromSymbol = values.currencyFrom?.token?.symbol.str();
+      const toSymbol = values.currencyTo?.token?.symbol.str();
       const fromUiAmt = values.currencyFrom?.amount;
       if (hippoSwap && hippoWallet && fromSymbol && toSymbol && fromUiAmt) {
         const quote = hippoSwap.getBestQuoteBySymbols(fromSymbol, toSymbol, fromUiAmt, 3);
         if (quote) {
           const minOut = quote.bestQuote.outputUiAmt * (1 - values.slipTolerance / 100);
-          await requestSwap(fromSymbol, toSymbol, fromUiAmt, minOut, () => {
-            formikHelper.resetForm();
+          requestSwap(fromSymbol, toSymbol, fromUiAmt, minOut, () => {
+            formikHelper.setFieldValue('currencyFrom.amount', 0);
           });
         } else {
           // TODO: info bubble "route note available"

@@ -1,15 +1,17 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Input, List } from 'components/Antd';
 import { useFormikContext } from 'formik';
 import { getTokenList } from 'modules/swap/reducer';
 import { ISwapSettings } from 'pages/Swap/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { ITokenInfo } from 'types/tokenList';
 import VirtualList from 'rc-virtual-list';
 import CoinRow from './CoinRow';
 
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
+import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -25,14 +27,14 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const tokenList = useSelector(getTokenList);
   const commonCoins = tokenList.filter((token) => {
-    return ['BTC', 'USDT', 'USDC'].includes(token.symbol);
+    return ['BTC', 'USDT', 'USDC'].includes(token.symbol.str());
   });
   const [filter, setFilter] = useState<string>('');
   const { hippoWallet } = useHippoClient();
-  const [tokenListBalance, setTokenListBalance] = useState<ITokenInfo[]>();
+  const [tokenListBalance, setTokenListBalance] = useState<TokenInfo[]>();
 
   const onSelectToken = useCallback(
-    (token: ITokenInfo) => {
+    (token: TokenInfo) => {
       setFieldValue(actionType, {
         ...values[actionType],
         token
@@ -50,31 +52,16 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   //   });
   // }, [tokenList, filter]);
 
-  const getFilteredTokenListWithBalance = useCallback(async () => {
+  const getFilteredTokenListWithBalance = useCallback(() => {
     let currentTokenList = tokenList;
     if (filter) {
-      currentTokenList = tokenList.filter((token) => {
-        const keysForFilter = [token.name, token.symbol, token.address].join(',').toLowerCase();
+      currentTokenList = currentTokenList.filter((token) => {
+        const keysForFilter = [token.name.str(), token.symbol.str()].join(',').toLowerCase();
         return keysForFilter.includes(filter);
       });
     }
-    let balance = Number(0).toFixed(4);
-    if (hippoWallet) {
-      await hippoWallet.refreshStores();
-      const results = currentTokenList.map((token) => {
-        const store = hippoWallet?.symbolToCoinStore[token?.symbol || ''];
-        const ti = hippoWallet?.symbolToTokenInfo[token?.symbol || ''];
-        const uiBalance =
-          (store?.coin?.value.toJsNumber() || 0) / Math.pow(10, ti?.decimals.toJsNumber() || 1);
-        balance = uiBalance.toFixed(4);
-        return { ...token, balance } as ITokenInfo & { balance: string };
-      });
-      setTokenListBalance(results);
-    } else {
-      setTokenListBalance(currentTokenList);
-    }
-    return balance;
-  }, [hippoWallet, filter, tokenList]);
+    setTokenListBalance(currentTokenList);
+  }, [filter, tokenList]);
 
   useEffect(() => {
     getFilteredTokenListWithBalance();
@@ -87,7 +74,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
           {commonCoins.map((coin) => (
             <CommonCoinButton
               coin={coin}
-              key={`common-coin-${coin.symbol}`}
+              key={`common-coin-${coin.symbol.str()}`}
               onClickToken={() => onSelectToken(coin)}
             />
           ))}
@@ -118,7 +105,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
             {(item) => (
               <List.Item
                 className="!border-b-0 !px-0 cursor-pointer p-1"
-                key={`${item.symbol}-${item.address}`}
+                key={`${item.symbol.str()}`}
                 onClick={() => onSelectToken(item)}>
                 <CoinRow item={item} />
               </List.Item>
@@ -127,7 +114,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         </List>
       </div>
     );
-  }, [tokenListBalance, onSelectToken, hippoWallet]);
+  }, [hippoWallet, tokenListBalance, onSelectToken]);
 
   return (
     <div className="flex flex-col gap-2">

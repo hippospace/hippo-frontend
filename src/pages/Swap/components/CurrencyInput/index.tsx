@@ -5,10 +5,13 @@ import cx from 'classnames';
 import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
 import { useMemo, useState } from 'react';
-import NumberInput from 'components/NumberInput';
 import CoinIcon from 'components/CoinIcon';
 import { Popover } from 'antd';
-import useHippoClient from 'hooks/useHippoClient';
+import useTokenBalane from 'hooks/useTokenBalance';
+import { useSelector } from 'react-redux';
+import { getTokenList } from 'modules/swap/reducer';
+import classNames from 'classnames';
+import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -17,28 +20,23 @@ interface TProps {
 const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
   const [isVisibile, setIsVisible] = useState(false);
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
-  const hippoClient = useHippoClient();
 
   const selectedCurrency = values[actionType];
-  const selectedSymbol = selectedCurrency?.token.symbol;
-  let uiBalance = 0;
-  if (selectedSymbol && hippoClient && hippoClient.hippoWallet) {
-    const selectedRawBalance =
-      hippoClient.hippoWallet?.symbolToCoinStore[selectedSymbol]?.coin.value.toJsNumber();
-    const selectedDecimals =
-      hippoClient.hippoWallet.symbolToTokenInfo[selectedSymbol].decimals.toJsNumber();
-    uiBalance = selectedRawBalance! / Math.pow(10, selectedDecimals) || 0;
-  }
+  const selectedSymbol = selectedCurrency?.token?.symbol.str();
+  const uiBalance = useTokenBalane(selectedSymbol);
+  const tokenList = useSelector(getTokenList);
+  const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
 
   const coinSelectorButton = useMemo(() => {
     return (
       <div
-        className="flex items-center gap-2 font-bold cursor-pointer"
-        onClick={() => setIsVisible(true)}>
-        {selectedCurrency?.token.symbol ? (
+        className={classNames('flex items-center gap-2 font-bold cursor-pointer', {
+          'cursor-not-allowed': isCoinSelectorDisabled
+        })}>
+        {selectedCurrency?.token?.symbol ? (
           <div className="flex gap-2 uppercase items-center">
-            <CoinIcon logoSrc={selectedCurrency.token.logoURI} />
-            {selectedCurrency.token.symbol}
+            <CoinIcon logoSrc={selectedCurrency.token.logo_url.str()} />
+            {selectedCurrency.token.symbol.str()}
           </div>
         ) : (
           <div>Select Currency</div>
@@ -46,7 +44,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
         <CaretIcon className="fill-black" />
       </div>
     );
-  }, [setIsVisible, selectedCurrency]);
+  }, [isCoinSelectorDisabled, selectedCurrency?.token?.symbol, selectedCurrency?.token?.logo_url]);
 
   return (
     <div
@@ -59,48 +57,34 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
           overlayClassName={styles.popover}
           trigger="click"
           visible={isVisibile}
-          onVisibleChange={(visible) => setIsVisible(visible)}
+          onVisibleChange={(visible) => setIsVisible(!isCoinSelectorDisabled && visible)}
           content={
             <CoinSelector actionType={actionType} dismissiModal={() => setIsVisible(!isVisibile)} />
           }>
           {coinSelectorButton}
         </Popover>
-        <NumberInput
-          className="grow rounded-xl bg-transparent"
+        <PositiveFloatNumInput
           min={0}
+          max={1e11}
+          maxDecimals={9}
+          isDisabled={actionType === 'currencyTo'}
           placeholder="0.00"
-          onFocus={() =>
+          className="grow font-bold title bg-transparent text-right pr-0 pl-1"
+          inputAmount={selectedCurrency?.amount || 0}
+          onAmountChange={(a) =>
             setFieldValue(actionType, {
               ...selectedCurrency,
-              amount: null
-            })
-          }
-          controls={false}
-          value={selectedCurrency?.amount}
-          onChange={(val) =>
-            setFieldValue(actionType, {
-              ...selectedCurrency,
-              amount: val
+              amount: a
             })
           }
         />
       </div>
-      <div className="flex justify-between">
-        <small className="flex items-center gap-2 font-bold text-grey-500">Current Balance:</small>
-        <NumberInput
-          className="grow bg-transparent"
-          step="0.01"
-          stringMode
-          readOnly
-          controls={false}
-          formatter={(value: unknown) =>
-            typeof value !== 'undefined'
-              ? `${parseFloat((value as string) || '0.00').toFixed(4)}`
-              : ''
-          }
-          value={uiBalance.toString()}
-        />
-      </div>
+      {typeof uiBalance === 'number' && (
+        <div className="flex justify-between font-bold text-grey-500 mt-1">
+          <small>Current Balance:</small>
+          <small>{uiBalance}</small>
+        </div>
+      )}
     </div>
   );
 };

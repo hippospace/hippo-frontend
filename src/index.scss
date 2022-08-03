@@ -19,3 +19,16 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+@layer components {
+  svg.font-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    // vertical alignment when adjacent with texts
+    vertical-align: -0.15em;
+    // change color by setting color
+    fill: currentColor;
+    overflow: hidden;
+  }
+}

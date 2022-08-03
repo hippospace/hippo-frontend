@@ -1,14 +1,14 @@
+import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
 import { createReducer } from '@reduxjs/toolkit';
 import { RootState } from 'modules/rootReducer';
 import { ISwapSettings } from 'pages/Swap/types';
-import { ITokenInfo } from 'types/tokenList';
 import actions from './actions';
 
 interface SwapState {
   isFetching: boolean;
   isFetched: boolean;
   error: any;
-  tokenList: ITokenInfo[];
+  tokenList: TokenInfo[];
   swapSettings: ISwapSettings;
 }
 
@@ -21,12 +21,12 @@ const initState: SwapState = {
     slipTolerance: 1,
     trasactionDeadline: 0,
     currencyFrom: {
-      token: {} as ITokenInfo,
+      token: undefined,
       amount: undefined,
       balance: 0
     },
     currencyTo: {
-      token: {} as ITokenInfo,
+      token: undefined,
       amount: undefined,
       balance: 0
     }

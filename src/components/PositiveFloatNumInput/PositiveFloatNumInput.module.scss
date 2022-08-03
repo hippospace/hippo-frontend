@@ -1,0 +1,14 @@
+:global {
+  input.positiveFloatNumInput {
+    &:focus {
+      outline: none;
+    }
+    &[type='number'] {
+      -moz-appearance: textfield;
+    }
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+  }
+}

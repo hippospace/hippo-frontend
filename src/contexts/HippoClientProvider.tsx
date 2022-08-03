@@ -1,5 +1,5 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useState } from 'react';
-import { hippoSwapClient, hippoWalletClient } from 'config/hippoWalletClient';
+import { hippoSwapClient, hippoTradeAggregator, hippoWalletClient } from 'config/hippoClients';
 import {
   HippoSwapClient,
   HippoWalletClient,
@@ -7,6 +7,7 @@ import {
   UITokenAmount,
   aptos_framework
 } from '@manahippo/hippo-sdk';
+import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
 import { Coin_registry } from '@manahippo/hippo-sdk/dist/generated/coin_registry';
 import useAptosWallet from 'hooks/useAptosWallet';
 // import { aptosClient } from 'config/aptosClient';
@@ -15,9 +16,12 @@ import { TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { MaybeHexString } from 'aptos';
 import { TransactionPayload, TransactionPayload_ScriptFunctionPayload } from 'aptos/dist/generated';
+import { useDispatch } from 'react-redux';
+import swapAction from 'modules/swap/actions';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
+  hippoAgg?: TradeAggregator;
   hippoSwap?: HippoSwapClient;
   tokenStores?: Record<string, aptos_framework.Coin.CoinStore>;
   tokenInfos?: Record<string, Coin_registry.TokenInfo>;
@@ -90,10 +94,12 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { signAndSubmitTransaction } = useWallet();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
   const [hippoSwap, setHippoSwapClient] = useState<HippoSwapClient>();
+  const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
   const [refresh, setRefresh] = useState(false);
   const [transaction, setTransaction] = useState<TTransaction>();
   const [tokenStores, setTokenStores] = useState<Record<string, aptos_framework.Coin.CoinStore>>();
   const [tokenInfos, setTokenInfos] = useState<Record<string, Coin_registry.TokenInfo>>();
+  const dispatch = useDispatch();
 
   const requestFaucet = useCallback(
     async (symbol: string, callback?: () => void) => {
@@ -101,7 +107,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (!activeWallet) throw new Error('Please login first');
         if (symbol !== 'APTOS') {
           const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
-          const payload = await hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol);
+          const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol);
           if (payload) {
             const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
             if (result) {
@@ -134,10 +140,15 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     setHippoSwapClient(sClient);
   }, []);
 
+  const getHippoTradeAggregator = useCallback(async () => {
+    setHippoAgg(await hippoTradeAggregator());
+  }, []);
+
   useEffect(() => {
     getHippoWalletClient();
     getHippoSwapClient();
-  }, [getHippoWalletClient, getHippoSwapClient]);
+    getHippoTradeAggregator();
+  }, [getHippoWalletClient, getHippoSwapClient, getHippoTradeAggregator]);
 
   useEffect(() => {
     if (hippoWallet) {
@@ -149,6 +160,12 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       }
     }
   }, [hippoWallet, refresh, getHippoWalletClient]);
+
+  useEffect(() => {
+    if (hippoSwap) {
+      dispatch(swapAction.SET_TOKEN_LIST(hippoSwap.singleTokens));
+    }
+  }, [dispatch, hippoSwap]);
 
   const requestSwap = useCallback(
     async (
@@ -263,6 +280,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       value={{
         hippoWallet,
         hippoSwap,
+        hippoAgg,
         tokenStores,
         tokenInfos,
         requestSwap,

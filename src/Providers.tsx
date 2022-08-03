@@ -62,9 +62,9 @@ const Providers: React.FC<TProps> = (props: TProps) => {
           }
         }}>
         <AptosWalletProvider>
-          <HippoClientProvider>
-            <ReduxProvider store={store}>{props.children}</ReduxProvider>
-          </HippoClientProvider>
+          <ReduxProvider store={store}>
+            <HippoClientProvider>{props.children}</HippoClientProvider>
+          </ReduxProvider>
         </AptosWalletProvider>
       </WalletProvider>
     </ErrorBoundary>

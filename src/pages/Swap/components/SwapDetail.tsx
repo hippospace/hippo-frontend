@@ -1,40 +1,49 @@
+import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import Button from 'components/Button';
 import { useFormikContext } from 'formik';
-import useHippoClient from 'hooks/useHippoClient';
-// import { getSwapSettings } from 'modules/swap/reducer';
-// import { useSelector } from 'react-redux';
+import { useState } from 'react';
+import { ExchangeIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
 
-const SwapDetail: React.FC = () => {
-  // const swapSettings = useSelector(getSwapSettings);
-  const hippoClient = useHippoClient();
+const SwapDetail = ({
+  routeAndQuote,
+  fromSymbol,
+  toSymbol
+}: {
+  routeAndQuote: RouteAndQuote;
+  fromSymbol: string;
+  toSymbol: string;
+}) => {
   const { values: swapSettings } = useFormikContext<ISwapSettings>();
-  let output = '...';
-  let minimum = '...';
-  let priceImpact = '...';
+  const [isPriceYToX, setIsPriceYToX] = useState(true);
 
-  if (hippoClient.hippoSwap && swapSettings.currencyFrom?.amount && swapSettings.currencyTo) {
-    const fromSymbol = swapSettings.currencyFrom.token.symbol;
-    const toSymbol = swapSettings.currencyTo.token.symbol;
+  const outputUiAmt = routeAndQuote.quote.outputUiAmt;
+  const output = `${outputUiAmt.toFixed(4)} ${toSymbol}`;
+  const minimum = `${(outputUiAmt * (1 - swapSettings.slipTolerance / 100)).toFixed(
+    4
+  )} ${toSymbol}`;
+  const priceImpact = `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`;
 
-    const quote = hippoClient.hippoSwap.getBestQuoteBySymbols(
-      fromSymbol,
-      toSymbol,
-      swapSettings.currencyFrom.amount,
-      3
-    );
-    if (quote) {
-      const outputUiAmt = quote.bestQuote.outputUiAmt;
-      output = `${outputUiAmt.toFixed(4)} ${toSymbol}`;
-      minimum = `${(outputUiAmt * (1 - swapSettings.slipTolerance / 100)).toFixed(4)} ${toSymbol}`;
-      priceImpact = `${(quote.bestQuote.priceImpact * 100).toFixed(2)}%`;
-    } else {
-      output = 'route unavailable';
-      minimum = 'route unavailable';
-      priceImpact = 'route unavailable';
-    }
-  }
+  const avgPrice = routeAndQuote.quote.outputUiAmt / routeAndQuote.quote.inputUiAmt;
+  const rate =
+    !avgPrice || avgPrice === Infinity
+      ? 'n/a'
+      : isPriceYToX
+      ? `1 ${fromSymbol} ≈ ${avgPrice} ${toSymbol}`
+      : `1 ${toSymbol} ≈ ${1 / avgPrice} ${fromSymbol}`;
 
   const details = [
+    {
+      label: 'Rate',
+      value: (
+        <div className="flex items-center">
+          <span className="mr-1">{rate}</span>
+          <Button variant="icon" onClick={() => setIsPriceYToX(!isPriceYToX)}>
+            <ExchangeIcon className="font-icon" />
+          </Button>
+        </div>
+      )
+    },
     {
       label: 'Expected Output',
       value: output

@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import poolAction from 'modules/pool/actions';
 import { useSelector } from 'react-redux';
 import { getFilteredPoolList } from 'modules/pool/reducer';
-import useFetchToken from 'hooks/useFetchToken';
 import PoolList from './components/PoolList';
 import SummaryPanel from './components/SummaryPanel';
 import FilterPanel from './components/FilterPanel';
@@ -14,7 +13,6 @@ import { HippoConstantProductPool, HippoPieceSwapPool } from '@manahippo/hippo-s
 const Pool: React.FC = () => {
   const dispatch = useDispatch();
   const poolsToRender = useSelector(getFilteredPoolList);
-  useFetchToken();
   const { hippoSwap } = useHippoClient();
 
   const fetchTokenList = useCallback(async () => {

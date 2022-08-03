@@ -7,8 +7,8 @@ const useToken = () => {
 
   const retreiveTokenImg = (tokens: IPoolToken[]) => {
     return tokens.map((token) => {
-      const existToken = tokenList.find((t) => t.symbol === token.symbol);
-      return existToken?.logoURI;
+      const existToken = tokenList.find((t) => t.symbol.str() === token.symbol);
+      return existToken?.logo_url.str();
     });
   };
 

@@ -64,6 +64,7 @@ module.exports = {
       figma: '8px 8px 0px #2D2D2D'
     },
     borderRadius: {
+      none: '0',
       lg: '8px',
       xl: '10px',
       xxl: '20px',
