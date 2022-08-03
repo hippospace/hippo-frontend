@@ -56,7 +56,6 @@ const Providers: React.FC<TProps> = (props: TProps) => {
         wallets={wallets}
         onError={(error: Error) => {
           if (error instanceof Error) {
-            console.log('MEMEMEME');
             message.error(error?.message);
           } else {
             message.error(`Wallet Error: ${error}`);
