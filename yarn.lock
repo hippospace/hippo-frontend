@@ -2207,12 +2207,18 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@^0.1.16":
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.1.16.tgz#53e374f698337dbc4a61b990613023ab9964ec18"
-  integrity sha512-o9dWzIomOjtBaNJlgivrjbfD2nqywZFCsxKhSEES7kDIud+IONXR5bWMZKD0AMFtXY68WRTs3TnJ5qKuc7hhoA==
+"@manahippo/aptos-wallet-adapter@^0.1.17":
+  version "0.1.17"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.1.17.tgz#8b69cdbc8eb313e807763af2eaa21074791e4f60"
+  integrity sha512-M4awMg72e0OVwmmHfh9Ch2nDh75dItETaJ8FmgIoQLw/6AeHFgiekTPZb1uNuflBLhD4FEuYL3DRKnMN93MUXQ==
   dependencies:
     "@fewcha/web3" "^0.1.6"
+    "@types/jest" "^27.0.1"
+    "@types/node" "^16.7.13"
+    "@types/react" "^18.0.0"
+    aptos "1.2.0"
+    eventemitter3 "^4.0.7"
+    typescript "^4.4.2"
 
 "@manahippo/hippo-sdk@^0.0.32":
   version "0.0.32"
