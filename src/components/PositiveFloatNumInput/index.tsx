@@ -1,9 +1,9 @@
 import classNames from 'classnames';
-import { FC, useEffect, useState } from 'react';
-import './PositiveFloatNumInput.module.scss';
+import { FC, useEffect, useMemo, useState } from 'react';
+import invariant from 'tiny-invariant';
 
 type PositiveFloatNumInputProps = {
-  inputAmount: number;
+  inputAmount?: number;
   className?: string;
   isDisabled?: boolean;
   placeholder?: string;
@@ -17,9 +17,8 @@ type PositiveFloatNumInputProps = {
   onAmountChange?: (a: number) => void;
 };
 
-export const numToGrouped = (num: string | number) => {
+export const numToGrouped = (num: string) => {
   return num
-    .toString()
     .split('.')
     .map((v, index) => {
       if (index > 0) return v;
@@ -40,37 +39,77 @@ export const numToGrouped = (num: string | number) => {
     .join('.');
 };
 
+const avoidScientificNotation = (x: number) => {
+  invariant(x >= 0 && x <= Number.MAX_SAFE_INTEGER, 'Invalid number range');
+  let res = x.toString();
+  if (Math.abs(x) < 1.0) {
+    const e = parseInt(x.toString().split('e-')[1]);
+    if (e) {
+      x *= Math.pow(10, e - 1);
+      res = '0.' + new Array(e).join('0') + x.toString().substring(2);
+    }
+  }
+  // Note we don't consider the case x >= 1e21 which would also be converted to scientific notation by js
+  return res;
+};
+
+const MIN_DEFAULT = 0;
+const MAX_DEFAULT = Number.MAX_SAFE_INTEGER;
+const MAX_DECIMALS_DEFAULT = 9;
+
 const PositiveFloatNumInput: FC<PositiveFloatNumInputProps> = ({
   inputAmount,
   isDisabled = false,
   placeholder = '0',
   className = '',
   styles = {},
-  min = 0,
-  max = Infinity,
+  min = MIN_DEFAULT,
+  max = MAX_DEFAULT,
   isConfine = false,
-  maxDecimals,
+  maxDecimals = MAX_DECIMALS_DEFAULT,
   onInputChange = () => {},
   onEnter = () => {},
   onAmountChange = () => {}
 }) => {
+  invariant(min >= MIN_DEFAULT, 'Min prop value invalid');
+  invariant(max <= MAX_DEFAULT, 'Max prop value invalid');
+  invariant(maxDecimals <= MAX_DECIMALS_DEFAULT, 'Max decimals prop value invalid');
+
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key === 'Enter') {
       onEnter();
     }
   };
-  const [amount, setAmount] = useState<number | string>(inputAmount);
+  const inputToInternalAmount = useMemo(() => {
+    if (!inputAmount) return '';
+    let inputAmountTemp = inputAmount;
+    if (inputAmount > max || inputAmount < min) {
+      if (!isConfine) {
+        throw new Error('Invalid input amount');
+      } else {
+        inputAmountTemp = inputAmount > max ? max : min;
+      }
+    }
+
+    return avoidScientificNotation(inputAmountTemp);
+  }, [inputAmount, isConfine, max, min]);
+
+  const [internalAmountText, setInternalAmountText] = useState<string>(inputToInternalAmount); // can be ''
 
   useEffect(() => {
-    setAmount(inputAmount);
+    // Input only changes internal state when there will be an value update for the zero input cases like 0.0000, 1.0000
+    if (inputAmount !== parseFloat(internalAmountText)) {
+      setInternalAmountText(inputToInternalAmount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputAmount]);
 
-  const inputValue = amount === 0 ? '' : numToGrouped(amount);
+  const displayText = numToGrouped(internalAmountText);
 
   return (
     <input
-      className={classNames('positiveFloatNumInput', 'px-1', className)}
-      value={inputValue}
+      className={classNames('positiveFloatNumInput', 'px-1 focus: outline-none', className)}
+      value={displayText}
       placeholder={placeholder}
       inputMode="decimal"
       type="text"
@@ -83,10 +122,14 @@ const PositiveFloatNumInput: FC<PositiveFloatNumInputProps> = ({
         if (!/^[0-9,]*[.]?[0-9]*$/.test(event.target.value)) {
           return;
         }
+        // Remove group separator
         let valueStr = event.target.value
           .split('')
           .filter((l) => l !== ',')
           .join('');
+        // Avoid the case to parse strings like '.123'
+        if (/^\./.test(valueStr)) valueStr = '0' + valueStr;
+
         if (valueStr !== '') {
           const decimalsLength = valueStr.split('.')[1]?.length || 0;
           if (maxDecimals !== undefined && decimalsLength > maxDecimals) {
@@ -101,9 +144,9 @@ const PositiveFloatNumInput: FC<PositiveFloatNumInputProps> = ({
             else return;
           }
         }
-
-        setAmount(valueStr);
+        setInternalAmountText(valueStr);
         onInputChange(event);
+        // When internal value is '', convert to 0
         onAmountChange(parseFloat(valueStr || '0'));
       }}
     />

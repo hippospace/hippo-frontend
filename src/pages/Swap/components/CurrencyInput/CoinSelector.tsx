@@ -35,6 +35,14 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
 
   const onSelectToken = useCallback(
     (token: TokenInfo) => {
+      const otherActionType: TProps['actionType'] =
+        actionType === 'currencyFrom' ? 'currencyTo' : 'currencyFrom';
+      if (token.symbol.str() === values[otherActionType]?.token?.symbol.str()) {
+        setFieldValue(otherActionType, {
+          ...values[otherActionType],
+          token: values[actionType]?.token
+        });
+      }
       setFieldValue(actionType, {
         ...values[actionType],
         token
@@ -96,16 +104,17 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
           <small className="text-grey-700 font-bold">Token</small>
           <small className="text-grey-700 font-bold">{hippoWallet ? 'Balance' : ''}</small>
         </div>
-        <List className="h-[376px] overflow-y-scroll no-scrollbar border-0">
+        <List
+          className="h-[376px] overflow-y-scroll no-scrollbar border-0"
+          rowKey={(item) => `list-row-${(item as TokenInfo).symbol.str()}`}>
           <VirtualList
             data={tokenListBalance || []}
             height={376}
             itemHeight={56}
-            itemKey="tokenList">
+            itemKey={(item) => `list-item-${item.symbol.str()}`}>
             {(item) => (
               <List.Item
                 className="!border-b-0 !px-0 cursor-pointer p-1"
-                key={`${item.symbol.str()}`}
                 onClick={() => onSelectToken(item)}>
                 <CoinRow item={item} />
               </List.Item>

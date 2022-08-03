@@ -154,8 +154,13 @@ const TokenSwap = () => {
     toSymbol,
     fromUiAmt
   });
+  latestInputParams.current = {
+    fromSymbol,
+    toSymbol,
+    fromUiAmt
+  };
 
-  const ifInputParametersChanged = useCallback(
+  const ifInputParametersDifferentWithLatest = useCallback(
     (fromSymbolLocal: string, toSymbolLocal: string, fromUiAmtLocal: number) => {
       return !(
         fromSymbolLocal === latestInputParams.current.fromSymbol &&
@@ -166,12 +171,15 @@ const TokenSwap = () => {
     []
   );
 
-  const fetchSwapPrice = useCallback(async () => {
-    latestInputParams.current = {
-      fromSymbol,
-      toSymbol,
-      fromUiAmt
-    };
+  const lastFetchTs = useRef(0);
+
+  const fetchSwapRoutes = useCallback(async () => {
+    if (process.env.NODE_ENV !== 'production') {
+      if (lastFetchTs.current !== 0) {
+        console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
+      }
+      lastFetchTs.current = Date.now();
+    }
     if (hippoAgg && fromSymbol && toSymbol && fromUiAmt) {
       const [xToken] = hippoAgg.registryClient.getTokenInfoBySymbol(fromSymbol);
       const [yToken] = hippoAgg.registryClient.getTokenInfoBySymbol(toSymbol);
@@ -180,7 +188,7 @@ const TokenSwap = () => {
       if (routes.length === 0)
         throw new Error(`No quotes from ${fromSymbol} to ${toSymbol} of input ${fromUiAmt}`);
 
-      if (!ifInputParametersChanged(fromSymbol, toSymbol, fromUiAmt)) {
+      if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
         setAllRoutes(routes);
         setRouteSelected(routes[0]);
       }
@@ -188,11 +196,19 @@ const TokenSwap = () => {
       setAllRoutes([]);
       setRouteSelected(null);
     }
-  }, [hippoAgg, fromSymbol, toSymbol, fromUiAmt, ifInputParametersChanged]);
+  }, [hippoAgg, fromSymbol, toSymbol, fromUiAmt, ifInputParametersDifferentWithLatest]);
 
   useEffect(() => {
-    fetchSwapPrice();
-  }, [fetchSwapPrice]);
+    fetchSwapRoutes();
+  }, [fetchSwapRoutes]);
+
+  useEffect(() => {
+    setFieldValue('currencyTo', {
+      ...values.currencyTo,
+      amount: routeSelected?.quote.outputUiAmt || ''
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeSelected, setFieldValue]);
 
   useEffect(() => {
     setFieldValue('currencyTo', {

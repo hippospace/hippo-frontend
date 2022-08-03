@@ -4,7 +4,7 @@ import { CaretIcon } from 'resources/icons';
 import cx from 'classnames';
 import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import CoinIcon from 'components/CoinIcon';
 import { Popover } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { getTokenList } from 'modules/swap/reducer';
 import classNames from 'classnames';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
+import useDebouncedCallback from 'hooks/useDebouncedCallback';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -46,6 +47,21 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
     );
   }, [isCoinSelectorDisabled, selectedCurrency?.token?.symbol, selectedCurrency?.token?.logo_url]);
 
+  // The debounce delay should be bigger than the average of key input intervals
+  const onAmountChange = useDebouncedCallback(
+    useCallback(
+      (a: number) => {
+        console.log(`Currency input num: ${a}`);
+        setFieldValue(actionType, {
+          ...selectedCurrency,
+          amount: a
+        });
+      },
+      [actionType, selectedCurrency, setFieldValue]
+    ),
+    200
+  );
+
   return (
     <div
       className={cx(
@@ -66,17 +82,12 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
         <PositiveFloatNumInput
           min={0}
           max={1e11}
-          maxDecimals={9}
+          maxDecimals={values[actionType]?.token?.decimals.toJsNumber() || 9}
           isDisabled={actionType === 'currencyTo'}
           placeholder="0.00"
           className="grow font-bold title bg-transparent text-right pr-0 pl-1"
           inputAmount={selectedCurrency?.amount || 0}
-          onAmountChange={(a) =>
-            setFieldValue(actionType, {
-              ...selectedCurrency,
-              amount: a
-            })
-          }
+          onAmountChange={onAmountChange}
         />
       </div>
       {typeof uiBalance === 'number' && (
