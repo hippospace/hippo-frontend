@@ -14,6 +14,7 @@ import { message, notification } from 'components/Antd';
 import { TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { MaybeHexString } from 'aptos';
+import { TransactionPayload, TransactionPayload_ScriptFunctionPayload } from 'aptos/dist/generated';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -74,6 +75,16 @@ const openNotification = (txhash: MaybeHexString) => {
 
 const HippoClientContext = createContext<HippoClientContextType>({} as HippoClientContextType);
 
+const payloadV1ToV0 = (payload: TransactionPayload) => {
+  const v1 = payload as TransactionPayload_ScriptFunctionPayload;
+  return {
+    type: 'script_function_payload',
+    function: `${v1.function.module.address}::${v1.function.module.name}::${v1.function.name}`,
+    type_arguments: v1.type_arguments,
+    arguments: v1.arguments
+  };
+};
+
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { activeWallet } = useAptosWallet();
   const { signAndSubmitTransaction } = useWallet();
@@ -92,7 +103,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
           const payload = await hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol);
           if (payload) {
-            const result = await signAndSubmitTransaction(payload);
+            const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
             if (result) {
               openNotification(result.hash);
               await hippoWallet?.refreshStores();
@@ -158,7 +169,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         }
         const payload = await bestQuote.bestRoute.makeSwapPayload(uiAmtIn, uiAmtOutMin);
         console.log('request swap payload', payload);
-        const result = await signAndSubmitTransaction(payload);
+        const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
         if (result) {
           message.success('Transaction Success');
           setRefresh(true);
@@ -192,7 +203,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           throw new Error('Desired pool does not exist');
         }
         const payload = await pool[0].makeAddLiquidityPayload(lhsUiAmt, rhsUiAmt);
-        const result = await signAndSubmitTransaction(payload);
+        const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
         if (result) {
           message.success('Transaction Success');
           setRefresh(true);
@@ -231,7 +242,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           lhsMinAmt,
           rhsMinAmt
         );
-        const result = await signAndSubmitTransaction(payload);
+        const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
         if (result) {
           message.success('Transaction Success');
           setRefresh(true);

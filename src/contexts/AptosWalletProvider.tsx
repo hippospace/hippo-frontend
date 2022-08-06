@@ -16,6 +16,16 @@ interface TProviderProps {
 
 const AptosWalletContext = createContext<AptosWalletContextType>({} as AptosWalletContextType);
 
+const hexStringV0ToV1 = (v0: any) => {
+  if (typeof v0 === 'string') {
+    return new HexString(v0);
+  } else if (v0.hexString) {
+    return new HexString(v0.toString());
+  } else {
+    throw new Error(`Invalid hex string object: ${v0}`);
+  }
+};
+
 const AptosWalletProvider: FC<TProviderProps> = ({ children }) => {
   const { connected, account } = useWallet();
   const [activeWallet, setActiveWallet] = useState<ActiveAptosWallet>(undefined);
@@ -23,7 +33,7 @@ const AptosWalletProvider: FC<TProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (connected && (account?.address || account?.publicKey)) {
-      setActiveWallet(HexString.ensure(account?.address || account?.publicKey || ''));
+      setActiveWallet(hexStringV0ToV1(account?.address || account?.publicKey));
     } else {
       setActiveWallet(undefined);
     }
