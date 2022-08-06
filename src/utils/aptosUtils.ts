@@ -27,7 +27,7 @@ export function getEncryptedLocalState(): string | null {
   return item;
 }
 
-export type AptosNetwork = 'http://0.0.0.0:8080' | 'https://fullnode.devnet.aptoslabs.com';
+export type AptosNetwork = 'http://0.0.0.0:8080' | 'https://fullnode.devnet.aptoslabs.com/v1';
 
 export function getLocalStorageNetworkState(): AptosNetwork | null {
   // Get network from local storage by key

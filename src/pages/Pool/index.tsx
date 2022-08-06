@@ -19,7 +19,7 @@ const Pool: React.FC = () => {
 
   const fetchTokenList = useCallback(async () => {
     let data = { pools: [] as IPool[] };
-    if (hippoSwap?.cpMetas) {
+    if (hippoSwap?.cpPoolInfos) {
       for (const pool of hippoSwap.allPools()) {
         const xTokenInfo = pool.xTokenInfo;
         const yTokenInfo = pool.yTokenInfo;

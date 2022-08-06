@@ -1,8 +1,8 @@
-import { UserTransactionRequest } from 'aptos/dist/api/data-contracts';
+import { SubmitTransactionRequest } from 'aptos/dist/generated';
 
 export type TTransaction = {
   // type: 'signTransaction' | 'signAndSubmit';
-  transaction: UserTransactionRequest;
+  transaction: SubmitTransactionRequest;
   callback: () => void;
   // transactionInfo: Record<string, string | number>;
 };
