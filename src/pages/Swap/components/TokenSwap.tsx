@@ -9,6 +9,7 @@ import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { DEX_TYPE_NAME, RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import classNames from 'classnames';
+import { message } from 'antd';
 
 interface IRoutesProps {
   className?: string;
@@ -174,29 +175,52 @@ const TokenSwap = () => {
   const lastFetchTs = useRef(0);
 
   const fetchSwapRoutes = useCallback(async () => {
-    if (process.env.NODE_ENV !== 'production') {
-      if (lastFetchTs.current !== 0) {
-        console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
+    try {
+      if (process.env.NODE_ENV !== 'production') {
+        if (lastFetchTs.current !== 0) {
+          console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
+        }
+        lastFetchTs.current = Date.now();
       }
-      lastFetchTs.current = Date.now();
-    }
-    if (hippoAgg && fromSymbol && toSymbol && fromUiAmt) {
-      const [xToken] = hippoAgg.registryClient.getTokenInfoBySymbol(fromSymbol);
-      const [yToken] = hippoAgg.registryClient.getTokenInfoBySymbol(toSymbol);
+      if (hippoAgg && fromSymbol && toSymbol && fromUiAmt) {
+        const [xToken] = hippoAgg.registryClient.getTokenInfoBySymbol(fromSymbol);
+        const [yToken] = hippoAgg.registryClient.getTokenInfoBySymbol(toSymbol);
 
-      const routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken);
-      if (routes.length === 0)
-        throw new Error(`No quotes from ${fromSymbol} to ${toSymbol} of input ${fromUiAmt}`);
+        const routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken);
+        if (routes.length === 0) {
+          throw new Error(
+            `No quotes from ${fromSymbol} to ${toSymbol} with input amount ${fromUiAmt}`
+          );
+        }
 
-      if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
-        setAllRoutes(routes);
-        setRouteSelected(routes[0]);
+        if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
+          setAllRoutes(routes);
+          setRouteSelected(routes[0]);
+        }
+      } else {
+        setAllRoutes([]);
+        setRouteSelected(null);
       }
-    } else {
-      setAllRoutes([]);
-      setRouteSelected(null);
+    } catch (error) {
+      console.log('Fetch swap routes:', error);
+      if (error instanceof Error) {
+        message.error(error?.message);
+      }
+
+      setFieldValue('currencyFrom', {
+        ...values.currencyFrom,
+        amount: 0
+      });
     }
-  }, [hippoAgg, fromSymbol, toSymbol, fromUiAmt, ifInputParametersDifferentWithLatest]);
+  }, [
+    hippoAgg,
+    fromSymbol,
+    toSymbol,
+    fromUiAmt,
+    ifInputParametersDifferentWithLatest,
+    setFieldValue,
+    values.currencyFrom
+  ]);
 
   useEffect(() => {
     fetchSwapRoutes();
