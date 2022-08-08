@@ -189,6 +189,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
         if (result) {
           message.success('Transaction Success');
+          openNotification(result.hash);
           setRefresh(true);
           callback();
         }
@@ -223,6 +224,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
         if (result) {
           message.success('Transaction Success');
+          openNotification(result.hash);
           setRefresh(true);
           callback();
         }
@@ -262,6 +264,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
         if (result) {
           message.success('Transaction Success');
+          openNotification(result.hash);
           setRefresh(true);
           callback();
         }

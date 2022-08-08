@@ -163,6 +163,7 @@ const DepositModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
       className=""
       wrapClassName={styles.depositModal}
       visible={isVisible}
+      destroyOnClose
       footer={null}
       maskClosable={false}
       closeIcon={<CloseIcon />}>

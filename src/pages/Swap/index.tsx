@@ -66,6 +66,7 @@ const Swap: React.FC = () => {
           const minOut = quote.bestQuote.outputUiAmt * (1 - values.slipTolerance / 100);
           requestSwap(fromSymbol, toSymbol, fromUiAmt, minOut, () => {
             formikHelper.setFieldValue('currencyFrom.amount', 0);
+            formikHelper.setSubmitting(false);
           });
         } else {
           // TODO: info bubble "route note available"
