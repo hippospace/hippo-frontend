@@ -1,0 +1,111 @@
+$duration: 15s;
+.vc1 {
+  will-change: transform;
+  animation: an1 $duration ease infinite;
+}
+.vc2 {
+  will-change: transform;
+  animation: an2 $duration ease infinite;
+}
+.vc3 {
+  will-change: transform;
+  animation: an3 $duration ease infinite;
+}
+.vc4 {
+  will-change: transform;
+  animation: an4 $duration ease infinite;
+}
+.vc5 {
+  will-change: transform;
+  animation: an5 $duration ease infinite;
+}
+
+@keyframes an1 {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(112px, -143px, 0);
+  }
+  50% {
+    transform: translate3d(-258px, -52px, 0);
+  }
+  75% {
+    transform: translate3d(112px, -143px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes an2 {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-15px, 21px, 0) scale(1.5);
+  }
+  50% {
+    transform: translate3d(-415px, 205px, 0) rotate(-28deg) scale(2);
+  }
+  75% {
+    transform: translate3d(-15px, 21px, 0) scale(1.5);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes an3 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(154deg);
+  }
+  25% {
+    transform: translate3d(-176px, 17px, 0) rotate(154deg) scale(1.5);
+  }
+  50% {
+    transform: translate3d(154px, 291px, 0) rotate(165deg) scale(2);
+  }
+  75% {
+    transform: translate3d(-176px, 17px, 0) rotate(154deg) scale(1.5);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(154deg);
+  }
+}
+
+@keyframes an4 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-118deg);
+  }
+  25% {
+    transform: translate3d(147px, 62px, 0) rotate(-118deg) scale(1.5);
+  }
+  50% {
+    transform: translate3d(185px, 27px, 0) rotate(-141deg) scale(2);
+  }
+  75% {
+    transform: translate3d(147px, 62px, 0) rotate(-118deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-118deg);
+  }
+}
+
+@keyframes an5 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(91deg);
+  }
+  25% {
+    transform: translate3d(-55px, -89px, 0) rotate(80deg) scale(1.5);
+  }
+  50% {
+    transform: translate3d(-72px, 106px, 0) rotate(91deg) scale(2);
+  }
+  75% {
+    transform: translate3d(-55px, -89px, 0) rotate(80deg) scale(1.5);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(91deg);
+  }
+}
