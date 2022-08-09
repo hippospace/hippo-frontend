@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import HippoLogoBg from 'resources/img/hippo-logo-bg.png';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
+import AnimatedBackground from 'components/AnimatedBackground';
 // import styles from './PageLayout.module.scss';
 
 const { Content } = Antd.Layout;
@@ -29,6 +30,7 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       className={classNames('relative min-h-screen bg-primary overflow-x-hidden', {
         'bg-white': currentPageName === 'Home'
       })}>
+      <AnimatedBackground />
       <Header />
       <Content
         className={classNames('pt-[136px] px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]', {
@@ -48,7 +50,12 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <Footer />
       <img
         src={HippoLogoBg}
-        className="absolute right-0 bottom-0 w-[824.49px] h-auto z-0 laptop:w-[33%] mobile:w-[40%]"
+        className={classNames(
+          'absolute right-0 bottom-0 w-[824.49px] h-auto z-0 laptop:w-[33%] mobile:w-[40%]',
+          {
+            hidden: currentPageName !== 'Home'
+          }
+        )}
       />
     </Antd.Layout>
   );

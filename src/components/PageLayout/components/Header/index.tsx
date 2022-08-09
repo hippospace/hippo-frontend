@@ -100,9 +100,10 @@ const PageHeader: React.FC = () => {
           className="hidden w-[24px] h-[24px] mr-4 mobile:inline-block"
           onClick={() => setIsSideMenuOpen(true)}
         />
-        <div className="h-full absolute left-0 top-0 aspect-1 mobile:relative">
-          <Link to="/" className="h-full flex items-center justify-center rounded-xl">
-            <LogoIcon className="w-full h-full" />
+        <div className="h-full absolute left-0 top-0 mobile:relative">
+          <Link to="/" className="h-full flex items-center justify-center">
+            <LogoIcon className="w-auto h-[64px] mobile:h-full" />
+            <span className="h4 ml-7 laptop:ml-4 tablet:hidden mobile:hidden">Hippo Labs</span>
           </Link>
         </div>
         <div className="grow items-center justify-center h-full">
@@ -121,7 +122,6 @@ const PageHeader: React.FC = () => {
           {currentPageName !== 'Home' && <WalletConnector />}
           {currentPageName === 'Home' && <SiteBadge />}
         </div>
-        <div />
       </div>
       <Drawer
         visible={isSideMenuOpen}

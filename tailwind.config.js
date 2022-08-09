@@ -24,7 +24,7 @@ module.exports = {
         }
       },
       backgroundImage: {
-        'home-icons': "url(resources/img/home-icons.png)",
+        'home-icons': "url(resources/img/home/home-icons.png)",
         home1: 'radial-gradient(88.17% 88.17% at 87.73% 7.97%, rgba(110, 108, 202, 0.17) 0%, rgba(151, 71, 255, 0) 63.69%, rgba(151, 71, 255, 0) 100%)'
       }
     },

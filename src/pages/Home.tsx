@@ -1,10 +1,10 @@
 import { FC } from 'react';
-import HomeTrade from 'resources/img/home-trade.png';
-import HomeMoveToTs from 'resources/img/home-move-to-ts.png';
-import HomeWalletInfra from 'resources/img/home-wallet-infra.png';
-import HomeProactive from 'resources/img/home-proactive.png';
-import HomeBlogPoster1 from 'resources/img/home-blog-poster-1.png';
-import HomeBlogPoster2 from 'resources/img/home-blog-poster-2.png';
+import HomeTrade from 'resources/img/home/home-trade.png';
+import HomeMoveToTs from 'resources/img/home/home-move-to-ts.png';
+import HomeWalletInfra from 'resources/img/home/home-wallet-infra.png';
+import HomeProactive from 'resources/img/home/home-proactive.png';
+import HomeBlogPoster1 from 'resources/img/home/home-blog-poster-1.png';
+import HomeBlogPoster2 from 'resources/img/home/home-blog-poster-2.png';
 import BlogsAccessArrow from 'resources/icons/blogsAccessArrow.svg';
 import Button from 'components/Button';
 import classNames from 'classnames';
