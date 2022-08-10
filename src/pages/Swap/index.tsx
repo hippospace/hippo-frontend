@@ -33,7 +33,7 @@ const validationSchema = yup.object({
 const Swap: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const swapSettings = useSelector(getSwapSettings);
-  const { hippoSwap, hippoWallet, requestSwap } = useHippoClient();
+  const { hippoSwap, hippoWallet, requestSwapByRoute } = useHippoClient();
 
   const renderCardHeader = useMemo(
     () => (
@@ -61,11 +61,9 @@ const Swap: React.FC = () => {
       const toSymbol = values.currencyTo?.token?.symbol.str();
       const fromUiAmt = values.currencyFrom?.amount;
       if (hippoSwap && hippoWallet && fromSymbol && toSymbol && fromUiAmt) {
-        const quote = hippoSwap.getBestQuoteBySymbols(fromSymbol, toSymbol, fromUiAmt, 3);
+        const quote = values.quoteChosen;
         if (quote) {
-          const minOut = quote.bestQuote.outputUiAmt * (1 - values.slipTolerance / 100);
-          requestSwap(fromSymbol, toSymbol, fromUiAmt, minOut, () => {
-            formikHelper.setFieldValue('currencyFrom.amount', 0);
+          requestSwapByRoute(quote, values.slipTolerance, () => {
             formikHelper.setSubmitting(false);
           });
         } else {
@@ -73,7 +71,7 @@ const Swap: React.FC = () => {
         }
       }
     },
-    [hippoSwap, hippoWallet, requestSwap]
+    [hippoSwap, hippoWallet, requestSwapByRoute]
   );
 
   return (

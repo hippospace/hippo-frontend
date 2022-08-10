@@ -172,6 +172,11 @@ const TokenSwap = () => {
     []
   );
 
+  const setRoute = (ro: RouteAndQuote | null) => {
+    setRouteSelected(ro);
+    setFieldValue('quoteChosen', ro);
+  };
+
   const lastFetchTs = useRef(0);
 
   const fetchSwapRoutes = useCallback(async () => {
@@ -195,11 +200,11 @@ const TokenSwap = () => {
 
         if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
           setAllRoutes(routes);
-          setRouteSelected(routes[0]);
+          setRoute(routes[0]);
         }
       } else {
         setAllRoutes([]);
-        setRouteSelected(null);
+        setRoute(null);
       }
     } catch (error) {
       console.log('Fetch swap routes:', error);
@@ -261,7 +266,7 @@ const TokenSwap = () => {
           className="mt-4"
           routes={allRoutes}
           routeSelected={routeSelected}
-          onRouteSelected={(ro) => setRouteSelected(ro)}
+          onRouteSelected={(ro) => setRoute(ro)}
         />
       )}
       <Button

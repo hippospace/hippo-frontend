@@ -1993,26 +1993,26 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@^0.1.18":
-  version "0.1.18"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.1.18.tgz#f7c76158bdd8987692a06805fef0603ee9a95041"
-  integrity sha512-Phhv3L5bhzc00g+Y9BFoKkdZCuRMvESd13OqlCbJvid2ds5ppTia8ZzAc9lFb88k+sR7LNmeYtRGSoNLutn3DA==
+"@manahippo/aptos-wallet-adapter@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.1.19.tgz#7040443469d19e48f29aaa7b60f76d4e00109a98"
+  integrity sha512-DzKAyW2a2apLHPr19EbQzk13VTydluhU84Ucv+S+NmVgbL7nTDWxMwZzxw92SexYMgUMCn2Jj+dCOwOvWSzAog==
   dependencies:
     "@fewcha/web3" "^0.1.13"
     "@types/jest" "^27.0.1"
     "@types/node" "^16.7.13"
     "@types/react" "^18.0.0"
-    aptos "^1.3.4"
+    aptos "^1.3.5"
     eventemitter3 "^4.0.7"
     typescript "^4.4.2"
 
-"@manahippo/hippo-sdk@^0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.2.5.tgz#898953ba105139ff56c709f7264cd565a2287211"
-  integrity sha512-tnT6aTS52jdC20U9A/iGvEjNkhG3kEuwRFAzYDrvySyxl3castusmFb7M/YBED7sCZB4is+oqkWqvS2en7+Xgg==
+"@manahippo/hippo-sdk@^0.2.10":
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.2.10.tgz#fd251997af73b64047c07fe2013432db496b948f"
+  integrity sha512-oWYWwkIbOIpoB62OjMhXt67lUtQeGfzIu43pcFLd8H1EONel9gVZUDaZkSuEGOR8Z3+Z76oqLBTXAYHZ2y8ItQ==
   dependencies:
-    "@manahippo/move-to-ts" "^0.1.2"
-    aptos "^1.3.3"
+    "@manahippo/move-to-ts" "^0.1.3"
+    aptos "^1.3.5"
     commander "^9.3.0"
     yaml "^2.1.1"
 
@@ -2022,6 +2022,19 @@
   integrity sha512-HwqQnDbnzxxUBZSAQKgY8d910okladqRri9DM68kbGtNodwCv0T9PdW1JjgOJ1nGINOaxyabZTUodUj1ze4LzQ==
   dependencies:
     aptos "^1.3.2"
+    big-integer "^1.6.51"
+    elliptic "^6.5.4"
+    json-stable-stringify "^1.0.1"
+    path "^0.12.7"
+    sha.js "^2.4.11"
+    sha3 "^2.1.4"
+
+"@manahippo/move-to-ts@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.1.3.tgz#9f752c2a592430615962c890bec2018bb6c820c8"
+  integrity sha512-+Jb5yTgTgl7wHRxph4ajE1nEmsHs76ebjWLNiU42ok7MMhEb8J25KKr7PCEaW54z8lS7v3p9V4sghyD3aESjJg==
+  dependencies:
+    aptos "^1.3.5"
     big-integer "^1.6.51"
     elliptic "^6.5.4"
     json-stable-stringify "^1.0.1"
@@ -3345,10 +3358,23 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aptos@^1.2.2, aptos@^1.3.2, aptos@^1.3.3, aptos@^1.3.4:
+aptos@^1.2.2, aptos@^1.3.2:
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.4.tgz#da2604c243f8f7673ee1d11181911bad8f5a450f"
   integrity sha512-gGEnV25maOaeyNQ5G+QjgfJqFjhBATa4FMlL8//oqUcutmOBLEMtH2R6wJfdtVrow/Mx+FU0nGIZdPBU2SWikQ==
+  dependencies:
+    axios "^0.27.2"
+    buffer "^6.0.3"
+    js-sha3 "^0.8.0"
+    lodash "^4.17.21"
+    tweetnacl "^1.0.3"
+    typescript-memoize "^1.1.0"
+    yarn "^1.22.19"
+
+aptos@^1.3.5:
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.5.tgz#a065f3050234f683777a12c4513c7ad5d766d9ed"
+  integrity sha512-GO8ZTkEGdZwa9zQ4t9sI9rBv2AgLwcvfioTpZw8uPDG0dNRZ2DYxs9EeKhN3Ihm7Vl5tp92j+pzu1gUecp6Z+Q==
   dependencies:
     axios "^0.27.2"
     buffer "^6.0.3"

@@ -15,9 +15,9 @@ import { message, notification } from 'components/Antd';
 import { TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { MaybeHexString } from 'aptos';
-import { TransactionPayload, TransactionPayload_ScriptFunctionPayload } from 'aptos/dist/generated';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
+import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -25,6 +25,11 @@ interface HippoClientContextType {
   hippoSwap?: HippoSwapClient;
   tokenStores?: Record<string, aptos_framework.Coin.CoinStore>;
   tokenInfos?: Record<string, Coin_registry.TokenInfo>;
+  requestSwapByRoute: (
+    routeAndQuote: RouteAndQuote,
+    slipTolerance: number,
+    callback: () => void
+  ) => {};
   requestSwap: (
     fromSymbol: string,
     toSymbol: string,
@@ -79,16 +84,6 @@ const openNotification = (txhash: MaybeHexString) => {
 
 const HippoClientContext = createContext<HippoClientContextType>({} as HippoClientContextType);
 
-const payloadV1ToV0 = (payload: TransactionPayload) => {
-  const v1 = payload as TransactionPayload_ScriptFunctionPayload;
-  return {
-    type: 'script_function_payload',
-    function: `${v1.function.module.address}::${v1.function.module.name}::${v1.function.name}`,
-    type_arguments: v1.type_arguments,
-    arguments: v1.arguments
-  };
-};
-
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { activeWallet } = useAptosWallet();
   const { signAndSubmitTransaction } = useWallet();
@@ -109,7 +104,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
           const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol);
           if (payload) {
-            const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
+            const result = await signAndSubmitTransaction(payload);
             if (result) {
               openNotification(result.hash);
               await hippoWallet?.refreshStores();
@@ -167,6 +162,33 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     }
   }, [dispatch, hippoSwap]);
 
+  const requestSwapByRoute = useCallback(
+    async (routeAndQuote: RouteAndQuote, slipTolerance: number, callback: () => void) => {
+      try {
+        const input = routeAndQuote.quote.inputUiAmt;
+        const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
+        if (!activeWallet) throw new Error('Please login first');
+        if (input <= 0) {
+          throw new Error('Input amount needs to be greater than 0');
+        }
+        const payload = routeAndQuote.route.makePaylod(input, minOut);
+        const result = await signAndSubmitTransaction(payload);
+        if (result) {
+          message.success('Transaction Success');
+          openNotification(result.hash);
+          setRefresh(true);
+          callback();
+        }
+      } catch (error) {
+        console.log('request swap by route error:', error);
+        if (error instanceof Error) {
+          message.error(error?.message);
+        }
+      }
+    },
+    [activeWallet, signAndSubmitTransaction]
+  );
+
   const requestSwap = useCallback(
     async (
       fromSymbol: string,
@@ -186,7 +208,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         }
         const payload = await bestQuote.bestRoute.makeSwapPayload(uiAmtIn, uiAmtOutMin);
         console.log('request swap payload', payload);
-        const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
+        const result = await signAndSubmitTransaction(payload);
         if (result) {
           message.success('Transaction Success');
           openNotification(result.hash);
@@ -221,7 +243,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           throw new Error('Desired pool does not exist');
         }
         const payload = await pool[0].makeAddLiquidityPayload(lhsUiAmt, rhsUiAmt);
-        const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
+        const result = await signAndSubmitTransaction(payload);
         if (result) {
           message.success('Transaction Success');
           openNotification(result.hash);
@@ -261,7 +283,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           lhsMinAmt,
           rhsMinAmt
         );
-        const result = await signAndSubmitTransaction(payloadV1ToV0(payload));
+        const result = await signAndSubmitTransaction(payload);
         if (result) {
           message.success('Transaction Success');
           openNotification(result.hash);
@@ -286,6 +308,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         hippoAgg,
         tokenStores,
         tokenInfos,
+        requestSwapByRoute,
         requestSwap,
         requestDeposit,
         requestWithdraw,
