@@ -2006,10 +2006,10 @@
     eventemitter3 "^4.0.7"
     typescript "^4.4.2"
 
-"@manahippo/hippo-sdk@^0.2.10":
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.2.10.tgz#fd251997af73b64047c07fe2013432db496b948f"
-  integrity sha512-oWYWwkIbOIpoB62OjMhXt67lUtQeGfzIu43pcFLd8H1EONel9gVZUDaZkSuEGOR8Z3+Z76oqLBTXAYHZ2y8ItQ==
+"@manahippo/hippo-sdk@^0.2.13":
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.2.13.tgz#3db538a7bf322d097b4e825aed625cefa7a56a2e"
+  integrity sha512-w6zpQ2ZRtDog3R7Tx2buS+kTTVUt6Ld7uYp6bs9RVo6ZB9CaictaHq+JhlIRWMW+/b1iIhNFwv9/oLf9EyTMXA==
   dependencies:
     "@manahippo/move-to-ts" "^0.1.3"
     aptos "^1.3.5"
