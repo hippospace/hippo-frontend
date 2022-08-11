@@ -27,6 +27,10 @@
     }
   }
 
+  .largeTextBold {
+    @apply text-base font-bold;
+  }
+
   .helpText {
     @apply font-normal text-sm;
     &.bold {

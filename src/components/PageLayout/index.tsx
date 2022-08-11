@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import HippoLogoBg from 'resources/img/hippo-logo-bg.png';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
+import SwapIllu from 'resources/img/swap/swap-illu-2x.png';
 // import styles from './PageLayout.module.scss';
 
 const { Content } = Antd.Layout;
@@ -26,14 +27,22 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <Antd.Layout
-      className={classNames('relative min-h-screen bg-primary overflow-x-hidden', {
-        'bg-white': currentPageName === 'Home'
+      className={classNames('relative min-h-screen bg-white overflow-hidden', {
+        'bg-swap': currentPageName === 'Swap'
       })}>
+      {currentPageName === 'Swap' && (
+        <>
+          <img src={SwapIllu} className="absolute top-0 bottom-0 mx-auto w-full opacity-[0.2]" />
+        </>
+      )}
       <Header />
       <Content
-        className={classNames('pt-[136px] px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]', {
-          'bg-home1': currentPageName === 'Home'
-        })}>
+        className={classNames(
+          'relative pt-[136px] px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]',
+          {
+            'bg-home1': currentPageName === 'Home'
+          }
+        )}>
         <div
           className={classNames('py-16', {
             'bg-home-icons bg-contain bg-no-repeat bg-top': currentPageName === 'Home'

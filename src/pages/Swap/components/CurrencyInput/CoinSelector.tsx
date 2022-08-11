@@ -1,6 +1,4 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Input, List } from 'components/Antd';
+import { List } from 'components/Antd';
 import { useFormikContext } from 'formik';
 import { getTokenList } from 'modules/swap/reducer';
 import { ISwapSettings } from 'pages/Swap/types';
@@ -87,8 +85,8 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
             />
           ))}
         </div>
-        <Input
-          className="py-4 px-6 font-bold text-base !border-[3px] !border-grey-900 text-grey-900 rounded-xl bg-transparent shadow-transparent"
+        <input
+          className="py-4 px-6 font-bold text-base bg-primaryGrey text-grey-900 rounded-xl focus:outline-none border-none"
           value={filter}
           onChange={(e) => setFilter(e.target.value.toLowerCase())}
           placeholder="Search"

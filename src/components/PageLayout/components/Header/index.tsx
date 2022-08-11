@@ -102,8 +102,8 @@ const PageHeader: React.FC = () => {
         />
         <div className="h-full absolute left-0 top-0 mobile:relative">
           <Link to="/" className="h-full flex items-center justify-center">
-            <LogoIcon className="w-auto h-[64px] mobile:h-full" />
-            <span className="h4 ml-7 laptop:ml-4 tablet:hidden mobile:hidden">Hippo Labs</span>
+            <LogoIcon className="w-auto h-[48px] mobile:h-full" />
+            <span className="h5 ml-4 tablet:hidden mobile:hidden">HIPPO</span>
           </Link>
         </div>
         <div className="grow items-center justify-center h-full">

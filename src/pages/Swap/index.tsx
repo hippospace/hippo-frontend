@@ -37,8 +37,7 @@ const Swap: React.FC = () => {
 
   const renderCardHeader = useMemo(
     () => (
-      <div className="w-full flex my-8 justify-center relative">
-        <h5 className="font-bold">Swap</h5>
+      <div className="absolute w-14 h-14 rounded-xxl shadow-swap top-0 -right-16 flex justify-center align-center bg-secondary">
         <Popover
           overlayClassName={styles.popover}
           trigger="click"
@@ -46,7 +45,7 @@ const Swap: React.FC = () => {
           onVisibleChange={(visible) => setIsVisible(visible)}
           content={<SwapSetting onClose={() => setIsVisible(false)} />}
           placement="rightBottom">
-          <button className="absolute right-9 top-0 cursor-pointer">
+          <button className="cursor-pointer">
             <SettingIcon />
           </button>
         </Popover>
@@ -75,14 +74,14 @@ const Swap: React.FC = () => {
   );
 
   return (
-    <div className="w-full flex justify-center items-center h-full">
+    <div className="w-full flex justify-center items-center h-full relative">
       <Formik
         initialValues={swapSettings}
         validationSchema={validationSchema}
         onSubmit={onSubmitSwap}>
-        <Card className="w-[497px] min-h-[430px] flex flex-col pb-10 border-4 border-grey-900 shadow-figma">
-          {renderCardHeader}
+        <Card className="w-[497px] min-h-[430px] flex flex-col py-10 shadow-swap rounded-xxl relative">
           <TokenSwap />
+          {renderCardHeader}
         </Card>
       </Formik>
     </div>

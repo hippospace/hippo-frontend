@@ -35,7 +35,8 @@ const WalletConnector: React.FC = () => {
         placement="bottomLeft">
         <div className="flex gap-4 items-center">
           <Button
-            className="min-w-[156px] h-10 rounded-xl !shadow-sm !text-grey-900 !bg-primePurple-100 font-bold"
+            variant="outlined"
+            className="min-w-[156px] h-10 !text-grey-900 font-bold"
             // onClick={!address ? toggleConnectModal : undefined}
           >
             {activeWallet

@@ -9,7 +9,7 @@ interface TProps {
 const CoinRow: React.FC<TProps> = ({ item }) => {
   const balance = useTokenBalane(item.symbol.str());
   return (
-    <div className="flex items-center justify-between gap-2 border-2 border-grey-900 w-full p-2 hover:bg-primePurple-100">
+    <div className="flex items-center justify-between gap-2 border-2 border-grey-300 w-full p-2 hover:bg-primePurple-100 rounded-xl">
       <div className="flex items-center gap-2">
         <CoinIcon logoSrc={item.logo_url.str()} />
         <div className="">

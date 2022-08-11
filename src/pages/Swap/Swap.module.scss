@@ -8,7 +8,7 @@
       }
 
       .ant-popover-inner {
-        @apply border-4 border-grey-900 shadow-figma;
+        @apply rounded-xxl shadow-swap;
         .ant-popover-inner-content {
           @apply p-6;
         }

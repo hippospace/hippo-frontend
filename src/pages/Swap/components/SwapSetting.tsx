@@ -37,7 +37,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
         <div className="paragraph text-primeBlack80">Slippage tolerance</div>
         <div className="flex w-full mt-4">
           <NumberInput
-            className="grow mr-4 rounded-xl bg-transparent border-[3px] border-grey-900"
+            className="grow mr-4 rounded-xl bg-primaryGrey"
             name="slipTolerance"
             min={0}
             max={100}
@@ -55,7 +55,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
             onChange={(val) => setFieldValue('slipTolerance', val)}
           />
           <Button
-            className="py-[6px] border-[3px] border-grey-900 font-bold !text-grey-900"
+            className="py-[6px] font-bold !text-grey-900"
             variant="outlined"
             onClick={handleAuto}>
             Auto
@@ -66,7 +66,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
         <div className="paragraph text-primeBlack80">Transaction deadline</div>
         <div className="flex w-full mt-4 h-[39px] items-center">
           <NumberInput
-            className="w-[88px] h-full mr-4 rounded-xl bg-transparent  border-[3px] border-grey-900"
+            className="w-[88px] h-full mr-4 rounded-xl bg-primaryGrey"
             name="trasactionDeadline"
             min={0}
             max={4320}
@@ -88,7 +88,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
           onClick={onResetSwapSetting}>
           Reset
         </Button>
-        <Button className="grow font-bold" variant="solid" onClick={onConfirm}>
+        <Button className="grow font-bold" variant="gradient" onClick={onConfirm}>
           Confirm
         </Button>
       </div>

@@ -172,10 +172,13 @@ const TokenSwap = () => {
     []
   );
 
-  const setRoute = (ro: RouteAndQuote | null) => {
-    setRouteSelected(ro);
-    setFieldValue('quoteChosen', ro);
-  };
+  const setRoute = useCallback(
+    (ro: RouteAndQuote | null) => {
+      setRouteSelected(ro);
+      setFieldValue('quoteChosen', ro);
+    },
+    [setFieldValue]
+  );
 
   const lastFetchTs = useRef(0);
 
@@ -223,6 +226,7 @@ const TokenSwap = () => {
     toSymbol,
     fromUiAmt,
     ifInputParametersDifferentWithLatest,
+    setRoute,
     setFieldValue,
     values.currencyFrom
   ]);
@@ -256,10 +260,16 @@ const TokenSwap = () => {
 
   return (
     <div className="w-full flex flex-col px-8 gap-1">
+      <div className="largeTextBold mb-2 flex">
+        <div className="mr-auto">Pay</div>
+      </div>
       <CurrencyInput actionType="currencyFrom" />
       <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
         <SwapIcon />
       </Button>
+      <div className="largeTextBold mb-2 flex">
+        <div className="mr-auto">Receive</div>
+      </div>
       <CurrencyInput actionType="currencyTo" />
       {allRoutes.length > 0 && routeSelected && (
         <RoutesAvailable
@@ -272,6 +282,7 @@ const TokenSwap = () => {
       <Button
         isLoading={isSubmitting}
         className="paragraph bold mt-8"
+        variant="gradient"
         // disabled={activeWallet && (!isValid || !dirty)}
         onClick={!activeWallet ? openModal : submitForm}>
         {!activeWallet ? 'Connect to Wallet' : 'SWAP'}
