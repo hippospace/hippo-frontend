@@ -25,11 +25,7 @@ interface HippoClientContextType {
   hippoSwap?: HippoSwapClient;
   tokenStores?: Record<string, aptos_framework.Coin.CoinStore>;
   tokenInfos?: Record<string, Coin_registry.TokenInfo>;
-  requestSwapByRoute: (
-    routeAndQuote: RouteAndQuote,
-    slipTolerance: number,
-    callback: () => void
-  ) => {};
+  requestSwapByRoute: (routeAndQuote: RouteAndQuote, slipTolerance: number) => Promise<boolean>;
   requestSwap: (
     fromSymbol: string,
     toSymbol: string,
@@ -42,21 +38,19 @@ interface HippoClientContextType {
     rhsSymbol: string,
     poolType: PoolType,
     lhsUiAmt: number,
-    rhsUiAmt: number,
-    callback: () => void
-  ) => {};
+    rhsUiAmt: number
+  ) => Promise<boolean>;
   requestWithdraw: (
     lhsSymbol: string,
     rhsSymbol: string,
     poolType: PoolType,
     liqiudityAmt: UITokenAmount,
     lhsMinAmt: UITokenAmount,
-    rhsMinAmt: UITokenAmount,
-    callback: () => void
-  ) => {};
+    rhsMinAmt: UITokenAmount
+  ) => Promise<boolean>;
   transaction?: TTransaction;
   setTransaction: (trans?: TTransaction) => void;
-  requestFaucet: (symbol: string, callback?: () => void) => void;
+  requestFaucet: (symbol: string) => Promise<boolean>;
 }
 
 interface TProviderProps {
@@ -97,7 +91,8 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const dispatch = useDispatch();
 
   const requestFaucet = useCallback(
-    async (symbol: string, callback?: () => void) => {
+    async (symbol: string) => {
+      let success = false;
       try {
         if (!activeWallet) throw new Error('Please login first');
         if (symbol !== 'APTOS') {
@@ -109,7 +104,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
               openNotification(result.hash);
               await hippoWallet?.refreshStores();
               setRefresh(true);
-              if (callback) callback();
+              success = true;
             }
           }
         }
@@ -118,6 +113,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (error instanceof Error) {
           message.error(error?.message);
         }
+        success = false;
+      } finally {
+        return success;
       }
     },
     [activeWallet, hippoWallet, signAndSubmitTransaction]
@@ -126,6 +124,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const getHippoWalletClient = useCallback(async () => {
     if (activeWallet) {
       const client = await hippoWalletClient(activeWallet);
+      await client?.refreshStores();
       setHippoWallet(client);
     }
   }, [activeWallet]);
@@ -163,7 +162,8 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   }, [dispatch, hippoSwap]);
 
   const requestSwapByRoute = useCallback(
-    async (routeAndQuote: RouteAndQuote, slipTolerance: number, callback: () => void) => {
+    async (routeAndQuote: RouteAndQuote, slipTolerance: number) => {
+      let success = false;
       try {
         const input = routeAndQuote.quote.inputUiAmt;
         const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
@@ -177,13 +177,16 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           message.success('Transaction Success');
           openNotification(result.hash);
           setRefresh(true);
-          callback();
+          success = true;
         }
       } catch (error) {
         console.log('request swap by route error:', error);
         if (error instanceof Error) {
           message.error(error?.message);
         }
+        success = false;
+      } finally {
+        return success;
       }
     },
     [activeWallet, signAndSubmitTransaction]
@@ -231,9 +234,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       rhsSymbol: string,
       poolType: PoolType,
       lhsUiAmt: number,
-      rhsUiAmt: number,
-      callback: () => void
+      rhsUiAmt: number
     ) => {
+      let success = false;
       try {
         if (!activeWallet || !hippoSwap) {
           throw new Error('Please login first');
@@ -248,13 +251,16 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           message.success('Transaction Success');
           openNotification(result.hash);
           setRefresh(true);
-          callback();
+          success = true;
         }
       } catch (error) {
         console.log('request deposit error:', error);
         if (error instanceof Error) {
           message.error(error?.message);
         }
+        success = false;
+      } finally {
+        return success;
       }
     },
     [hippoSwap, activeWallet, signAndSubmitTransaction]
@@ -267,9 +273,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       poolType: PoolType,
       liqiudityAmt: UITokenAmount,
       lhsMinAmt: UITokenAmount,
-      rhsMinAmt: UITokenAmount,
-      callback: () => void
+      rhsMinAmt: UITokenAmount
     ) => {
+      let success = false;
       try {
         if (!activeWallet || !hippoSwap) {
           throw new Error('Please login first');
@@ -288,13 +294,16 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           message.success('Transaction Success');
           openNotification(result.hash);
           setRefresh(true);
-          callback();
+          success = true;
         }
       } catch (error) {
         console.log('request withdraw error:', error);
         if (error instanceof Error) {
           message.error(error?.message);
         }
+        success = false;
+      } finally {
+        return success;
       }
     },
     [hippoSwap, activeWallet, signAndSubmitTransaction]

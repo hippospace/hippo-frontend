@@ -55,20 +55,18 @@ const Swap: React.FC = () => {
   );
 
   const onSubmitSwap = useCallback(
-    (values: ISwapSettings, formikHelper: FormikHelpers<ISwapSettings>) => {
+    async (values: ISwapSettings, formikHelper: FormikHelpers<ISwapSettings>) => {
       const fromSymbol = values.currencyFrom?.token?.symbol.str();
       const toSymbol = values.currencyTo?.token?.symbol.str();
       const fromUiAmt = values.currencyFrom?.amount;
       if (hippoSwap && hippoWallet && fromSymbol && toSymbol && fromUiAmt) {
         const quote = values.quoteChosen;
         if (quote) {
-          requestSwapByRoute(quote, values.slipTolerance, () => {
-            formikHelper.setSubmitting(false);
-            formikHelper.setFieldValue('currencyFrom', {
-              ...values.currencyTo,
-              amount: 0
-            });
-          });
+          const result = await requestSwapByRoute(quote, values.slipTolerance);
+          if (result) {
+            formikHelper.resetForm();
+          }
+          formikHelper.setSubmitting(false);
         } else {
           // TODO: info bubble "route note available"
         }

@@ -7,16 +7,15 @@ import { useCallback, useMemo, useState } from 'react';
 const Faucet: React.FC = () => {
   const [loading, setLoading] = useState('');
   const { activeWallet } = useAptosWallet();
-  const { tokenStores, tokenInfos, requestFaucet, hippoWallet } = useHippoClient();
+  const { tokenStores, tokenInfos, requestFaucet } = useHippoClient();
 
   const onRequestFaucet = useCallback(
     async (coin: string) => {
       setLoading(coin);
       await requestFaucet(coin);
-      await hippoWallet?.refreshStores();
       setLoading('');
     },
-    [requestFaucet, hippoWallet]
+    [requestFaucet]
   );
 
   const renderTokenList = useMemo(() => {

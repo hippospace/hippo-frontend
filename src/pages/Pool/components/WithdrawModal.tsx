@@ -73,10 +73,11 @@ const WithdrawModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
     }
     const pool = pools[0];
     if (tokenStores && tokenStores[pool.lpTokenInfo.symbol.str()]) {
-      await requestWithdraw(lhsSymbol, rhsSymbol, poolType, values.amount, 0, 0, () => {
-        setLoading(false);
+      const result = await requestWithdraw(lhsSymbol, rhsSymbol, poolType, values.amount, 0, 0);
+      if (result) {
         onDismissModal();
-      });
+      }
+      setLoading(false);
     } else {
       // user does not have this LP
       message.error('You do not have this LP token');

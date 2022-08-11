@@ -70,17 +70,17 @@ const DepositModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
     const xSymbol = tokenPair!.token0.symbol;
     const ySymbol = tokenPair!.token1.symbol;
     if (xSymbol && ySymbol && hippoClient && hippoClient.hippoSwap) {
-      await hippoClient.requestDeposit(
+      const result = await hippoClient.requestDeposit(
         xSymbol,
         ySymbol,
         tokenPair!.poolType,
         values.token0Amount,
-        values.token1Amount,
-        () => {
-          onDismissModal();
-          setLoading(false);
-        }
+        values.token1Amount
       );
+      if (result) {
+        onDismissModal();
+      }
+      setLoading(false);
     } else {
       setLoading(false);
     }

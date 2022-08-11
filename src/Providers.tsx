@@ -10,8 +10,8 @@ import {
   //HippoWalletAdapter,
   AptosWalletAdapter,
   //HippoExtensionWalletAdapter,
-  MartianWalletAdapter
-  // FewchaWalletAdapter
+  MartianWalletAdapter,
+  FewchaWalletAdapter
   // NightlyWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
@@ -41,8 +41,8 @@ const Providers: React.FC<TProps> = (props: TProps) => {
       //new HippoWalletAdapter(),
       //new HippoExtensionWalletAdapter(),
       new MartianWalletAdapter(),
-      new AptosWalletAdapter()
-      // new FewchaWalletAdapter()
+      new AptosWalletAdapter(),
+      new FewchaWalletAdapter()
       // new MultiMaskWalletAdapter()
       // new NightlyWalletAdapter()
     ],
@@ -54,11 +54,8 @@ const Providers: React.FC<TProps> = (props: TProps) => {
       <WalletProvider
         wallets={wallets}
         onError={(error: Error) => {
-          if (error instanceof Error) {
-            message.error(error?.message);
-          } else {
-            message.error(`Wallet Error: ${error}`);
-          }
+          console.log('wallet errors: ', error);
+          message.error(error.message);
         }}>
         <AptosWalletProvider>
           <ReduxProvider store={store}>
