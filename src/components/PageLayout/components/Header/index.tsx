@@ -44,7 +44,6 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
           .filter((r) => r.path !== '*' && !r.hidden)
           .map(({ name, path }) => {
             const isCurrent = currentPageName === name;
-            console.log('current page name 2', currentPageName, isCurrent);
             return (
               <Button
                 key={`${name}-${isCurrent}`}
@@ -103,7 +102,6 @@ const PageHeader: React.FC = () => {
         <div className="h-full absolute left-0 top-0 mobile:relative">
           <Link to="/" className="h-full flex items-center justify-center">
             <LogoIcon className="w-auto h-[48px] mobile:h-full" />
-            <span className="h5 ml-4 tablet:hidden mobile:hidden">HIPPO</span>
           </Link>
         </div>
         <div className="grow items-center justify-center h-full">

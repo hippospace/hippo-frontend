@@ -1,5 +1,16 @@
 .button {
-  @apply cursor-pointer py-3 px-5 rounded-lg flex items-center justify-center text-center uppercase font-medium;
+  @apply cursor-pointer py-3 px-5 rounded-lg flex items-center justify-center text-center font-medium transition-transform;
+
+  &:active {
+    transform: scale(1.05);
+  }
+
+  &.gradient {
+    @apply bg-btn-gradient rounded-full h-[58px] text-white h6;
+    &:hover {
+      @apply brightness-90;
+    }
+  }
 
   &.solid {
     @apply bg-prime text-white border-[3px] border-solid border-primary;
@@ -7,24 +18,14 @@
     &:hover {
       @apply text-grey-900/80 bg-secondary;
     }
-
-    // &:active,
-    // &:focus {
-    //   @apply text-grey-900/100 bg-primary;
-    // }
   }
 
   &.outlined {
-    @apply border-[2px] border-grey-900 bg-buttonOutlined rounded-xxl h-[43px] largeTextBold;
+    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent rounded-full h-[43px] largeTextBold;
 
     &:hover {
       @apply bg-primePurple-100;
     }
-
-    // &:active,
-    // &:focus {
-    //   @apply text-grey-900/100 bg-prime;
-    // }
   }
 
   &.icon {
@@ -37,28 +38,11 @@
     }
   }
 
-  &:hover {
-    @apply text-grey-900/80;
-  }
-
-  // &:active,
-  // &:focus {
-  //   @apply text-grey-900/100;
-  // }
-
   &.disabled {
-    @apply text-white pointer-events-none border-none cursor-not-allowed bg-grey-500;
-    // background: rgba(255, 255, 255, 0.3);
+    @apply pointer-events-none border-none cursor-not-allowed opacity-50;
   }
 
   &.loading {
     @apply flex items-center pointer-events-none cursor-not-allowed;
-  }
-
-  &.gradient {
-    @apply bg-btn-gradient rounded-full h-[58px] text-white;
-    &:hover {
-      @apply opacity-80;
-    }
   }
 }

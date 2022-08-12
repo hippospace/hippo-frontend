@@ -20,6 +20,7 @@ module.exports = {
         primePurple: {
           100: '#F1EFFE',
           300: '#B3A6FE',
+          700: '#5957AC',
           900: '#414082'
         }
       },
@@ -60,14 +61,13 @@ module.exports = {
         300: '#B3A6FE',
         900: '#414082'
       },
-      primaryGrey: 'rgba(248, 248, 248, 0.8)',
-      buttonOutlined: 'rgba(246, 248, 250, 0.4)',
+      primaryGrey: 'rgba(248, 248, 248, 0.8)'
     }),
     boxShadow: {
       sm: '4px 4px 0px #2D2D2D',
       md: '0px 4px 8px rgba(0, 0, 0, 0.25)',
       figma: '8px 8px 0px #2D2D2D',
-      swap: '0px 4px 35px rgba(0, 0, 0, 0.05)',
+      main1: '0px 4px 35px rgba(0, 0, 0, 0.05)',
       home: '-4px 8px 32px rgba(211, 207, 230, 0.4)'
     },
     borderRadius: {

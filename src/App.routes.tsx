@@ -24,6 +24,7 @@ export const routes: TRoute[] = [
   {
     path: 'pools',
     name: 'Pools',
+    hidden: true,
     element: <Pool />
   },
   {

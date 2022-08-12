@@ -37,7 +37,7 @@ const Swap: React.FC = () => {
 
   const renderCardHeader = useMemo(
     () => (
-      <div className="absolute w-14 h-14 rounded-xxl shadow-swap top-0 -right-16 flex justify-center align-center bg-secondary">
+      <div className="absolute w-14 h-14 rounded-xxl shadow-main1 top-0 -right-16 flex justify-center align-center bg-secondary">
         <Popover
           overlayClassName={styles.popover}
           trigger="click"
@@ -83,7 +83,7 @@ const Swap: React.FC = () => {
         initialValues={swapSettings}
         validationSchema={validationSchema}
         onSubmit={onSubmitSwap}>
-        <Card className="w-[497px] min-h-[430px] flex flex-col py-10 shadow-swap rounded-xxl relative">
+        <Card className="w-[497px] min-h-[430px] flex flex-col py-10 relative">
           <TokenSwap />
           {renderCardHeader}
         </Card>

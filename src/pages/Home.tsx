@@ -1,10 +1,11 @@
 import { FC } from 'react';
 import HomeBlogPoster1 from 'resources/img/home/home-blog-poster-1.png';
 import HomeBlogPoster2 from 'resources/img/home/home-blog-poster-2.png';
-import BlogsAccessArrow from 'resources/icons/blogsAccessArrow.svg';
 import Button from 'components/Button';
 import IlluUsers from 'resources/img/illu-users-2x.png';
 import DevsIllu from 'resources/img/illu-devs-2x.png';
+import Card from 'components/Card';
+import { useNavigate } from 'react-router-dom';
 
 interface HomeBlogProps {
   posterSrc: string;
@@ -15,23 +16,26 @@ interface HomeBlogProps {
 
 const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
   return (
-    <div className="flex-1 max-w-[380px] text-left px-6 py-5 border-4 border-solid border-primary shadow-figma">
-      <div className="w-full aspect-w-16 aspect-h-9">
-        <img src={posterSrc} className="w-full object-cover" />
+    <Card className="flex-1 max-w-[535px] text-left px-5 pt-4 pb-10">
+      <div className="w-full">
+        <img src={posterSrc} className="w-full h-[146px] object-cover rounded-xxl" />
       </div>
       {/* line-clamp will automatically truncate the text as boxes shrink but 'truncate' won't */}
-      <div className="h5 mb-2 mt-4 w-full line-clamp-1 mobile:title bold">{title}</div>
-      <div className="flex items-end justify-between  min-h-[88px]">
-        <div className="title w-full line-clamp-4 mr-2 mobile:paragraph">{summary}</div>
+      <div className="h4 mb-2 mt-4 w-full text-center line-clamp-1 mobile:title">{title}</div>
+      <div className="subTitle-semiBold px-2 text-grey-700 opacity-50 w-full line-clamp-4 mb-9 mobile:paragraph">
+        {summary}
+      </div>
+      <div className="w-full">
         <Button
-          variant="icon"
+          variant="outlined"
+          className="mx-auto w-[340px]"
           onClick={() => {
             window.open(url, '_blank');
           }}>
-          <img src={BlogsAccessArrow} className="w-14 h-14" />
+          Read More
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -40,6 +44,8 @@ const SubTitle = ({ children }: { children: any }) => (
 );
 
 const Home = () => {
+  const navigate = useNavigate();
+
   const blogs: HomeBlogProps[] = [
     {
       posterSrc: HomeBlogPoster1,
@@ -66,50 +72,53 @@ const Home = () => {
           <span>Aptos</span>
         </div>
         <div className="h5 font-[500] max-w-[798px]">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec orci ornare, iaculis
-          sapien vitae, malesuada tortor. Proin euismod metus sit amet mi feugiat, quis rhoncus ex
-          varius.
+          Using developer tools we are creating in-house, we help Aptos developers build
+          applications that are composable by default, and automatically aggregate all the liquidity
+          on Aptos, so users can always trade <br className="mobile:hidden" /> with the best rates
         </div>
         <div>
-          <Button className="w-[320px]" variant="gradient">
+          <Button className="w-[320px]" variant="gradient" onClick={() => navigate('/swap')}>
             TRY SWAP
           </Button>
         </div>
       </div>
       <div className="space-y-16 mt-[162px] mb-[72px]">
-        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-xxl w-full px-[110px] translate-x-[72px]">
+        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-tl-xxl rounded-bl-xxl w-full px-[110px] translate-x-[5%] space-x-12">
           <div className="mr-12 space-y-12 text-left">
             <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary">
-              For Users
+              Trade Aggregation
             </div>
             <div className="h5 font-[500] max-w-[749px]">
-              The liquidity infrastructure on Aptos to give users access to best trading rates
-              across all Aptos DEXs. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-              nec orci ornare, iaculis sapien vitae, Lorem ipsum dolor.
+              Aptos has close to a dozen DEX protocols already building on it. We aggregate
+              liquidity across all of them so that users can always trade with the best rates.
             </div>
             <div>
-              <Button variant="outlined">Placeholder</Button>
+              <Button variant="outlined" className="w-[260px]">
+                Placeholder
+              </Button>
             </div>
           </div>
           <div className="my-4 h-full">
             <img src={IlluUsers} className="h-full w-auto object-contain" />
           </div>
         </div>
-        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-xxl w-full px-[110px] -translate-x-[72px]">
+        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-tr-xxl rounded-br-xxl w-full px-[110px] -translate-x-[72px] space-x-12">
           <div className="my-4 h-full">
             <img src={DevsIllu} className="h-full w-auto object-contain" />
           </div>
           <div className="mr-12 space-y-12 text-left">
             <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary">
-              For Developers
+              Developer Tools
             </div>
             <div className="h5 font-[500] max-w-[749px]">
-              Tools at the SDK, compiler, and language level to streamline development process and
-              maximise developer productivity. Lorem ipsum dolor sit amet, consectetur adipiscing
-              elit. Nullam nec orci ornare, iaculis sapien vitae, Lorem ipsum dolor.
+              We are developing tools at the SDK, compiler, language and RPC/validator level to
+              streamline the development and deployment process on Aptos. Try our developer SDK and
+              be 10x more productive!
             </div>
             <div>
-              <Button variant="outlined">Placeholder</Button>
+              <Button variant="outlined" className="w-[260px]">
+                Placeholder
+              </Button>
             </div>
           </div>
         </div>

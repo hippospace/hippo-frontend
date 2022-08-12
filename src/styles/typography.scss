@@ -62,7 +62,7 @@
   }
 
   h6, .h6 {
-    @apply text-xl;
+    @apply text-xl font-bold;
   }
 
   small, .small {
@@ -71,5 +71,9 @@
 
   .helpText {
     @apply text-sm;
+  }
+
+  .subTitle-semiBold {
+    @apply text-[18px] leading-[22px] font-semibold;
   }
 }
