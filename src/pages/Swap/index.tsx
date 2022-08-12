@@ -64,6 +64,10 @@ const Swap: React.FC = () => {
         if (quote) {
           requestSwapByRoute(quote, values.slipTolerance, () => {
             formikHelper.setSubmitting(false);
+            formikHelper.setFieldValue('currencyFrom', {
+              ...values.currencyTo,
+              amount: 0
+            });
           });
         } else {
           // TODO: info bubble "route note available"

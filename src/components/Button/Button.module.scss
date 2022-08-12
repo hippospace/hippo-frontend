@@ -15,7 +15,7 @@
   }
 
   &.outlined {
-    @apply border-[2px] border-grey-900 bg-transparent rounded-xxl;
+    @apply border-[2px] border-grey-900 bg-buttonOutlined rounded-xxl h-[43px] largeTextBold;
 
     &:hover {
       @apply bg-primePurple-100;
@@ -56,7 +56,7 @@
   }
 
   &.gradient {
-    @apply bg-btn1 rounded-full h-[58px] text-white;
+    @apply bg-btn-gradient rounded-full h-[58px] text-white;
     &:hover {
       @apply opacity-80;
     }

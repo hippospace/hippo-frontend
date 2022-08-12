@@ -1,13 +1,10 @@
 import { FC } from 'react';
-import HomeTrade from 'resources/img/home/home-trade.png';
-import HomeMoveToTs from 'resources/img/home/home-move-to-ts.png';
-import HomeWalletInfra from 'resources/img/home/home-wallet-infra.png';
-import HomeProactive from 'resources/img/home/home-proactive.png';
 import HomeBlogPoster1 from 'resources/img/home/home-blog-poster-1.png';
 import HomeBlogPoster2 from 'resources/img/home/home-blog-poster-2.png';
 import BlogsAccessArrow from 'resources/icons/blogsAccessArrow.svg';
 import Button from 'components/Button';
-import classNames from 'classnames';
+import IlluUsers from 'resources/img/illu-users-2x.png';
+import DevsIllu from 'resources/img/illu-devs-2x.png';
 
 interface HomeBlogProps {
   posterSrc: string;
@@ -38,58 +35,11 @@ const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
   );
 };
 
-interface HomeIllustrationProps {
-  label: string;
-  imageSrc: string;
-  className?: string;
-  link?: string;
-}
-
-const HomeIllustration: FC<HomeIllustrationProps> = ({ imageSrc, label, className = '', link }) => {
-  return (
-    <div
-      className={classNames(className, 'home-illu w-[296px]', { 'cursor-pointer group': !!link })}
-      onClick={() => link && window.open(link, '_blank')}>
-      <div>
-        <img
-          src={imageSrc}
-          className="w-[220px] mx-auto group-hover:scale-110 transition-transform"
-        />
-      </div>
-      <div className="font-bold text-2xl leading-7 mt-6 mobile:paragraph mobile:font-bold">
-        {label}
-      </div>
-    </div>
-  );
-};
-
 const SubTitle = ({ children }: { children: any }) => (
-  <div className="h5 font-bold mb-12 mobile:h6 mobile:mb-6">{children}</div>
+  <div className="text-[64px] leading-[77px] font-bold mb-12 mobile:h6 mobile:mb-6">{children}</div>
 );
 
 const Home = () => {
-  const aboutIllus = [
-    {
-      label: 'Trade aggregation',
-      imageSrc: HomeTrade
-    },
-    {
-      label: 'Proactive Liquidity with Concentrated Liquidity Pools',
-      imageSrc: HomeProactive
-    }
-  ];
-  const offeringIllus = [
-    {
-      label: 'Move-to-Typescript Transpiler',
-      imageSrc: HomeMoveToTs,
-      link: 'https://github.com/hippospace/move-to-ts'
-    },
-    {
-      label: 'Wallet Infrastructure',
-      imageSrc: HomeWalletInfra,
-      link: 'https://github.com/hippospace/aptos-wallet-adapter'
-    }
-  ];
   const blogs: HomeBlogProps[] = [
     {
       posterSrc: HomeBlogPoster1,
@@ -107,25 +57,61 @@ const Home = () => {
     }
   ];
   return (
-    <div className="hippo-home text-center mx-auto  max-w-[1570px]">
-      <div className="hippo-home__about mb-56 mobile:mb-32">
-        <div className="font-bold text-[80px] mb-24 laptop:text-[68px] tablet:text-[56px] mobile:h5 mobile:mb-16">
-          Trade with best rates on Aptos
+    <div className="hippo-home text-center mx-auto">
+      <div className="flex flex-col items-center space-y-12">
+        <div className="text-[96px] leading-[115px] font-bold max-w-[907px] text-gradient">
+          <span className="bg-grey-900 bg-clip-text [-webkit-text-fill-color:transparent]">
+            The Aggregation Mechanism on{' '}
+          </span>{' '}
+          <span>Aptos</span>
         </div>
-        <div className="flex justify-evenly items-start tablet:flex-col tablet:gap-y-8 tablet:items-center">
-          {aboutIllus.map((ilu, index) => (
-            <HomeIllustration {...ilu} key={`illu-${index}`} />
-          ))}
+        <div className="h5 font-[500] max-w-[798px]">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec orci ornare, iaculis
+          sapien vitae, malesuada tortor. Proin euismod metus sit amet mi feugiat, quis rhoncus ex
+          varius.
+        </div>
+        <div>
+          <Button className="w-[320px]" variant="gradient">
+            TRY SWAP
+          </Button>
         </div>
       </div>
-      <div className="hippo-home__offerings mb-56 mobile:mb-32">
-        <div className="h1 mb-24 max-w-[1108px] mx-auto mobile:h5 mobile:mb-16">
-          Boost dev productivity with best tooling
+      <div className="space-y-16 mt-[162px] mb-[72px]">
+        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-xxl w-full px-[110px] translate-x-[72px]">
+          <div className="mr-12 space-y-12 text-left">
+            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary">
+              For Users
+            </div>
+            <div className="h5 font-[500] max-w-[749px]">
+              The liquidity infrastructure on Aptos to give users access to best trading rates
+              across all Aptos DEXs. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
+              nec orci ornare, iaculis sapien vitae, Lorem ipsum dolor.
+            </div>
+            <div>
+              <Button variant="outlined">Placeholder</Button>
+            </div>
+          </div>
+          <div className="my-4 h-full">
+            <img src={IlluUsers} className="h-full w-auto object-contain" />
+          </div>
         </div>
-        <div className="flex justify-evenly items-start tablet:flex-col tablet:gap-y-8 tablet:items-center">
-          {offeringIllus.map((ilu, index) => (
-            <HomeIllustration {...ilu} key={`illu-${index}`} />
-          ))}
+        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-xxl w-full px-[110px] -translate-x-[72px]">
+          <div className="my-4 h-full">
+            <img src={DevsIllu} className="h-full w-auto object-contain" />
+          </div>
+          <div className="mr-12 space-y-12 text-left">
+            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary">
+              For Developers
+            </div>
+            <div className="h5 font-[500] max-w-[749px]">
+              Tools at the SDK, compiler, and language level to streamline development process and
+              maximise developer productivity. Lorem ipsum dolor sit amet, consectetur adipiscing
+              elit. Nullam nec orci ornare, iaculis sapien vitae, Lorem ipsum dolor.
+            </div>
+            <div>
+              <Button variant="outlined">Placeholder</Button>
+            </div>
+          </div>
         </div>
       </div>
       <div className="hippo-home__blogs">

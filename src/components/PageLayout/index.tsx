@@ -5,10 +5,9 @@ import commonAction from 'modules/common/actions';
 import { Footer, Header } from './components';
 import { getLayoutHeight } from 'modules/common/reducer';
 import { useSelector } from 'react-redux';
-import HippoLogoBg from 'resources/img/hippo-logo-bg.png';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
-import SwapIllu from 'resources/img/swap/swap-illu-2x.png';
+import SwapIllu from 'resources/img/swap-illu-2x.png';
 // import styles from './PageLayout.module.scss';
 
 const { Content } = Antd.Layout;
@@ -28,6 +27,7 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <Antd.Layout
       className={classNames('relative min-h-screen bg-white overflow-hidden', {
+        'bg-home1': currentPageName === 'Home',
         'bg-swap': currentPageName === 'Swap'
       })}>
       {currentPageName === 'Swap' && (
@@ -38,32 +38,13 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <Header />
       <Content
         className={classNames(
-          'relative pt-[136px] px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]',
-          {
-            'bg-home1': currentPageName === 'Home'
-          }
+          'relative pt-[136px] px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]'
         )}>
-        <div
-          className={classNames('py-16', {
-            'bg-home-icons bg-contain bg-no-repeat bg-top': currentPageName === 'Home'
-          })}
-          ref={containerRef}>
+        <div className={classNames('py-16')} ref={containerRef}>
           <div className="relative z-10">{children}</div>
         </div>
-        {currentPageName === 'Home' && (
-          <div className="bg-home1 absolute w-full h-full left-0 top-0 rotate-180 -z-0"></div>
-        )}
       </Content>
       <Footer />
-      <img
-        src={HippoLogoBg}
-        className={classNames(
-          'absolute right-0 bottom-0 w-[824.49px] h-auto z-0 laptop:w-[33%] mobile:w-[40%]',
-          {
-            hidden: currentPageName !== 'Home'
-          }
-        )}
-      />
     </Antd.Layout>
   );
 };

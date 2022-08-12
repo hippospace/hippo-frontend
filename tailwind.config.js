@@ -25,9 +25,10 @@ module.exports = {
       },
       backgroundImage: {
         'home-icons': 'url(resources/img/home/home-icons.png)',
-        home1: 'radial-gradient(88.17% 88.17% at 87.73% 7.97%, rgba(110, 108, 202, 0.17) 0%, rgba(151, 71, 255, 0) 63.69%, rgba(151, 71, 255, 0) 100%)',
+        home1: 'linear-gradient(0deg, #F4F1FD 0%, #FDFDFF 100%)',
+        home2: 'linear-gradient(90deg, #F8F7FF 26.08%, #F7F5FE 98.41%)',
         swap: 'linear-gradient(0deg, #F7F5FD 0%, #FDFDFF 100%)',
-        btn1: 'linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%)',
+        'btn-gradient': 'linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%)',
       }
     },
     screens: {
@@ -60,12 +61,14 @@ module.exports = {
         900: '#414082'
       },
       primaryGrey: 'rgba(248, 248, 248, 0.8)',
+      buttonOutlined: 'rgba(246, 248, 250, 0.4)',
     }),
     boxShadow: {
       sm: '4px 4px 0px #2D2D2D',
       md: '0px 4px 8px rgba(0, 0, 0, 0.25)',
       figma: '8px 8px 0px #2D2D2D',
-      swap: '0px 4px 35px rgba(0, 0, 0, 0.05)'
+      swap: '0px 4px 35px rgba(0, 0, 0, 0.05)',
+      home: '-4px 8px 32px rgba(211, 207, 230, 0.4)'
     },
     borderRadius: {
       none: '0',
@@ -119,6 +122,16 @@ module.exports = {
         '.no-scrollbar': {
           '-ms-overflow-style': 'none',
           'scrollbar-width': 'none'
+        },
+        '.text-gradient': {
+          background: 'linear-gradient(135deg, #A6EAFF 14.64%, #B380F5 85.36%)',
+          '-webkit-background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent'
+        },
+        '.text-gradient-secondary': {
+          background: 'linear-gradient(273.38deg, #8032FF 19.81%, #472394 87.9%)',
+          '-webkit-background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent'
         }
       });
     }),
