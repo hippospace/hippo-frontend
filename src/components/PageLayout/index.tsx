@@ -28,9 +28,9 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <Antd.Layout
       className={classNames('relative min-h-screen bg-white overflow-hidden', {
         'bg-home1': currentPageName === 'Home',
-        'bg-swap': currentPageName === 'Swap'
+        'bg-swap': currentPageName !== 'Home'
       })}>
-      {currentPageName === 'Swap' && (
+      {currentPageName !== 'Home' && (
         <>
           <img src={SwapIllu} className="absolute top-0 bottom-0 mx-auto w-full opacity-[0.2]" />
         </>

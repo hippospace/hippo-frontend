@@ -1,13 +1,25 @@
+import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
+import Card from 'components/Card';
 import Button from 'components/Button';
 import CoinIcon from 'components/CoinIcon';
 import useAptosWallet from 'hooks/useAptosWallet';
 import useHippoClient from 'hooks/useHippoClient';
+import useTokenBalane from 'hooks/useTokenBalance';
 import { useCallback, useMemo, useState } from 'react';
 
-const Faucet: React.FC = () => {
+const Balance = ({ symbol }: { symbol: string }) => {
+  const [balance] = useTokenBalane(symbol);
+  return (
+    <div className="text-grey-500 largeTextNormal font-[600]">
+      {balance} {symbol}
+    </div>
+  );
+};
+
+const TokenCard = ({ tokenInfo }: { tokenInfo: TokenInfo }) => {
   const [loading, setLoading] = useState('');
-  const { activeWallet } = useAptosWallet();
-  const { tokenStores, tokenInfos, requestFaucet } = useHippoClient();
+  const { requestFaucet } = useHippoClient();
+  const symbol = tokenInfo.symbol.str();
 
   const onRequestFaucet = useCallback(
     async (coin: string) => {
@@ -18,50 +30,55 @@ const Faucet: React.FC = () => {
     [requestFaucet]
   );
 
+  return (
+    <Card className="w-[340px] h-[200px] flex flex-col items-center justify-between p-5">
+      <div className="flex items-center justify-start w-full">
+        <CoinIcon logoSrc={tokenInfo.logo_url.str()} className="w-16 h-16" />
+        <div className="ml-4">
+          <div className="h4 text-grey-900">{tokenInfo.name.str()}</div>
+          <Balance symbol={symbol} />
+        </div>
+      </div>
+      <Button
+        variant="outlined"
+        isLoading={loading === symbol}
+        className="font-bold w-full"
+        onClick={() => onRequestFaucet(symbol)}>
+        Faucet
+      </Button>
+    </Card>
+  );
+};
+
+const Faucet: React.FC = () => {
+  const { activeWallet, openModal } = useAptosWallet();
+  const { tokenInfos } = useHippoClient();
+
   const renderTokenList = useMemo(() => {
-    if (!activeWallet) return null;
-    if (tokenStores && tokenInfos) {
+    if (!activeWallet) {
+      return (
+        <div className="flex items-center justify-center h-[calc(100vh_-_416px)]">
+          <Button className="shadow-main1" variant="gradient" onClick={openModal}>
+            Connect to Wallet
+          </Button>
+        </div>
+      );
+    }
+    if (tokenInfos) {
       return Object.keys(tokenInfos)
         .filter((symbol) => {
           return tokenInfos[symbol].token_type.moduleName().startsWith('mock_coin');
         })
         .map((symbol) => {
-          const store = tokenStores[symbol];
           const tokenInfo = tokenInfos[symbol];
-          return (
-            <div
-              className="border-2 h-14 border-grey-900 py-2 px-6 flex bg-primePurple-100 justify-between items-center"
-              key={symbol}>
-              <div className="flex gap-3 justify-center items-center">
-                <CoinIcon logoSrc={tokenInfo.logo_url.str()} />
-                <div className="font-bold text-grey-900">{tokenInfo.name.str()}</div>
-              </div>
-              <div className="flex gap-4 justify-center items-center">
-                <small className="text-grey-700 font-bold uppercase">
-                  {`${
-                    store
-                      ? store.coin.value.toJsNumber() /
-                        Math.pow(10, tokenInfo.decimals.toJsNumber())
-                      : 0
-                  } 
-                  ${symbol}`}{' '}
-                </small>
-                <Button
-                  isLoading={loading === symbol}
-                  className="font-bold p-0 px-2"
-                  onClick={() => onRequestFaucet(symbol)}>
-                  Faucet
-                </Button>
-              </div>
-            </div>
-          );
+          return <TokenCard key={`card-${symbol}`} tokenInfo={tokenInfo} />;
         });
     }
-  }, [tokenInfos, tokenStores, onRequestFaucet, loading, activeWallet]);
+  }, [activeWallet, tokenInfos, openModal]);
 
   return (
-    <div>
-      <div className="flex flex-col gap-4">{renderTokenList}</div>
+    <div className="flex gap-6 justify-center flex-wrap max-w-[1500px] mx-auto">
+      {renderTokenList}
     </div>
   );
 };

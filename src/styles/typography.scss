@@ -31,6 +31,10 @@
     @apply text-base font-bold;
   }
 
+  .largeTextNormal {
+    @apply text-base font-medium;
+  }
+
   .helpText {
     @apply font-normal text-sm;
     &.bold {
