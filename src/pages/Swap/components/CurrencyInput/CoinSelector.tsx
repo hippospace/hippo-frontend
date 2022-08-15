@@ -75,7 +75,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
 
   const renderHeaderSearch = useMemo(() => {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-y-1">
         <div className="flex gap-2">
           {commonCoins.map((coin) => (
             <CommonCoinButton
@@ -97,10 +97,10 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
 
   const renderTokenList = useMemo(() => {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 mt-4">
         <div className="flex justify-between">
-          <small className="text-grey-700 font-bold">Token</small>
-          <small className="text-grey-700 font-bold">{hippoWallet ? 'Balance' : ''}</small>
+          <small className="text-grey-500 font-bold">Token</small>
+          <small className="text-grey-500 font-bold">{hippoWallet ? 'Balance' : ''}</small>
         </div>
         <List
           className="h-[376px] overflow-y-scroll no-scrollbar border-0"

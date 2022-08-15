@@ -12,16 +12,8 @@
     }
   }
 
-  &.solid {
-    @apply bg-prime text-white border-[3px] border-solid border-primary;
-
-    &:hover {
-      @apply text-grey-900/80 bg-secondary;
-    }
-  }
-
   &.outlined {
-    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent rounded-full h-[43px] largeTextBold;
+    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent rounded-full h-11 largeTextBold;
 
     &:hover {
       @apply bg-primePurple-100;
@@ -36,6 +28,20 @@
     &.disabled {
       @apply opacity-50;
     }
+  }
+
+  &.notSelected, &.selected {
+    @apply rounded-xl h-11 largeTextBold;
+    &:active {
+      @apply transform-none;
+    }
+  }
+
+  &.notSelected {
+    @apply border-[2px] border-transparent bg-primaryGrey text-grey-700;
+  }
+  &.selected {
+    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent;
   }
 
   &.disabled {

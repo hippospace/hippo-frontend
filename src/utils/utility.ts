@@ -5,9 +5,9 @@ export const stringToHex = (text: string) => {
   return Array.from(encoded, (i) => i.toString(16).padStart(2, '0')).join('');
 };
 
-export const walletAddressEllipsis = (address: string) => {
+export const walletAddressEllipsis = (address: string | undefined) => {
   if (!address) {
-    return address;
+    return '';
   }
   return address.slice(0, 4) + '...' + address.slice(-6);
 };

@@ -10,6 +10,7 @@ import useAptosWallet from 'hooks/useAptosWallet';
 import { DEX_TYPE_NAME, RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import classNames from 'classnames';
 import { message } from 'antd';
+import useTokenBalane from 'hooks/useTokenBalance';
 
 interface IRoutesProps {
   className?: string;
@@ -54,7 +55,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestP
         </div>
         <div className="flex justify-between items-center small font-bold text-grey-500">
           <div>{swapRoutes}</div>
-          <div>${outputValue}</div>
+          <div className="invisible">${outputValue}</div>
         </div>
         {isBestPrice && (
           <div className="absolute -left-[2px] -top-2 h-4 px-2 small font-bold bg-primePurple-300 rounded-lg rounded-bl-none flex items-center text-white">
@@ -258,8 +259,12 @@ const TokenSwap = () => {
     setFieldValue('currencyTo', tokenFrom);
   }, [values, setFieldValue]);
 
+  const [fromCurrentBalance] = useTokenBalane(fromSymbol);
+  const isSwapEnabled =
+    !activeWallet || (values.quoteChosen && fromUiAmt && fromUiAmt <= fromCurrentBalance);
+
   return (
-    <div className="w-full flex flex-col px-8 gap-1">
+    <div className="w-full flex flex-col px-8 gap-1 mobile:px-4">
       <div className="largeTextBold mb-2 flex">
         <div className="mr-auto">Pay</div>
       </div>
@@ -283,7 +288,7 @@ const TokenSwap = () => {
         isLoading={isSubmitting}
         className="paragraph bold mt-8"
         variant="gradient"
-        // disabled={activeWallet && (!isValid || !dirty)}
+        disabled={!isSwapEnabled}
         onClick={!activeWallet ? openModal : submitForm}>
         {!activeWallet ? 'Connect to Wallet' : 'SWAP'}
       </Button>

@@ -59,7 +59,7 @@ interface TProviderProps {
 
 const openNotification = (txhash: MaybeHexString) => {
   notification.open({
-    message: 'Transaction Success',
+    message: 'Transaction Successful',
     description: (
       <p>
         You can verify the transaction by visiting the{' '}
@@ -174,7 +174,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const payload = routeAndQuote.route.makePaylod(input, minOut);
         const result = await signAndSubmitTransaction(payload);
         if (result) {
-          message.success('Transaction Success');
           openNotification(result.hash);
           setRefresh(true);
           success = true;

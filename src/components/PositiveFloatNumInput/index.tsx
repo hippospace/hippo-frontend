@@ -53,6 +53,23 @@ const avoidScientificNotation = (x: number) => {
   return res;
 };
 
+const cutDecimals = (v: string, maxDecimals: number | undefined) => {
+  const decimalsLength = v.split('.')[1]?.length || 0;
+  if (typeof maxDecimals === 'number' && decimalsLength > maxDecimals) {
+    v = v
+      .split('.')
+      .map((vs, index) => {
+        if (index > 0) {
+          return vs.slice(0, maxDecimals);
+        }
+        return vs;
+      })
+      .join('.');
+    if (/^[\d]+\.$/.test(v)) v = v.replace('.', '');
+  }
+  return v;
+};
+
 const MIN_DEFAULT = 0;
 const MAX_DEFAULT = Number.MAX_SAFE_INTEGER;
 const MAX_DECIMALS_DEFAULT = 9;
@@ -73,7 +90,10 @@ const PositiveFloatNumInput: FC<PositiveFloatNumInputProps> = ({
 }) => {
   invariant(min >= MIN_DEFAULT, 'Min prop value invalid');
   invariant(max <= MAX_DEFAULT, 'Max prop value invalid');
-  invariant(maxDecimals <= MAX_DECIMALS_DEFAULT, 'Max decimals prop value invalid');
+  invariant(
+    maxDecimals <= MAX_DECIMALS_DEFAULT && maxDecimals % 1 === 0,
+    'Max decimals prop value invalid'
+  );
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key === 'Enter') {
@@ -91,8 +111,8 @@ const PositiveFloatNumInput: FC<PositiveFloatNumInputProps> = ({
       }
     }
 
-    return avoidScientificNotation(inputAmountTemp);
-  }, [inputAmount, isConfine, max, min]);
+    return cutDecimals(avoidScientificNotation(inputAmountTemp), maxDecimals);
+  }, [inputAmount, isConfine, max, maxDecimals, min]);
 
   const [internalAmountText, setInternalAmountText] = useState<string>(inputToInternalAmount); // can be ''
 
@@ -108,7 +128,7 @@ const PositiveFloatNumInput: FC<PositiveFloatNumInputProps> = ({
 
   return (
     <input
-      className={classNames('positiveFloatNumInput', 'px-1 focus: outline-none', className)}
+      className={classNames('positiveFloatNumInput', 'px-1 focus: outline-none min-w-0', className)}
       value={displayText}
       placeholder={placeholder}
       inputMode="decimal"

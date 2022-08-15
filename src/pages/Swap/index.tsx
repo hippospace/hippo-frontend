@@ -1,4 +1,4 @@
-import { Popover } from 'components/Antd';
+import { Drawer, Popover } from 'components/Antd';
 import Card from 'components/Card';
 import { Formik, FormikHelpers } from 'formik';
 import { useCallback, useMemo, useState } from 'react';
@@ -32,13 +32,15 @@ const validationSchema = yup.object({
 
 const Swap: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   const swapSettings = useSelector(getSwapSettings);
   const { hippoSwap, hippoWallet, requestSwapByRoute } = useHippoClient();
 
   const renderCardHeader = useMemo(
     () => (
-      <div className="absolute w-14 h-14 rounded-xxl shadow-main1 top-0 -right-16 flex justify-center align-center bg-secondary">
+      <div className="absolute w-14 h-14 rounded-xxl shadow-main1 top-0 -right-16 flex justify-center align-center bg-secondary mobile:-top-16 mobile:right-0">
         <Popover
+          className="mobile:hidden"
           overlayClassName={styles.popover}
           trigger="click"
           visible={isVisible}
@@ -49,6 +51,11 @@ const Swap: React.FC = () => {
             <SettingIcon />
           </button>
         </Popover>
+        <button
+          className="cursor-pointer hidden mobile:block"
+          onClick={() => setIsMobileTxSettingsOpen(true)}>
+          <SettingIcon />
+        </button>
       </div>
     ),
     [setIsVisible, isVisible]
@@ -64,7 +71,10 @@ const Swap: React.FC = () => {
         if (quote) {
           const result = await requestSwapByRoute(quote, values.slipTolerance);
           if (result) {
-            formikHelper.resetForm();
+            formikHelper.setFieldValue('currencyFrom', {
+              ...values.currencyFrom,
+              amount: 0
+            });
           }
           formikHelper.setSubmitting(false);
         } else {
@@ -81,9 +91,17 @@ const Swap: React.FC = () => {
         initialValues={swapSettings}
         validationSchema={validationSchema}
         onSubmit={onSubmitSwap}>
-        <Card className="w-[497px] min-h-[430px] flex flex-col py-10 relative">
-          <TokenSwap />
+        <Card className="w-full max-w-[497px] min-h-[430px] flex flex-col py-10 relative">
           {renderCardHeader}
+          <TokenSwap />
+          <Drawer
+            height={'auto'}
+            title={<div className="paragraph bold text-black">Transaction Settings</div>}
+            placement={'bottom'}
+            onClose={() => setIsMobileTxSettingsOpen(false)}
+            visible={isMobileTxSettingsOpen}>
+            <SwapSetting onClose={() => setIsMobileTxSettingsOpen(false)} />
+          </Drawer>
         </Card>
       </Formik>
     </div>

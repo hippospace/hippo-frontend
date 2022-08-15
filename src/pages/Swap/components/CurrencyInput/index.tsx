@@ -6,7 +6,7 @@ import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
 import { useCallback, useMemo, useState } from 'react';
 import CoinIcon from 'components/CoinIcon';
-import { Popover } from 'antd';
+import { Drawer, Popover } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useSelector } from 'react-redux';
 import { getTokenList } from 'modules/swap/reducer';
@@ -20,11 +20,12 @@ interface TProps {
 
 const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
   const [isVisibile, setIsVisible] = useState(false);
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
 
   const selectedCurrency = values[actionType];
   const selectedSymbol = selectedCurrency?.token?.symbol.str();
-  const uiBalance = useTokenBalane(selectedSymbol);
+  const [uiBalance] = useTokenBalane(selectedSymbol);
   const tokenList = useSelector(getTokenList);
   const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
 
@@ -66,10 +67,11 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
     <div
       className={cx(
         styles.currencyInput,
-        'bg-primaryGrey w-full py-4 px-6 rounded-xl h-[77px] flex flex-col justify-center'
+        'bg-primaryGrey w-full py-4 px-6 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2'
       )}>
       <div className="flex gap-1">
         <Popover
+          className="mobile:hidden"
           overlayClassName={styles.popover}
           trigger="click"
           visible={isVisibile}
@@ -79,6 +81,9 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
           }>
           {coinSelectorButton}
         </Popover>
+        <div className="hidden mobile:block" onClick={() => setIsDrawerVisible(true)}>
+          {coinSelectorButton}
+        </div>
         <PositiveFloatNumInput
           min={0}
           max={1e11}
@@ -91,11 +96,32 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
         />
       </div>
       {typeof uiBalance === 'number' && (
-        <div className="flex justify-between font-bold text-grey-500 mt-1">
+        <div className="flex justify-between font-bold text-grey-500 mt-1 cursor-auto pointer-events-none">
           <small>Current Balance:</small>
-          <small>{uiBalance}</small>
+          <small
+            className={classNames({
+              'cursor-pointer pointer-events-auto underline': actionType === 'currencyFrom'
+            })}
+            onClick={() => {
+              if (actionType === 'currencyFrom') {
+                setFieldValue(actionType, {
+                  ...selectedCurrency,
+                  amount: uiBalance
+                });
+              }
+            }}>
+            {uiBalance}
+          </small>
         </div>
       )}
+      <Drawer
+        title={<div className="paragraph bold text-black">Select a Token</div>}
+        height={'100vh'}
+        placement={'bottom'}
+        onClose={() => setIsDrawerVisible(false)}
+        visible={isDrawerVisible}>
+        <CoinSelector actionType={actionType} dismissiModal={() => setIsDrawerVisible(false)} />
+      </Drawer>
     </div>
   );
 };

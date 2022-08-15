@@ -4,6 +4,7 @@ import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coi
 export interface ISwapSettings {
   slipTolerance: number;
   trasactionDeadline: number;
+  maxGasFee: number;
   quoteChosen?: RouteAndQuote;
   currencyFrom?: {
     token?: TokenInfo;

@@ -123,8 +123,8 @@ module.exports = {
           '-ms-overflow-style': 'none',
           'scrollbar-width': 'none'
         },
-        '.text-gradient': {
-          background: 'linear-gradient(135deg, #A6EAFF 14.64%, #B380F5 85.36%)',
+        '.text-gradient-primary': {
+          background: 'linear-gradient(90.74deg, #5687F8 -17.79%, #7743E6 120.43%)',
           '-webkit-background-clip': 'text',
           '-webkit-text-fill-color': 'transparent'
         },

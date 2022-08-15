@@ -12,14 +12,15 @@ interface SwapState {
   swapSettings: ISwapSettings;
 }
 
-const initState: SwapState = {
+export const initState: SwapState = {
   isFetching: false,
   isFetched: false,
   error: null,
   tokenList: [],
   swapSettings: {
     slipTolerance: 1,
-    trasactionDeadline: 0,
+    trasactionDeadline: 30,
+    maxGasFee: 1000,
     currencyFrom: {
       token: undefined,
       amount: undefined,

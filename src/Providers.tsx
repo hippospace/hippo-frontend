@@ -8,10 +8,10 @@ import { HippoClientProvider } from 'contexts/HippoClientProvider';
 import {
   WalletProvider,
   //HippoWalletAdapter,
-  AptosWalletAdapter,
+  // AptosWalletAdapter,
   //HippoExtensionWalletAdapter,
-  MartianWalletAdapter,
-  FewchaWalletAdapter
+  MartianWalletAdapter
+  // FewchaWalletAdapter
   // NightlyWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
@@ -40,9 +40,9 @@ const Providers: React.FC<TProps> = (props: TProps) => {
     () => [
       //new HippoWalletAdapter(),
       //new HippoExtensionWalletAdapter(),
-      new MartianWalletAdapter(),
-      new AptosWalletAdapter(),
-      new FewchaWalletAdapter()
+      new MartianWalletAdapter()
+      // new AptosWalletAdapter(),
+      // new FewchaWalletAdapter()
       // new MultiMaskWalletAdapter()
       // new NightlyWalletAdapter()
     ],

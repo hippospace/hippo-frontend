@@ -7,7 +7,7 @@ const { Footer } = Antd.Layout;
 const URLs = {
   discord: 'https://discord.gg/f7qFxfJWMX',
   github: 'https://github.com/hippospace',
-  docs: '/',
+  docs: 'https://hippo-labs.gitbook.io/dev/',
   medium: 'https://medium.com/@hippolabs',
   twitter: 'https://twitter.com/hippolabs__'
 };

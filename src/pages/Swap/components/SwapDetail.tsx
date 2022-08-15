@@ -18,9 +18,9 @@ const SwapDetail = ({
   const [isPriceYToX, setIsPriceYToX] = useState(true);
 
   const outputUiAmt = routeAndQuote.quote.outputUiAmt;
-  const output = `${outputUiAmt.toFixed(4)} ${toSymbol}`;
+  const output = `${outputUiAmt.toFixed(6)} ${toSymbol}`;
   const minimum = `${(outputUiAmt * (1 - swapSettings.slipTolerance / 100)).toFixed(
-    4
+    6
   )} ${toSymbol}`;
   const priceImpact = `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`;
 
@@ -49,7 +49,7 @@ const SwapDetail = ({
       value: output
     },
     {
-      label: 'Minimum received after slippage',
+      label: 'Minimum Received after Slippage',
       value: minimum
     },
     {
@@ -57,17 +57,23 @@ const SwapDetail = ({
       value: priceImpact
     },
     {
-      label: 'Slippage tolerance',
+      label: 'Slippage Tolerance',
       value: `${swapSettings.slipTolerance} %`
+    },
+    {
+      label: 'Max Gas Fee',
+      value: `${swapSettings.maxGasFee} Gas Units`
     }
   ];
 
   return (
     <div className="flex flex-col gap-2 py-4 mt-6 -mb-6 px-2">
       {details.map((detail) => (
-        <div className="flex justify-between" key={detail.label}>
-          <small className="font-bold text-grey-900">{detail.label}</small>
-          <small className="font-bold text-grey-900">{detail.value}</small>
+        <div className="flex justify-between mobile:block mobile:mb-1" key={detail.label}>
+          <div className="small font-bold text-grey-500">{detail.label}</div>
+          <div className="small font-bold text-grey-900 mobile:flex mobile:justify-end">
+            {detail.value}
+          </div>
         </div>
       ))}
     </div>

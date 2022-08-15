@@ -6,6 +6,7 @@ import IlluUsers from 'resources/img/illu-users-2x.png';
 import DevsIllu from 'resources/img/illu-devs-2x.png';
 import Card from 'components/Card';
 import { useNavigate } from 'react-router-dom';
+import classNames from 'classnames';
 
 interface HomeBlogProps {
   posterSrc: string;
@@ -28,7 +29,7 @@ const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
       <div className="w-full">
         <Button
           variant="outlined"
-          className="mx-auto w-[340px]"
+          className="mx-auto w-[80%] max-w-[340px]"
           onClick={() => {
             window.open(url, '_blank');
           }}>
@@ -40,8 +41,20 @@ const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
 };
 
 const SubTitle = ({ children }: { children: any }) => (
-  <div className="text-[64px] leading-[77px] font-bold mb-12 mobile:h6 mobile:mb-6">{children}</div>
+  <div className="text-[64px] leading-[77px] font-bold mb-12 mobile:h4 mobile:mb-6">{children}</div>
 );
+
+const Intro = ({ children, className }: { children: any; className: string }) => {
+  return (
+    <div
+      className={classNames(
+        'h5 font-[500] text-gray-700 max-w-[798px] mobile:h6 mobile:font-[500]',
+        className
+      )}>
+      {children}
+    </div>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -65,17 +78,15 @@ const Home = () => {
   return (
     <div className="hippo-home text-center mx-auto">
       <div className="flex flex-col items-center space-y-12">
-        <div className="text-[96px] leading-[115px] font-bold max-w-[907px] text-gradient">
-          <span className="bg-grey-900 bg-clip-text [-webkit-text-fill-color:transparent]">
-            The Aggregation Mechanism on{' '}
-          </span>{' '}
-          <span>Aptos</span>
+        <div className="text-[96px] leading-[115px] font-bold max-w-[930px] mobile:h3">
+          <span className="text-grey-900">The Aggregation Mechanism on</span>{' '}
+          <span className="text-gradient-primary">Aptos</span>
         </div>
-        <div className="h5 font-[500] max-w-[798px]">
+        <Intro className="max-w-[798px]">
           Using developer tools we are creating in-house, we help Aptos developers build
           applications that are composable by default, and automatically aggregate all the liquidity
           on Aptos, so users can always trade <br className="mobile:hidden" /> with the best rates
-        </div>
+        </Intro>
         <div>
           <Button className="w-[320px]" variant="gradient" onClick={() => navigate('/swap')}>
             TRY SWAP
@@ -83,41 +94,55 @@ const Home = () => {
         </div>
       </div>
       <div className="space-y-16 mt-[162px] mb-[72px]">
-        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-tl-xxl rounded-bl-xxl w-full px-[110px] translate-x-[5%] space-x-12">
-          <div className="mr-12 space-y-12 text-left">
-            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary">
+        <div className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tl-xxl rounded-bl-xxl w-full px-[110px] translate-x-[5%] space-x-12 tablet:pl-4 tablet:pr-8 tablet:space-x-0">
+          <div className="space-y-12 text-left tablet:mt-16">
+            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary mobile:h4">
               Trade Aggregation
             </div>
-            <div className="h5 font-[500] max-w-[749px]">
+            <Intro className="max-w-[749px]">
               Aptos has close to a dozen DEX protocols already building on it. We aggregate
               liquidity across all of them so that users can always trade with the best rates.
-            </div>
+            </Intro>
             <div>
-              <Button variant="outlined" className="w-[260px]">
-                Placeholder
+              <Button variant="outlined" className="w-[260px]" onClick={() => navigate('/swap')}>
+                Swap Now
               </Button>
             </div>
           </div>
-          <div className="my-4 h-full">
-            <img src={IlluUsers} className="h-full w-auto object-contain" />
+          <div className="my-4 h-full tablet:mb-8 tablet:w-full tablet:h-auto">
+            <img
+              src={IlluUsers}
+              className="h-full w-auto object-contain tablet:w-full tablet:h-auto"
+            />
           </div>
         </div>
-        <div className="h-[728px] flex items-center justify-between bg-home2 shadow-home rounded-tr-xxl rounded-br-xxl w-full px-[110px] -translate-x-[72px] space-x-12">
-          <div className="my-4 h-full">
-            <img src={DevsIllu} className="h-full w-auto object-contain" />
+        <div className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tr-xxl rounded-br-xxl w-full px-[110px] -translate-x-[5%] space-x-12 tablet:pr-4 tablet:pl-8 tablet:space-x-0">
+          <div className="my-4 h-full tablet:mt-8 tablet:w-full tablet:h-auto">
+            <img
+              src={DevsIllu}
+              className="h-full w-auto object-contain tablet:w-full tablet:h-auto"
+            />
           </div>
-          <div className="mr-12 space-y-12 text-left">
-            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary">
+          <div className="space-y-12 text-left tablet:mb-16">
+            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary mobile:h4">
               Developer Tools
             </div>
-            <div className="h5 font-[500] max-w-[749px]">
+            <Intro className="max-w-[749px]">
               We are developing tools at the SDK, compiler, language and RPC/validator level to
               streamline the development and deployment process on Aptos. Try our developer SDK and
               be 10x more productive!
-            </div>
+            </Intro>
             <div>
-              <Button variant="outlined" className="w-[260px]">
-                Placeholder
+              <Button
+                variant="outlined"
+                className="w-[260px]"
+                onClick={() =>
+                  window.open(
+                    'https://hippo-labs.gitbook.io/dev/move-to-ts/move-to-typescript-transpiler',
+                    '_blank'
+                  )
+                }>
+                Move-to-ts Docs
               </Button>
             </div>
           </div>
@@ -125,7 +150,7 @@ const Home = () => {
       </div>
       <div className="hippo-home__blogs">
         <SubTitle>Blogs</SubTitle>
-        <div className="flex justify-center items-center gap-x-16 tablet:flex-col tablet:gap-y-8">
+        <div className="flex justify-center items-center gap-x-16 tablet:flex-col tablet:gap-y-8 tablet:gap-x-0">
           {blogs.map((bl, index) => (
             <HomeBlog {...bl} key={`k-${index}`} />
           ))}

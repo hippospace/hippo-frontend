@@ -1,24 +1,22 @@
 import { useFormikContext } from 'formik';
 import { ISwapSettings } from 'pages/Swap/types';
 import Button from 'components/Button';
-import NumberInput from 'components/NumberInput';
 import { useCallback } from 'react';
-import random from 'lodash/random';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
+import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
+import classNames from 'classnames';
+import { initState as swapInitState } from 'modules/swap/reducer';
 
 interface TProps {
   onClose: () => void;
 }
 
 const SwapSetting: React.FC<TProps> = ({ onClose }) => {
-  const dispatch = useDispatch();
-  const { values, setFieldValue, touched, errors } = useFormikContext<ISwapSettings>();
+  const slippageOptions = [0.5, 1, 2];
 
-  const handleAuto = () => {
-    // TO UPDATE
-    setFieldValue('slipTolerance', random(0, 100));
-  };
+  const dispatch = useDispatch();
+  const { values, setFieldValue } = useFormikContext<ISwapSettings>();
 
   const onConfirm = useCallback(() => {
     dispatch(swapAction.SET_SWAP_SETTING(values));
@@ -26,69 +24,94 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
   }, [onClose, values, dispatch]);
 
   const onResetSwapSetting = useCallback(() => {
-    setFieldValue('slipTolerance', 0);
-    setFieldValue('trasactionDeadline', 0);
+    setFieldValue('slipTolerance', swapInitState.swapSettings.slipTolerance);
+    setFieldValue('trasactionDeadline', swapInitState.swapSettings.trasactionDeadline);
+    setFieldValue('maxGasFee', swapInitState.swapSettings.maxGasFee);
   }, [setFieldValue]);
+
+  const isCustomSlippage = !slippageOptions.includes(values.slipTolerance);
 
   return (
     <div>
-      <div className="paragraph bold text-black">Transaction Settings</div>
-      <div className="mt-6">
-        <div className="paragraph text-primeBlack80">Slippage tolerance</div>
-        <div className="flex w-full mt-4">
-          <NumberInput
-            className="grow mr-4 rounded-xl bg-primaryGrey"
-            name="slipTolerance"
+      <div className="paragraph bold text-black mobile:hidden">Transaction Settings</div>
+      <div className="mt-6 mobile:mt-0">
+        <div className="paragraph text-primeBlack80 mb-4">Slippage Tolerance</div>
+        <div className="flex gap-2">
+          {slippageOptions.map((s, i) => {
+            return (
+              <Button
+                key={`st-${i}`}
+                className="flex-1 h-9 rounded-md"
+                variant={values.slipTolerance === s ? 'selected' : 'notSelected'}
+                onClick={() => setFieldValue('slipTolerance', s)}>
+                {s}%
+              </Button>
+            );
+          })}
+        </div>
+        <div
+          className={classNames(
+            'flex items-center relative border-[2px] border-grey-300 rounded-md h-11 mt-2 rounded-xl',
+            { '!border-primePurple-700': isCustomSlippage }
+          )}>
+          <PositiveFloatNumInput
+            inputAmount={!isCustomSlippage ? 0 : values.slipTolerance}
             min={0}
-            max={100}
-            placeholder="0.00%"
-            step="0.01"
-            stringMode
-            controls={false}
-            parser={(value: string | undefined) =>
-              Number(
-                parseFloat(typeof value !== 'undefined' ? value.replace('%', '') : '').toFixed(2)
-              )
-            }
-            formatter={(value) => (typeof value !== 'undefined' && value > 0 ? `${value}%` : '')}
-            value={values.slipTolerance}
-            onChange={(val) => setFieldValue('slipTolerance', val)}
+            max={10}
+            isConfine={true}
+            placeholder="Custom"
+            className={classNames(
+              'rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 largeTextBold px-4',
+              { '!text-primePurple-700': isCustomSlippage }
+            )}
+            onAmountChange={(v) => setFieldValue('slipTolerance', v)}
           />
-          <Button
-            className="py-[6px] font-bold !text-grey-900"
-            variant="outlined"
-            onClick={handleAuto}>
-            Auto
-          </Button>
+          <div
+            className={classNames('mx-4 text-grey-500 largeTextBold', {
+              '!text-primePurple-700': isCustomSlippage
+            })}>
+            %
+          </div>
         </div>
       </div>
       <div className="mt-6">
-        <div className="paragraph text-primeBlack80">Transaction deadline</div>
-        <div className="flex w-full mt-4 h-[39px] items-center">
-          <NumberInput
-            className="w-[88px] h-full mr-4 rounded-xl bg-primaryGrey"
-            name="trasactionDeadline"
-            min={0}
-            max={4320}
+        <div className="paragraph text-primeBlack80 mb-4">Transaction Deadline</div>
+        <div className="flex w-full h-11 items-center gap-x-2">
+          <PositiveFloatNumInput
+            className="h-full grow rounded-xl bg-primaryGrey largeTextBold px-4"
+            inputAmount={values.trasactionDeadline}
+            isConfine={true}
             placeholder="0"
-            step="1"
-            stringMode
-            controls={false}
-            status={touched.trasactionDeadline && Boolean(errors.trasactionDeadline) ? 'error' : ''}
-            value={values.trasactionDeadline}
-            onChange={(val) => setFieldValue('trasactionDeadline', val)}
+            min={0}
+            max={600}
+            onAmountChange={(v) => setFieldValue('trasactionDeadline', v)}
           />
-          <div className="paragraph">minutes</div>
+          <div className="paragraph">Seconds</div>
         </div>
       </div>
-      <div className="mt-6 flex gap-6">
+      <div className="mt-6">
+        <div className="paragraph text-primeBlack80 mb-4">Max Gas Fee</div>
+        <div className="flex w-full h-11 items-center gap-x-2">
+          <PositiveFloatNumInput
+            className="h-full grow rounded-xl bg-primaryGrey largeTextBold px-4"
+            inputAmount={values.maxGasFee}
+            isConfine={true}
+            placeholder="0"
+            min={0}
+            max={1000}
+            onAmountChange={(v) => setFieldValue('maxGasFee', v)}
+          />
+          <div className="paragraph">Gas Units</div>
+        </div>
+      </div>
+      <div className="mt-6 flex gap-6 h-[43px]">
         <Button
-          className="grow border-[3px] border-grey-900 font-bold !text-grey-900"
+          className="grow border-[3px] border-grey-900 font-bold h-full"
           variant="outlined"
           onClick={onResetSwapSetting}>
           Reset
         </Button>
-        <Button className="grow font-bold" variant="gradient" onClick={onConfirm}>
+        <Button className="grow font-bold !h-full" variant="gradient" onClick={onConfirm}>
           Confirm
         </Button>
       </div>

@@ -40,7 +40,7 @@ const Option: React.FC<TOptionProps> = ({ onClick, label, icon }) => {
   );
 };
 
-const WalletSelector: React.FC = () => {
+const WalletSelector = ({ onConnected }: { onConnected: () => any }) => {
   const { wallets, connect } = useWallet();
 
   const renderButtonGroup = useMemo(() => {
@@ -51,15 +51,18 @@ const WalletSelector: React.FC = () => {
           key={option.name}
           label={option.name}
           icon={option.icon}
-          onClick={() => connect(option.name)}
+          onClick={async () => {
+            await connect(option.name);
+            onConnected();
+          }}
         />
       );
     });
-  }, [wallets, connect]);
+  }, [wallets, connect, onConnected]);
 
   return (
     <div className="p-6 flex flex-col gap-6">
-      <h6 className="font-bold text-black">Connect your wallet</h6>
+      <h6 className="font-bold text-black mobile:hidden">Connect your wallet</h6>
       <div className="flex flex-wrap gap-2">{renderButtonGroup}</div>
     </div>
   );
