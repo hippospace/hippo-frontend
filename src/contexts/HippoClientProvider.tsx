@@ -11,13 +11,14 @@ import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator
 import { Coin_registry } from '@manahippo/hippo-sdk/dist/generated/coin_registry';
 import useAptosWallet from 'hooks/useAptosWallet';
 // import { aptosClient } from 'config/aptosClient';
-import { message, notification } from 'components/Antd';
+import { message } from 'components/Antd';
 import { TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { MaybeHexString } from 'aptos';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { useNotification } from 'hooks/useNotification';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -57,30 +58,12 @@ interface TProviderProps {
   children: ReactNode;
 }
 
-const openNotification = (txhash: MaybeHexString) => {
-  notification.open({
-    message: 'Transaction Successful',
-    description: (
-      <p>
-        You can verify the transaction by visiting the{' '}
-        <a
-          href={`https://explorer.devnet.aptos.dev/txn/${txhash}`}
-          target="_blank"
-          rel="noreferrer"
-          className="underline">
-          Aptos Transaction Explorer
-        </a>
-      </p>
-    ),
-    placement: 'bottomLeft'
-  });
-};
-
 const HippoClientContext = createContext<HippoClientContextType>({} as HippoClientContextType);
 
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { activeWallet } = useAptosWallet();
   const { signAndSubmitTransaction } = useWallet();
+  const { openNotification } = useNotification();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
   const [hippoSwap, setHippoSwapClient] = useState<HippoSwapClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
@@ -89,6 +72,25 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [tokenStores, setTokenStores] = useState<Record<string, aptos_framework.Coin.CoinStore>>();
   const [tokenInfos, setTokenInfos] = useState<Record<string, Coin_registry.TokenInfo>>();
   const dispatch = useDispatch();
+
+  const getNotificationMsg = useCallback(
+    (txhash: MaybeHexString) => {
+      const description = (
+        <p>
+          You can verify the transaction by visiting the{' '}
+          <a
+            href={`https://explorer.devnet.aptos.dev/txn/${txhash}`}
+            target="_blank"
+            rel="noreferrer"
+            className="underline">
+            Aptos Transaction Explorer
+          </a>
+        </p>
+      );
+      return openNotification(description);
+    },
+    [openNotification]
+  );
 
   const requestFaucet = useCallback(
     async (symbol: string) => {
@@ -101,7 +103,8 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           if (payload) {
             const result = await signAndSubmitTransaction(payload);
             if (result) {
-              openNotification(result.hash);
+              message.success('Faucet Success');
+              getNotificationMsg(result.hash);
               await hippoWallet?.refreshStores();
               setRefresh(true);
               success = true;
@@ -174,7 +177,8 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const payload = routeAndQuote.route.makePaylod(input, minOut);
         const result = await signAndSubmitTransaction(payload);
         if (result) {
-          openNotification(result.hash);
+          message.success('Transaction Success');
+          getNotificationMsg(result.hash);
           setRefresh(true);
           success = true;
         }
@@ -213,7 +217,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const result = await signAndSubmitTransaction(payload);
         if (result) {
           message.success('Transaction Success');
-          openNotification(result.hash);
+          getNotificationMsg(result.hash);
           setRefresh(true);
           callback();
         }
@@ -248,7 +252,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const result = await signAndSubmitTransaction(payload);
         if (result) {
           message.success('Transaction Success');
-          openNotification(result.hash);
+          getNotificationMsg(result.hash);
           setRefresh(true);
           success = true;
         }
@@ -291,7 +295,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const result = await signAndSubmitTransaction(payload);
         if (result) {
           message.success('Transaction Success');
-          openNotification(result.hash);
+          getNotificationMsg(result.hash);
           setRefresh(true);
           success = true;
         }
