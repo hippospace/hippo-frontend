@@ -1,22 +1,54 @@
 .button {
   @apply cursor-pointer py-3 px-5 rounded-lg flex items-center justify-center text-center font-medium transition-transform;
 
+  &.large {
+    height: 58px;
+    @apply h6;
+  }
+  &.medium {
+    height: 54px;
+    @apply subTitleBold;
+  }
+  &.small {
+    height: 43px;
+    @apply largeTextBold;
+  }
+
   &:active {
-    transform: scale(1.05);
+    transform: scale(1.02);
+  }
+
+  &.disabled {
+    @apply pointer-events-none border-none cursor-not-allowed opacity-40;
+  }
+
+  &.loading {
+    @apply flex items-center pointer-events-none cursor-not-allowed;
   }
 
   &.gradient {
-    @apply bg-btn-gradient rounded-full h-[58px] text-white h6;
+    @apply bg-btn-gradient rounded-full text-white;
     &:hover {
-      @apply brightness-90;
+      background: linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%);
+    }
+    &:active {
+      background: linear-gradient(268.82deg, #B889DF -26.18%, #9688E1 3.15%, #6979D6 83.6%);
+    }
+    &:disabled {
+      background: linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%);
     }
   }
 
   &.outlined {
-    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent rounded-full h-11 largeTextBold;
-
+    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent rounded-full;
     &:hover {
-      @apply bg-primePurple-100;
+      @apply bg-primePurple-700 text-primePurple-100;
+    }
+    &:active {
+      @apply bg-primePurple-900 text-primePurple-100;
+    }
+    &:disabled {
+      @apply opacity-40;
     }
   }
 
@@ -28,27 +60,5 @@
     &.disabled {
       @apply opacity-50;
     }
-  }
-
-  &.notSelected, &.selected {
-    @apply rounded-xl h-11 largeTextBold;
-    &:active {
-      @apply transform-none;
-    }
-  }
-
-  &.notSelected {
-    @apply border-[2px] border-transparent bg-primaryGrey text-grey-700;
-  }
-  &.selected {
-    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent;
-  }
-
-  &.disabled {
-    @apply pointer-events-none border-none cursor-not-allowed opacity-50;
-  }
-
-  &.loading {
-    @apply flex items-center pointer-events-none cursor-not-allowed;
   }
 }

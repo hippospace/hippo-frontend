@@ -40,7 +40,7 @@ const TokenCard = ({ tokenInfo }: { tokenInfo: TokenInfo }) => {
         </div>
       </div>
       <Button
-        variant="outlined"
+        variant="secondary"
         isLoading={loading === symbol}
         className="font-bold w-full"
         onClick={() => onRequestFaucet(symbol)}>
@@ -58,7 +58,7 @@ const Faucet: React.FC = () => {
     if (!activeWallet) {
       return (
         <div className="flex items-center justify-center h-[calc(100vh_-_416px)]">
-          <Button className="shadow-main1" variant="gradient" onClick={openModal}>
+          <Button className="shadow-main1 w-60" variant="gradient" onClick={openModal}>
             Connect to Wallet
           </Button>
         </div>

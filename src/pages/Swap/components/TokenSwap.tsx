@@ -286,7 +286,7 @@ const TokenSwap = () => {
       )}
       <Button
         isLoading={isSubmitting}
-        className="paragraph bold mt-8"
+        className="mt-8"
         variant="gradient"
         disabled={!isSwapEnabled}
         onClick={!activeWallet ? openModal : submitForm}>

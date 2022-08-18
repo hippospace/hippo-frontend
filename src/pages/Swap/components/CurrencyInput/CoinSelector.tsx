@@ -59,7 +59,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   // }, [tokenList, filter]);
 
   const getFilteredTokenListWithBalance = useCallback(() => {
-    let currentTokenList = tokenList;
+    let currentTokenList = tokenList.filter((t) => t.symbol.str() !== 'APT');
     if (filter) {
       currentTokenList = currentTokenList.filter((token) => {
         const keysForFilter = [token.name.str(), token.symbol.str()].join(',').toLowerCase();

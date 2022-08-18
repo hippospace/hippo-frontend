@@ -116,7 +116,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
       )}
       <Drawer
         title={<div className="paragraph bold text-black">Select a Token</div>}
-        height={'100vh'}
+        height={'80vh'}
         placement={'bottom'}
         onClose={() => setIsDrawerVisible(false)}
         visible={isDrawerVisible}>

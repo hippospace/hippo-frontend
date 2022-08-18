@@ -49,18 +49,6 @@ module.exports = {
       primeBlack80: 'rgba(45, 45, 45, 0.8)',
       input: '#F8F8F8',
       transparent: 'transparent',
-      grey: {
-        100: '#F8F8F8',
-        300: '#D5D5D5',
-        500: '#959595',
-        700: '#575757',
-        900: '#2D2D2D'
-      },
-      primePurple: {
-        100: '#F1EFFE',
-        300: '#B3A6FE',
-        900: '#414082'
-      },
       primaryGrey: 'rgba(248, 248, 248, 0.8)'
     }),
     boxShadow: {

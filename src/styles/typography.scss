@@ -80,4 +80,8 @@
   .subTitle-semiBold {
     @apply text-[18px] leading-[22px] font-semibold;
   }
+
+  .subTitleBold {
+    @apply text-[18px] leading-[22px] font-bold;
+  }
 }

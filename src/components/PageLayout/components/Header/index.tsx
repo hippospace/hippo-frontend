@@ -18,7 +18,7 @@ const { Header } = Antd.Layout;
 const SiteBadge = () => {
   return (
     <div className="bg-[#fe6e65] w-[300px] text-white text-center font-bold text-[22px] h-[44px] leading-[44px] rotate-45 translate-x-[140px] tablet:translate-x-[113px] mobile:scale-[0.6] mobile:pl-[72px]">
-      <img src={GithubIcon} className="w-6 inline-block" /> Coming soon
+      <img src={GithubIcon} className="w-6 inline-block" /> Devnet beta
     </div>
   );
 };
@@ -67,13 +67,6 @@ const PageHeader: React.FC = () => {
   const renderNavItems = () => {
     return routes.map(({ name, path, hidden }) => {
       if (path === '*' || hidden) return null;
-      // if (path && isDisabledFeature(path))
-      //   return (
-      //     <Antd.Menu.Item key={name} className={styles.disabledItem}>
-      //       {name}
-      //     </Antd.Menu.Item>
-      //   );
-
       return (
         <Antd.Menu.Item key={name}>
           <Link to={path || '/'} className="header5 bold">
@@ -89,7 +82,7 @@ const PageHeader: React.FC = () => {
   return (
     <Header
       className={classNames(
-        'fixed z-20 w-full px-16 py-8 bg-transparent h-[136px] tablet:px-8 mobile:px-4 mobile:py-2 mobile:h-[56px]',
+        'z-20 w-full px-16 py-8 bg-transparent h-[140px] tablet:px-8 mobile:px-4 mobile:py-2 mobile:h-[56px]',
         {
           [styles.blur]: scrollY > 64
         }

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import HomeBlogPoster1 from 'resources/img/home/home-blog-poster-1.png';
 import HomeBlogPoster2 from 'resources/img/home/home-blog-poster-2.png';
 import Button from 'components/Button';
@@ -7,6 +7,7 @@ import DevsIllu from 'resources/img/illu-devs-2x.png';
 import Card from 'components/Card';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
+// import { useScrollYPosition } from 'react-use-scroll-position';
 
 interface HomeBlogProps {
   posterSrc: string;
@@ -23,7 +24,7 @@ const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
       </div>
       {/* line-clamp will automatically truncate the text as boxes shrink but 'truncate' won't */}
       <div className="h4 mb-2 mt-4 w-full text-center line-clamp-1 mobile:title">{title}</div>
-      <div className="subTitle-semiBold px-2 text-grey-700 opacity-50 w-full line-clamp-4 mb-9 mobile:paragraph">
+      <div className="subTitle-semiBold h-[88px] px-2 text-grey-700 opacity-50 w-full line-clamp-4 mb-9 mobile:paragraph">
         {summary}
       </div>
       <div className="w-full">
@@ -75,8 +76,57 @@ const Home = () => {
       url: ''
     }
   ];
+
+  const isCardAnimationFeatureOn = true;
+  // const scrollY = useScrollYPosition();
+
+  const card1Ref = useRef<HTMLDivElement>(null);
+  const card2Ref = useRef<HTMLDivElement>(null);
+
+  const startPercent = 100;
+  const endPercent = 5;
+  const [card1TranslatePercent, setCard1TranslatePercent] = useState(startPercent);
+  const [card2TranslatePercent, setCard2TranslatePercent] = useState(startPercent);
+
+  const scrollHandler = useCallback(() => {
+    setCard1TranslatePercent(
+      (() => {
+        let startY =
+          window.innerHeight -
+          (card1Ref.current?.getBoundingClientRect().y || 0) -
+          (card1Ref.current?.offsetHeight || 0) * 0.2;
+
+        // if (scrollY < 64) startY = 0;
+
+        if (!isCardAnimationFeatureOn) return endPercent;
+        if (startY <= 0) return startPercent;
+        else return endPercent;
+      })()
+    );
+    setCard2TranslatePercent(
+      (() => {
+        const startY =
+          window.innerHeight -
+          (card2Ref.current?.getBoundingClientRect().y || 0) -
+          (card2Ref.current?.offsetHeight || 0) * 0.2;
+
+        if (!isCardAnimationFeatureOn) return -1 * endPercent;
+        if (startY <= 0) return -1 * startPercent;
+        else return -1 * endPercent;
+      })()
+    );
+  }, [isCardAnimationFeatureOn]);
+
+  useEffect(() => {
+    scrollHandler();
+    window.addEventListener('scroll', scrollHandler);
+    return () => {
+      window.removeEventListener('scroll', scrollHandler);
+    };
+  }, [scrollHandler]);
+
   return (
-    <div className="hippo-home text-center mx-auto">
+    <div className="hippo-home text-center mx-auto pt-[38px]">
       <div className="flex flex-col items-center space-y-12">
         <div className="text-[96px] leading-[115px] font-bold max-w-[930px] mobile:h3">
           <span className="text-grey-900">The Aggregation Mechanism on</span>{' '}
@@ -94,7 +144,10 @@ const Home = () => {
         </div>
       </div>
       <div className="space-y-16 mt-[162px] mb-[72px]">
-        <div className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tl-xxl rounded-bl-xxl w-full px-[110px] translate-x-[5%] space-x-12 tablet:pl-4 tablet:pr-8 tablet:space-x-0">
+        <div
+          ref={card1Ref}
+          className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tl-xxl rounded-bl-xxl w-full px-[110px] translate-x-[5%] space-x-12 tablet:pl-4 tablet:pr-8 tablet:space-x-0 transition-transform duration-300"
+          style={{ transform: `translateX(${card1TranslatePercent}%)` }}>
           <div className="space-y-12 text-left tablet:mt-16">
             <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary mobile:h4">
               Trade Aggregation
@@ -116,7 +169,10 @@ const Home = () => {
             />
           </div>
         </div>
-        <div className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tr-xxl rounded-br-xxl w-full px-[110px] -translate-x-[5%] space-x-12 tablet:pr-4 tablet:pl-8 tablet:space-x-0">
+        <div
+          ref={card2Ref}
+          className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tr-xxl rounded-br-xxl w-full px-[110px] -translate-x-[5%] space-x-12 tablet:pr-4 tablet:pl-8 tablet:space-x-0 transition-transform duration-300"
+          style={{ transform: `translateX(${card2TranslatePercent}%)` }}>
           <div className="my-4 h-full tablet:mt-8 tablet:w-full tablet:h-auto">
             <img
               src={DevsIllu}

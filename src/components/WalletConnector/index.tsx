@@ -44,7 +44,7 @@ const WalletConnector: React.FC = () => {
     <>
       <Popover
         className="mobile:hidden"
-        overlayClassName={styles.popover}
+        overlayClassName={classNames(styles.popover)}
         trigger="click"
         visible={open}
         onVisibleChange={(visible) => (visible ? openModal() : closeModal())}
@@ -53,7 +53,8 @@ const WalletConnector: React.FC = () => {
         placement="bottomLeft">
         <div className="flex gap-4 items-center">
           <Button
-            variant="outlined"
+            variant="secondary"
+            size="small"
             className="min-w-[156px] h-10 font-bold"
             // onClick={!address ? toggleConnectModal : undefined}
           >

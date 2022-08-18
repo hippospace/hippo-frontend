@@ -1,7 +1,7 @@
 import { useFormikContext } from 'formik';
 import { ISwapSettings } from 'pages/Swap/types';
 import Button from 'components/Button';
-import { useCallback } from 'react';
+import { ReactNode, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
@@ -11,6 +11,39 @@ import { initState as swapInitState } from 'modules/swap/reducer';
 interface TProps {
   onClose: () => void;
 }
+
+const SubTitle = ({ children }: { children: string }) => {
+  return <div className="small font-extrabold text-grey-700 mb-4">{children}</div>;
+};
+
+const Selectable = ({
+  isSelected,
+  className,
+  children,
+  onClick = () => {}
+}: {
+  isSelected: boolean;
+  className: string;
+  children: ReactNode;
+  onClick?: () => void;
+}) => {
+  return (
+    <div
+      className={classNames(
+        'rounded-full h-[40px] h6 border-[2px] border-transparent bg-grey-100 text-grey-700 cursor-pointer',
+        {
+          'bg-[linear-gradient(90deg,#D483FF_86.1%,#9747FF_95.98%,#6E6CCA_105.2%)] bg-clip-border bg-origin-border bg-cover':
+            isSelected
+        },
+        className
+      )}
+      onClick={onClick}>
+      <div className="h-full w-full rounded-full bg-grey-100 flex items-center justify-center">
+        {children}
+      </div>
+    </div>
+  );
+};
 
 const SwapSetting: React.FC<TProps> = ({ onClose }) => {
   const slippageOptions = [0.5, 1, 2];
@@ -33,52 +66,49 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
 
   return (
     <div>
-      <div className="paragraph bold text-black mobile:hidden">Transaction Settings</div>
+      <div className="h6 text-grey-900 text-center mb-10 mobile:hidden">Transaction Settings</div>
       <div className="mt-6 mobile:mt-0">
-        <div className="paragraph text-primeBlack80 mb-4">Slippage Tolerance</div>
+        <SubTitle>Slippage Tolerance</SubTitle>
         <div className="flex gap-2">
           {slippageOptions.map((s, i) => {
             return (
-              <Button
+              <Selectable
                 key={`st-${i}`}
-                className="flex-1 h-9 rounded-md"
-                variant={values.slipTolerance === s ? 'selected' : 'notSelected'}
+                className="flex-1"
+                isSelected={values.slipTolerance === s}
                 onClick={() => setFieldValue('slipTolerance', s)}>
                 {s}%
-              </Button>
+              </Selectable>
             );
           })}
-        </div>
-        <div
-          className={classNames(
-            'flex items-center relative border-[2px] border-grey-300 rounded-md h-11 mt-2 rounded-xl',
-            { '!border-primePurple-700': isCustomSlippage }
-          )}>
-          <PositiveFloatNumInput
-            inputAmount={!isCustomSlippage ? 0 : values.slipTolerance}
-            min={0}
-            max={10}
-            isConfine={true}
-            placeholder="Custom"
-            className={classNames(
-              'rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 largeTextBold px-4',
-              { '!text-primePurple-700': isCustomSlippage }
-            )}
-            onAmountChange={(v) => setFieldValue('slipTolerance', v)}
-          />
-          <div
-            className={classNames('mx-4 text-grey-500 largeTextBold', {
-              '!text-primePurple-700': isCustomSlippage
-            })}>
-            %
-          </div>
+          <Selectable
+            isSelected={isCustomSlippage}
+            className={classNames('flex items-center relative w-[142px]')}>
+            <PositiveFloatNumInput
+              inputAmount={!isCustomSlippage ? 0 : values.slipTolerance}
+              min={0}
+              max={10}
+              isConfine={true}
+              placeholder="Custom"
+              className={classNames(
+                'rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 largeTextBold px-4'
+              )}
+              onAmountChange={(v) => setFieldValue('slipTolerance', v)}
+            />
+            <div
+              className={classNames('mx-4 text-grey-500 largeTextBold', {
+                '!text-grey-900': isCustomSlippage
+              })}>
+              %
+            </div>
+          </Selectable>
         </div>
       </div>
       <div className="mt-6">
-        <div className="paragraph text-primeBlack80 mb-4">Transaction Deadline</div>
-        <div className="flex w-full h-11 items-center gap-x-2">
+        <SubTitle>Transaction Deadline</SubTitle>
+        <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="h-full grow rounded-xl bg-primaryGrey largeTextBold px-4"
+            className="grow rounded-full bg-grey-100 px-4 w-[180px] h-[40px] h6"
             inputAmount={values.trasactionDeadline}
             isConfine={true}
             placeholder="0"
@@ -86,14 +116,14 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
             max={600}
             onAmountChange={(v) => setFieldValue('trasactionDeadline', v)}
           />
-          <div className="paragraph">Seconds</div>
+          <div className="h6">Seconds</div>
         </div>
       </div>
       <div className="mt-6">
-        <div className="paragraph text-primeBlack80 mb-4">Max Gas Fee</div>
-        <div className="flex w-full h-11 items-center gap-x-2">
+        <SubTitle>Max Gas Fee</SubTitle>
+        <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="h-full grow rounded-xl bg-primaryGrey largeTextBold px-4"
+            className="grow rounded-full bg-grey-100 px-4 w-[180px] h-[40px] h6"
             inputAmount={values.maxGasFee}
             isConfine={true}
             placeholder="0"
@@ -101,17 +131,14 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
             max={1000}
             onAmountChange={(v) => setFieldValue('maxGasFee', v)}
           />
-          <div className="paragraph">Gas Units</div>
+          <div className="h6">Gas Units</div>
         </div>
       </div>
-      <div className="mt-6 flex gap-6 h-[43px]">
-        <Button
-          className="grow border-[3px] border-grey-900 font-bold h-full"
-          variant="outlined"
-          onClick={onResetSwapSetting}>
+      <div className="mt-6 flex gap-6">
+        <Button className="flex-1" variant="secondary" size="small" onClick={onResetSwapSetting}>
           Reset
         </Button>
-        <Button className="grow font-bold !h-full" variant="gradient" onClick={onConfirm}>
+        <Button className="flex-1" variant="primary" size="small" onClick={onConfirm}>
           Confirm
         </Button>
       </div>

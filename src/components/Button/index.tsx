@@ -7,32 +7,35 @@ type TProps = {
   children?: any;
   disabled?: boolean;
   isLoading?: boolean;
-  variant?: 'outlined' | 'icon' | 'gradient' | 'selected' | 'notSelected';
+  variant?: 'primary' | 'secondary' | 'outlined' | 'icon' | 'gradient';
+  size?: 'large' | 'medium' | 'small';
   type?: 'button' | 'submit' | 'reset' | undefined;
   onClick?: (e: React.MouseEvent<HTMLElement>) => any;
 };
 
 const Button: React.FC<TProps> = (props) => {
-  const {
+  let {
     onClick = () => {},
     isLoading,
     className,
     disabled,
     children,
     variant = 'gradient',
+    size = 'large',
     ...rest
   } = props;
 
+  if (variant === 'primary') {
+    variant = 'gradient';
+  } else if (variant === 'secondary') {
+    variant = 'outlined';
+  }
+
   return (
     <button
-      className={cx(styles.button, className, {
+      className={cx(styles.button, className, styles[size], styles[variant], {
         [styles.disabled]: disabled,
-        [styles.loading]: isLoading,
-        [styles.gradient]: variant === 'gradient',
-        [styles.outlined]: variant === 'outlined',
-        [styles.icon]: variant === 'icon',
-        [styles.selected]: variant === 'selected',
-        [styles.notSelected]: variant === 'notSelected'
+        [styles.loading]: isLoading
       })}
       onClick={onClick}
       disabled={disabled}

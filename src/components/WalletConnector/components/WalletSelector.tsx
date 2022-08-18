@@ -33,9 +33,10 @@ const Option: React.FC<TOptionProps> = ({ onClick, label, icon }) => {
     <Button
       onClick={onClick ? onClick : undefined}
       className="flex gap-2 grow justify-start mt-2 rounded-[0px] w-full"
-      variant="outlined">
+      size="small"
+      variant="secondary">
       {getWalletIcon()}
-      <div className="font-bold text-black">{label}</div>
+      <div className="font-bold text-left">{label}</div>
     </Button>
   );
 };
@@ -63,7 +64,7 @@ const WalletSelector = ({ onConnected }: { onConnected: () => any }) => {
   return (
     <div className="p-6 flex flex-col gap-6">
       <h6 className="font-bold text-black mobile:hidden">Connect your wallet</h6>
-      <div className="flex flex-wrap gap-2">{renderButtonGroup}</div>
+      <div className="flex flex-col gap-2">{renderButtonGroup}</div>
     </div>
   );
 };
