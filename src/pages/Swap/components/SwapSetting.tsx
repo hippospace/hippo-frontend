@@ -69,7 +69,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
       <div className="h6 text-grey-900 text-center mb-10 mobile:hidden">Transaction Settings</div>
       <div className="mt-6 mobile:mt-0">
         <SubTitle>Slippage Tolerance</SubTitle>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {slippageOptions.map((s, i) => {
             return (
               <Selectable
@@ -83,7 +83,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
           })}
           <Selectable
             isSelected={isCustomSlippage}
-            className={classNames('flex items-center relative w-[142px]')}>
+            className={classNames('flex items-center relative w-[142px] mobile:w-full')}>
             <PositiveFloatNumInput
               inputAmount={!isCustomSlippage ? 0 : values.slipTolerance}
               min={0}

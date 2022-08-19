@@ -27,3 +27,5 @@ export { ReactComponent as ExchangeIcon } from './exchange.svg';
 export { ReactComponent as ArrowRight } from './arrowRight.svg';
 export { ReactComponent as MoreArrowDown } from './moreArrowDown.svg';
 export { ReactComponent as WalletIcon } from './wallet.svg';
+export { ReactComponent as WalletNotConnectedIcon } from './walletNotConnected.svg';
+export { ReactComponent as WalletConnectedIcon } from './walletConnected.svg';

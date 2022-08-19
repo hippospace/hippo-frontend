@@ -38,7 +38,7 @@ const Swap: React.FC = () => {
 
   const renderCardHeader = useMemo(
     () => (
-      <div className="absolute w-14 h-14 rounded-xxl shadow-main1 top-0 -right-16 flex justify-center align-center bg-secondary mobile:-top-16 mobile:right-0">
+      <div className="absolute w-14 h-14 rounded-xxl shadow-main1 top-0 -right-16 flex justify-center align-center bg-secondary mobile:-top-10 mobile:right-0 mobile:h-8 mobile:w-8">
         <Popover
           className="mobile:hidden"
           overlayClassName={styles.popover}

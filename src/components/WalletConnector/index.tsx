@@ -9,7 +9,7 @@ import WalletMenu from './components/WalletMenu';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useCallback, useState } from 'react';
 import WebWallet from 'components/WebWallet';
-import { WalletIcon } from 'resources/icons';
+import { WalletConnectedIcon, WalletNotConnectedIcon } from 'resources/icons';
 import classNames from 'classnames';
 // import { useCallback } from 'react';
 
@@ -62,13 +62,12 @@ const WalletConnector: React.FC = () => {
           </Button>
         </div>
       </Popover>
-      <div className="hidden mobile:block">
-        <WalletIcon
-          className={classNames('font-icon text-[28px] !align-[-0.28em]', {
-            'text-primePurple-700': activeWallet
-          })}
-          onClick={() => setIsMobileDrawerVisible(true)}
-        />
+      <div className="hidden mobile:block" onClick={() => setIsMobileDrawerVisible(true)}>
+        {activeWallet ? (
+          <WalletConnectedIcon className="w-6" />
+        ) : (
+          <WalletNotConnectedIcon className="w-6" />
+        )}
       </div>
       <Drawer
         closable={!activeWallet}

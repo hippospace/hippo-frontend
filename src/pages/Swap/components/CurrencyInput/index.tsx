@@ -4,7 +4,7 @@ import { CaretIcon } from 'resources/icons';
 import cx from 'classnames';
 import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import CoinIcon from 'components/CoinIcon';
 import { Drawer, Popover } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
@@ -13,10 +13,50 @@ import { getTokenList } from 'modules/swap/reducer';
 import classNames from 'classnames';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import useDebouncedCallback from 'hooks/useDebouncedCallback';
+import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
 }
+
+const CoinSelectButton = ({
+  className = '',
+  token,
+  isDisabled = false,
+  onClick = () => {}
+}: {
+  className?: string;
+  token: TokenInfo | undefined;
+  isDisabled?: Boolean;
+  onClick?: () => void;
+}) => {
+  return (
+    <div
+      className={classNames(
+        'flex items-center gap-2 font-bold cursor-pointer',
+        {
+          'cursor-not-allowed pointer-events-none': isDisabled
+        },
+        className
+      )}
+      onClick={onClick}>
+      {token?.symbol ? (
+        <>
+          <div className="flex gap-2 uppercase items-center">
+            <CoinIcon logoSrc={token.logo_url.str()} />
+            {token.symbol.str()}
+          </div>
+          <CaretIcon className="font-icon text-grey-300" />
+        </>
+      ) : (
+        <>
+          <div className="small">--</div>
+          <CaretIcon className="font-icon text-grey-300" />
+        </>
+      )}
+    </div>
+  );
+};
 
 const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
   const [isVisibile, setIsVisible] = useState(false);
@@ -28,25 +68,6 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
   const [uiBalance] = useTokenBalane(selectedSymbol);
   const tokenList = useSelector(getTokenList);
   const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
-
-  const coinSelectorButton = useMemo(() => {
-    return (
-      <div
-        className={classNames('flex items-center gap-2 font-bold cursor-pointer', {
-          'cursor-not-allowed': isCoinSelectorDisabled
-        })}>
-        {selectedCurrency?.token?.symbol ? (
-          <div className="flex gap-2 uppercase items-center">
-            <CoinIcon logoSrc={selectedCurrency.token.logo_url.str()} />
-            {selectedCurrency.token.symbol.str()}
-          </div>
-        ) : (
-          <div>Select Currency</div>
-        )}
-        <CaretIcon className="fill-black" />
-      </div>
-    );
-  }, [isCoinSelectorDisabled, selectedCurrency?.token?.symbol, selectedCurrency?.token?.logo_url]);
 
   // The debounce delay should be bigger than the average of key input intervals
   const onAmountChange = useDebouncedCallback(
@@ -69,7 +90,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
         styles.currencyInput,
         'bg-primaryGrey w-full py-4 px-6 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2'
       )}>
-      <div className="flex gap-1">
+      <div className="flex gap-1 items-center">
         <Popover
           className="mobile:hidden"
           overlayClassName={styles.popover}
@@ -79,18 +100,21 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
           content={
             <CoinSelector actionType={actionType} dismissiModal={() => setIsVisible(!isVisibile)} />
           }>
-          {coinSelectorButton}
+          <CoinSelectButton token={selectedCurrency?.token} isDisabled={isCoinSelectorDisabled} />
         </Popover>
-        <div className="hidden mobile:block" onClick={() => setIsDrawerVisible(true)}>
-          {coinSelectorButton}
-        </div>
+        <CoinSelectButton
+          className="hidden min-w-fit mobile:flex"
+          isDisabled={isCoinSelectorDisabled}
+          token={selectedCurrency?.token}
+          onClick={() => setIsDrawerVisible(true)}
+        />
         <PositiveFloatNumInput
           min={0}
           max={1e11}
           maxDecimals={values[actionType]?.token?.decimals.toJsNumber() || 9}
           isDisabled={actionType === 'currencyTo'}
           placeholder="0.00"
-          className="grow font-bold title bg-transparent text-right pr-0 pl-1"
+          className="grow h6 font-[900] bg-transparent text-right pr-0 pl-1"
           inputAmount={selectedCurrency?.amount || 0}
           onAmountChange={onAmountChange}
         />
