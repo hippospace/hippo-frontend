@@ -1,5 +1,5 @@
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
-import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
+import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 
 export interface ISwapSettings {
   slipTolerance: number;

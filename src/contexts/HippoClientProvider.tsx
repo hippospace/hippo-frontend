@@ -8,7 +8,6 @@ import {
   aptos_framework
 } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
-import { Coin_registry } from '@manahippo/hippo-sdk/dist/generated/coin_registry';
 import useAptosWallet from 'hooks/useAptosWallet';
 // import { aptosClient } from 'config/aptosClient';
 import { message } from 'components/Antd';
@@ -19,29 +18,31 @@ import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { useNotification } from 'hooks/useNotification';
+import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { TransactionPayload_EntryFunctionPayload } from 'aptos/dist/generated';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
   hippoAgg?: TradeAggregator;
   hippoSwap?: HippoSwapClient;
   tokenStores?: Record<string, aptos_framework.Coin.CoinStore>;
-  tokenInfos?: Record<string, Coin_registry.TokenInfo>;
+  tokenInfos?: Record<string, CoinInfo>;
   requestSwapByRoute: (routeAndQuote: RouteAndQuote, slipTolerance: number) => Promise<boolean>;
-  requestSwap: (
+  requestSwap?: (
     fromSymbol: string,
     toSymbol: string,
     uiAmtIn: number,
     uiAmtOutMin: number,
     callback: () => void
   ) => {};
-  requestDeposit: (
+  requestDeposit?: (
     lhsSymbol: string,
     rhsSymbol: string,
     poolType: PoolType,
     lhsUiAmt: number,
     rhsUiAmt: number
   ) => Promise<boolean>;
-  requestWithdraw: (
+  requestWithdraw?: (
     lhsSymbol: string,
     rhsSymbol: string,
     poolType: PoolType,
@@ -70,7 +71,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [refresh, setRefresh] = useState(false);
   const [transaction, setTransaction] = useState<TTransaction>();
   const [tokenStores, setTokenStores] = useState<Record<string, aptos_framework.Coin.CoinStore>>();
-  const [tokenInfos, setTokenInfos] = useState<Record<string, Coin_registry.TokenInfo>>();
+  const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
   const dispatch = useDispatch();
 
   const getNotificationMsg = useCallback(
@@ -97,18 +98,18 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       let success = false;
       try {
         if (!activeWallet) throw new Error('Please login first');
-        if (symbol !== 'APTOS') {
-          const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
-          const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol);
-          if (payload) {
-            const result = await signAndSubmitTransaction(payload);
-            if (result) {
-              message.success('Faucet Success');
-              getNotificationMsg(result.hash);
-              await hippoWallet?.refreshStores();
-              setRefresh(true);
-              success = true;
-            }
+        const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
+        const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, true);
+        if (payload) {
+          const result = await signAndSubmitTransaction(
+            payload as TransactionPayload_EntryFunctionPayload
+          );
+          if (result) {
+            message.success('Faucet Success');
+            getNotificationMsg(result.hash);
+            await hippoWallet?.refreshStores();
+            setRefresh(true);
+            success = true;
           }
         }
       } catch (error) {
@@ -121,7 +122,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         return success;
       }
     },
-    [activeWallet, hippoWallet, signAndSubmitTransaction]
+    [activeWallet, getNotificationMsg, hippoWallet, signAndSubmitTransaction]
   );
 
   const getHippoWalletClient = useCallback(async () => {
@@ -160,7 +161,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (hippoSwap) {
-      dispatch(swapAction.SET_TOKEN_LIST(hippoSwap.singleTokens));
+      dispatch(swapAction.SET_TOKEN_LIST(hippoSwap.singleCoins));
     }
   }, [dispatch, hippoSwap]);
 
@@ -174,8 +175,10 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (input <= 0) {
           throw new Error('Input amount needs to be greater than 0');
         }
-        const payload = routeAndQuote.route.makePaylod(input, minOut);
-        const result = await signAndSubmitTransaction(payload);
+        const payload = routeAndQuote.route.makePayload(input, minOut, true);
+        const result = await signAndSubmitTransaction(
+          payload as TransactionPayload_EntryFunctionPayload
+        );
         if (result) {
           message.success('Transaction Success');
           getNotificationMsg(result.hash);
@@ -192,45 +195,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         return success;
       }
     },
-    [activeWallet, signAndSubmitTransaction]
+    [activeWallet, getNotificationMsg, signAndSubmitTransaction]
   );
-
-  const requestSwap = useCallback(
-    async (
-      fromSymbol: string,
-      toSymbol: string,
-      uiAmtIn: number,
-      uiAmtOutMin: number,
-      callback: () => void
-    ) => {
-      try {
-        if (!activeWallet || !hippoSwap) throw new Error('Please login first');
-        if (uiAmtIn <= 0) {
-          throw new Error('Input amount needs to be greater than 0');
-        }
-        const bestQuote = await hippoSwap.getBestQuoteBySymbols(fromSymbol, toSymbol, uiAmtIn, 3);
-        if (!bestQuote) {
-          throw new Error(`No route exists from ${fromSymbol} to ${toSymbol}`);
-        }
-        const payload = await bestQuote.bestRoute.makeSwapPayload(uiAmtIn, uiAmtOutMin);
-        console.log('request swap payload', payload);
-        const result = await signAndSubmitTransaction(payload);
-        if (result) {
-          message.success('Transaction Success');
-          getNotificationMsg(result.hash);
-          setRefresh(true);
-          callback();
-        }
-      } catch (error) {
-        console.log('request swap error:', error);
-        if (error instanceof Error) {
-          message.error(error?.message);
-        }
-      }
-    },
-    [hippoSwap, activeWallet, signAndSubmitTransaction]
-  );
-
+  /*
   const requestDeposit = useCallback(
     async (
       lhsSymbol: string,
@@ -311,6 +278,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     },
     [hippoSwap, activeWallet, signAndSubmitTransaction]
   );
+  */
 
   return (
     <HippoClientContext.Provider
@@ -321,9 +289,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         tokenStores,
         tokenInfos,
         requestSwapByRoute,
-        requestSwap,
-        requestDeposit,
-        requestWithdraw,
         transaction,
         setTransaction,
         requestFaucet

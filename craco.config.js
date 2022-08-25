@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 module.exports = {
   webpack: {
     configure: (config) => {
@@ -11,8 +13,24 @@ module.exports = {
             moduleLoader.options.sourceMap = false;
         });
       });
+      config.resolve = {
+        ...config.resolve,
+        fallback: {
+          buffer: require.resolve('buffer')
+        }
+      };
+
+      // To disable webpack cache of node_modules when debug
+      // config.cache.buildDependencies.mydeps = ['./webpackBuildCache.lock'];
 
       return config;
-    }
+    },
+    plugins: {
+      add: [
+        new webpack.ProvidePlugin({
+          Buffer: ['buffer', 'Buffer'],
+        }),
+      ],
+    },
   }
 };

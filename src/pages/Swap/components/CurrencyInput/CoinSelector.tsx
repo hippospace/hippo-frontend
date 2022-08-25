@@ -9,7 +9,7 @@ import CoinRow from './CoinRow';
 
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
-import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
+import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';

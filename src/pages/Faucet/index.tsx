@@ -1,4 +1,3 @@
-import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
 import Card from 'components/Card';
 import Button from 'components/Button';
 import CoinIcon from 'components/CoinIcon';
@@ -6,6 +5,9 @@ import useAptosWallet from 'hooks/useAptosWallet';
 import useHippoClient from 'hooks/useHippoClient';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useCallback, useMemo, useState } from 'react';
+import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { getTokenList } from 'modules/swap/reducer';
+import { useSelector } from 'react-redux';
 
 const Balance = ({ symbol }: { symbol: string }) => {
   const [balance] = useTokenBalane(symbol);
@@ -16,7 +18,7 @@ const Balance = ({ symbol }: { symbol: string }) => {
   );
 };
 
-const TokenCard = ({ tokenInfo }: { tokenInfo: TokenInfo }) => {
+const TokenCard = ({ tokenInfo }: { tokenInfo: CoinInfo }) => {
   const [loading, setLoading] = useState('');
   const { requestFaucet } = useHippoClient();
   const symbol = tokenInfo.symbol.str();
@@ -52,7 +54,7 @@ const TokenCard = ({ tokenInfo }: { tokenInfo: TokenInfo }) => {
 
 const Faucet: React.FC = () => {
   const { activeWallet, openModal } = useAptosWallet();
-  const { tokenInfos } = useHippoClient();
+  const tokenList = useSelector(getTokenList).filter((t) => t.symbol.str() !== 'APT');
 
   const renderTokenList = useMemo(() => {
     if (!activeWallet) {
@@ -64,17 +66,12 @@ const Faucet: React.FC = () => {
         </div>
       );
     }
-    if (tokenInfos) {
-      return Object.keys(tokenInfos)
-        .filter((symbol) => {
-          return tokenInfos[symbol].token_type.moduleName().startsWith('mock_coin');
-        })
-        .map((symbol) => {
-          const tokenInfo = tokenInfos[symbol];
-          return <TokenCard key={`card-${symbol}`} tokenInfo={tokenInfo} />;
-        });
+    if (tokenList.length > 0) {
+      return tokenList.map((tokenInfo) => {
+        return <TokenCard key={`card-${tokenInfo.symbol.str()}`} tokenInfo={tokenInfo} />;
+      });
     }
-  }, [activeWallet, tokenInfos, openModal]);
+  }, [activeWallet, tokenList, openModal]);
 
   return (
     <div className="flex gap-6 justify-center flex-wrap max-w-[1500px] mx-auto">

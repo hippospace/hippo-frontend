@@ -1,9 +1,9 @@
-import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
+import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import Button from 'components/Button';
 import CoinIcon from 'components/CoinIcon';
 
 interface TProps {
-  coin: TokenInfo;
+  coin: CoinInfo;
   onClickToken: () => void;
 }
 

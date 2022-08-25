@@ -1,4 +1,4 @@
-import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
+import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import { createReducer } from '@reduxjs/toolkit';
 import { RootState } from 'modules/rootReducer';
 import { ISwapSettings } from 'pages/Swap/types';
@@ -8,7 +8,7 @@ interface SwapState {
   isFetching: boolean;
   isFetched: boolean;
   error: any;
-  tokenList: TokenInfo[];
+  tokenList: CoinInfo[];
   swapSettings: ISwapSettings;
 }
 

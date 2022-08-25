@@ -19,8 +19,8 @@ const Pool: React.FC = () => {
     let data = { pools: [] as IPool[] };
     if (hippoSwap?.cpPoolInfos) {
       for (const pool of hippoSwap.allPools()) {
-        const xTokenInfo = pool.xTokenInfo;
-        const yTokenInfo = pool.yTokenInfo;
+        const xTokenInfo = pool.xCoinInfo;
+        const yTokenInfo = pool.yCoinInfo;
         // FIXME: these methods of computing TVL only work for constant product pools whose one side is a USD stablecoin
         let totalTvlInUSD;
         if (pool instanceof HippoConstantProductPool) {
@@ -32,8 +32,8 @@ const Pool: React.FC = () => {
           // if one of them is USDC, USDT, DAI, just add them up
           const stables = ['USDC', 'USDT', 'DAI'];
           if (
-            stables.includes(pool.xTokenInfo.symbol.str()) ||
-            stables.includes(pool.yTokenInfo.symbol.str())
+            stables.includes(pool.xCoinInfo.symbol.str()) ||
+            stables.includes(pool.yCoinInfo.symbol.str())
           ) {
             totalTvlInUSD = pool.xUiBalance() + pool.yUiBalance();
           } else {

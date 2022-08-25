@@ -44,11 +44,11 @@ const WithdrawModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
           throw new Error(`Pool for ${lhsSymbol} and ${rhsSymbol} does not exist!`);
         }
         const pool = pools[0];
-        const lpSymbol = pool.lpTokenInfo.symbol.str();
+        const lpSymbol = pool.lpCoinInfo.symbol.str();
         if (lpSymbol in tokenStores) {
           const uiAmt =
             tokenStores[lpSymbol].coin.value.toJsNumber() /
-            Math.pow(10, pool.lpTokenInfo.decimals.toJsNumber());
+            Math.pow(10, pool.lpCoinInfo.decimals.toJsNumber());
           setTotalUserLpUiAmt(uiAmt);
         } else {
           setTotalUserLpUiAmt(0);
@@ -72,7 +72,7 @@ const WithdrawModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
       throw new Error(`Direct Pool for ${lhsSymbol} - ${rhsSymbol} does not exist`);
     }
     const pool = pools[0];
-    if (tokenStores && tokenStores[pool.lpTokenInfo.symbol.str()]) {
+    if (tokenStores && tokenStores[pool.lpCoinInfo.symbol.str()] && requestWithdraw) {
       const result = await requestWithdraw(lhsSymbol, rhsSymbol, poolType, values.amount, 0, 0);
       if (result) {
         onDismissModal();
@@ -113,13 +113,13 @@ const WithdrawModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
     }
     const pool = pools[0];
     const lpSupplyRawAmt = await hippoSwap.getTokenTotalSupplyBySymbol(
-      pool.lpTokenInfo.symbol.str()
+      pool.lpCoinInfo.symbol.str()
     );
     if (!lpSupplyRawAmt) {
       throw new Error('Unable to obtain LP token total supply');
     }
     const lpSupplyUiAmt =
-      lpSupplyRawAmt.toJSNumber() / Math.pow(10, pool.lpTokenInfo.decimals.toJsNumber());
+      lpSupplyRawAmt.toJSNumber() / Math.pow(10, pool.lpCoinInfo.decimals.toJsNumber());
     const toReceive = pool.estimateWithdrawalOutput(amount, lpSupplyUiAmt);
     setReceivedX(toReceive.xUiAmt);
     setReceivedY(toReceive.yUiAmt);

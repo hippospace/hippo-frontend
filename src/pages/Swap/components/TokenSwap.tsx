@@ -30,11 +30,11 @@ const routeRowHeight = 66;
 const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestPrice = false }) => {
   const swapDexs = route.route.steps.map((s) => DEX_TYPE_NAME[s.pool.dexType]).join(' x ');
   const swapRoutes = [
-    route.route.steps[0].xTokenInfo.symbol.str(),
+    route.route.steps[0].xCoinInfo.symbol.str(),
     ...route.route.steps.map((s, index) => (
       <span key={`r-${index}`}>
         <ArrowRight className="font-icon inline-block mx-[2px]" />
-        {s.yTokenInfo.symbol.str()}
+        {s.yCoinInfo.symbol.str()}
       </span>
     ))
   ];
@@ -131,14 +131,11 @@ const TokenSwap = () => {
       if (!values.currencyFrom?.token) {
         setFieldValue(
           'currencyFrom.token',
-          hippoAgg.registryClient.getTokenInfoBySymbol(fromSymbol)[0]
+          hippoAgg.registryClient.getCoinInfoBySymbol(fromSymbol)
         );
       }
       if (!values.currencyTo?.token) {
-        setFieldValue(
-          'currencyTo.token',
-          hippoAgg.registryClient.getTokenInfoBySymbol(toSymbol)[0]
-        );
+        setFieldValue('currencyTo.token', hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol));
       }
     }
   }, [
@@ -192,8 +189,8 @@ const TokenSwap = () => {
         lastFetchTs.current = Date.now();
       }
       if (hippoAgg && fromSymbol && toSymbol && fromUiAmt) {
-        const [xToken] = hippoAgg.registryClient.getTokenInfoBySymbol(fromSymbol);
-        const [yToken] = hippoAgg.registryClient.getTokenInfoBySymbol(toSymbol);
+        const xToken = hippoAgg.registryClient.getCoinInfoBySymbol(fromSymbol);
+        const yToken = hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol);
 
         const routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken);
         if (routes.length === 0) {

@@ -5,8 +5,7 @@ import { AptosAccount, AptosClient, Types } from 'aptos';
 export const readConfig = () => {
   const isDevnet = true;
   const netConf = isDevnet ? CONFIGS.devnet : CONFIGS.localhost;
-  const contractAddress = netConf.contractAddress;
-  return { contractAddress, netConf };
+  return { netConf };
 };
 
 export async function sendPayloadTx(

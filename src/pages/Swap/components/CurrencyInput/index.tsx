@@ -13,7 +13,7 @@ import { getTokenList } from 'modules/swap/reducer';
 import classNames from 'classnames';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import useDebouncedCallback from 'hooks/useDebouncedCallback';
-import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
+import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';

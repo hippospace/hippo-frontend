@@ -1,9 +1,9 @@
-import { TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_registry/coin_registry';
+import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import CoinIcon from 'components/CoinIcon';
 import useTokenBalane from 'hooks/useTokenBalance';
 
 interface TProps {
-  item: TokenInfo;
+  item: CoinInfo;
 }
 
 const CoinRow: React.FC<TProps> = ({ item }) => {
