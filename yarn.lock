@@ -1835,20 +1835,20 @@
     aptos "^1.3.7"
     eventemitter3 "^4.0.7"
 
-"@manahippo/hippo-sdk@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.3.2.tgz#40ae236ad82ecb363cbed2e83498fdedb2e67754"
-  integrity sha512-hy8JHrBAeJ3p7vYPPy+J/UGaXiJrjdUXTTE2G5SiCgwiE4+NrtjHQnugW/WlkLf621EalSa+mYDerEW7GoksgQ==
+"@manahippo/hippo-sdk@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.3.6.tgz#ca5aa1055f3b4b03ef4c872d6f915be9c72e28f6"
+  integrity sha512-59Eg0/cjayq6dHRCj5zi9WXGgQdxKxnktxs6skoDoF9wlMAwxX+d2f+qkzjToy7rDcaG9TebVlppHaL0zh/Gig==
   dependencies:
-    "@manahippo/move-to-ts" "^0.1.24"
+    "@manahippo/move-to-ts" "^0.2.8"
     aptos "^1.3.7"
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@^0.1.24":
-  version "0.1.24"
-  resolved "https://registry.npmjs.org/@manahippo/move-to-ts/-/move-to-ts-0.1.24.tgz"
-  integrity sha512-PgagXUaqRrcCz668osoJUHLFnEKnsI4NHJlfj5INuqyPoHlZ0mM5Y/gVdFP+/SzKAXvmensNGoG4YWbDgF5gFg==
+"@manahippo/move-to-ts@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.2.8.tgz#9c7ea0d221a17416cd85647eb865d882c0ea76ec"
+  integrity sha512-1jydlg8KMfmu2XkGNZ+3eQ3DbrOiIqaEvf8t55JErBIvactAXrha19pxyteIySzPWl/yR13A4/ehteP4e3MW9Q==
   dependencies:
     aptos "^1.3.7"
     big-integer "^1.6.51"

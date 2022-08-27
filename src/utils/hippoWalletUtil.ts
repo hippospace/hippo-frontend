@@ -1,11 +1,11 @@
 import { getTypeTagFullname, StructTag, TypeTag } from '@manahippo/move-to-ts';
-import { CONFIGS } from '@manahippo/hippo-sdk';
+import { CONFIGS, NetworkConfiguration } from '@manahippo/hippo-sdk';
 import { AptosAccount, AptosClient, Types } from 'aptos';
 
-export const readConfig = () => {
+export const readConfig = (): NetworkConfiguration => {
   const isDevnet = true;
   const netConf = isDevnet ? CONFIGS.devnet : CONFIGS.localhost;
-  return { netConf };
+  return netConf;
 };
 
 export async function sendPayloadTx(

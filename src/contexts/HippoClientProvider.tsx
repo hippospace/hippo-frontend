@@ -5,7 +5,7 @@ import {
   HippoWalletClient,
   PoolType,
   UITokenAmount,
-  aptos_framework
+  stdlib
 } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
 import useAptosWallet from 'hooks/useAptosWallet';
@@ -25,7 +25,7 @@ interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
   hippoAgg?: TradeAggregator;
   hippoSwap?: HippoSwapClient;
-  tokenStores?: Record<string, aptos_framework.Coin.CoinStore>;
+  tokenStores?: Record<string, stdlib.Coin.CoinStore>;
   tokenInfos?: Record<string, CoinInfo>;
   requestSwapByRoute: (routeAndQuote: RouteAndQuote, slipTolerance: number) => Promise<boolean>;
   requestSwap?: (
@@ -70,7 +70,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
   const [refresh, setRefresh] = useState(false);
   const [transaction, setTransaction] = useState<TTransaction>();
-  const [tokenStores, setTokenStores] = useState<Record<string, aptos_framework.Coin.CoinStore>>();
+  const [tokenStores, setTokenStores] = useState<Record<string, stdlib.Coin.CoinStore>>();
   const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
   const dispatch = useDispatch();
 
