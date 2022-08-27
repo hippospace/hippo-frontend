@@ -32,8 +32,8 @@ const AptosWalletProvider: FC<TProviderProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (connected && (account?.address || account?.publicKey)) {
-      setActiveWallet(hexStringV0ToV1(account?.address || account?.publicKey));
+    if (connected && account?.address) {
+      setActiveWallet(hexStringV0ToV1(account?.address));
     } else {
       setActiveWallet(undefined);
     }

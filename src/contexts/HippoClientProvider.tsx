@@ -99,11 +99,14 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       try {
         if (!activeWallet) throw new Error('Please login first');
         const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
-        const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, true);
-        if (payload) {
-          const result = await signAndSubmitTransaction(
-            payload as TransactionPayload_EntryFunctionPayload
-          );
+        const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, false);
+        if (payload && tokenInfos) {
+          let pl = payload as TransactionPayload_EntryFunctionPayload;
+          /*
+          const tokenInfo = tokenInfos[symbol];
+          pl.arguments = [Math.floor(uiAmtUsed * Math.pow(10, tokenInfo.decimals.toJsNumber()))];
+          */
+          const result = await signAndSubmitTransaction(pl);
           if (result) {
             message.success('Faucet Success');
             getNotificationMsg(result.hash);
@@ -122,7 +125,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         return success;
       }
     },
-    [activeWallet, getNotificationMsg, hippoWallet, signAndSubmitTransaction]
+    [activeWallet, getNotificationMsg, hippoWallet, signAndSubmitTransaction, tokenInfos]
   );
 
   const getHippoWalletClient = useCallback(async () => {

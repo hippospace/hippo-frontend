@@ -6,22 +6,16 @@ import styles from './WalletConnector.module.scss';
 // import WebWallet from 'components/WebWallet';
 import WalletSelector from './components/WalletSelector';
 import WalletMenu from './components/WalletMenu';
-import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useCallback, useState } from 'react';
-import WebWallet from 'components/WebWallet';
 import { WalletConnectedIcon, WalletNotConnectedIcon } from 'resources/icons';
 import classNames from 'classnames';
 // import { useCallback } from 'react';
 
 const WalletConnector: React.FC = () => {
   const { activeWallet, openModal, open, closeModal } = useAptosWallet();
-  const { wallet } = useWallet();
   const [isMobileDrawerVisible, setIsMobileDrawerVisible] = useState(false);
 
   const renderContent = useCallback(() => {
-    if (wallet && wallet.adapter.name === 'Hippo Web Wallet') {
-      return <WebWallet />;
-    }
     // TODO: send notification messages when wallet connected/disconnected
     return activeWallet ? (
       <WalletMenu
@@ -38,7 +32,7 @@ const WalletConnector: React.FC = () => {
         }}
       />
     );
-  }, [activeWallet, closeModal, wallet]);
+  }, [activeWallet, closeModal]);
 
   return (
     <>

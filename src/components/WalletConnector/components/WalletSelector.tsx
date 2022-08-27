@@ -1,6 +1,5 @@
 import Button from 'components/Button';
 import { useMemo } from 'react';
-import { MetamaskIcon, WalletConnectIcon, CoinbaseIcon, PhantomIcon } from 'resources/icons';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 
 type TOptionProps = {
@@ -10,32 +9,13 @@ type TOptionProps = {
 };
 
 const Option: React.FC<TOptionProps> = ({ onClick, label, icon }) => {
-  const getWalletIcon = () => {
-    switch (label) {
-      case 'MetaMask':
-        return <MetamaskIcon width={24} height={24} />;
-      case 'Wallet Connect':
-        return <WalletConnectIcon width={24} height={24} />;
-      case 'Coinbase Wallet':
-        return <CoinbaseIcon width={24} height={24} />;
-      case 'Phantom':
-        return <PhantomIcon width={24} height={24} />;
-      default:
-        return icon ? (
-          <img src={icon} width={24} height={24} className="block rounded-full" />
-        ) : (
-          <div className="bg-grey-700 block w-6 h-6 rounded-full" />
-        );
-    }
-  };
-
   return (
     <Button
       onClick={onClick ? onClick : undefined}
       className="flex gap-2 grow justify-start mt-2 rounded-[0px] w-full"
       size="small"
       variant="secondary">
-      {getWalletIcon()}
+      <img src={icon} width={24} height={24} className="block rounded-full" />
       <div className="font-bold text-left">{label}</div>
     </Button>
   );
