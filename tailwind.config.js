@@ -30,6 +30,7 @@ module.exports = {
         home2: 'linear-gradient(90deg, #F8F7FF 26.08%, #F7F5FE 98.41%)',
         swap: 'linear-gradient(0deg, #F7F5FD 0%, #FDFDFF 100%)',
         'btn-gradient': 'linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%)',
+        'select-border': 'linear-gradient(90deg, #D483FF 86.1%, #9747FF 95.98%, #6E6CCA 105.2%)'
       }
     },
     screens: {
@@ -49,7 +50,8 @@ module.exports = {
       primeBlack80: 'rgba(45, 45, 45, 0.8)',
       input: '#F8F8F8',
       transparent: 'transparent',
-      primaryGrey: 'rgba(248, 248, 248, 0.8)'
+      primaryGrey: 'rgba(248, 248, 248, 0.8)',
+      selected: '#F2F1FE'
     }),
     boxShadow: {
       sm: '4px 4px 0px #2D2D2D',

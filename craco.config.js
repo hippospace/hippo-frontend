@@ -22,7 +22,7 @@ module.exports = {
       };
 
       // To disable webpack cache of node_modules when debug
-      // config.cache.buildDependencies.mydeps = ['./webpackBuildCache.lock'];
+      config.cache.buildDependencies.mydeps = ['./webpackBuildCache.lock'];
 
       return config;
     },

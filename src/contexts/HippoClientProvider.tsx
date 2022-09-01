@@ -102,10 +102,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, true);
         if (payload && tokenInfos) {
           let pl = payload as TransactionPayload_EntryFunctionPayload;
-          /*
-          const tokenInfo = tokenInfos[symbol];
-          pl.arguments = [Math.floor(uiAmtUsed * Math.pow(10, tokenInfo.decimals.toJsNumber()))];
-          */
           const result = await signAndSubmitTransaction(pl);
           if (result) {
             message.success('Faucet Success');

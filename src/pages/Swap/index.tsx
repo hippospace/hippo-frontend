@@ -86,12 +86,12 @@ const Swap: React.FC = () => {
   );
 
   return (
-    <div className="w-full flex justify-center items-center h-full relative">
+    <div className="w-full flex justify-center items-center h-full relative pointer-events-none">
       <Formik
         initialValues={swapSettings}
         validationSchema={validationSchema}
         onSubmit={onSubmitSwap}>
-        <Card className="w-full max-w-[497px] min-h-[430px] flex flex-col py-10 relative">
+        <Card className="w-full max-w-[497px] min-h-[430px] flex flex-col py-8 relative pointer-events-auto">
           {renderCardHeader}
           <TokenSwap />
           <Drawer

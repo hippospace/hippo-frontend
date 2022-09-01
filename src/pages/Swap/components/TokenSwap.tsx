@@ -11,12 +11,14 @@ import { DEX_TYPE_NAME, RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregat
 import classNames from 'classnames';
 import { message } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
+import Card from 'components/Card';
 
 interface IRoutesProps {
   className?: string;
   routes: RouteAndQuote[];
-  routeSelected: RouteAndQuote;
+  routeSelected: RouteAndQuote | null;
   onRouteSelected: (route: RouteAndQuote) => void;
+  isDesktopScreen?: boolean;
 }
 
 interface IRouteRowProps {
@@ -44,21 +46,27 @@ const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestP
     <div className={classNames('pt-2')} style={{ height: `${routeRowHeight}px` }}>
       <div
         className={classNames(
-          'relative h-full flex flex-col justify-center bg-primary bg-clip-border rounded-lg p-2 border-2 border-transparent cursor-pointer',
+          'relative h-full flex flex-col justify-center bg-clip-border rounded-lg border-2 cursor-pointer bg-grey-100 border-transparent',
           {
-            'border-primePurple-300 bg-primePurple-100': isSelected
+            'bg-select-border bg-origin-border bg-cover': isSelected
           }
         )}>
-        <div className="flex justify-between items-center title bold">
-          <div>{swapDexs}</div>
-          <div>{outputUiAmt}</div>
-        </div>
-        <div className="flex justify-between items-center small font-bold text-grey-500">
-          <div>{swapRoutes}</div>
-          <div className="invisible">${outputValue}</div>
+        <div
+          className={classNames('w-full h-full p-2 rounded-lg', {
+            'bg-selected': isSelected,
+            'bg-grey-100': !isSelected
+          })}>
+          <div className="flex justify-between items-center title bold">
+            <div>{swapDexs}</div>
+            <div>{outputUiAmt}</div>
+          </div>
+          <div className="flex justify-between items-center small font-bold text-grey-500">
+            <div>{swapRoutes}</div>
+            <div className="invisible">${outputValue}</div>
+          </div>
         </div>
         {isBestPrice && (
-          <div className="absolute -left-[2px] -top-2 h-4 px-2 small font-bold bg-primePurple-300 rounded-lg rounded-bl-none flex items-center text-white">
+          <div className="absolute -left-[2px] -top-2 h-4 px-2 small font-bold bg-[#D483FF] rounded-lg rounded-bl-none flex items-center text-white">
             Best price
           </div>
         )}
@@ -71,32 +79,38 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   routes,
   onRouteSelected,
   routeSelected,
-  className = ''
+  className = '',
+  isDesktopScreen = false
 }) => {
   const [isMore, setIsMore] = useState(false);
   const rowsWhenLess = 2;
   const rowsWhenMore = 4;
-  const height = `${
-    Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight
-  }px`;
+  const rowsOnDesktop = 4;
+  const height = isDesktopScreen
+    ? `${rowsOnDesktop * routeRowHeight}px`
+    : `${Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight}px`;
   return (
     <div className={className}>
       <div className="helpText text-grey-500 font-bold mb-1">
         <div>Total {routes.length} routes available</div>
       </div>
       <div
-        className={classNames('overflow-x-hidden overflow-y-auto no-scrollbar')}
-        style={{ height }}>
-        {routes.map((ro, index) => {
-          return (
-            <div key={`route-${index}`} onClick={() => onRouteSelected(ro)}>
-              <RouteRow route={ro} isSelected={ro === routeSelected} isBestPrice={index === 0} />
-            </div>
-          );
+        className={classNames('overflow-x-hidden overflow-y-auto pr-1', {
+          'no-scrollbar': !isDesktopScreen,
+          scrollbar: isDesktopScreen
         })}
+        style={{ height }}>
+        {routeSelected &&
+          routes.map((ro, index) => {
+            return (
+              <div key={`route-${index}`} onClick={() => onRouteSelected(ro)}>
+                <RouteRow route={ro} isSelected={ro === routeSelected} isBestPrice={index === 0} />
+              </div>
+            );
+          })}
       </div>
-      <div className="flex helpText text-grey-500 font-bold mt-2 justify-between">
-        {routes.length > rowsWhenLess && (
+      {!isDesktopScreen && routes.length > rowsWhenLess && (
+        <div className="flex helpText text-grey-500 font-bold mt-2 justify-between">
           <div
             className="ml-auto cursor-pointer hover:opacity-50"
             onClick={() => setIsMore(!isMore)}>
@@ -110,8 +124,8 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
               </>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -274,13 +288,29 @@ const TokenSwap = () => {
       </div>
       <CurrencyInput actionType="currencyTo" />
       {allRoutes.length > 0 && routeSelected && (
+        <>
+          <RoutesAvailable
+            className="mt-4 hidden mobile:block tablet:block"
+            routes={allRoutes}
+            routeSelected={routeSelected}
+            onRouteSelected={(ro) => setRoute(ro)}
+          />
+        </>
+      )}
+      <Card
+        className={classNames(
+          // 'mobile:hidden tablet:hidden absolute top-0 w-[400px] left-[-420px] p-8 transition-[opacity,transform] opacity-0 scale-[80%] origin-top-right',
+          'mobile:hidden tablet:hidden absolute top-0 w-[400px] left-[-420px] p-8 transition-[opacity,transform] opacity-0 translate-x-[20%] -z-10',
+          // { 'opacity-100 !scale-100': allRoutes.length > 0 && routeSelected }
+          { 'opacity-100 !translate-x-0': allRoutes.length > 0 && routeSelected }
+        )}>
         <RoutesAvailable
-          className="mt-4"
+          isDesktopScreen={true}
           routes={allRoutes}
           routeSelected={routeSelected}
           onRouteSelected={(ro) => setRoute(ro)}
         />
-      )}
+      </Card>
       <Button
         isLoading={isSubmitting}
         className="mt-8"

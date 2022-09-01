@@ -31,4 +31,20 @@ code {
     fill: currentColor;
     overflow: hidden;
   }
+
+  .scrollbar::-webkit-scrollbar {
+    @apply w-1 ml-1;
+  }
+  
+  .scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-grey-300 rounded-[100vh];
+  }
+  
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-grey-500;
+  }
 }

@@ -88,7 +88,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
     <div
       className={cx(
         styles.currencyInput,
-        'bg-primaryGrey w-full py-4 px-6 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2'
+        'bg-primaryGrey w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2'
       )}>
       <div className="flex gap-1 items-center">
         <Popover
