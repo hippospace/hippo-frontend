@@ -99,7 +99,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       try {
         if (!activeWallet) throw new Error('Please login first');
         const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
-        const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, false);
+        const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, true);
         if (payload && tokenInfos) {
           let pl = payload as TransactionPayload_EntryFunctionPayload;
           /*
