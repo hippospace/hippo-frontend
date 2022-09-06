@@ -1,5 +1,6 @@
 import { App, HippoSwapClient, HippoWalletClient } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
+import { CoinListClient } from '@manahippo/hippo-sdk/dist/coinList';
 import { message } from 'antd';
 import { ActiveAptosWallet } from 'types/aptos';
 import { readConfig } from 'utils/hippoWalletUtil';
@@ -48,4 +49,16 @@ export const hippoTradeAggregator = async () => {
     message.error(err.message);
   }
   return agg;
+};
+
+export const coinListClient = async () => {
+  let client: CoinListClient | undefined;
+  try {
+    const netConf = readConfig();
+    client = await CoinListClient.load(new App(aptosClient), netConf.simulationKeys);
+  } catch (err: any) {
+    message.error(err.message);
+  }
+
+  return client;
 };

@@ -1,5 +1,10 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useState } from 'react';
-import { hippoSwapClient, hippoTradeAggregator, hippoWalletClient } from 'config/hippoClients';
+import {
+  coinListClient,
+  hippoSwapClient,
+  hippoTradeAggregator,
+  hippoWalletClient
+} from 'config/hippoClients';
 import {
   HippoSwapClient,
   HippoWalletClient,
@@ -74,6 +79,55 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
   const dispatch = useDispatch();
 
+  const getHippoWalletClient = useCallback(async () => {
+    if (activeWallet) {
+      const client = await hippoWalletClient(activeWallet);
+      await client?.refreshStores();
+      setHippoWallet(client);
+    } else {
+      setHippoWallet(undefined);
+    }
+  }, [activeWallet]);
+
+  const getHippoSwapClient = useCallback(async () => {
+    const sClient = await hippoSwapClient();
+    setHippoSwapClient(sClient);
+  }, []);
+
+  const getHippoTradeAggregator = useCallback(async () => {
+    setHippoAgg(await hippoTradeAggregator());
+  }, []);
+
+  const getTokenInfos = useCallback(async () => {
+    const client = await coinListClient();
+    setTokenInfos(client?.symbolToCoinInfo);
+  }, []);
+
+  useEffect(() => {
+    getHippoWalletClient();
+    getHippoSwapClient();
+    getHippoTradeAggregator();
+    getTokenInfos();
+  }, [getHippoWalletClient, getHippoSwapClient, getHippoTradeAggregator, getTokenInfos]);
+
+  useEffect(() => {
+    if (hippoWallet) {
+      setTokenStores(hippoWallet?.symbolToCoinStore);
+      if (refresh) {
+        getHippoWalletClient();
+        setRefresh(false);
+      }
+    } else {
+      setTokenStores(undefined);
+    }
+  }, [hippoWallet, refresh, getHippoWalletClient]);
+
+  useEffect(() => {
+    if (hippoSwap) {
+      dispatch(swapAction.SET_TOKEN_LIST(hippoSwap.singleCoins));
+    }
+  }, [dispatch, hippoSwap]);
+
   const getNotificationMsg = useCallback(
     (txhash: MaybeHexString) => {
       const description = (
@@ -123,51 +177,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     },
     [activeWallet, getNotificationMsg, hippoWallet, signAndSubmitTransaction, tokenInfos]
   );
-
-  const getHippoWalletClient = useCallback(async () => {
-    if (activeWallet) {
-      const client = await hippoWalletClient(activeWallet);
-      await client?.refreshStores();
-      setHippoWallet(client);
-    } else {
-      setHippoWallet(undefined);
-    }
-  }, [activeWallet]);
-
-  const getHippoSwapClient = useCallback(async () => {
-    const sClient = await hippoSwapClient();
-    setHippoSwapClient(sClient);
-  }, []);
-
-  const getHippoTradeAggregator = useCallback(async () => {
-    setHippoAgg(await hippoTradeAggregator());
-  }, []);
-
-  useEffect(() => {
-    getHippoWalletClient();
-    getHippoSwapClient();
-    getHippoTradeAggregator();
-  }, [getHippoWalletClient, getHippoSwapClient, getHippoTradeAggregator]);
-
-  useEffect(() => {
-    if (hippoWallet) {
-      setTokenStores(hippoWallet?.symbolToCoinStore);
-      setTokenInfos(hippoWallet?.symbolToTokenInfo);
-      if (refresh) {
-        getHippoWalletClient();
-        setRefresh(false);
-      }
-    } else {
-      setTokenStores(undefined);
-      setTokenInfos(undefined);
-    }
-  }, [hippoWallet, refresh, getHippoWalletClient]);
-
-  useEffect(() => {
-    if (hippoSwap) {
-      dispatch(swapAction.SET_TOKEN_LIST(hippoSwap.singleCoins));
-    }
-  }, [dispatch, hippoSwap]);
 
   const requestSwapByRoute = useCallback(
     async (routeAndQuote: RouteAndQuote, slipTolerance: number) => {

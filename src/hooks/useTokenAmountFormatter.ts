@@ -12,7 +12,7 @@ const useTokenAmountFormatter = () => {
   const formatter = useMemo(
     () =>
       (amount: number | undefined | null, tokenSymbol: string | undefined): string => {
-        if (!tokenInfos || typeof amount !== 'number' || !tokenSymbol) return '';
+        if (typeof amount !== 'number' || !tokenSymbol || !tokenInfos) return '';
         const decimals = tokenInfos[tokenSymbol].decimals.toJsNumber();
         return numToGrouped(cutDecimals(avoidScientificNotation(amount), decimals));
       },
