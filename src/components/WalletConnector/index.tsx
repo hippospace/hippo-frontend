@@ -5,34 +5,35 @@ import { Drawer, Popover } from 'components/Antd';
 import styles from './WalletConnector.module.scss';
 import WalletSelector from './components/WalletSelector';
 import WalletMenu from './components/WalletMenu';
-import { useCallback, useState } from 'react';
 import { WalletConnectedIcon, WalletNotConnectedIcon } from 'resources/icons';
 import classNames from 'classnames';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 
+const WalletModal = ({ className = '' }: { className?: string }) => {
+  const { activeWallet, closeModal } = useAptosWallet();
+
+  return (
+    <div className={className}>
+      {activeWallet ? (
+        <WalletMenu
+          onDisconnected={() => {
+            closeModal();
+          }}
+        />
+      ) : (
+        <WalletSelector
+          onConnected={() => {
+            closeModal();
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
 const WalletConnector: React.FC = () => {
   const { wallet } = useWallet();
   const { activeWallet, openModal, open, closeModal } = useAptosWallet();
-  const [isMobileDrawerVisible, setIsMobileDrawerVisible] = useState(false);
-
-  const renderContent = useCallback(() => {
-    // TODO: send notification messages when wallet connected/disconnected
-    return activeWallet ? (
-      <WalletMenu
-        onDisconnected={() => {
-          closeModal();
-          setIsMobileDrawerVisible(false);
-        }}
-      />
-    ) : (
-      <WalletSelector
-        onConnected={() => {
-          closeModal();
-          setIsMobileDrawerVisible(false);
-        }}
-      />
-    );
-  }, [activeWallet, closeModal]);
 
   return (
     <>
@@ -42,7 +43,7 @@ const WalletConnector: React.FC = () => {
         trigger="click"
         visible={open}
         onVisibleChange={(visible) => (visible ? openModal() : closeModal())}
-        content={renderContent}
+        content={<WalletModal className="mobile:hidden" />}
         destroyTooltipOnHide
         placement="bottomLeft">
         <div className="flex gap-4 items-center">
@@ -63,7 +64,7 @@ const WalletConnector: React.FC = () => {
           </Button>
         </div>
       </Popover>
-      <div className="hidden mobile:block" onClick={() => setIsMobileDrawerVisible(true)}>
+      <div className="hidden mobile:block" onClick={() => openModal()}>
         {activeWallet ? (
           <WalletConnectedIcon className="w-6" />
         ) : (
@@ -71,13 +72,14 @@ const WalletConnector: React.FC = () => {
         )}
       </div>
       <Drawer
+        className="hidden mobile:block"
         closable={!activeWallet}
         title={!activeWallet ? <h6 className="font-bold text-black">Connect your wallet</h6> : ''}
         height={'auto'}
         placement={'bottom'}
-        onClose={() => setIsMobileDrawerVisible(false)}
-        visible={isMobileDrawerVisible}>
-        {renderContent()}
+        onClose={() => closeModal()}
+        visible={open}>
+        <WalletModal className="hidden mobile:block" />
       </Drawer>
     </>
   );

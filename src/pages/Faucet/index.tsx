@@ -84,7 +84,7 @@ const Faucet: React.FC = () => {
   }, [activeWallet, tokenList, openModal]);
 
   return (
-    <div className="flex gap-6 justify-center flex-wrap max-w-[1500px] mx-auto">
+    <div className="mt-6 flex gap-6 justify-center flex-wrap max-w-[1500px] mx-auto">
       {renderTokenList}
     </div>
   );

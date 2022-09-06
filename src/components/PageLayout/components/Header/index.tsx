@@ -5,7 +5,6 @@ import LogoIcon from 'components/LogoIcon';
 import cx from 'classnames';
 import styles from './Header.module.scss';
 import useCurrentPage from 'hooks/useCurrentPage';
-import { useScrollYPosition } from 'react-use-scroll-position';
 import classNames from 'classnames';
 import GithubIcon from 'resources/icons/GitHub-Mark-Light-120px-plus.png';
 import { CloseIcon, MenuIcon } from 'resources/icons';
@@ -77,15 +76,10 @@ const PageHeader: React.FC = () => {
     });
   };
 
-  const scrollY = useScrollYPosition();
-
   return (
     <Header
       className={classNames(
-        'z-20 w-full px-16 py-8 bg-transparent h-[140px] tablet:px-8 mobile:px-4 mobile:py-2 mobile:h-[56px]',
-        {
-          [styles.blur]: scrollY > 64
-        }
+        'z-20 w-full px-16 py-8 bg-transparent h-[140px] tablet:px-8 mobile:px-4 mobile:py-2 mobile:h-[56px]'
       )}>
       <div className="mx-auto h-full top-0 left-0 flex items-center relative">
         <MenuIcon

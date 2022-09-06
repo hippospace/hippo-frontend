@@ -66,11 +66,11 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
   const isCustomSlippage = !slippageOptions.includes(values.slipTolerance);
 
   return (
-    <div>
-      <div className="h6 text-grey-900 text-center mb-10 mobile:hidden">Transaction Settings</div>
+    <div className="w-full">
+      <div className="h6 text-grey-900 text-center mobile:hidden">Transaction Settings</div>
       <div className="mt-6 mobile:mt-0">
         <SubTitle>Slippage Tolerance</SubTitle>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-x-2 gap-y-3 flex-wrap">
           {slippageOptions.map((s, i) => {
             return (
               <Selectable
@@ -84,7 +84,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
           })}
           <Selectable
             isSelected={isCustomSlippage}
-            className={classNames('flex items-center relative w-[142px] mobile:w-full')}>
+            className={classNames('flex items-center relative w-full')}>
             <PositiveFloatNumInput
               inputAmount={!isCustomSlippage ? 0 : values.slipTolerance}
               min={0}
@@ -92,7 +92,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
               isConfine={true}
               placeholder="Custom"
               className={classNames(
-                'rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 largeTextBold px-4'
+                'h6 rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 largeTextBold px-4'
               )}
               onAmountChange={(v) => setFieldValue('slipTolerance', v)}
             />

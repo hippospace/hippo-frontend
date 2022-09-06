@@ -36,8 +36,7 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </>
       )}
       <Header />
-      <Content
-        className={classNames('relative pt-[60px] px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]')}>
+      <Content className={classNames('relative px-16 tablet:px-8 mobile:px-4 mobile:pt-[56px]')}>
         <div ref={containerRef} className="relative z-10">
           {children}
         </div>

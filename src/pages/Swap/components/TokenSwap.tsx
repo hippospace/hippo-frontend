@@ -307,9 +307,7 @@ const TokenSwap = () => {
       )}
       <Card
         className={classNames(
-          // 'mobile:hidden tablet:hidden absolute top-0 w-[400px] left-[-420px] p-8 transition-[opacity,transform] opacity-0 scale-[80%] origin-top-right',
-          'mobile:hidden tablet:hidden absolute top-0 w-[400px] left-[-420px] p-8 transition-[opacity,transform] opacity-0 translate-x-[20%] -z-10',
-          // { 'opacity-100 !scale-100': allRoutes.length > 0 && routeSelected }
+          'mobile:hidden tablet:hidden absolute top-0 w-[400px] left-[-420px] px-8 laptop:w-[368px] laptop:left-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 translate-x-[30%] -z-10',
           { 'opacity-100 !translate-x-0': allRoutes.length > 0 && routeSelected }
         )}>
         <RoutesAvailable

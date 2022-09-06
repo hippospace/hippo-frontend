@@ -126,7 +126,7 @@ const Home = () => {
   }, [scrollHandler]);
 
   return (
-    <div className="hippo-home text-center mx-auto pt-[38px]">
+    <div className="hippo-home text-center mx-auto pt-[98px]">
       <div className="flex flex-col items-center space-y-12">
         <div className="text-[96px] leading-[115px] font-bold max-w-[930px] mobile:h3">
           <span className="text-grey-900">The Aggregation Mechanism on</span>{' '}
