@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import { message } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
+import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 
 interface IRoutesProps {
   className?: string;
@@ -40,8 +41,12 @@ const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestP
       </span>
     ))
   ];
+  const toSymbol = route.route.steps.slice(-1)[0].yCoinInfo.symbol.str();
   const outputUiAmt = route.quote.outputUiAmt;
   const outputValue = 0; // TOD0: calculate the output value
+  const [tokenAmountFormatter] = useTokenAmountFormatter();
+  const outputFormatted = tokenAmountFormatter(outputUiAmt, toSymbol);
+
   return (
     <div className={classNames('pt-2')} style={{ height: `${routeRowHeight}px` }}>
       <div
@@ -56,9 +61,11 @@ const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestP
             'bg-selected': isSelected,
             'bg-grey-100': !isSelected
           })}>
-          <div className="flex justify-between items-center title bold">
-            <div>{swapDexs}</div>
-            <div>{outputUiAmt}</div>
+          <div className="flex justify-between items-center largeTextBold">
+            <div className="truncate" title={swapDexs}>
+              {swapDexs}
+            </div>
+            <div className="largeTextBold">{outputFormatted}</div>
           </div>
           <div className="flex justify-between items-center small font-bold text-grey-500">
             <div>{swapRoutes}</div>
@@ -272,7 +279,8 @@ const TokenSwap = () => {
 
   const [fromCurrentBalance] = useTokenBalane(fromSymbol);
   const isSwapEnabled =
-    !activeWallet || (values.quoteChosen && fromUiAmt && fromUiAmt <= fromCurrentBalance);
+    !activeWallet || // to connect wallet
+    (values.quoteChosen && fromUiAmt && fromCurrentBalance && fromUiAmt <= fromCurrentBalance);
 
   return (
     <div className="w-full flex flex-col px-8 gap-1 mobile:px-4">

@@ -62,6 +62,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
     setFieldValue('maxGasFee', swapInitState.swapSettings.maxGasFee);
   }, [setFieldValue]);
 
+  // TODO: manage state here!
   const isCustomSlippage = !slippageOptions.includes(values.slipTolerance);
 
   return (
@@ -139,7 +140,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
           Reset
         </Button>
         <Button className="flex-1" variant="primary" size="small" onClick={onConfirm}>
-          Confirm
+          Close
         </Button>
       </div>
     </div>

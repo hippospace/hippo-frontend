@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Card from 'components/Card';
 import Button from 'components/Button';
 import CoinIcon from 'components/CoinIcon';
@@ -8,19 +9,27 @@ import { useCallback, useMemo, useState } from 'react';
 import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import { getTokenList } from 'modules/swap/reducer';
 import { useSelector } from 'react-redux';
+import { Skeleton } from 'antd';
+import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 
 const Balance = ({ symbol }: { symbol: string }) => {
-  const [balance] = useTokenBalane(symbol);
+  const [balance, isReady] = useTokenBalane(symbol);
+  const [tokenAmountFormatter] = useTokenAmountFormatter();
   return (
     <div className="text-grey-500 largeTextNormal font-[600]">
-      {balance} {symbol}
+      {!isReady && <Skeleton.Button active className={'!w-16 !h-5 !rounded'} />}
+      {isReady && (
+        <>
+          {tokenAmountFormatter(balance, symbol)} {symbol}
+        </>
+      )}
     </div>
   );
 };
 
 const TokenCard = ({ tokenInfo }: { tokenInfo: CoinInfo }) => {
   const [loading, setLoading] = useState('');
-  const { requestFaucet } = useHippoClient();
+  const { requestFaucet, hippoWallet } = useHippoClient();
   const symbol = tokenInfo.symbol.str();
 
   const onRequestFaucet = useCallback(
@@ -44,6 +53,7 @@ const TokenCard = ({ tokenInfo }: { tokenInfo: CoinInfo }) => {
       <Button
         variant="secondary"
         isLoading={loading === symbol}
+        disabled={!hippoWallet}
         className="font-bold w-full"
         onClick={() => onRequestFaucet(symbol)}>
         Faucet

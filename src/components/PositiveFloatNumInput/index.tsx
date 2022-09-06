@@ -39,7 +39,7 @@ export const numToGrouped = (num: string) => {
     .join('.');
 };
 
-const avoidScientificNotation = (x: number) => {
+export const avoidScientificNotation = (x: number) => {
   invariant(x >= 0 && x <= Number.MAX_SAFE_INTEGER, 'Invalid number range');
   let res = x.toString();
   if (Math.abs(x) < 1.0) {
@@ -53,7 +53,8 @@ const avoidScientificNotation = (x: number) => {
   return res;
 };
 
-const cutDecimals = (v: string, maxDecimals: number | undefined) => {
+// Cut decimals to its max allowed count
+export const cutDecimals = (v: string, maxDecimals: number | undefined) => {
   const decimalsLength = v.split('.')[1]?.length || 0;
   if (typeof maxDecimals === 'number' && decimalsLength > maxDecimals) {
     v = v

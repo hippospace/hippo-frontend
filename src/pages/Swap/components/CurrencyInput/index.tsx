@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useFormikContext } from 'formik';
 import { ISwapSettings } from 'pages/Swap/types';
 import { CaretIcon } from 'resources/icons';
@@ -6,7 +8,7 @@ import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
 import { useCallback, useState } from 'react';
 import CoinIcon from 'components/CoinIcon';
-import { Drawer, Popover } from 'antd';
+import { Drawer, Popover, Skeleton } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useSelector } from 'react-redux';
 import { getTokenList } from 'modules/swap/reducer';
@@ -14,6 +16,8 @@ import classNames from 'classnames';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import useDebouncedCallback from 'hooks/useDebouncedCallback';
 import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
+import { useWallet } from '@manahippo/aptos-wallet-adapter';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -59,13 +63,15 @@ const CoinSelectButton = ({
 };
 
 const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
+  const [tokenAmountFormatter] = useTokenAmountFormatter();
   const [isVisibile, setIsVisible] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
+  const { connected } = useWallet();
 
   const selectedCurrency = values[actionType];
   const selectedSymbol = selectedCurrency?.token?.symbol.str();
-  const [uiBalance] = useTokenBalane(selectedSymbol);
+  const [uiBalance, isReady] = useTokenBalane(selectedSymbol);
   const tokenList = useSelector(getTokenList);
   const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
 
@@ -119,23 +125,26 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
           onAmountChange={onAmountChange}
         />
       </div>
-      {typeof uiBalance === 'number' && (
+      {connected && (
         <div className="flex justify-between font-bold text-grey-500 mt-1 cursor-auto pointer-events-none">
           <small>Current Balance:</small>
-          <small
-            className={classNames({
-              'cursor-pointer pointer-events-auto underline': actionType === 'currencyFrom'
-            })}
-            onClick={() => {
-              if (actionType === 'currencyFrom') {
-                setFieldValue(actionType, {
-                  ...selectedCurrency,
-                  amount: uiBalance
-                });
-              }
-            }}>
-            {uiBalance}
-          </small>
+          {isReady && (
+            <small
+              className={classNames({
+                'cursor-pointer pointer-events-auto underline': actionType === 'currencyFrom'
+              })}
+              onClick={() => {
+                if (actionType === 'currencyFrom') {
+                  setFieldValue(actionType, {
+                    ...selectedCurrency,
+                    amount: uiBalance
+                  });
+                }
+              }}>
+              {tokenAmountFormatter(uiBalance, selectedSymbol)}
+            </small>
+          )}
+          {!isReady && <Skeleton.Button active className="!w-10 !h-4 !min-w-[40px] !rounded" />}
         </div>
       )}
       <Drawer

@@ -1,6 +1,7 @@
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
+import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useState } from 'react';
 import { ExchangeIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
@@ -16,11 +17,13 @@ const SwapDetail = ({
 }) => {
   const { values: swapSettings } = useFormikContext<ISwapSettings>();
   const [isPriceYToX, setIsPriceYToX] = useState(true);
+  const [tokenAmountFormatter] = useTokenAmountFormatter();
 
   const outputUiAmt = routeAndQuote.quote.outputUiAmt;
-  const output = `${outputUiAmt.toFixed(6)} ${toSymbol}`;
-  const minimum = `${(outputUiAmt * (1 - swapSettings.slipTolerance / 100)).toFixed(
-    6
+  const output = `${tokenAmountFormatter(outputUiAmt, toSymbol)} ${toSymbol}`;
+  const minimum = `${tokenAmountFormatter(
+    outputUiAmt * (1 - swapSettings.slipTolerance / 100),
+    toSymbol
   )} ${toSymbol}`;
   const priceImpact = `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`;
 
@@ -29,8 +32,8 @@ const SwapDetail = ({
     !avgPrice || avgPrice === Infinity
       ? 'n/a'
       : isPriceYToX
-      ? `1 ${fromSymbol} ≈ ${avgPrice} ${toSymbol}`
-      : `1 ${toSymbol} ≈ ${1 / avgPrice} ${fromSymbol}`;
+      ? `1 ${fromSymbol} ≈ ${tokenAmountFormatter(avgPrice, toSymbol)} ${toSymbol}`
+      : `1 ${toSymbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromSymbol)} ${fromSymbol}`;
 
   const details = [
     {

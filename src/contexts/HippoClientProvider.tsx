@@ -129,6 +129,8 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       const client = await hippoWalletClient(activeWallet);
       await client?.refreshStores();
       setHippoWallet(client);
+    } else {
+      setHippoWallet(undefined);
     }
   }, [activeWallet]);
 
@@ -155,6 +157,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         getHippoWalletClient();
         setRefresh(false);
       }
+    } else {
+      setTokenStores(undefined);
+      setTokenInfos(undefined);
     }
   }, [hippoWallet, refresh, getHippoWalletClient]);
 

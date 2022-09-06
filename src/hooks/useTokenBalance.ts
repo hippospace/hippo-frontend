@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 import useHippoClient from './useHippoClient';
 import invariant from 'tiny-invariant';
 
-export type Balance = number | '';
+export type Balance = number | null;
 
-const useTokenBalane = (tokenSymbol: string | undefined): [Balance] => {
+const useTokenBalane = (tokenSymbol: string | undefined): [Balance, boolean] => {
   const { tokenInfos, tokenStores } = useHippoClient();
   const { connected } = useWallet();
 
@@ -18,11 +18,13 @@ const useTokenBalane = (tokenSymbol: string | undefined): [Balance] => {
         ? tokenStore.coin.value.toJsNumber() / Math.pow(10, tokenInfo.decimals.toJsNumber())
         : 0;
     } else {
-      return '';
+      return null;
     }
   }, [connected, tokenInfos, tokenStores, tokenSymbol]);
 
-  return [inputTokenBalance];
+  const isReady = typeof inputTokenBalance === 'number';
+
+  return [inputTokenBalance, isReady];
 };
 
 export default useTokenBalane;
