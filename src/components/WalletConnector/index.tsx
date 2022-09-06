@@ -3,15 +3,15 @@ import useAptosWallet from 'hooks/useAptosWallet';
 import { walletAddressEllipsis } from 'utils/utility';
 import { Drawer, Popover } from 'components/Antd';
 import styles from './WalletConnector.module.scss';
-// import WebWallet from 'components/WebWallet';
 import WalletSelector from './components/WalletSelector';
 import WalletMenu from './components/WalletMenu';
 import { useCallback, useState } from 'react';
 import { WalletConnectedIcon, WalletNotConnectedIcon } from 'resources/icons';
 import classNames from 'classnames';
-// import { useCallback } from 'react';
+import { useWallet } from '@manahippo/aptos-wallet-adapter';
 
 const WalletConnector: React.FC = () => {
+  const { wallet } = useWallet();
   const { activeWallet, openModal, open, closeModal } = useAptosWallet();
   const [isMobileDrawerVisible, setIsMobileDrawerVisible] = useState(false);
 
@@ -52,7 +52,14 @@ const WalletConnector: React.FC = () => {
             className="min-w-[156px] h-10 font-bold"
             // onClick={!address ? toggleConnectModal : undefined}
           >
-            {activeWallet ? walletAddressEllipsis(activeWallet?.toString()) : 'Connect To Wallet'}
+            {activeWallet ? (
+              <>
+                <img src={wallet?.adapter.icon} className="w-6 h-6 mr-2" />{' '}
+                {walletAddressEllipsis(activeWallet?.toString())}
+              </>
+            ) : (
+              'Connect To Wallet'
+            )}
           </Button>
         </div>
       </Popover>

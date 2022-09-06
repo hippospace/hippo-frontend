@@ -100,6 +100,12 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   const getTokenInfos = useCallback(async () => {
     const client = await coinListClient();
+    /*
+    console.log(
+      'coin list',
+      client?.coinList.map((c) => c.name.str())
+    );
+    */
     setTokenInfos(client?.symbolToCoinInfo);
   }, []);
 
@@ -184,7 +190,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       try {
         const input = routeAndQuote.quote.inputUiAmt;
         const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
-        if (!activeWallet) throw new Error('Please login first');
+        if (!activeWallet) throw new Error('Please connect wallet first');
         if (input <= 0) {
           throw new Error('Input amount needs to be greater than 0');
         }

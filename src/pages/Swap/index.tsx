@@ -34,7 +34,7 @@ const Swap: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   const swapSettings = useSelector(getSwapSettings);
-  const { hippoSwap, hippoWallet, requestSwapByRoute } = useHippoClient();
+  const { requestSwapByRoute } = useHippoClient();
 
   const renderCardHeader = useMemo(
     () => (
@@ -66,7 +66,7 @@ const Swap: React.FC = () => {
       const fromSymbol = values.currencyFrom?.token?.symbol.str();
       const toSymbol = values.currencyTo?.token?.symbol.str();
       const fromUiAmt = values.currencyFrom?.amount;
-      if (hippoSwap && hippoWallet && fromSymbol && toSymbol && fromUiAmt) {
+      if (fromSymbol && toSymbol && fromUiAmt) {
         const quote = values.quoteChosen;
         if (quote) {
           const result = await requestSwapByRoute(quote, values.slipTolerance);
@@ -82,7 +82,7 @@ const Swap: React.FC = () => {
         }
       }
     },
-    [hippoSwap, hippoWallet, requestSwapByRoute]
+    [requestSwapByRoute]
   );
 
   return (
