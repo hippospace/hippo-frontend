@@ -13,7 +13,8 @@ import {
   MartianWalletAdapter,
   // FewchaWalletAdapter,
   // NightlyWalletAdapter
-  PontemWalletAdapter
+  PontemWalletAdapter,
+  SpikaWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
 import { message } from 'antd';
@@ -46,7 +47,8 @@ const Providers: React.FC<TProps> = (props: TProps) => {
       // new FewchaWalletAdapter(),
       // new MultiMaskWalletAdapter()
       // new NightlyWalletAdapter()
-      new PontemWalletAdapter()
+      new PontemWalletAdapter(),
+      new SpikaWalletAdapter()
     ],
     []
   );
