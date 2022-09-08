@@ -1823,10 +1823,10 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.3.4.tgz#6208a619fd7bfda92edab6231473f2c138ebffe1"
-  integrity sha512-FGOQKVdVorGPhJPY4NEU2qauBLIDss1sKKLjb1+RjnqqJlEBUk/hYP+NYVjS9A90nhC+cv9Vt4KqWwvK2xdvsA==
+"@manahippo/aptos-wallet-adapter@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.3.5.tgz#6091552de2a885e635befce4ca75534226fc6dac"
+  integrity sha512-iezUbp69zUF/wGusg0Nz197cot6/ckxJq4tDq61EKsaagvd1M8rgT+OGbDztKLMHTTzhtApfh4wqHYyDVzwvgA==
   dependencies:
     "@fewcha/web3" "^0.1.25"
     "@types/jest" "^27.0.1"
