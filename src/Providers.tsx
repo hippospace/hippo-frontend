@@ -55,6 +55,7 @@ const Providers: React.FC<TProps> = (props: TProps) => {
     <ErrorBoundary>
       <WalletProvider
         wallets={wallets}
+        autoConnect
         onError={(error: Error) => {
           console.log('wallet errors: ', error);
           let text = '';
