@@ -1,6 +1,6 @@
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, MoreArrowDown, SwapIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
 import CurrencyInput from './CurrencyInput';
@@ -277,10 +277,34 @@ const TokenSwap = () => {
     setFieldValue('currencyTo', tokenFrom);
   }, [values, setFieldValue]);
 
-  const [fromCurrentBalance] = useTokenBalane(fromSymbol);
+  const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromSymbol);
   const isSwapEnabled =
-    !activeWallet || // to connect wallet
+    (!activeWallet && values.currencyFrom?.token) || // to connect wallet
     (values.quoteChosen && fromUiAmt && fromCurrentBalance && fromUiAmt <= fromCurrentBalance);
+
+  const swapButtonText = useMemo(() => {
+    if (!values.currencyFrom?.token) {
+      return 'Loading Tokens...';
+    } else if (!activeWallet) {
+      return 'Connect to Wallet';
+    } else if (!isCurrentBalanceReady) {
+      return 'Loading Balance...';
+    } else if (!fromUiAmt) {
+      return 'Enter an Amount';
+    } else if (!fromCurrentBalance || fromUiAmt > fromCurrentBalance) {
+      return 'Insufficient Balance';
+    } else if (!values.quoteChosen) {
+      return 'Loading Routes...';
+    }
+    return 'SWAP';
+  }, [
+    activeWallet,
+    fromCurrentBalance,
+    fromUiAmt,
+    isCurrentBalanceReady,
+    values.currencyFrom?.token,
+    values.quoteChosen
+  ]);
 
   return (
     <div className="w-full flex flex-col px-8 gap-1 mobile:px-4">
@@ -323,7 +347,7 @@ const TokenSwap = () => {
         variant="gradient"
         disabled={!isSwapEnabled}
         onClick={!activeWallet ? openModal : submitForm}>
-        {!activeWallet ? 'Connect to Wallet' : 'SWAP'}
+        {swapButtonText}
       </Button>
       {routeSelected && fromSymbol && toSymbol && (
         <SwapDetail routeAndQuote={routeSelected} fromSymbol={fromSymbol} toSymbol={toSymbol} />
