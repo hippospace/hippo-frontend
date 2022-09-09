@@ -1,10 +1,23 @@
 import { App, HippoSwapClient, HippoWalletClient } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
 import { CoinListClient } from '@manahippo/hippo-sdk/dist/coinList';
-import { message } from 'antd';
+import { store } from 'Providers';
 import { ActiveAptosWallet } from 'types/aptos';
 import { readConfig } from 'utils/hippoWalletUtil';
 import { aptosClient } from './aptosClient';
+import commonActions from 'modules/common/actions';
+import { debounce } from 'lodash';
+import { message } from 'antd';
+
+const errorHandler = debounce(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (_err: any) => {
+    store.dispatch(commonActions.SET_RESOURCES_NOT_FOUND(true));
+    message.error('Resource not found or loaded');
+  },
+  1000,
+  { leading: false, trailing: true }
+);
 
 export const hippoWalletClient = async (account: ActiveAptosWallet) => {
   let walletClient: HippoWalletClient | undefined;
@@ -18,7 +31,8 @@ export const hippoWalletClient = async (account: ActiveAptosWallet) => {
       netConf.simulationKeys
     );
   } catch (err: any) {
-    message.error(err.message);
+    console.log('Get hippo wallet client failed', err);
+    errorHandler(err);
   }
 
   return walletClient;
@@ -34,7 +48,8 @@ export const hippoSwapClient = async () => {
       netConf.simulationKeys
     );
   } catch (err: any) {
-    message.error(err.message);
+    console.log('Get hippo swap client failed', err);
+    errorHandler(err);
   }
 
   return swapClient;
@@ -46,7 +61,8 @@ export const hippoTradeAggregator = async () => {
     const netConf = readConfig();
     agg = await TradeAggregator.create(new App(aptosClient), netConf.simulationKeys);
   } catch (err: any) {
-    message.error(err.message);
+    console.log('Get hippo trade aggregator failed', err);
+    errorHandler(err);
   }
   return agg;
 };
@@ -57,7 +73,8 @@ export const coinListClient = async () => {
     const netConf = readConfig();
     client = await CoinListClient.load(new App(aptosClient), netConf.simulationKeys);
   } catch (err: any) {
-    message.error(err.message);
+    console.log('Get coin list client failed', err);
+    errorHandler(err);
   }
 
   return client;

@@ -11,6 +11,8 @@ import { CloseIcon, MenuIcon } from 'resources/icons';
 import { Drawer } from 'antd';
 import { useCallback, useState } from 'react';
 import Button from 'components/Button';
+import { useSelector } from 'react-redux';
+import { getIsResourcesNotFound } from 'modules/common/reducer';
 
 const { Header } = Antd.Layout;
 
@@ -62,8 +64,9 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
 const PageHeader: React.FC = () => {
   const [currentPageName] = useCurrentPage();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const isResourcesNotFound = useSelector(getIsResourcesNotFound);
 
-  const renderNavItems = () => {
+  const renderNavItems = useCallback(() => {
     return routes.map(({ name, path, hidden }) => {
       if (path === '*' || hidden) return null;
       return (
@@ -74,7 +77,7 @@ const PageHeader: React.FC = () => {
         </Antd.Menu.Item>
       );
     });
-  };
+  }, []);
 
   return (
     <Header
@@ -113,7 +116,7 @@ const PageHeader: React.FC = () => {
               'flex justify-center h-full min-w-[200px] w-full !bg-transparent mobile:hidden'
             )}
             selectedKeys={[currentPageName]}>
-            {renderNavItems()}
+            {!isResourcesNotFound && renderNavItems()}
           </Antd.Menu>
         </div>
         <div className="absolute right-0 top-0 h-full w-fit flex items-center">
@@ -127,10 +130,12 @@ const PageHeader: React.FC = () => {
         closeIcon={<CloseIcon />}
         width="70%"
         onClose={() => setIsSideMenuOpen(false)}>
-        <SideMenu
-          currentPageName={currentPageName}
-          onRouteSelected={() => setIsSideMenuOpen(false)}
-        />
+        {!isResourcesNotFound && (
+          <SideMenu
+            currentPageName={currentPageName}
+            onRouteSelected={() => setIsSideMenuOpen(false)}
+          />
+        )}
       </Drawer>
     </Header>
   );

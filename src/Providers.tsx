@@ -20,7 +20,7 @@ import { message } from 'antd';
 
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
 
-const store = configureStore({
+export const store = configureStore({
   reducer,
   devTools: isDevelopmentMode,
   middleware: (getDefaultMiddleware) =>
