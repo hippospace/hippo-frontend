@@ -7,6 +7,8 @@ import DevsIllu from 'resources/img/illu-devs-2x.png';
 import Card from 'components/Card';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
+import { getIsResourcesNotFound } from 'modules/common/reducer';
+import { useSelector } from 'react-redux';
 // import { useScrollYPosition } from 'react-use-scroll-position';
 
 interface HomeBlogProps {
@@ -125,6 +127,8 @@ const Home = () => {
     };
   }, [scrollHandler]);
 
+  const isResourcesNotFound = useSelector(getIsResourcesNotFound);
+
   return (
     <div className="hippo-home text-center mx-auto pt-[98px]">
       <div className="flex flex-col items-center space-y-12">
@@ -138,7 +142,11 @@ const Home = () => {
           on Aptos, so users can always trade <br className="mobile:hidden" /> with the best rates
         </Intro>
         <div>
-          <Button className="w-[320px]" variant="gradient" onClick={() => navigate('/swap')}>
+          <Button
+            className="w-[320px]"
+            variant="gradient"
+            disabled={isResourcesNotFound}
+            onClick={() => navigate('/swap')}>
             TRY SWAP
           </Button>
         </div>
@@ -157,7 +165,11 @@ const Home = () => {
               liquidity across all of them so that users can always trade with the best rates.
             </Intro>
             <div>
-              <Button variant="outlined" className="w-[260px]" onClick={() => navigate('/swap')}>
+              <Button
+                variant="outlined"
+                className="w-[260px]"
+                disabled={isResourcesNotFound}
+                onClick={() => navigate('/swap')}>
                 Swap Now
               </Button>
             </div>

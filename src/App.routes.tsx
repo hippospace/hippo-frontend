@@ -76,7 +76,6 @@ const Routes = () => {
       if (location.pathname !== '/') nav('/');
     });
   }
-  console.log('active routes', activeRoutes);
 
   const elements = useRoutes(activeRoutes as RouteObject[]);
   return elements;
