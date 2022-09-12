@@ -72,10 +72,12 @@ const Home = () => {
     },
     {
       posterSrc: HomeBlogPoster2,
-      title: 'Title placeholder 2',
-      summary:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam iaculis pretium ultrices. Pellentesque habitant morbi tristique senectus et netus et...',
-      url: ''
+      title: 'Move-to-TS: A Dev Framework For Aptos',
+      summary: `In Web3 development, developers often spend a lot of time writing code that connects frontends to on-chain data and contracts. For example:
+        Writing transaction builders,
+        Fetching and parsing on-chain data structures,
+        Duplicating contract logic to frontends/bots`,
+      url: 'https://medium.com/@hippolabs/move-to-ts-a-dev-framework-for-aptos-4d3ccc97c31a'
     }
   ];
 
