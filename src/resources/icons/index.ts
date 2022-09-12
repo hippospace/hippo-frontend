@@ -25,3 +25,4 @@ export { ReactComponent as MoreArrowDown } from './moreArrowDown.svg';
 export { ReactComponent as WalletIcon } from './wallet.svg';
 export { ReactComponent as WalletNotConnectedIcon } from './walletNotConnected.svg';
 export { ReactComponent as WalletConnectedIcon } from './walletConnected.svg';
+export { ReactComponent as RefreshIcon } from './refresh.svg';

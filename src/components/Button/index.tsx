@@ -33,10 +33,16 @@ const Button: React.FC<TProps> = (props) => {
 
   return (
     <button
-      className={cx(styles.button, className, styles[size], styles[variant], {
-        [styles.disabled]: disabled,
-        [styles.loading]: isLoading
-      })}
+      className={cx(
+        styles.button,
+        styles[size],
+        styles[variant],
+        {
+          [styles.disabled]: disabled,
+          [styles.loading]: isLoading
+        },
+        className
+      )}
       onClick={onClick}
       disabled={disabled}
       {...rest}>
