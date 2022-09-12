@@ -73,7 +73,7 @@ const WalletConnector: React.FC = () => {
       </div>
       <Drawer
         className="hidden mobile:block"
-        closable={!activeWallet}
+        closable={false}
         title={!activeWallet ? <h6 className="font-bold text-black">Connect your wallet</h6> : ''}
         height={'auto'}
         placement={'bottom'}

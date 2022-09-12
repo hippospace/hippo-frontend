@@ -1,12 +1,10 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useFormikContext } from 'formik';
 import { ISwapSettings } from 'pages/Swap/types';
-import { CaretIcon } from 'resources/icons';
+import { CaretIcon, TrashIcon } from 'resources/icons';
 import cx from 'classnames';
 import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import CoinIcon from 'components/CoinIcon';
 import { Drawer, Popover, Skeleton } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
@@ -18,9 +16,11 @@ import useDebouncedCallback from 'hooks/useDebouncedCallback';
 import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
+import Button from 'components/Button';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
+  trashButtonContainerWidth?: string;
 }
 
 const CoinSelectButton = ({
@@ -62,7 +62,7 @@ const CoinSelectButton = ({
   );
 };
 
-const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
+const CurrencyInput: React.FC<TProps> = ({ actionType, trashButtonContainerWidth = '32px' }) => {
   const [tokenAmountFormatter] = useTokenAmountFormatter();
   const [isVisibile, setIsVisible] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -79,7 +79,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
   const onAmountChange = useDebouncedCallback(
     useCallback(
       (a: number) => {
-        console.log(`Currency input num: ${a}`);
+        console.log(`Currency input num: ${a} of type ${typeof a}`);
         setFieldValue(actionType, {
           ...selectedCurrency,
           amount: a
@@ -90,11 +90,20 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
     200
   );
 
+  const inputRef = useRef<HTMLInputElement>(null);
+  const onTrashClick = useCallback(() => {
+    setFieldValue(actionType, {
+      ...selectedCurrency,
+      amount: 0
+    });
+    inputRef.current?.focus();
+  }, [actionType, selectedCurrency, setFieldValue]);
+
   return (
     <div
       className={cx(
         styles.currencyInput,
-        'bg-primaryGrey w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2'
+        'bg-primaryGrey w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2 relative group'
       )}>
       <div className="flex gap-1 items-center">
         <Popover
@@ -115,6 +124,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
           onClick={() => setIsDrawerVisible(true)}
         />
         <PositiveFloatNumInput
+          ref={inputRef}
           min={0}
           max={1e11}
           maxDecimals={values[actionType]?.token?.decimals.toJsNumber() || 9}
@@ -124,6 +134,15 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
           inputAmount={selectedCurrency?.amount || 0}
           onAmountChange={onAmountChange}
         />
+        {actionType === 'currencyFrom' && !!selectedCurrency?.amount && (
+          <div
+            style={{ width: trashButtonContainerWidth, right: `-${trashButtonContainerWidth}` }}
+            className="mobile:hidden tablet:hidden absolute h-full flex opacity-0 group-hover:opacity-100 hover:opacity-100 items-center justify-center">
+            <Button size="small" variant="icon" onClick={onTrashClick}>
+              <TrashIcon className="font-icon text-grey-500" />
+            </Button>
+          </div>
+        )}
       </div>
       {connected && (
         <div className="flex justify-between font-bold text-grey-500 mt-1 cursor-auto pointer-events-none">
@@ -149,6 +168,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType }) => {
       )}
       <Drawer
         title={<div className="paragraph bold text-black">Select a Token</div>}
+        closable={false}
         height={'80vh'}
         placement={'bottom'}
         onClose={() => setIsDrawerVisible(false)}

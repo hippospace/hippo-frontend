@@ -1,18 +1,18 @@
 import { App, HippoSwapClient, HippoWalletClient } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
 import { CoinListClient } from '@manahippo/hippo-sdk/dist/coinList';
-import { store } from 'Providers';
+// import { store } from 'Providers';
 import { ActiveAptosWallet } from 'types/aptos';
 import { readConfig } from 'utils/hippoWalletUtil';
 import { aptosClient } from './aptosClient';
-import commonActions from 'modules/common/actions';
+// import commonActions from 'modules/common/actions';
 import { debounce } from 'lodash';
 import { message } from 'antd';
 
 const errorHandler = debounce(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (_err: any) => {
-    store.dispatch(commonActions.SET_RESOURCES_NOT_FOUND(true));
+    // store.dispatch(commonActions.SET_RESOURCES_NOT_FOUND(true));
     message.error('Resource not found or loaded');
   },
   1000,

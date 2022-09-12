@@ -15,6 +15,7 @@ import Card from 'components/Card';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useInterval } from 'usehooks-ts';
 import SwapSetting from './SwapSetting';
+import usePrevious from 'hooks/usePrevious';
 
 interface IRoutesProps {
   className?: string;
@@ -70,6 +71,7 @@ const RefreshButton = ({
         disabled={isDisabled}
         onClick={onRefreshClicked}>
         <Tooltip
+          placement="bottomLeft"
           title={`${timePassedAfterRefresh}s after last suceesful refreshing. Click to refresh manually`}>
           <RefreshIcon className={classNames('font-icon', { 'animate-spin': isRefreshing })} />
         </Tooltip>
@@ -90,7 +92,7 @@ const CardHeader = ({ className = '', left }: { className?: string; left?: React
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
         />
         <SettingsButton
-          className="cursor-pointer hidden mobile:block tablet:block"
+          className="cursor-pointer hidden mobile:flex tablet:flex"
           onClick={() => setIsMobileTxSettingsOpen(true)}
         />
         <Card
@@ -103,6 +105,7 @@ const CardHeader = ({ className = '', left }: { className?: string; left?: React
       </Card>
       <Drawer
         height={'auto'}
+        closable={false}
         title={<div className="paragraph bold text-black">Transaction Settings</div>}
         placement={'bottom'}
         onClose={() => setIsMobileTxSettingsOpen(false)}
@@ -432,8 +435,25 @@ const TokenSwap = () => {
     values.quoteChosen
   ]);
 
+  // Scroll the Swap box to vertical middle
+  const swapRef = useRef<HTMLDivElement>(null);
+  const preRouteSelected = usePrevious(routeSelected);
+  useEffect(() => {
+    if (!preRouteSelected && routeSelected) {
+      setTimeout(() => {
+        const height = swapRef.current?.offsetHeight || 0;
+        const topToViewport = swapRef.current?.getBoundingClientRect().top || 0;
+        const top = (window.innerHeight - height) / 2;
+        if (top > 0) {
+          window.scrollBy(0, topToViewport - top);
+        }
+      }, 150);
+    }
+  }, [preRouteSelected, routeSelected]);
+
+  const cardXPadding = '32px';
   return (
-    <>
+    <div className="w-full" ref={swapRef}>
       <CardHeader
         className="pointer-events-auto"
         left={
@@ -446,11 +466,13 @@ const TokenSwap = () => {
         }
       />
       <Card className="w-full min-h-[430px] flex flex-col py-8 relative pointer-events-auto">
-        <div className="w-full flex flex-col px-8 gap-1 mobile:px-4">
+        <div
+          className="w-full flex flex-col gap-1 mobile:!px-4"
+          style={{ paddingLeft: cardXPadding, paddingRight: cardXPadding }}>
           <div className="largeTextBold mb-2 flex">
             <div className="mr-auto">Pay</div>
           </div>
-          <CurrencyInput actionType="currencyFrom" />
+          <CurrencyInput actionType="currencyFrom" trashButtonContainerWidth={cardXPadding} />
           <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
             <SwapIcon />
           </Button>
@@ -490,12 +512,12 @@ const TokenSwap = () => {
             onClick={!activeWallet ? openModal : submitForm}>
             {swapButtonText}
           </Button>
-          {routeSelected && fromSymbol && toSymbol && (
+          {routeSelected && (
             <SwapDetail routeAndQuote={routeSelected} fromSymbol={fromSymbol} toSymbol={toSymbol} />
           )}
         </div>
       </Card>
-    </>
+    </div>
   );
 };
 
