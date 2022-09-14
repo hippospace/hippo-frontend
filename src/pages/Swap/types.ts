@@ -1,18 +1,18 @@
-import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
-import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { AggregatorTypes } from '@manahippo/hippo-sdk';
+import { coin_list } from '@manahippo/hippo-sdk';
 
 export interface ISwapSettings {
   slipTolerance: number;
   trasactionDeadline: number;
   maxGasFee: number;
-  quoteChosen?: RouteAndQuote;
+  quoteChosen?: AggregatorTypes.RouteAndQuote;
   currencyFrom?: {
-    token?: TokenInfo;
+    token?: coin_list.Coin_list.CoinInfo;
     amount?: number;
     balance: number;
   };
   currencyTo?: {
-    token?: TokenInfo;
+    token?: coin_list.Coin_list.CoinInfo;
     amount?: number;
     balance: number;
   };

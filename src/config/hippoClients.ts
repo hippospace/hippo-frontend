@@ -1,6 +1,6 @@
 import { App, HippoSwapClient, HippoWalletClient } from '@manahippo/hippo-sdk';
-import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
-import { CoinListClient } from '@manahippo/hippo-sdk/dist/coinList';
+import { TradeAggregator } from '@manahippo/hippo-sdk';
+import { CoinListClient } from '@manahippo/hippo-sdk';
 // import { store } from 'Providers';
 import { ActiveAptosWallet } from 'types/aptos';
 import { readConfig } from 'utils/hippoWalletUtil';

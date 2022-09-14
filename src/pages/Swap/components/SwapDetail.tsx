@@ -1,4 +1,4 @@
-import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
@@ -11,7 +11,7 @@ const SwapDetail = ({
   fromSymbol,
   toSymbol
 }: {
-  routeAndQuote: RouteAndQuote;
+  routeAndQuote: AggregatorTypes.RouteAndQuote;
   fromSymbol: string;
   toSymbol: string;
 }) => {

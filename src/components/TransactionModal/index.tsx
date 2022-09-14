@@ -1,4 +1,5 @@
-import { SubmitTransactionRequest } from 'aptos/dist/generated';
+import { Types } from 'aptos';
+
 import { message } from 'components/Antd';
 import { WEBWALLET_URL } from 'config/aptosConstants';
 import useHippoClient from 'hooks/useHippoClient';
@@ -35,7 +36,7 @@ const TransactionModal: React.FC<TProps> = () => {
     return () => window.removeEventListener('message', messageHandler);
   }, [messageHandler]);
 
-  const createRequest = useCallback((tx: SubmitTransactionRequest) => {
+  const createRequest = useCallback((tx: Types.SubmitTransactionRequest) => {
     const request = new URLSearchParams({
       request: JSON.stringify({ method: 'signTransaction', request: tx }),
       origin: window.location.origin
