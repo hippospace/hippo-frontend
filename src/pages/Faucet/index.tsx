@@ -6,7 +6,7 @@ import useAptosWallet from 'hooks/useAptosWallet';
 import useHippoClient from 'hooks/useHippoClient';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useCallback, useMemo, useState } from 'react';
-import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { coin_list } from '@manahippo/hippo-sdk';
 import { getTokenList } from 'modules/swap/reducer';
 import { useSelector } from 'react-redux';
 import { Skeleton } from 'antd';
@@ -27,7 +27,7 @@ const Balance = ({ symbol }: { symbol: string }) => {
   );
 };
 
-const TokenCard = ({ tokenInfo }: { tokenInfo: CoinInfo }) => {
+const TokenCard = ({ tokenInfo }: { tokenInfo: coin_list.Coin_list.CoinInfo }) => {
   const [loading, setLoading] = useState('');
   const { requestFaucet, hippoWallet } = useHippoClient();
   const symbol = tokenInfo.symbol.str();

@@ -13,7 +13,7 @@ import { getTokenList } from 'modules/swap/reducer';
 import classNames from 'classnames';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import useDebouncedCallback from 'hooks/useDebouncedCallback';
-import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { coin_list } from '@manahippo/hippo-sdk';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import Button from 'components/Button';
@@ -30,7 +30,7 @@ const CoinSelectButton = ({
   onClick = () => {}
 }: {
   className?: string;
-  token: TokenInfo | undefined;
+  token: coin_list.Coin_list.CoinInfo | undefined;
   isDisabled?: Boolean;
   onClick?: () => void;
 }) => {

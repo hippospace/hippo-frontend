@@ -12,7 +12,7 @@ import {
   UITokenAmount,
   stdlib
 } from '@manahippo/hippo-sdk';
-import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
+import { TradeAggregator } from '@manahippo/hippo-sdk';
 import useAptosWallet from 'hooks/useAptosWallet';
 // import { aptosClient } from 'config/aptosClient';
 import { message } from 'components/Antd';

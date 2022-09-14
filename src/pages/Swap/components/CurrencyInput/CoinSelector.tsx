@@ -9,7 +9,7 @@ import CoinRow from './CoinRow';
 
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
-import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { coin_list } from '@manahippo/hippo-sdk';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -29,10 +29,10 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   });
   const [filter, setFilter] = useState<string>('');
   const { hippoWallet } = useHippoClient();
-  const [tokenListBalance, setTokenListBalance] = useState<TokenInfo[]>();
+  const [tokenListBalance, setTokenListBalance] = useState<coin_list.Coin_list.CoinInfo[]>();
 
   const onSelectToken = useCallback(
-    (token: TokenInfo) => {
+    (token: coin_list.Coin_list.CoinInfo) => {
       const otherActionType: TProps['actionType'] =
         actionType === 'currencyFrom' ? 'currencyTo' : 'currencyFrom';
       if (token.symbol.str() === values[otherActionType]?.token?.symbol.str()) {
@@ -104,7 +104,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         </div>
         <List
           className="h-[376px] overflow-y-scroll no-scrollbar border-0"
-          rowKey={(item) => `list-row-${(item as TokenInfo).symbol.str()}`}>
+          rowKey={(item) => `list-row-${(item as coin_list.Coin_list.CoinInfo).symbol.str()}`}>
           <VirtualList
             data={tokenListBalance || []}
             height={376}

@@ -1,12 +1,12 @@
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
-import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { coin_list } from '@manahippo/hippo-sdk';
 import { Skeleton } from 'antd';
 import CoinIcon from 'components/CoinIcon';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import useTokenBalane from 'hooks/useTokenBalance';
 
 interface TProps {
-  item: CoinInfo;
+  item: coin_list.Coin_list.CoinInfo;
 }
 
 const CoinRow: React.FC<TProps> = ({ item }) => {
