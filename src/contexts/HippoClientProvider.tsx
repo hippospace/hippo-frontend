@@ -24,7 +24,7 @@ import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { useNotification } from 'hooks/useNotification';
 import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
-import { TransactionPayload_EntryFunctionPayload } from 'aptos/dist/generated';
+import { Types } from 'aptos';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -161,7 +161,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const uiAmtUsed = symbol === 'BTC' ? 0.01 : 10;
         const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, true);
         if (payload && tokenInfos) {
-          let pl = payload as TransactionPayload_EntryFunctionPayload;
+          let pl = payload as Types.TransactionPayload_EntryFunctionPayload;
           const result = await signAndSubmitTransaction(pl);
           if (result) {
             message.success('Faucet Success');
@@ -196,7 +196,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         }
         const payload = routeAndQuote.route.makePayload(input, minOut, true);
         const result = await signAndSubmitTransaction(
-          payload as TransactionPayload_EntryFunctionPayload
+          payload as Types.TransactionPayload_EntryFunctionPayload
         );
         if (result) {
           message.success('Transaction Success');

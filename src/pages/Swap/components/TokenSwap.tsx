@@ -7,7 +7,7 @@ import CurrencyInput from './CurrencyInput';
 import SwapDetail from './SwapDetail';
 import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
-import { DEX_TYPE_NAME, RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import classNames from 'classnames';
 import { Drawer, message, Skeleton, Tooltip } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
@@ -19,15 +19,15 @@ import usePrevious from 'hooks/usePrevious';
 
 interface IRoutesProps {
   className?: string;
-  routes: RouteAndQuote[];
-  routeSelected: RouteAndQuote | null;
-  onRouteSelected: (route: RouteAndQuote) => void;
+  routes: AggregatorTypes.RouteAndQuote[];
+  routeSelected: AggregatorTypes.RouteAndQuote | null;
+  onRouteSelected: (route: AggregatorTypes.RouteAndQuote) => void;
   isDesktopScreen?: boolean;
   isRefreshing?: boolean;
 }
 
 interface IRouteRowProps {
-  route: RouteAndQuote;
+  route: AggregatorTypes.RouteAndQuote;
   isSelected?: boolean;
   isBestPrice: boolean;
 }
@@ -118,7 +118,9 @@ const CardHeader = ({ className = '', left }: { className?: string; left?: React
 
 const routeRowHeight = 66;
 const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestPrice = false }) => {
-  const swapDexs = route.route.steps.map((s) => DEX_TYPE_NAME[s.pool.dexType]).join(' x ');
+  const swapDexs = route.route.steps
+    .map((s) => AggregatorTypes.DEX_TYPE_NAME[s.pool.dexType])
+    .join(' x ');
   const swapRoutes = [
     route.route.steps[0].xCoinInfo.symbol.str(),
     ...route.route.steps.map((s, index) => (
@@ -243,8 +245,8 @@ const TokenSwap = () => {
   const fromSymbol = values.currencyFrom?.token?.symbol.str() || 'USDC';
   const toSymbol = values.currencyTo?.token?.symbol.str() || 'BTC';
   const fromUiAmt = values.currencyFrom?.amount;
-  const [allRoutes, setAllRoutes] = useState<RouteAndQuote[]>([]);
-  const [routeSelected, setRouteSelected] = useState<RouteAndQuote | null>(null);
+  const [allRoutes, setAllRoutes] = useState<AggregatorTypes.RouteAndQuote[]>([]);
+  const [routeSelected, setRouteSelected] = useState<AggregatorTypes.RouteAndQuote | null>(null);
 
   const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
   const [timePassedAfterRefresh, setTimePassedAfterRefresh] = useState(0);
@@ -295,7 +297,7 @@ const TokenSwap = () => {
   );
 
   const setRoute = useCallback(
-    (ro: RouteAndQuote | null) => {
+    (ro: AggregatorTypes.RouteAndQuote | null) => {
       setRouteSelected(ro);
       setFieldValue('quoteChosen', ro);
     },
