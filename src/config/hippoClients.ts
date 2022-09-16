@@ -59,7 +59,7 @@ export const hippoTradeAggregator = async () => {
   let agg: TradeAggregator | undefined;
   try {
     const netConf = readConfig();
-    agg = await TradeAggregator.create(new App(aptosClient), netConf.simulationKeys);
+    agg = await TradeAggregator.create(aptosClient, netConf);
   } catch (err: any) {
     console.log('Get hippo trade aggregator failed', err);
     errorHandler(err);
