@@ -22,7 +22,7 @@ const Option: React.FC<TOptionProps> = ({ onClick, label, icon }) => {
 };
 
 const WalletSelector = ({ onConnected }: { onConnected: () => any }) => {
-  const { wallets, connect } = useWallet();
+  const { wallets, select } = useWallet();
 
   const renderButtonGroup = useMemo(() => {
     return wallets.map((wallet) => {
@@ -33,13 +33,13 @@ const WalletSelector = ({ onConnected }: { onConnected: () => any }) => {
           label={option.name}
           icon={option.icon}
           onClick={async () => {
-            await connect(option.name);
+            await select(option.name);
             onConnected();
           }}
         />
       );
     });
-  }, [wallets, connect, onConnected]);
+  }, [wallets, select, onConnected]);
 
   return (
     <div className="p-6 flex flex-col gap-6">
