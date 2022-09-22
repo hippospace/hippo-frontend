@@ -39,6 +39,7 @@
     "react-scripts": "5.0.1",
     "react-spring": "^9.4.5",
     "react-use-scroll-position": "^2.0.0",
+    "recharts": "^2.1.14",
     "redux-logger": "^3.0.6",
     "sass": "^1.53.0",
     "source-map-explorer": "^2.5.2",

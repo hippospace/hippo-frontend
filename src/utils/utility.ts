@@ -11,3 +11,9 @@ export const walletAddressEllipsis = (address: string | undefined) => {
   }
   return address.slice(0, 4) + '...' + address.slice(-6);
 };
+
+export const addDays = (date: Date, days: number) => {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};

@@ -1,8 +1,4 @@
-import {
-  avoidScientificNotation,
-  cutDecimals,
-  numToGrouped
-} from 'components/PositiveFloatNumInput';
+import { numberGroupFormat } from 'components/PositiveFloatNumInput/numberFormats';
 import { useMemo } from 'react';
 import useHippoClient from './useHippoClient';
 
@@ -14,7 +10,7 @@ const useTokenAmountFormatter = () => {
       (amount: number | undefined | null, tokenSymbol: string | undefined): string => {
         if (typeof amount !== 'number' || !tokenSymbol || !tokenInfos) return '';
         const decimals = tokenInfos[tokenSymbol].decimals.toJsNumber();
-        return numToGrouped(cutDecimals(avoidScientificNotation(amount), decimals));
+        return numberGroupFormat(amount, decimals);
       },
     [tokenInfos]
   );

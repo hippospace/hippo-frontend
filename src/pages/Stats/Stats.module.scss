@@ -1,0 +1,33 @@
+.segmentedSelector {
+  @apply p-1;
+  @apply rounded-full #{!important};
+  &:hover {
+    @apply bg-secondary #{!important};
+  }
+  :global {
+    .ant-segmented-item {
+      @apply duration-[0s];
+      &:hover, &:active {
+        @apply text-grey-500;
+      }
+    }
+    .ant-segmented-item-selected {
+      @apply rounded-full bg-grey-900 text-grey-100;
+      &:hover {
+        @apply text-grey-100;
+      }
+    }
+    .ant-segmented-item-label {
+      @apply largeTextBold h-8 flex items-center justify-center w-[74px];
+    }
+    .ant-segmented-thumb-motion-appear ~ .ant-segmented-item {
+      .ant-segmented-item-label {
+        @apply text-grey-500 #{!important};
+      }
+    }
+
+    .ant-segmented-thumb-motion-appear-active {
+      @apply bg-grey-900 rounded-full duration-150;
+    }
+  }
+}

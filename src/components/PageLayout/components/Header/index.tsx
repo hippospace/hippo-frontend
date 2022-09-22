@@ -98,7 +98,11 @@ const PageHeader: React.FC = () => {
             className={classNames('h-full flex items-center justify-center', {
               'mobile:hidden': currentPageName !== 'Home'
             })}>
-            <LogoIcon className="w-auto h-[48px] mobile:h-full" />
+            <LogoIcon className="w-auto h-[48px] mobile:h-full tablet:hidden mobile:block" />
+            <LogoIcon
+              className="w-auto h-[48px] mobile:h-full hidden tablet:block mobile:hidden"
+              hasLabel={false}
+            />
           </Link>
           <div
             className={classNames('hidden h6 h-full', {

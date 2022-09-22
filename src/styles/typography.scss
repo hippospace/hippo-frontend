@@ -50,11 +50,11 @@
   }
 
   h2, .h2 {
-    @apply text-[48px] leading-[58px];
+    @apply text-[48px] leading-[58px] font-bold;
   }
 
   h3, .h3 {
-    @apply text-[40px] leading-[48px];
+    @apply text-[40px] leading-[48px] font-bold;
   }
 
   h4, .h4 {

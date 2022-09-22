@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 import invariant from 'tiny-invariant';
+import { avoidScientificNotation, cutDecimals, numToGrouped } from './numberFormats';
 
 type PositiveFloatNumInputProps = {
   inputAmount?: number;
@@ -15,60 +16,6 @@ type PositiveFloatNumInputProps = {
   onInputChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onEnter?: () => {};
   onAmountChange?: (a: number) => void;
-};
-
-export const numToGrouped = (num: string) => {
-  return num
-    .split('.')
-    .map((v, index) => {
-      if (index > 0) return v;
-      else {
-        return v
-          .split('')
-          .map((l, index2) => {
-            const revertIndex = v.length - index2;
-            if ((revertIndex - 1) % 3 === 0 && revertIndex !== 1) {
-              return `${l},`;
-            } else {
-              return l;
-            }
-          })
-          .join('');
-      }
-    })
-    .join('.');
-};
-
-export const avoidScientificNotation = (x: number) => {
-  invariant(x >= 0 && x <= Number.MAX_SAFE_INTEGER, 'Invalid number range');
-  let res = x.toString();
-  if (Math.abs(x) < 1.0) {
-    const e = parseInt(x.toString().split('e-')[1]);
-    if (e) {
-      x *= Math.pow(10, e - 1);
-      res = '0.' + new Array(e).join('0') + x.toString().substring(2);
-    }
-  }
-  // Note we don't consider the case x >= 1e21 which would also be converted to scientific notation by js
-  return res;
-};
-
-// Cut decimals to its max allowed count
-export const cutDecimals = (v: string, maxDecimals: number | undefined) => {
-  const decimalsLength = v.split('.')[1]?.length || 0;
-  if (typeof maxDecimals === 'number' && decimalsLength > maxDecimals) {
-    v = v
-      .split('.')
-      .map((vs, index) => {
-        if (index > 0) {
-          return vs.slice(0, maxDecimals);
-        }
-        return vs;
-      })
-      .join('.');
-    if (/^[\d]+\.$/.test(v)) v = v.replace('.', '');
-  }
-  return v;
 };
 
 const MIN_DEFAULT = 0;

@@ -32,6 +32,7 @@ interface HippoClientContextType {
   hippoSwap?: HippoSwapClient;
   tokenStores?: Record<string, stdlib.Coin.CoinStore>;
   tokenInfos?: Record<string, CoinInfo>;
+  getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
   requestSwapByRoute: (routeAndQuote: RouteAndQuote, slipTolerance: number) => Promise<boolean>;
   requestSwap?: (
     fromSymbol: string,
@@ -100,14 +101,16 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   const getTokenInfos = useCallback(async () => {
     const client = await coinListClient();
-    /*
-    console.log(
-      'coin list',
-      client?.coinList.map((c) => c.name.str())
-    );
-    */
     setTokenInfos(client?.symbolToCoinInfo);
   }, []);
+
+  const getTokenInfoByFullName = useCallback(
+    (fullName: string) => {
+      if (!tokenInfos) return undefined;
+      return Object.values(tokenInfos).find((ti) => ti.token_type.typeFullname() === fullName);
+    },
+    [tokenInfos]
+  );
 
   useEffect(() => {
     getHippoWalletClient();
@@ -307,6 +310,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         hippoAgg,
         tokenStores,
         tokenInfos,
+        getTokenInfoByFullName,
         requestSwapByRoute,
         transaction,
         setTransaction,

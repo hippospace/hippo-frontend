@@ -6,9 +6,10 @@ import Faucet from 'pages/Faucet';
 import Home from 'pages/Home';
 import { useSelector } from 'react-redux';
 import { getIsResourcesNotFound } from 'modules/common/reducer';
+import Stats from 'pages/Stats';
 
 export type TRoute = RouteObject & {
-  name: 'Home' | 'Pools' | 'Swap' | '404' | 'Faucet';
+  name: 'Home' | 'Pools' | 'Swap' | '404' | 'Faucet' | 'Stats';
   hidden?: boolean; //to hide the visibility in header menu
 };
 
@@ -34,26 +35,11 @@ export const routes: TRoute[] = [
     name: 'Faucet',
     element: <Faucet />
   },
-  // {
-  //   path: 'stake',
-  //   name: 'Stake',
-  //   element: <Swap />
-  // },
-  // {
-  //   path: 'vote',
-  //   name: 'Vote',
-  //   element: <Swap />
-  // },
-  // {
-  //   path: 'launchpad',
-  //   name: 'Launchpad',
-  //   element: <Swap />
-  // },
-  // {
-  //   path: 'stats',
-  //   name: 'Stats',
-  //   element: <Swap />
-  // },
+  {
+    path: 'stats',
+    name: 'Stats',
+    element: <Stats />
+  },
   {
     path: '*',
     name: '404',

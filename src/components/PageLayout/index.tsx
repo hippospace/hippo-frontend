@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
 import SwapIllu from 'resources/img/swap-illu-2x.png';
+import { TRoute } from 'App.routes';
 // import styles from './PageLayout.module.scss';
 
 const { Content } = Antd.Layout;
@@ -30,7 +31,7 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         'bg-home1': currentPageName === 'Home',
         'bg-swap': currentPageName !== 'Home'
       })}>
-      {currentPageName !== 'Home' && (
+      {(['Swap', 'Faucet'] as TRoute['name'][]).includes(currentPageName) && (
         <>
           <img src={SwapIllu} className="absolute top-0 bottom-0 mx-auto w-full opacity-[0.2]" />
         </>
