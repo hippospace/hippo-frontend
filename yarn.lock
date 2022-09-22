@@ -1835,22 +1835,22 @@
     aptos "^1.3.12"
     eventemitter3 "^4.0.7"
 
-"@manahippo/hippo-sdk@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.5.0.tgz#3572a56e65d2a60678e61dc372b1b30229cf962d"
-  integrity sha512-jTQHahM2yGa2JUOxsQdavf3vaTjAPBgFXpGyhjZGN0ktrFDmgs025qu9nfE2+5zFrmg0i6eW/nTyfUB9o+cT9w==
+"@manahippo/hippo-sdk@0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.5.3.tgz#64f04dd2ae1fd8db7c87214c864d36d220a6bfdf"
+  integrity sha512-9IM+lGmUnvX3zZe2UI1WVjemQMYy9we9T8p0hF240ygZ1K0XaI1l3ChA17M0alVjjILCiheZtySCy1pKnqFwyA==
   dependencies:
-    "@manahippo/move-to-ts" "0.3.3"
-    aptos "1.3.13"
+    "@manahippo/move-to-ts" "0.3.4"
+    aptos "1.3.14"
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.3.3.tgz#087e1933dad1eb8ba5c0bae90fd84d78d60ceff4"
-  integrity sha512-YqJuDKUnllDpSymGpC/mOndDWWJKg27YAhWhw7ytFgbJzDztIPffsYJTn1o72M5K8qI6tcJVT2jJWLIJ9KQT3w==
+"@manahippo/move-to-ts@0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.3.4.tgz#48df8bb3a98692042ac9d5f8f18a672b83c727a7"
+  integrity sha512-eui+2AkuzKZvMg5B5Srwr2cv50QxsGXb7mOVRtjQK2eCyegEtZMODQwGGeR3uIxoqrvlLRKsP0LEpC6MNCu09w==
   dependencies:
-    aptos "1.3.13"
+    aptos "1.3.14"
     big-integer "^1.6.51"
     elliptic "^6.5.4"
     json-stable-stringify "^1.0.1"
@@ -3180,16 +3180,15 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aptos@1.3.13, aptos@^1.3.12:
-  version "1.3.13"
-  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.13.tgz#cbf12431b6ee66a3d1952b1d1ce6520005170da0"
-  integrity sha512-rhpG9ibIWZxMLsUY91bSCeN75H68onvms/gTDaWRKkryOAVdzPUmvWd34TQN8uFjNZRFlXloIICm/8Ri+yBRNw==
+aptos@1.3.14:
+  version "1.3.14"
+  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.14.tgz#7487b4fd783dd5dfb49419f6e907a95c8ca7ce22"
+  integrity sha512-9AZ7fKgOwLoOITnw3nz2Nzon/HjKrHDU6n893S4MhsmHXK85R4NG4UyTyIczhWGWVdytJiPCkEZufhzsH4eZCw==
   dependencies:
     "@noble/hashes" "1.1.2"
     "@scure/bip39" "1.1.0"
     axios "0.27.2"
     form-data "4.0.0"
-    js-sha3 "0.8.0"
     tweetnacl "1.0.3"
 
 aptos@^1.3.10:
@@ -3205,6 +3204,18 @@ aptos@^1.3.10:
     tweetnacl "^1.0.3"
     typescript-memoize "^1.1.0"
     yarn "^1.22.19"
+
+aptos@^1.3.12:
+  version "1.3.13"
+  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.13.tgz#cbf12431b6ee66a3d1952b1d1ce6520005170da0"
+  integrity sha512-rhpG9ibIWZxMLsUY91bSCeN75H68onvms/gTDaWRKkryOAVdzPUmvWd34TQN8uFjNZRFlXloIICm/8Ri+yBRNw==
+  dependencies:
+    "@noble/hashes" "1.1.2"
+    "@scure/bip39" "1.1.0"
+    axios "0.27.2"
+    form-data "4.0.0"
+    js-sha3 "0.8.0"
+    tweetnacl "1.0.3"
 
 arg@^4.1.0:
   version "4.1.3"
