@@ -1509,12 +1509,12 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@fewcha/web3@^0.1.25":
-  version "0.1.25"
-  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.1.25.tgz#bd9a66d0cda4b1fed17a441ea77616ae5ec930ee"
-  integrity sha512-Jgt4W4gNnviL7jqexu73Jr/Mag8eHZUIqDE52kY6tXKqXlaDb22DwqCLfcccZPy0YMMvOr/Y5S+DmoVruipOxQ==
+"@fewcha/web3@^0.1.28":
+  version "0.1.28"
+  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.1.28.tgz#f9bed1ac3aa88ec83ea1ac1d07aada62d2835506"
+  integrity sha512-NsVGuTwtKyMsN5SN6B0POZ3FUC7tr3OrY+cEZZMKBq7XGASJPKm0zumW22Q0vRI/mDQqrY/g6p47SXBl9hxNEQ==
   dependencies:
-    aptos "^1.3.10"
+    aptos "^1.3.13"
     buffer "^6.0.3"
 
 "@humanwhocodes/config-array@^0.10.4":
@@ -1823,16 +1823,16 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.3.7.tgz#41d26442635d1d26153499133b855fdd5ad97cf4"
-  integrity sha512-WkIboKxfORbq19bMUETWyvAqw6oRYTZBVYKmj+ok7oBaOmveyfnbzwOz+ONDf8fvA2+gOdO9v2caeHZUgSxzqg==
+"@manahippo/aptos-wallet-adapter@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.4.1.tgz#e4a7137917348ece44cba4be75bc03ddf75dda76"
+  integrity sha512-vglXouQHR+/XfPJN6fGX0Sxoelkc+B4SiQulpj4eUz5ZLG3WXTgwApt+PiDvf86CnXw/pmwsF7JBoA7DAf2juw==
   dependencies:
-    "@fewcha/web3" "^0.1.25"
+    "@fewcha/web3" "^0.1.28"
     "@types/jest" "^27.0.1"
     "@types/node" "^18.7.6"
     "@types/react" "^18.0.17"
-    aptos "^1.3.12"
+    aptos "1.3.14"
     eventemitter3 "^4.0.7"
 
 "@manahippo/hippo-sdk@0.5.3":
@@ -2041,7 +2041,7 @@
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.1.tgz#ebb651ee52ff84f420097055f4bf46cfba403938"
   integrity sha512-ZxOhsSyxYwLJj3pLZCefNitxsj093tb2vq90mp2txoYeBqbcjDjqFhyM8eUjq/uFm6zJ+mUuqxlS2FkuSY1MTA==
 
-"@scure/bip39@1.1.0", "@scure/bip39@^1.1.0":
+"@scure/bip39@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@scure/bip39/-/bip39-1.1.0.tgz#92f11d095bae025f166bef3defcc5bf4945d419a"
   integrity sha512-pwrPOS16VeTKg98dYXQyIjJEcWfz7/1YJIwxUEPFfQPtc86Ym/1sVgQ2RLoD43AazMk2l/unK4ITySSpW2+82w==
@@ -3180,7 +3180,7 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aptos@1.3.14:
+aptos@1.3.14, aptos@^1.3.13:
   version "1.3.14"
   resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.14.tgz#7487b4fd783dd5dfb49419f6e907a95c8ca7ce22"
   integrity sha512-9AZ7fKgOwLoOITnw3nz2Nzon/HjKrHDU6n893S4MhsmHXK85R4NG4UyTyIczhWGWVdytJiPCkEZufhzsH4eZCw==
@@ -3189,32 +3189,6 @@ aptos@1.3.14:
     "@scure/bip39" "1.1.0"
     axios "0.27.2"
     form-data "4.0.0"
-    tweetnacl "1.0.3"
-
-aptos@^1.3.10:
-  version "1.3.10"
-  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.10.tgz#a801e25456159485d27d0ff738c5e1fbd9fe073d"
-  integrity sha512-a5DUuFR22gwxLBZqyXxIO656oA5pjHfON8Ll0sYdQGwUwnFYnbgJd9C7TFJok2/kGrRkM1rwyMdqsECVRPpqYA==
-  dependencies:
-    "@scure/bip39" "^1.1.0"
-    axios "^0.27.2"
-    buffer "^6.0.3"
-    ed25519-hd-key "^1.2.0"
-    js-sha3 "^0.8.0"
-    tweetnacl "^1.0.3"
-    typescript-memoize "^1.1.0"
-    yarn "^1.22.19"
-
-aptos@^1.3.12:
-  version "1.3.13"
-  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.13.tgz#cbf12431b6ee66a3d1952b1d1ce6520005170da0"
-  integrity sha512-rhpG9ibIWZxMLsUY91bSCeN75H68onvms/gTDaWRKkryOAVdzPUmvWd34TQN8uFjNZRFlXloIICm/8Ri+yBRNw==
-  dependencies:
-    "@noble/hashes" "1.1.2"
-    "@scure/bip39" "1.1.0"
-    axios "0.27.2"
-    form-data "4.0.0"
-    js-sha3 "0.8.0"
     tweetnacl "1.0.3"
 
 arg@^4.1.0:
@@ -3403,7 +3377,7 @@ axe-core@^4.4.3:
   resolved "https://registry.npmjs.org/axe-core/-/axe-core-4.4.3.tgz"
   integrity sha512-32+ub6kkdhhWick/UjvEwRchgoetXqTK14INLqbGm5U2TzBkBNF3nQtLYm8ovxSkQWArjEQvftCKryjZaATu3w==
 
-axios@0.27.2, axios@^0.27.2:
+axios@0.27.2:
   version "0.27.2"
   resolved "https://registry.npmjs.org/axios/-/axios-0.27.2.tgz"
   integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==
@@ -4337,7 +4311,7 @@ create-hash@^1.1.0, create-hash@^1.1.2, create-hash@^1.2.0:
     ripemd160 "^2.0.1"
     sha.js "^2.4.0"
 
-create-hmac@1.1.7, create-hmac@^1.1.0, create-hmac@^1.1.4, create-hmac@^1.1.7:
+create-hmac@^1.1.0, create-hmac@^1.1.4, create-hmac@^1.1.7:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/create-hmac/-/create-hmac-1.1.7.tgz#69170c78b3ab957147b2b8b04572e47ead2243ff"
   integrity sha512-MJG9liiZ+ogc4TzUwuvbER1JRdgvUFSB5+VR/g5h82fGaIRWMWddtKBHi7/sVhfjQZ6SehlyhvQYrcYkaUIpLg==
@@ -4963,14 +4937,6 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
-
-ed25519-hd-key@^1.2.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/ed25519-hd-key/-/ed25519-hd-key-1.3.0.tgz#e0bd2be4c07e15c753d5ed3aca30744e321b7c78"
-  integrity sha512-IWwAyiiuJQhgu3L8NaHb68eJxTu2pgCwxIBdgpLJdKpYZM46+AXePSVTr7fkNKaUOfOL4IrjEUaQvyVRIDP7fg==
-  dependencies:
-    create-hmac "1.1.7"
-    tweetnacl "1.0.3"
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -11187,7 +11153,7 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
-tweetnacl@1.0.3, tweetnacl@^1.0.3:
+tweetnacl@1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/tweetnacl/-/tweetnacl-1.0.3.tgz"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
@@ -11255,11 +11221,6 @@ typedarray-to-buffer@^3.1.5:
   integrity sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==
   dependencies:
     is-typedarray "^1.0.0"
-
-typescript-memoize@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.npmjs.org/typescript-memoize/-/typescript-memoize-1.1.0.tgz"
-  integrity sha512-LQPKVXK8QrBBkL/zclE6YgSWn0I8ew5m0Lf+XL00IwMhlotqRLlzHV+BRrljVQIc+NohUAuQP7mg4HQwrx5Xbg==
 
 typescript@^4.4.2:
   version "4.7.4"
@@ -12311,11 +12272,6 @@ yargs@^16.2.0:
     string-width "^4.2.0"
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
-
-yarn@^1.22.19:
-  version "1.22.19"
-  resolved "https://registry.npmjs.org/yarn/-/yarn-1.22.19.tgz"
-  integrity sha512-/0V5q0WbslqnwP91tirOvldvYISzaqhClxzyUKXYxs07yUILIs5jx/k6CFe8bvKSkds5w+eiOqta39Wk3WxdcQ==
 
 yn@3.1.1:
   version "3.1.1"
