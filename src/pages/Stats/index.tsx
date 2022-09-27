@@ -23,6 +23,10 @@ const Stats = () => {
   const [statsPeriod, setStatsPeriod] = useState<Peroid>('24H');
 
   const [volume, setVolume] = useState<hippo_aggregator.Volume.Volume | null>(null);
+  const volumeScale = useMemo(
+    () => 10 ** (volume?.volume_decimals.toJsNumber() || 0),
+    [volume?.volume_decimals]
+  );
 
   const topPoolProviders2 = useMemo(() => {
     if (!volume) return [];
@@ -37,15 +41,15 @@ const Stats = () => {
         // eslint-disable-next-line react/jsx-key
         <>
           <span className="largeTextBold text-grey-700 mobile:hidden">
-            ${numberGroupFormat(pp.amount.toJsNumber() / volume.volume_decimals.toJsNumber(), 2)}
+            ${numberGroupFormat(pp.amount.toJsNumber() / volumeScale, 0)}
           </span>
           <span className="largeTextBold text-grey-700 hidden mobile:block">
-            ${numberOfAbbr(pp.amount.toJsNumber() / volume.volume_decimals.toJsNumber(), 1)}
+            ${numberOfAbbr(pp.amount.toJsNumber() / volumeScale, 1)}
           </span>
         </>
       ];
     });
-  }, [statsPeriod, volume]);
+  }, [statsPeriod, volume, volumeScale]);
 
   const topTradingPairs2 = useMemo(() => {
     if (!volume) return [];
@@ -60,15 +64,15 @@ const Stats = () => {
         // eslint-disable-next-line react/jsx-key
         <>
           <span className="largeTextBold text-grey-700 mobile:hidden">
-            ${numberGroupFormat(tp.amount.toJsNumber() / volume.volume_decimals.toJsNumber(), 2)}
+            ${numberGroupFormat(tp.amount.toJsNumber() / volumeScale, 0)}
           </span>
           <span className="largeTextBold text-grey-700 hidden mobile:block">
-            ${numberOfAbbr(tp.amount.toJsNumber() / volume.volume_decimals.toJsNumber(), 1)}
+            ${numberOfAbbr(tp.amount.toJsNumber() / volumeScale, 1)}
           </span>
         </>
       ];
     });
-  }, [statsPeriod, volume]);
+  }, [statsPeriod, volume, volumeScale]);
 
   const historyVolumes = useMemo(() => {
     if (!volume) return [];
@@ -83,12 +87,13 @@ const Stats = () => {
         '' + (statsPeriod === '24H' ? new Date(time).getUTCDate() : new Date(time).getUTCDate());
       const startDate = utcDate(new Date(time));
       const endDate = utcDate(addDays(new Date(time), 6));
-      const label = statsPeriod === '24H' ? startDate : `${startDate} ~ ${endDate}`;
+      const label =
+        statsPeriod === '24H' ? `${startDate} (UTC)` : `${startDate} ~ ${endDate} (UTC)`;
       return {
         time,
         name,
         label,
-        amount: v.amount.toJsNumber() / volume.volume_decimals.toJsNumber()
+        amount: v.amount.toJsNumber() / volumeScale
       };
     });
     /*
@@ -98,7 +103,7 @@ const Stats = () => {
       label: '' + index
     }));
     */
-  }, [statsPeriod, volume]);
+  }, [statsPeriod, volume, volumeScale]);
 
   const volumeInPeriod = useMemo(() => {
     // TODO: change to realtime value
@@ -106,21 +111,21 @@ const Stats = () => {
     if (statsPeriod === '24H') {
       const volumeDay = volume.total_volume_history_24h.slice(-2)[0];
       return {
-        peroid: utcDate(new Date(volumeDay.start_time.toJsNumber())) + ' 00:00 ~ 24:00',
-        amount: volumeDay.amount.toJsNumber() / volume.volume_decimals.toJsNumber()
+        peroid: utcDate(new Date(volumeDay.start_time.toJsNumber())) + ' 00:00 ~ 24:00 (UTC)',
+        amount: volumeDay.amount.toJsNumber() / volumeScale
       };
     } else if (statsPeriod === '1 Week') {
       const volumeWeek = volume.total_volume_history_7d.slice(-2)[0];
       return {
         peroid: `${utcDate(new Date(volumeWeek.start_time.toJsNumber()))} ~ ${utcDate(
           addDays(new Date(volumeWeek.start_time.toJsNumber()), 6)
-        )}`,
-        amount: (volumeWeek.amount.toJsNumber() || 0) / volume.volume_decimals.toJsNumber()
+        )} (UTC)`,
+        amount: (volumeWeek.amount.toJsNumber() || 0) / volumeScale
       };
     } else {
       throw new Error('Invalid stats peroid');
     }
-  }, [statsPeriod, volume]);
+  }, [statsPeriod, volume, volumeScale]);
 
   const volumeTotal = useMemo(() => {
     // TODO: change to actual one
@@ -128,10 +133,10 @@ const Stats = () => {
     const tvh =
       statsPeriod === '24H' ? volume.total_volume_history_24h : volume.total_volume_history_7d;
     const totalV = tvh.reduce((pre, cur) => {
-      return pre + cur.amount.toJsNumber() / volume.volume_decimals.toJsNumber();
+      return pre + cur.amount.toJsNumber() / volumeScale;
     }, 0);
     return totalV;
-  }, [statsPeriod, volume]);
+  }, [statsPeriod, volume, volumeScale]);
 
   const switchToOtherPeriod = useCallback((v: string | number) => {
     setStatsPeriod(v as Peroid);
@@ -170,10 +175,10 @@ const Stats = () => {
             </div>
             <div>
               <div className="h2 mobile:h5 mb-3 tablet:mb-1">
-                ${numberGroupFormat(volumeInPeriod.amount, 2)}
+                ${numberGroupFormat(volumeInPeriod.amount, 0)}
               </div>
               <div className="textLargeNormal text-grey-500 font-[500] text-right tablet:text-left">
-                ${numberGroupFormat(volumeTotal, 2)} Total Volume
+                ${numberGroupFormat(volumeTotal, 0)} Total Volume
               </div>
             </div>
           </>
