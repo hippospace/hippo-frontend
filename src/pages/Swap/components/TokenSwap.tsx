@@ -9,21 +9,23 @@ import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import classNames from 'classnames';
-import { Drawer, message, Skeleton, Tooltip } from 'antd';
+import { Drawer, message, Modal, Skeleton, Tooltip } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useInterval } from 'usehooks-ts';
 import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
+import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 
 interface IRoutesProps {
   className?: string;
   routes: AggregatorTypes.RouteAndQuote[];
   routeSelected: AggregatorTypes.RouteAndQuote | null;
-  onRouteSelected: (route: AggregatorTypes.RouteAndQuote) => void;
+  onRouteSelected: (route: AggregatorTypes.RouteAndQuote, index: number) => void;
   isDesktopScreen?: boolean;
   isRefreshing?: boolean;
+  refreshButton?: ReactNode;
 }
 
 interface IRouteRowProps {
@@ -31,6 +33,12 @@ interface IRouteRowProps {
   isSelected?: boolean;
   isBestPrice: boolean;
 }
+
+const serializeRouteQuote = (rq: RouteAndQuote) => {
+  return `${rq.quote.inputUiAmt}:${rq.route.steps
+    .map((s) => s.pool.dexType)
+    .join('x')}:${rq.route.tokens.map((t) => t.symbol.str()).join('->')}`;
+};
 
 const SettingsButton = ({
   className = '',
@@ -55,15 +63,17 @@ const RefreshButton = ({
   isRefreshing,
   timePassedAfterRefresh,
   isDisabled = false,
-  onRefreshClicked
+  onRefreshClicked,
+  className = ''
 }: {
   isRefreshing: boolean;
   timePassedAfterRefresh: number;
   isDisabled?: boolean;
   onRefreshClicked: () => void;
+  className?: string;
 }) => {
   return (
-    <Card className="h-full w-fit">
+    <Card className={classNames('h-full w-fit', className)}>
       <Button
         className="!h-full !px-2"
         variant="icon"
@@ -80,13 +90,12 @@ const RefreshButton = ({
   );
 };
 
-const CardHeader = ({ className = '', left }: { className?: string; left?: ReactNode }) => {
+const CardHeader = ({ className = '', right }: { className?: string; right?: ReactNode }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   return (
     <div className={classNames('w-full flex h-8 items-center mb-1 largeTextNormal', className)}>
-      {left}
-      <Card className="ml-auto h-full relative w-fit">
+      <Card className="mr-auto h-full relative w-fit">
         <SettingsButton
           className="tablet:hidden mobile:hidden"
           onClick={() => setIsSettingsOpen(!isSettingsOpen)}
@@ -97,12 +106,13 @@ const CardHeader = ({ className = '', left }: { className?: string; left?: React
         />
         <Card
           className={classNames(
-            'absolute top-11 w-[400px] -right-[420px] px-8 laptop:w-[368px] laptop:-right-[calc(368px+20px)] py-8 laptop:px-4 mobile:hidden tablet:hidden scale-[50%] origin-top-left opacity-0 transition-all',
+            'absolute top-9 w-[400px] -left-[420px] px-8 laptop:w-[368px] laptop:-left-[calc(368px+20px)] py-8 laptop:px-4 tablet:hidden scale-[50%] origin-top-right opacity-0 transition-all',
             { '!opacity-100 !scale-100': isSettingsOpen }
           )}>
           <SwapSetting onClose={() => setIsSettingsOpen(false)} />
         </Card>
       </Card>
+      {right}
       <Drawer
         height={'auto'}
         closable={false}
@@ -177,7 +187,8 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   routeSelected,
   className = '',
   isDesktopScreen = false,
-  isRefreshing = false
+  isRefreshing = false,
+  refreshButton
 }) => {
   const [isMore, setIsMore] = useState(false);
   const rowsWhenLess = 2;
@@ -190,8 +201,9 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
   return (
     <div className={className}>
-      <div className="helpText text-grey-500 font-bold mb-1">
+      <div className="helpText text-grey-500 font-bold mb-2 flex justify-between items-center">
         <div>Total {routes.length} routes available</div>
+        <div>{refreshButton}</div>
       </div>
       <div
         className={classNames('overflow-x-hidden overflow-y-auto pr-1', {
@@ -203,7 +215,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
           routeSelected &&
           routes.map((ro, index) => {
             return (
-              <div key={`route-${index}`} onClick={() => onRouteSelected(ro)}>
+              <div key={`route-${index}`} onClick={() => onRouteSelected(ro, index)}>
                 <RouteRow route={ro} isSelected={ro === routeSelected} isBestPrice={index === 0} />
               </div>
             );
@@ -247,6 +259,7 @@ const TokenSwap = () => {
   const fromUiAmt = values.currencyFrom?.amount;
   const [allRoutes, setAllRoutes] = useState<AggregatorTypes.RouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<AggregatorTypes.RouteAndQuote | null>(null);
+  const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
 
   const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
   const [timePassedAfterRefresh, setTimePassedAfterRefresh] = useState(0);
@@ -332,7 +345,13 @@ const TokenSwap = () => {
           // check if parameters are not stale
           if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
             setAllRoutes(routes);
-            setRoute(routes[0]);
+            let manuallySelectedRoute;
+            if (routeSelectedSerialized) {
+              manuallySelectedRoute = routes.find(
+                (r) => serializeRouteQuote(r) === routeSelectedSerialized
+              );
+            }
+            setRoute(manuallySelectedRoute || routes[0]);
             if (isReload) {
               // restart interval timer
               setTimePassedAfterRefresh(0);
@@ -343,6 +362,7 @@ const TokenSwap = () => {
         } else {
           setAllRoutes([]);
           setRoute(null);
+          setRouteSelectedSerialized('');
           setRefreshRoutesTimerTick(null);
         }
       } catch (error) {
@@ -365,6 +385,7 @@ const TokenSwap = () => {
       toSymbol,
       fromUiAmt,
       ifInputParametersDifferentWithLatest,
+      routeSelectedSerialized,
       setRoute,
       setFieldValue,
       values.currencyFrom
@@ -453,13 +474,40 @@ const TokenSwap = () => {
     }
   }, [preRouteSelected, routeSelected]);
 
+  const onUserSelectRoute = useCallback(
+    (ro: RouteAndQuote, index: number) => {
+      setRoute(ro);
+      setRouteSelectedSerialized(index === 0 ? '' : serializeRouteQuote(ro));
+    },
+    [setRoute]
+  );
+
+  const onSwap = useCallback(() => {
+    if (routeSelectedSerialized) {
+      Modal.warning({
+        title: 'Are you sure to proceed?',
+        content: "You're not chosing the best price route",
+        okText: 'Proceed anyway',
+        okCancel: true,
+        cancelText: 'Cancel',
+        maskClosable: true,
+        onOk: () => {
+          submitForm();
+        }
+      });
+      return;
+    }
+    submitForm();
+  }, [routeSelectedSerialized, submitForm]);
+
   const cardXPadding = '32px';
   return (
     <div className="w-full" ref={swapRef}>
       <CardHeader
         className="pointer-events-auto"
-        left={
+        right={
           <RefreshButton
+            className="hidden tablet:block"
             isDisabled={!refreshRoutesTimerTick}
             isRefreshing={isRefreshingRoutes}
             onRefreshClicked={fetchSwapRoutes}
@@ -485,37 +533,57 @@ const TokenSwap = () => {
           {allRoutes.length > 0 && routeSelected && (
             <>
               <RoutesAvailable
-                className="mt-4 hidden mobile:block tablet:block"
+                className="mt-4 hidden tablet:block"
                 routes={allRoutes}
                 routeSelected={routeSelected}
-                onRouteSelected={(ro) => setRoute(ro)}
+                onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
               />
             </>
           )}
           <Card
             className={classNames(
-              'mobile:hidden tablet:hidden absolute top-0 w-[400px] left-[-420px] px-8 laptop:w-[368px] laptop:left-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 translate-x-[30%] -z-10',
+              'tablet:hidden absolute top-0 w-[420px] right-[-440px] px-4 laptop:w-[368px] laptop:right-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 -translate-x-[30%] -z-10',
               { 'opacity-100 !translate-x-0': allRoutes.length > 0 && routeSelected }
             )}>
             <RoutesAvailable
               isDesktopScreen={true}
               routes={allRoutes}
               routeSelected={routeSelected}
-              onRouteSelected={(ro) => setRoute(ro)}
+              onRouteSelected={onUserSelectRoute}
               isRefreshing={isRefreshingRoutes}
+              refreshButton={
+                <RefreshButton
+                  isDisabled={!refreshRoutesTimerTick}
+                  isRefreshing={isRefreshingRoutes}
+                  onRefreshClicked={fetchSwapRoutes}
+                  timePassedAfterRefresh={timePassedAfterRefresh}
+                />
+              }
             />
+            {routeSelected && (
+              <SwapDetail
+                routeAndQuote={routeSelected}
+                fromSymbol={fromSymbol}
+                toSymbol={toSymbol}
+              />
+            )}
           </Card>
           <Button
             isLoading={isSubmitting}
             className="mt-8"
             variant="gradient"
             disabled={!isSwapEnabled}
-            onClick={!activeWallet ? openModal : submitForm}>
+            onClick={!activeWallet ? openModal : onSwap}>
             {swapButtonText}
           </Button>
           {routeSelected && (
-            <SwapDetail routeAndQuote={routeSelected} fromSymbol={fromSymbol} toSymbol={toSymbol} />
+            <SwapDetail
+              className="hidden tablet:flex"
+              routeAndQuote={routeSelected}
+              fromSymbol={fromSymbol}
+              toSymbol={toSymbol}
+            />
           )}
         </div>
       </Card>

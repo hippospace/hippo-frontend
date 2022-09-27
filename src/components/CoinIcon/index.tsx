@@ -3,17 +3,17 @@ import { Skeleton } from 'antd';
 import cx from 'classnames';
 import useHippoClient from 'hooks/useHippoClient';
 import React from 'react';
-import invariant from 'tiny-invariant';
 
 interface TProps {
   logoSrc?: string;
   className?: string;
   symbol?: string;
   token?: CoinInfo;
+  size?: number;
 }
 
-const CoinIcon: React.FC<TProps> = ({ logoSrc, className, symbol, token }) => {
-  invariant(logoSrc || symbol || token, 'Invalid props');
+// Use size instead of className to set the size of images
+const CoinIcon: React.FC<TProps> = ({ logoSrc, size = 24, className, symbol, token }) => {
   const { tokenInfos } = useHippoClient();
   if (!logoSrc) {
     if (token) logoSrc = token?.logo_url.str();
@@ -27,8 +27,8 @@ const CoinIcon: React.FC<TProps> = ({ logoSrc, className, symbol, token }) => {
     event.currentTarget.className = 'bg-black';
   };
   return (
-    <div className={cx('w-6 h-6', className)}>
-      {!logoSrc && <Skeleton.Avatar active={true} className="h-full" shape="circle" />}
+    <div className={cx(className)} style={{ width: `${size}px`, height: `${size}px` }}>
+      {!logoSrc && <Skeleton.Avatar active={true} size={size} shape="circle" />}
       {logoSrc && (
         <img
           src={logoSrc}

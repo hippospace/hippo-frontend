@@ -1,4 +1,5 @@
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import classNames from 'classnames';
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
@@ -9,11 +10,13 @@ import { ISwapSettings } from '../types';
 const SwapDetail = ({
   routeAndQuote,
   fromSymbol,
-  toSymbol
+  toSymbol,
+  className = ''
 }: {
   routeAndQuote: RouteAndQuote;
   fromSymbol: string;
   toSymbol: string;
+  className?: string;
 }) => {
   const { values: swapSettings } = useFormikContext<ISwapSettings>();
   const [isPriceYToX, setIsPriceYToX] = useState(true);
@@ -42,7 +45,7 @@ const SwapDetail = ({
         <div className="flex items-center">
           <span className="mr-1">{rate}</span>
           <Button variant="icon" onClick={() => setIsPriceYToX(!isPriceYToX)}>
-            <ExchangeIcon className="font-icon" />
+            <ExchangeIcon className="w-4 h-4" />
           </Button>
         </div>
       )
@@ -52,7 +55,7 @@ const SwapDetail = ({
       value: output
     },
     {
-      label: 'Minimum Received after Slippage',
+      label: 'Minimum Received',
       value: minimum
     },
     {
@@ -70,7 +73,7 @@ const SwapDetail = ({
   ];
 
   return (
-    <div className="flex flex-col gap-2 mt-6 px-2">
+    <div className={classNames('flex flex-col gap-2 mt-6 px-2', className)}>
       {details.map((detail) => (
         <div className="flex justify-between mobile:block mobile:mb-1" key={detail.label}>
           <div className="small font-bold text-grey-500">{detail.label}</div>

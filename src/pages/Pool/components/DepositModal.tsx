@@ -122,7 +122,7 @@ const DepositModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
       // TODO: Calculate and update total field
       formik.setFieldValue('total', formik.values.token0Amount + formik.values.token1Amount);
     },
-    [formik]
+    [formik, hippoClient.hippoSwap, tokenPair]
   );
 
   const renderTokenInput = useCallback(
@@ -154,7 +154,7 @@ const DepositModal: React.FC<TProps> = ({ tokenPair, onDismissModal }) => {
         </div>
       );
     },
-    [tokenPair, retreiveTokenImg, formik.values, onHandleInput]
+    [tokenPair, retreiveTokenImg, formik.values, tokenBalance, onHandleInput]
   );
 
   return (

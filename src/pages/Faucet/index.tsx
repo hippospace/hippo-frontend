@@ -44,7 +44,7 @@ const TokenCard = ({ tokenInfo }: { tokenInfo: CoinInfo }) => {
   return (
     <Card className="w-[340px] h-[200px] flex flex-col items-center justify-between p-5">
       <div className="flex items-center justify-start w-full">
-        <CoinIcon logoSrc={tokenInfo.logo_url.str()} className="w-16 h-16" />
+        <CoinIcon logoSrc={tokenInfo.logo_url.str()} size={64} />
         <div className="ml-4">
           <div className="h4 text-grey-900">{tokenInfo.name.str()}</div>
           <Balance symbol={symbol} />
@@ -64,7 +64,9 @@ const TokenCard = ({ tokenInfo }: { tokenInfo: CoinInfo }) => {
 
 const Faucet: React.FC = () => {
   const { activeWallet, openModal } = useAptosWallet();
-  const tokenList = useSelector(getTokenList).filter((t) => t.symbol.str() !== 'APT');
+  const tokenList = useSelector(getTokenList).filter(
+    (t) => t.symbol.str() !== 'APT' && !!t.logo_url.str()
+  );
 
   const renderTokenList = useMemo(() => {
     if (!activeWallet) {
