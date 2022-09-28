@@ -46,7 +46,7 @@ const CoinSelectButton = ({
       onClick={onClick}>
       {token?.symbol ? (
         <>
-          <div className="flex gap-2 uppercase items-center">
+          <div className="flex gap-2 items-center">
             <CoinIcon logoSrc={token.logo_url.str()} />
             {token.symbol.str()}
           </div>
