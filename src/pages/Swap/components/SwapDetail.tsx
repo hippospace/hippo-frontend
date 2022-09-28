@@ -76,7 +76,7 @@ const SwapDetail = ({
     <div className={classNames('flex flex-col gap-2 mt-6 px-2', className)}>
       {details.map((detail) => (
         <div className="flex justify-between mobile:block mobile:mb-1" key={detail.label}>
-          <div className="small font-bold text-grey-500">{detail.label}</div>
+          <div className="small font-bold text-grey-500 laptop:text-[12px]">{detail.label}</div>
           <div className="small font-bold text-grey-900 mobile:flex mobile:justify-end">
             {detail.value}
           </div>

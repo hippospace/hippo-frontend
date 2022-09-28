@@ -81,7 +81,7 @@ const RefreshButton = ({
         disabled={isDisabled}
         onClick={onRefreshClicked}>
         <Tooltip
-          placement="bottomLeft"
+          placement="topRight"
           title={`${timePassedAfterRefresh}s after last suceesful refreshing. Click to refresh manually`}>
           <RefreshIcon className={classNames('font-icon', { 'animate-spin': isRefreshing })} />
         </Tooltip>
