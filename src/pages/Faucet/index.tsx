@@ -79,9 +79,14 @@ const Faucet: React.FC = () => {
       );
     }
     if (tokenList.length > 0) {
-      return tokenList.map((tokenInfo) => {
-        return <TokenCard key={`card-${tokenInfo.symbol.str()}`} tokenInfo={tokenInfo} />;
-      });
+      return tokenList
+        .filter(
+          (tokenInfo) =>
+            (tokenInfo as CoinInfo).token_type.typeFullname().indexOf('devnet_coins') > 0
+        )
+        .map((tokenInfo) => {
+          return <TokenCard key={`card-${tokenInfo.symbol.str()}`} tokenInfo={tokenInfo} />;
+        });
     }
   }, [activeWallet, tokenList, openModal]);
 
