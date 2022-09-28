@@ -7,7 +7,7 @@
     "@craco/craco": "^6.4.3",
     "@ethersproject/providers": "^5.6.6",
     "@manahippo/aptos-wallet-adapter": "0.4.1",
-    "@manahippo/hippo-sdk": "0.6.2",
+    "@manahippo/hippo-sdk": "0.6.4",
     "@manahippo/move-to-ts": "0.3.4",
     "@reduxjs/toolkit": "^1.8.1",
     "@tailwindcss/aspect-ratio": "^0.4.0",
