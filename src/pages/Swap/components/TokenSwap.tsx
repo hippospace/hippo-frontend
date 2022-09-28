@@ -254,8 +254,8 @@ const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { activeWallet, openModal } = useAptosWallet();
   const { hippoAgg } = useHippoClient();
-  const fromSymbol = values.currencyFrom?.token?.symbol.str() || 'USDC';
-  const toSymbol = values.currencyTo?.token?.symbol.str() || 'BTC';
+  const fromSymbol = values.currencyFrom?.token?.symbol.str() || 'devUSDC';
+  const toSymbol = values.currencyTo?.token?.symbol.str() || 'devBTC';
   const fromUiAmt = values.currencyFrom?.amount;
   const [allRoutes, setAllRoutes] = useState<AggregatorTypes.RouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<AggregatorTypes.RouteAndQuote | null>(null);
