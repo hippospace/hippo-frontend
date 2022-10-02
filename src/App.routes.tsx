@@ -5,7 +5,7 @@ import Faucet from 'pages/Faucet';
 import Home from 'pages/Home';
 import { useSelector } from 'react-redux';
 import { getIsResourcesNotFound } from 'modules/common/reducer';
-//import Stats from 'pages/Stats';
+import Stats from 'pages/Stats';
 
 export type TRoute = RouteObject & {
   name: 'Home' | 'Pools' | 'Swap' | '404' | 'Faucet' | 'Stats';
@@ -29,13 +29,11 @@ export const routes: TRoute[] = [
     hidden: true,
     element: <Faucet />
   },
-  /*
   {
     path: 'stats',
     name: 'Stats',
     element: <Stats />
   },
-  */
   {
     path: '*',
     name: '404',
