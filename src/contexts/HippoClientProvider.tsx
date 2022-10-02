@@ -74,7 +74,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
   const [hippoSwap, setHippoSwapClient] = useState<HippoSwapClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
-  const [refresh, setRefresh] = useState(false);
+  const [refreshWalletClient, setRefreshWalletClient] = useState(false);
   const [transaction, setTransaction] = useState<TTransaction>();
   const [tokenStores, setTokenStores] = useState<Record<string, stdlib.Coin.CoinStore>>();
   const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
@@ -114,22 +114,31 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   useEffect(() => {
     getHippoWalletClient();
+  }, [getHippoWalletClient]);
+  useEffect(() => {
     getHippoSwapClient();
+  }, [getHippoSwapClient]);
+  useEffect(() => {
     getHippoTradeAggregator();
+  }, [getHippoTradeAggregator]);
+  useEffect(() => {
     getTokenInfos();
-  }, [getHippoWalletClient, getHippoSwapClient, getHippoTradeAggregator, getTokenInfos]);
+  }, [getTokenInfos]);
+
+  useEffect(() => {
+    if (refreshWalletClient) {
+      getHippoWalletClient();
+      setRefreshWalletClient(false);
+    }
+  }, [getHippoWalletClient, refreshWalletClient]);
 
   useEffect(() => {
     if (hippoWallet) {
       setTokenStores(hippoWallet?.symbolToCoinStore);
-      if (refresh) {
-        getHippoWalletClient();
-        setRefresh(false);
-      }
     } else {
       setTokenStores(undefined);
     }
-  }, [hippoWallet, refresh, getHippoWalletClient]);
+  }, [hippoWallet?.symbolToCoinStore, hippoWallet]);
 
   useEffect(() => {
     if (hippoSwap) {
@@ -172,7 +181,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
             message.success('Faucet Success');
             getNotificationMsg(result.hash);
             await hippoWallet?.refreshStores();
-            setRefresh(true);
+            setRefreshWalletClient(true);
             success = true;
           }
         }
@@ -209,7 +218,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (result) {
           message.success('Transaction Success');
           getNotificationMsg(result.hash);
-          setRefresh(true);
+          setRefreshWalletClient(true);
           success = true;
         }
       } catch (error) {

@@ -10,6 +10,7 @@ import CoinRow from './CoinRow';
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
 import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { TokenBalance } from 'types/hippo';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -29,7 +30,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   });
   const [filter, setFilter] = useState<string>('');
   const { hippoWallet } = useHippoClient();
-  const [tokenListBalance, setTokenListBalance] = useState<TokenInfo[]>();
+  const [tokenListBalance, setTokenListBalance] = useState<TokenBalance[]>();
 
   const onSelectToken = useCallback(
     (token: TokenInfo) => {
@@ -50,24 +51,33 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     [actionType, values, setFieldValue, dismissiModal]
   );
 
-  // const filteredTokenList = useMemo(() => {
-  //   if (!filter) return tokenList;
-  //   return tokenList.filter((token) => {
-  //     const keysForFilter = [token.name, token.symbol, token.address].join(',').toLowerCase();
-  //     return keysForFilter.includes(filter);
-  //   });
-  // }, [tokenList, filter]);
-
   const getFilteredTokenListWithBalance = useCallback(() => {
-    let currentTokenList = tokenList;
+    let currentTokenList = tokenList
+      ?.sort((a, b) => (a.symbol.str() <= b.symbol.str() ? -1 : 1))
+      .map((t) => {
+        const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol.str()];
+        const balance = !hippoWallet
+          ? -1
+          : tokenStore
+          ? tokenStore.coin.value.toJsNumber() / Math.pow(10, t.decimals.toJsNumber())
+          : 0;
+        return {
+          token: t,
+          balance
+        };
+      })
+      .sort((a, b) => b.balance - a.balance); // TODO: sort by values
+
     if (filter) {
-      currentTokenList = currentTokenList.filter((token) => {
-        const keysForFilter = [token.name.str(), token.symbol.str()].join(',').toLowerCase();
+      currentTokenList = currentTokenList?.filter((token) => {
+        const keysForFilter = [token.token.name.str(), token.token.symbol.str()]
+          .join(',')
+          .toLowerCase();
         return keysForFilter.includes(filter);
       });
     }
     setTokenListBalance(currentTokenList);
-  }, [filter, tokenList]);
+  }, [filter, hippoWallet, tokenList]);
 
   useEffect(() => {
     getFilteredTokenListWithBalance();
@@ -76,7 +86,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const renderHeaderSearch = useMemo(() => {
     return (
       <div className="flex flex-col gap-y-1">
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-1">
           {commonCoins.map((coin) => (
             <CommonCoinButton
               coin={coin}
@@ -108,12 +118,12 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
           <VirtualList
             data={tokenListBalance || []}
             height={376}
-            itemHeight={56}
-            itemKey={(item) => `list-item-${item.symbol.str()}`}>
+            itemHeight={73}
+            itemKey={(item) => `list-item-${item.token.symbol.str()}`}>
             {(item) => (
               <List.Item
                 className="!border-b-0 !px-0 cursor-pointer p-1"
-                onClick={() => onSelectToken(item)}>
+                onClick={() => onSelectToken(item.token)}>
                 <CoinRow item={item} />
               </List.Item>
             )}
