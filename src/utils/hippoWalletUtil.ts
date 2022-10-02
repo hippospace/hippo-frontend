@@ -1,7 +1,7 @@
 import { CONFIGS, NetworkConfiguration } from '@manahippo/hippo-sdk';
 
 export const readConfig = (): NetworkConfiguration => {
-  const isDevnet = true;
-  const netConf = isDevnet ? CONFIGS.devnet : CONFIGS.localhost;
+  const isTestnet = true;
+  const netConf = isTestnet ? CONFIGS.testnet : CONFIGS.localhost;
   return netConf;
 };

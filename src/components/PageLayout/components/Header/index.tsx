@@ -19,7 +19,7 @@ const { Header } = Antd.Layout;
 const SiteBadge = () => {
   return (
     <div className="bg-[#fe6e65] w-[300px] text-white text-center font-bold text-[22px] h-[44px] leading-[44px] rotate-45 translate-x-[140px] tablet:translate-x-[113px] mobile:scale-[0.6] mobile:pl-[72px]">
-      <img src={GithubIcon} className="w-6 inline-block" /> Devnet beta
+      <img src={GithubIcon} className="w-6 inline-block" /> Testnet beta
     </div>
   );
 };

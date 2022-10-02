@@ -1830,10 +1830,10 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.4.1.tgz#e4a7137917348ece44cba4be75bc03ddf75dda76"
-  integrity sha512-vglXouQHR+/XfPJN6fGX0Sxoelkc+B4SiQulpj4eUz5ZLG3WXTgwApt+PiDvf86CnXw/pmwsF7JBoA7DAf2juw==
+"@manahippo/aptos-wallet-adapter@0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.4.3.tgz#f3f90162f5977b856e72d8b388313b00e8086d6b"
+  integrity sha512-zxilv27czsyiYt6zROWmzuO7SLYaqd9hDY7HW3uy36t9c7Pt4HRTe+jC/UmgWR1PzksGh3FQi2r+lejSYWEpCw==
   dependencies:
     "@fewcha/web3" "^0.1.28"
     "@types/jest" "^27.0.1"
@@ -1842,32 +1842,20 @@
     aptos "1.3.14"
     eventemitter3 "^4.0.7"
 
-"@manahippo/hippo-sdk@0.6.4":
-  version "0.6.4"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.6.4.tgz#29ad855090839198a0e269a7a1788c552e1d4c95"
-  integrity sha512-KAV0YSWzJr32mv/u0WyZ7CLVzm9RT6U99YylsvF4xKzzRDShp3KOs/bmD+oGIuwkELohtGHgzU8tAImTWspZzw==
+"@manahippo/hippo-sdk@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.8.1.tgz#338b4ee983aa21a3126d08ee793802d14b11e11d"
+  integrity sha512-8ntTb27ALgm+S3Fwe3+dixFyO33rYG78XWXAEPU/l03coz2zB3pR26q7Ul1gnUQPGOzpPPz9dUXZ7i9BbFIjlQ==
   dependencies:
-    "@manahippo/move-to-ts" "0.3.5"
+    "@manahippo/move-to-ts" "0.3.6"
     aptos "1.3.14"
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.3.4.tgz#48df8bb3a98692042ac9d5f8f18a672b83c727a7"
-  integrity sha512-eui+2AkuzKZvMg5B5Srwr2cv50QxsGXb7mOVRtjQK2eCyegEtZMODQwGGeR3uIxoqrvlLRKsP0LEpC6MNCu09w==
-  dependencies:
-    aptos "1.3.14"
-    big-integer "^1.6.51"
-    elliptic "^6.5.4"
-    json-stable-stringify "^1.0.1"
-    sha.js "^2.4.11"
-    sha3 "^2.1.4"
-
-"@manahippo/move-to-ts@0.3.5":
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.3.5.tgz#2a355d79a42400c4aacee92365254315e7ea5bcb"
-  integrity sha512-gqCZZjnCODzaZ5a2nqcCdicXJAYunTtd9Z8+ZwxzcyYZS1s2LTKeK/F6b0daqwuq7OPtHUPdS5Us8R2XnnH3ig==
+"@manahippo/move-to-ts@0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.3.6.tgz#28c23c74d76b4c4464d09df5b75faf35ea75ef25"
+  integrity sha512-J8nNwrl/M8eJkusQZy0cLhUipJB2X5F78aYV9lT4PnXrlcG8DvVwl7RtCrl+o/wErvH7wlGjZ3+Mfa6NCXk+BQ==
   dependencies:
     aptos "1.3.14"
     big-integer "^1.6.51"

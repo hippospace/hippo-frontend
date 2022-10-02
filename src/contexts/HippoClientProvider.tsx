@@ -143,7 +143,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         <p>
           You can verify the transaction by visiting the{' '}
           <a
-            href={`https://explorer.devnet.aptos.dev/txn/${txhash}`}
+            href={`https://explorer.aptoslabs.com/txn/${txhash}`}
             target="_blank"
             rel="noreferrer"
             className="underline">
