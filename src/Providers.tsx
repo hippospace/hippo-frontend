@@ -10,8 +10,8 @@ import {
   AptosWalletAdapter,
   MartianWalletAdapter,
   PontemWalletAdapter,
-  SpikaWalletAdapter,
-  RiseWalletAdapter
+  SpikaWalletAdapter
+  //RiseWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
 import { message } from 'antd';
@@ -37,7 +37,7 @@ type TProps = {
 const Providers: React.FC<TProps> = (props: TProps) => {
   const wallets = useMemo(
     () => [
-      new RiseWalletAdapter(),
+      //new RiseWalletAdapter(),
       new MartianWalletAdapter(),
       new AptosWalletAdapter(),
       new PontemWalletAdapter(),
