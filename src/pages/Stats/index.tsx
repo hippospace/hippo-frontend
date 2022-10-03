@@ -36,7 +36,7 @@ const Stats = () => {
   const topPoolProviders2 = useMemo(() => {
     if (!volume) return [];
     const pps = statsPeriod === '24H' ? volume.top_pool_provider_24h : volume.top_pool_provider_7d;
-    return pps.slice(0, 5).map((pp, index) => {
+    return pps.slice(0, pps.length > 5 ? 5 : pps.length - 1).map((pp, index) => {
       return [
         // eslint-disable-next-line react/jsx-key
         <div className="flex h-[65px] items-center">
@@ -59,7 +59,7 @@ const Stats = () => {
   const topTradingPairs2 = useMemo(() => {
     if (!volume) return [];
     const tps = statsPeriod === '24H' ? volume.top_trading_pairs_24h : volume.top_trading_pairs_7d;
-    return tps.slice(0, 5).map((tp, index) => {
+    return tps.slice(0, tps.length > 5 ? 5 : tps.length - 1).map((tp, index) => {
       return [
         // eslint-disable-next-line react/jsx-key
         <div className="flex h-[65px] items-center">
