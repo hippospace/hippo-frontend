@@ -5,6 +5,8 @@ import hippoLogo from 'resources/img/hippo-icon.svg';
 import basiqLogo from 'resources/img/dexes/basiq.jpeg';
 import econiaLogo from 'resources/img/dexes/econia.jpeg';
 import pontemLogo from 'resources/img/dexes/pontem.jpeg';
+import dittoLogo from 'resources/img/dexes/ditto.jpeg';
+import tortugaLogo from 'resources/img/dexes/tortuga.jpeg';
 import classNames from 'classnames';
 
 interface IPoolProviderProps {
@@ -22,6 +24,10 @@ const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
       return hippoLogo;
     } else if (dexType === AggregatorTypes.DexType.Pontem) {
       return pontemLogo;
+    } else if (dexType === AggregatorTypes.DexType.Ditto) {
+      return dittoLogo;
+    } else if (dexType === AggregatorTypes.DexType.Tortuga) {
+      return tortugaLogo;
     } else {
       throw new Error('Invalid dex for pool provider');
     }
