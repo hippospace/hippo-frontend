@@ -19,6 +19,11 @@ const utcDate = (date: Date) => {
   return dateString.substring(0, dateString.length - 13);
 };
 
+const utcTime = (date: Date) => {
+  const dateString = date.toUTCString();
+  return dateString.substring(0, dateString.length - 7);
+};
+
 const Stats = () => {
   const [statsPeriod, setStatsPeriod] = useState<Peroid>('24H');
 
@@ -108,19 +113,26 @@ const Stats = () => {
   const volumeInPeriod = useMemo(() => {
     // TODO: change to realtime value
     if (!volume) return null;
+    const dataEndTime = volume.data_end_time.toJsNumber();
     if (statsPeriod === '24H') {
-      const volumeDay = volume.total_volume_history_24h.slice(-2)[0];
       return {
-        peroid: utcDate(new Date(volumeDay.start_time.toJsNumber())) + ' 00:00 ~ 24:00 (UTC)',
-        amount: volumeDay.amount.toJsNumber() / volumeScale
+        peroid:
+          utcTime(new Date(dataEndTime - 24 * 60 * 60 * 1000)) +
+          ' ~ ' +
+          utcTime(new Date(dataEndTime)) +
+          ' (UTC)',
+        amount: volume.last_24h_volume.toJsNumber() / volumeScale
       };
     } else if (statsPeriod === '1 Week') {
       const volumeWeek = volume.total_volume_history_7d.slice(-2)[0];
+      console.log('volumeWeek', volumeWeek.amount.toJsNumber());
       return {
-        peroid: `${utcDate(new Date(volumeWeek.start_time.toJsNumber()))} ~ ${utcDate(
-          addDays(new Date(volumeWeek.start_time.toJsNumber()), 6)
-        )} (UTC)`,
-        amount: (volumeWeek.amount.toJsNumber() || 0) / volumeScale
+        peroid:
+          utcTime(new Date(dataEndTime - 7 * 24 * 60 * 60 * 1000)) +
+          ' ~ ' +
+          utcTime(new Date(dataEndTime)) +
+          ' (UTC)',
+        amount: volume.last_7d_volume.toJsNumber() / volumeScale
       };
     } else {
       throw new Error('Invalid stats peroid');
@@ -130,12 +142,7 @@ const Stats = () => {
   const volumeTotal = useMemo(() => {
     // TODO: change to actual one
     if (!volume) return null;
-    const tvh =
-      statsPeriod === '24H' ? volume.total_volume_history_24h : volume.total_volume_history_7d;
-    const totalV = tvh.reduce((pre, cur) => {
-      return pre + cur.amount.toJsNumber() / volumeScale;
-    }, 0);
-    return totalV;
+    return volume.total_volume.toJsNumber() / volumeScale;
   }, [statsPeriod, volume, volumeScale]);
 
   const switchToOtherPeriod = useCallback((v: string | number) => {
