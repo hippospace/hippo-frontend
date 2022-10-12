@@ -1516,12 +1516,12 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@fewcha/web3@^0.1.28":
-  version "0.1.28"
-  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.1.28.tgz#f9bed1ac3aa88ec83ea1ac1d07aada62d2835506"
-  integrity sha512-NsVGuTwtKyMsN5SN6B0POZ3FUC7tr3OrY+cEZZMKBq7XGASJPKm0zumW22Q0vRI/mDQqrY/g6p47SXBl9hxNEQ==
+"@fewcha/web3@^0.1.32":
+  version "0.1.32"
+  resolved "https://registry.yarnpkg.com/@fewcha/web3/-/web3-0.1.32.tgz#18c543a1f3830b256773b3194852c980b1a2256e"
+  integrity sha512-5QrBit4XlDpg4b8UMmDHNxDL/or+1/mk688IbZZ6JSEnvFs15/FW60TTPBTzt9sQKLC+0fq7uMCi3JH/EoMZYg==
   dependencies:
-    aptos "^1.3.13"
+    aptos "^1.3.14"
     buffer "^6.0.3"
 
 "@humanwhocodes/config-array@^0.10.4":
@@ -1837,12 +1837,12 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@0.4.5":
-  version "0.4.5"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.4.5.tgz#300d58c0469c01f87479ac126afecb26f8d4728c"
-  integrity sha512-Ka1aMhbs49oM9lqrDWWP8M1TDorKMjGfeNjYU5BKHVaiYIEUHmdfbI6ucQJspUbP4izmzYMrwR44MuYegk/8KA==
+"@manahippo/aptos-wallet-adapter@0.4.8":
+  version "0.4.8"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-0.4.8.tgz#9b35c26feab5766d2626e198c29ee8600fd32cf5"
+  integrity sha512-5PnOfYcLBrh3EQ9z8bkeiWTCUXXfjmAllrR0G7++bzzqtvh+aeXzxgEg4ARBsi5YoVB+wNQm85RRolTCm4L5bQ==
   dependencies:
-    "@fewcha/web3" "^0.1.28"
+    "@fewcha/web3" "^0.1.32"
     "@keystonehq/aptossnap-adapter" "^0.2.7"
     "@types/jest" "^27.0.1"
     "@types/node" "^18.7.6"
@@ -1851,22 +1851,22 @@
     eventemitter3 "^4.0.7"
     js-sha3 "^0.8.0"
 
-"@manahippo/hippo-sdk@0.8.3":
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.8.3.tgz#3b0ebd1160f5bfa96ab2728e181edea43c41c5a1"
-  integrity sha512-RtCAojHz/xUopFFEK5b4n2Chmbym/UzEw7fynaidC6+6WvXyOz3W8RFz2QxdzJmGnIRzxHMg7G28PR0o4mUoNg==
+"@manahippo/hippo-sdk@0.8.9":
+  version "0.8.9"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.8.9.tgz#62ea25c2d9888f17ab2e72eec35e6259015ee6f5"
+  integrity sha512-IEycOxmZb9WhkJjXN8YM+TucCa1Bu2dIxQduFHLPzKIbz6YNVqsdzR8TaQF4WgP12Lx+KonNmQWxO5fLtmw6WA==
   dependencies:
-    "@manahippo/move-to-ts" "0.3.6"
-    aptos "1.3.14"
+    "@manahippo/move-to-ts" "0.3.16"
+    aptos "1.3.15"
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.3.6.tgz#28c23c74d76b4c4464d09df5b75faf35ea75ef25"
-  integrity sha512-J8nNwrl/M8eJkusQZy0cLhUipJB2X5F78aYV9lT4PnXrlcG8DvVwl7RtCrl+o/wErvH7wlGjZ3+Mfa6NCXk+BQ==
+"@manahippo/move-to-ts@0.3.16":
+  version "0.3.16"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.3.16.tgz#c84d28764df66dac5fe8c8b5dca1bf0998cf8077"
+  integrity sha512-7J30v9dpia0brfx6eebnq4jy3e6Vn59sehbGIxKD7qtDT+EzAnL1R3gJ64jn5QhzoQYn/XtgV68F64LVZChLyA==
   dependencies:
-    aptos "1.3.14"
+    aptos "1.3.15"
     big-integer "^1.6.51"
     elliptic "^6.5.4"
     json-stable-stringify "^1.0.1"
@@ -3232,18 +3232,7 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-aptos@1.3.14, aptos@^1.3.13:
-  version "1.3.14"
-  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.14.tgz#7487b4fd783dd5dfb49419f6e907a95c8ca7ce22"
-  integrity sha512-9AZ7fKgOwLoOITnw3nz2Nzon/HjKrHDU6n893S4MhsmHXK85R4NG4UyTyIczhWGWVdytJiPCkEZufhzsH4eZCw==
-  dependencies:
-    "@noble/hashes" "1.1.2"
-    "@scure/bip39" "1.1.0"
-    axios "0.27.2"
-    form-data "4.0.0"
-    tweetnacl "1.0.3"
-
-aptos@^1.3.14:
+aptos@1.3.15, aptos@^1.3.14:
   version "1.3.15"
   resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.15.tgz#700bb78c1f04de78d2518d2dd9d9e675aef0d8e2"
   integrity sha512-kRjTHZctWM5m4K1tMDl7tZZpRu0+ceHFGpvyMw8ONrtbx9EvfcctFSv9DnSKSKGX0soivT0LhwDFIobd3jQQtw==
