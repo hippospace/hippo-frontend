@@ -262,6 +262,7 @@ const TokenSwap = () => {
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
 
   const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
+  const [hasRoute, setHasRoute] = useState(false);
   const [timePassedAfterRefresh, setTimePassedAfterRefresh] = useState(0);
   const [refreshRoutesTimerTick, setRefreshRoutesTimerTick] = useState<null | number>(null); // ms
 
@@ -321,33 +322,48 @@ const TokenSwap = () => {
           }
           lastFetchTs.current = Date.now();
         }
-        if (hippoAgg && fromSymbol && toSymbol && fromUiAmt) {
+        if (hippoAgg && fromSymbol && toSymbol) {
           const xToken = hippoAgg.registryClient.getCoinInfoBySymbol(fromSymbol);
           const yToken = hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol);
 
           if (isReload) {
             setIsRefreshingRoutes(true);
           }
-          const maxSteps = 3;
-          const routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken, maxSteps, isReload);
-          // check if parameters are not stale
-          if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
-            setAllRoutes(routes);
-            let manuallySelectedRoute;
-            if (routeSelectedSerialized) {
-              manuallySelectedRoute = routes.find(
-                (r) => serializeRouteQuote(r) === routeSelectedSerialized
-              );
+          if (fromUiAmt) {
+            const maxSteps = 3;
+            const routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken, maxSteps, isReload);
+            // check if parameters are not stale
+            if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
+              setAllRoutes(routes);
+              setHasRoute(true);
+              let manuallySelectedRoute;
+              if (routeSelectedSerialized) {
+                manuallySelectedRoute = routes.find(
+                  (r) => serializeRouteQuote(r) === routeSelectedSerialized
+                );
+              }
+              setRoute(manuallySelectedRoute || routes[0]);
+              if (isReload) {
+                // restart interval timer
+                setTimePassedAfterRefresh(0);
+                // random is used to make useInterval restart
+                setRefreshRoutesTimerTick(1_000 + 0.00001 * Math.random());
+              }
             }
-            setRoute(manuallySelectedRoute || routes[0]);
-            if (isReload) {
-              // restart interval timer
-              setTimePassedAfterRefresh(0);
-              // random is used to make useInterval restart
-              setRefreshRoutesTimerTick(1_000 + 0.00001 * Math.random());
+          } else {
+            const tradeRoutes = hippoAgg.getAllRoutes(xToken, yToken);
+            if (tradeRoutes.length > 0) {
+              setHasRoute(true);
+            } else {
+              setHasRoute(false);
             }
+            setAllRoutes([]);
+            setRoute(null);
+            setRouteSelectedSerialized('');
+            setRefreshRoutesTimerTick(null);
           }
         } else {
+          setHasRoute(false);
           setAllRoutes([]);
           setRoute(null);
           setRouteSelectedSerialized('');
@@ -376,7 +392,8 @@ const TokenSwap = () => {
       routeSelectedSerialized,
       setRoute,
       setFieldValue,
-      values.currencyFrom
+      values.currencyFrom,
+      hasRoute
     ]
   );
 
@@ -434,13 +451,17 @@ const TokenSwap = () => {
     } else if (!isCurrentBalanceReady) {
       return 'Loading Balance...';
     } else if (!fromUiAmt) {
-      return 'Enter an Amount';
+      if (hasRoute) {
+        return 'Enter an Amount';
+      } else {
+        return 'No Available Route';
+      }
     } else if (!fromCurrentBalance || fromUiAmt > fromCurrentBalance) {
       return 'Insufficient Balance';
     } else if (isRefreshingRoutes) {
       return 'Loading Routes...';
     } else if (!values.quoteChosen) {
-      return 'No quotes';
+      return 'No Available Route';
     }
     return 'SWAP';
   }, [
@@ -450,7 +471,8 @@ const TokenSwap = () => {
     isCurrentBalanceReady,
     values.currencyFrom?.token,
     isRefreshingRoutes,
-    values.quoteChosen
+    values.quoteChosen,
+    hasRoute
   ]);
 
   // Scroll the Swap box to vertical middle
