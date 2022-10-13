@@ -28,7 +28,10 @@ const SwapDetail = ({
     outputUiAmt * (1 - swapSettings.slipTolerance / 100),
     toSymbol
   )} ${toSymbol}`;
-  const priceImpact = `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`;
+  const priceImpact =
+    (routeAndQuote.quote.priceImpact || 0) >= 0.0001
+      ? `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`
+      : '<0.01%';
 
   const avgPrice = routeAndQuote.quote.outputUiAmt / routeAndQuote.quote.inputUiAmt;
   const rate =

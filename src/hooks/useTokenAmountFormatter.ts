@@ -8,7 +8,7 @@ const useTokenAmountFormatter = () => {
   const formatter = useMemo(
     () =>
       (amount: number | undefined | null, tokenSymbol: string | undefined): string => {
-        if (typeof amount !== 'number' || !tokenSymbol || !tokenInfos) return '';
+        if (typeof amount !== 'number' || amount < 0 || !tokenSymbol || !tokenInfos) return '';
         const decimals = tokenInfos[tokenSymbol].decimals.toJsNumber();
         return numberGroupFormat(amount, decimals);
       },

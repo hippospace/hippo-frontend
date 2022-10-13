@@ -252,7 +252,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
 const REFRESH_INTERVAL = 10; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
-  const { activeWallet, openModal } = useAptosWallet();
+  const { connected, openModal } = useAptosWallet();
   const { hippoAgg } = useHippoClient();
   const fromSymbol = values.currencyFrom?.token?.symbol.str() || 'devUSDC';
   const toSymbol = values.currencyTo?.token?.symbol.str() || 'devBTC';
@@ -277,15 +277,7 @@ const TokenSwap = () => {
         setFieldValue('currencyTo.token', hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol));
       }
     }
-  }, [
-    fromSymbol,
-    hippoAgg,
-    hippoAgg?.registryClient,
-    setFieldValue,
-    toSymbol,
-    values.currencyFrom,
-    values.currencyTo
-  ]);
+  }, [fromSymbol, hippoAgg, setFieldValue, toSymbol, values.currencyFrom, values.currencyTo]);
 
   const latestInputParams = useRef({
     fromSymbol,
@@ -427,7 +419,7 @@ const TokenSwap = () => {
 
   const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromSymbol);
   const isSwapEnabled =
-    (!activeWallet && values.currencyFrom?.token) || // to connect wallet
+    (!connected && values.currencyFrom?.token) || // to connect wallet
     (values.quoteChosen &&
       fromUiAmt &&
       fromCurrentBalance &&
@@ -437,7 +429,7 @@ const TokenSwap = () => {
   const swapButtonText = useMemo(() => {
     if (!values.currencyFrom?.token) {
       return 'Loading Tokens...';
-    } else if (!activeWallet) {
+    } else if (!connected) {
       return 'Connect to Wallet';
     } else if (!isCurrentBalanceReady) {
       return 'Loading Balance...';
@@ -452,7 +444,7 @@ const TokenSwap = () => {
     }
     return 'SWAP';
   }, [
-    activeWallet,
+    connected,
     fromCurrentBalance,
     fromUiAmt,
     isCurrentBalanceReady,
@@ -577,7 +569,7 @@ const TokenSwap = () => {
             className="mt-8"
             variant="gradient"
             disabled={!isSwapEnabled}
-            onClick={!activeWallet ? openModal : onSwap}>
+            onClick={!connected ? openModal : onSwap}>
             {swapButtonText}
           </Button>
           {routeSelected && (

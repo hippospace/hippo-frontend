@@ -5,6 +5,7 @@ import { ActiveAptosWallet } from 'types/aptos';
 
 interface AptosWalletContextType {
   activeWallet?: ActiveAptosWallet;
+  connected: boolean;
   open: boolean;
   openModal: () => void;
   closeModal: () => void;
@@ -46,6 +47,7 @@ const AptosWalletProvider: FC<TProviderProps> = ({ children }) => {
     <AptosWalletContext.Provider
       value={{
         activeWallet,
+        connected,
         open,
         openModal,
         closeModal
