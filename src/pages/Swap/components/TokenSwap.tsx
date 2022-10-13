@@ -333,15 +333,11 @@ const TokenSwap = () => {
           const xToken = hippoAgg.registryClient.getCoinInfoBySymbol(fromSymbol);
           const yToken = hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol);
 
-          if (isReload) setIsRefreshingRoutes(true);
+          if (isReload) {
+            setIsRefreshingRoutes(true);
+          }
           const maxSteps = 3;
           const routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken, maxSteps, isReload);
-          if (routes.length === 0) {
-            throw new Error(
-              `No quotes from ${fromSymbol} to ${toSymbol} with input amount ${fromUiAmt}`
-            );
-          }
-
           // check if parameters are not stale
           if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
             setAllRoutes(routes);
@@ -432,7 +428,11 @@ const TokenSwap = () => {
   const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromSymbol);
   const isSwapEnabled =
     (!activeWallet && values.currencyFrom?.token) || // to connect wallet
-    (values.quoteChosen && fromUiAmt && fromCurrentBalance && fromUiAmt <= fromCurrentBalance);
+    (values.quoteChosen &&
+      fromUiAmt &&
+      fromCurrentBalance &&
+      fromUiAmt <= fromCurrentBalance &&
+      !isRefreshingRoutes);
 
   const swapButtonText = useMemo(() => {
     if (!values.currencyFrom?.token) {
@@ -445,8 +445,10 @@ const TokenSwap = () => {
       return 'Enter an Amount';
     } else if (!fromCurrentBalance || fromUiAmt > fromCurrentBalance) {
       return 'Insufficient Balance';
-    } else if (!values.quoteChosen) {
+    } else if (isRefreshingRoutes) {
       return 'Loading Routes...';
+    } else if (!values.quoteChosen) {
+      return 'No quotes';
     }
     return 'SWAP';
   }, [
@@ -455,6 +457,7 @@ const TokenSwap = () => {
     fromUiAmt,
     isCurrentBalanceReady,
     values.currencyFrom?.token,
+    isRefreshingRoutes,
     values.quoteChosen
   ]);
 
