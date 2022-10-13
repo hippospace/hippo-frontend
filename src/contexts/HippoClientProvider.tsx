@@ -1,16 +1,12 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useState } from 'react';
-import {
-  coinListClient,
-  hippoSwapClient,
-  hippoTradeAggregator,
-  hippoWalletClient
-} from 'config/hippoClients';
+import { coinListClient, hippoTradeAggregator, hippoWalletClient } from 'config/hippoClients';
 import {
   HippoSwapClient,
   HippoWalletClient,
   PoolType,
   UITokenAmount,
-  stdlib
+  stdlib,
+  CoinListClient
 } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
 import useAptosWallet from 'hooks/useAptosWallet';
@@ -72,7 +68,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { signAndSubmitTransaction } = useWallet();
   const { openNotification } = useNotification();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
-  const [hippoSwap, setHippoSwapClient] = useState<HippoSwapClient>();
+  const [coinListCli, setCoinListCli] = useState<CoinListClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
   const [refreshWalletClient, setRefreshWalletClient] = useState(false);
   const [transaction, setTransaction] = useState<TTransaction>();
@@ -90,40 +86,30 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     }
   }, [activeWallet]);
 
-  const getHippoSwapClient = useCallback(async () => {
-    const sClient = await hippoSwapClient();
-    setHippoSwapClient(sClient);
-  }, []);
-
   const getHippoTradeAggregator = useCallback(async () => {
     setHippoAgg(await hippoTradeAggregator());
   }, []);
 
-  const getTokenInfos = useCallback(async () => {
-    const client = await coinListClient();
-    setTokenInfos(client?.symbolToCoinInfo);
+  const getCoinListClient = useCallback(async () => {
+    setCoinListCli(await coinListClient());
   }, []);
 
   const getTokenInfoByFullName = useCallback(
     (fullName: string) => {
-      if (!tokenInfos) return undefined;
-      return Object.values(tokenInfos).find((ti) => ti.token_type.typeFullname() === fullName);
+      return coinListCli?.fullnameToCoinInfo[fullName];
     },
-    [tokenInfos]
+    [coinListCli?.fullnameToCoinInfo]
   );
 
   useEffect(() => {
     getHippoWalletClient();
   }, [getHippoWalletClient]);
   useEffect(() => {
-    getHippoSwapClient();
-  }, [getHippoSwapClient]);
-  useEffect(() => {
     getHippoTradeAggregator();
   }, [getHippoTradeAggregator]);
   useEffect(() => {
-    getTokenInfos();
-  }, [getTokenInfos]);
+    getCoinListClient();
+  }, [getCoinListClient]);
 
   useEffect(() => {
     if (refreshWalletClient) {
@@ -141,10 +127,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   }, [hippoWallet?.symbolToCoinStore, hippoWallet]);
 
   useEffect(() => {
-    if (hippoSwap) {
-      dispatch(swapAction.SET_TOKEN_LIST(hippoSwap.singleCoins));
-    }
-  }, [dispatch, hippoSwap]);
+    setTokenInfos(coinListCli?.symbolToCoinInfo);
+    dispatch(swapAction.SET_TOKEN_LIST(coinListCli?.getCoinInfoList()));
+  }, [coinListCli, dispatch]);
 
   const getNotificationMsg = useCallback(
     (txhash: MaybeHexString) => {
@@ -320,7 +305,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     <HippoClientContext.Provider
       value={{
         hippoWallet,
-        hippoSwap,
         hippoAgg,
         tokenStores,
         tokenInfos,
