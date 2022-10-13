@@ -24,12 +24,7 @@ export const hippoWalletClient = async (account: ActiveAptosWallet) => {
   try {
     if (!account) return undefined;
     const netConf = readConfig();
-    walletClient = await HippoWalletClient.createInTwoCalls(
-      netConf,
-      new App(aptosClient),
-      account,
-      netConf.simulationKeys
-    );
+    walletClient = await HippoWalletClient.createInTwoCalls(netConf, new App(aptosClient), account);
   } catch (err: any) {
     console.log('Get hippo wallet client failed', err);
     errorHandler(err);
@@ -42,11 +37,7 @@ export const hippoSwapClient = async () => {
   let swapClient: HippoSwapClient | undefined;
   try {
     const netConf = readConfig();
-    swapClient = await HippoSwapClient.createInOneCall(
-      new App(aptosClient),
-      netConf,
-      netConf.simulationKeys
-    );
+    swapClient = await HippoSwapClient.createInOneCall(new App(aptosClient), netConf);
   } catch (err: any) {
     console.log('Get hippo swap client failed', err);
     errorHandler(err);
@@ -69,8 +60,7 @@ export const hippoTradeAggregator = async () => {
 export const coinListClient = async () => {
   let client: CoinListClient | undefined;
   try {
-    const netConf = readConfig();
-    client = await CoinListClient.load(new App(aptosClient), netConf.simulationKeys);
+    client = await CoinListClient.load(new App(aptosClient));
   } catch (err: any) {
     console.log('Get coin list client failed', err);
     errorHandler(err);

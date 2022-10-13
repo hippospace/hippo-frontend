@@ -165,7 +165,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, true);
         if (payload && tokenInfos) {
           let pl = payload as Types.TransactionPayload_EntryFunctionPayload;
-          const result = await signAndSubmitTransaction(pl);
+          const result = await signAndSubmitTransaction(pl, {
+            expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 60
+          });
           if (result) {
             message.success('Faucet Success');
             getNotificationMsg(result.hash);
@@ -199,7 +201,10 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         }
         const payload = routeAndQuote.route.makePayload(input, minOut, true);
         const result = await signAndSubmitTransaction(
-          payload as Types.TransactionPayload_EntryFunctionPayload
+          payload as Types.TransactionPayload_EntryFunctionPayload,
+          {
+            expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 60
+          }
         );
         if (result) {
           message.success('Transaction Success');
