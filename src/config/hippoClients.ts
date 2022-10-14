@@ -26,6 +26,10 @@ export const hippoWalletClient = async (account: ActiveAptosWallet) => {
     const netConf = readConfig();
     walletClient = await HippoWalletClient.createInTwoCalls(netConf, new App(aptosClient), account);
   } catch (err: any) {
+    if (err.errorCode === 'account_not_found') {
+      message.error("Cann't find your account. Please fund your account first.");
+      return;
+    }
     console.log('Get hippo wallet client failed', err);
     errorHandler(err);
   }

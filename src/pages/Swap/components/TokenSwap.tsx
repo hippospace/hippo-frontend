@@ -304,7 +304,6 @@ const TokenSwap = () => {
 
   const setRoute = useCallback(
     (ro: AggregatorTypes.RouteAndQuote | null) => {
-      console.log('set route ', ro);
       setRouteSelected(ro);
       setFieldValue('quoteChosen', ro);
     },
