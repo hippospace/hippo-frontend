@@ -1,4 +1,4 @@
-import { App, HippoSwapClient, HippoWalletClient } from '@manahippo/hippo-sdk';
+import { App, HippoWalletClient } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk';
 import { CoinListClient } from '@manahippo/hippo-sdk';
 // import { store } from 'Providers';
@@ -35,19 +35,6 @@ export const hippoWalletClient = async (account: ActiveAptosWallet) => {
   }
 
   return walletClient;
-};
-
-export const hippoSwapClient = async () => {
-  let swapClient: HippoSwapClient | undefined;
-  try {
-    const netConf = readConfig();
-    swapClient = await HippoSwapClient.createInOneCall(new App(aptosClient), netConf);
-  } catch (err: any) {
-    console.log('Get hippo swap client failed', err);
-    errorHandler(err);
-  }
-
-  return swapClient;
 };
 
 export const hippoTradeAggregator = async () => {
