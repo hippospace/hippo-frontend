@@ -160,7 +160,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (payload && tokenInfos) {
           let pl = payload as Types.TransactionPayload_EntryFunctionPayload;
           const result = await signAndSubmitTransaction(pl, {
-            expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 60
+            expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 3 * 60
           });
           if (result) {
             message.success('Faucet Success');
@@ -197,7 +197,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const result = await signAndSubmitTransaction(
           payload as Types.TransactionPayload_EntryFunctionPayload,
           {
-            expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 60
+            expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 3 * 60
           }
         );
         if (result) {
