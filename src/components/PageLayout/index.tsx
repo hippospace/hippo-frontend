@@ -7,7 +7,7 @@ import { getLayoutHeight } from 'modules/common/reducer';
 import { useSelector } from 'react-redux';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
-import SwapIllu from 'resources/img/swap-illu-2x.png';
+import SwapIllu from 'resources/img/swap-illu.png';
 import { TRoute } from 'App.routes';
 // import styles from './PageLayout.module.scss';
 
@@ -33,7 +33,7 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       })}>
       {(['Swap', 'Faucet'] as TRoute['name'][]).includes(currentPageName) && (
         <>
-          <img src={SwapIllu} className="absolute top-0 bottom-0 mx-auto w-full opacity-[0.2]" />
+          <img src={SwapIllu} className="absolute top-0 left-0 mx-auto w-full" />
         </>
       )}
       <Header />
