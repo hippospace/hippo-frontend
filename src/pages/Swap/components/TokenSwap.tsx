@@ -195,7 +195,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   const rowsWhenMore = 4;
   const rowsOnDesktop = 4;
   const height = isDesktopScreen
-    ? `${rowsOnDesktop * routeRowHeight}px`
+    ? `${Math.min(rowsOnDesktop, routes.length) * routeRowHeight}px`
     : `${Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight}px`;
 
   const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
@@ -304,6 +304,7 @@ const TokenSwap = () => {
 
   const setRoute = useCallback(
     (ro: AggregatorTypes.RouteAndQuote | null) => {
+      console.log('set route ', ro);
       setRouteSelected(ro);
       setFieldValue('quoteChosen', ro);
     },
@@ -322,27 +323,30 @@ const TokenSwap = () => {
           }
           lastFetchTs.current = Date.now();
         }
+
+        let routes: RouteAndQuote[] | AggregatorTypes.TradeRoute[] = [];
         if (hippoAgg && fromSymbol && toSymbol) {
           const xToken = hippoAgg.registryClient.getCoinInfoBySymbol(fromSymbol);
           const yToken = hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol);
 
-          if (isReload) {
-            setIsRefreshingRoutes(true);
-          }
+          setIsRefreshingRoutes(isReload);
+
           if (fromUiAmt) {
             const maxSteps = 3;
-            const routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken, maxSteps, isReload);
+            routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken, maxSteps, isReload);
             // check if parameters are not stale
-            if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
+            if (
+              routes.length > 0 &&
+              !ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)
+            ) {
               setAllRoutes(routes);
-              setHasRoute(true);
-              let manuallySelectedRoute;
+              let manuallySelectedRoute: RouteAndQuote;
               if (routeSelectedSerialized) {
                 manuallySelectedRoute = routes.find(
                   (r) => serializeRouteQuote(r) === routeSelectedSerialized
                 );
               }
-              setRoute(manuallySelectedRoute || routes[0]);
+              setRoute(manuallySelectedRoute || routes[0] || null);
               if (isReload) {
                 // restart interval timer
                 setTimePassedAfterRefresh(0);
@@ -351,23 +355,16 @@ const TokenSwap = () => {
               }
             }
           } else {
-            const tradeRoutes = hippoAgg.getAllRoutes(xToken, yToken);
-            if (tradeRoutes.length > 0) {
-              setHasRoute(true);
-            } else {
-              setHasRoute(false);
-            }
-            setAllRoutes([]);
-            setRoute(null);
-            setRouteSelectedSerialized('');
-            setRefreshRoutesTimerTick(null);
+            routes = hippoAgg.getAllRoutes(xToken, yToken);
           }
-        } else {
-          setHasRoute(false);
+        }
+
+        setHasRoute(routes.length > 0);
+        if (!fromUiAmt || routes.length === 0) {
           setAllRoutes([]);
           setRoute(null);
           setRouteSelectedSerialized('');
-          setRefreshRoutesTimerTick(null);
+          setRefreshRoutesTimerTick(null); // stop timer
         }
       } catch (error) {
         console.log('Fetch swap routes:', error);
@@ -392,8 +389,7 @@ const TokenSwap = () => {
       routeSelectedSerialized,
       setRoute,
       setFieldValue,
-      values.currencyFrom,
-      hasRoute
+      values.currencyFrom
     ]
   );
 
@@ -419,14 +415,6 @@ const TokenSwap = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeSelected, setFieldValue]);
 
-  useEffect(() => {
-    setFieldValue('currencyTo', {
-      ...values.currencyTo,
-      amount: routeSelected?.quote.outputUiAmt || ''
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeSelected, setFieldValue]);
-
   const onClickSwapToken = useCallback(() => {
     const tokenFrom = values.currencyFrom;
     const tokenTo = values.currencyTo;
@@ -436,7 +424,7 @@ const TokenSwap = () => {
 
   const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromSymbol);
   const isSwapEnabled =
-    (!connected && values.currencyFrom?.token) || // to connect wallet
+    (hasRoute && !connected && values.currencyFrom?.token) || // to connect wallet
     (values.quoteChosen &&
       fromUiAmt &&
       fromCurrentBalance &&
@@ -446,16 +434,14 @@ const TokenSwap = () => {
   const swapButtonText = useMemo(() => {
     if (!values.currencyFrom?.token) {
       return 'Loading Tokens...';
+    } else if (!hasRoute) {
+      return 'No Available Route';
     } else if (!connected) {
       return 'Connect to Wallet';
     } else if (!isCurrentBalanceReady) {
       return 'Loading Balance...';
     } else if (!fromUiAmt) {
-      if (hasRoute) {
-        return 'Enter an Amount';
-      } else {
-        return 'No Available Route';
-      }
+      return 'Enter an Amount';
     } else if (!fromCurrentBalance || fromUiAmt > fromCurrentBalance) {
       return 'Insufficient Balance';
     } else if (isRefreshingRoutes) {
@@ -539,7 +525,11 @@ const TokenSwap = () => {
           <div className="largeTextBold mb-2 flex">
             <div className="mr-auto">Pay</div>
           </div>
-          <CurrencyInput actionType="currencyFrom" trashButtonContainerWidth={cardXPadding} />
+          <CurrencyInput
+            actionType="currencyFrom"
+            isDisableAmountInput={!hasRoute}
+            trashButtonContainerWidth={cardXPadding}
+          />
           <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
             <SwapIcon />
           </Button>

@@ -21,6 +21,7 @@ import Button from 'components/Button';
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
   trashButtonContainerWidth?: string;
+  isDisableAmountInput?: boolean;
 }
 
 const CoinSelectButton = ({
@@ -62,7 +63,11 @@ const CoinSelectButton = ({
   );
 };
 
-const CurrencyInput: React.FC<TProps> = ({ actionType, trashButtonContainerWidth = '32px' }) => {
+const CurrencyInput: React.FC<TProps> = ({
+  actionType,
+  isDisableAmountInput = false,
+  trashButtonContainerWidth = '32px'
+}) => {
   const [tokenAmountFormatter] = useTokenAmountFormatter();
   const [isVisibile, setIsVisible] = useState(false);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -128,7 +133,7 @@ const CurrencyInput: React.FC<TProps> = ({ actionType, trashButtonContainerWidth
           min={0}
           max={1e11}
           maxDecimals={values[actionType]?.token?.decimals.toJsNumber() || 9}
-          isDisabled={actionType === 'currencyTo'}
+          isDisabled={actionType === 'currencyTo' || isDisableAmountInput}
           placeholder="0.00"
           className="grow h6 font-[900] bg-transparent text-right pr-0 pl-1"
           inputAmount={selectedCurrency?.amount || 0}
@@ -150,10 +155,11 @@ const CurrencyInput: React.FC<TProps> = ({ actionType, trashButtonContainerWidth
           {isReady && (
             <small
               className={classNames({
-                'cursor-pointer pointer-events-auto underline': actionType === 'currencyFrom'
+                'cursor-pointer pointer-events-auto underline':
+                  actionType === 'currencyFrom' && !isDisableAmountInput
               })}
               onClick={() => {
-                if (actionType === 'currencyFrom') {
+                if (actionType === 'currencyFrom' && !isDisableAmountInput) {
                   setFieldValue(actionType, {
                     ...selectedCurrency,
                     amount: uiBalance
