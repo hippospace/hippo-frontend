@@ -1,13 +1,6 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useState } from 'react';
 import { coinListClient, hippoTradeAggregator, hippoWalletClient } from 'config/hippoClients';
-import {
-  HippoSwapClient,
-  HippoWalletClient,
-  PoolType,
-  UITokenAmount,
-  stdlib,
-  CoinListClient
-} from '@manahippo/hippo-sdk';
+import { HippoWalletClient, stdlib, CoinListClient } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
 import useAptosWallet from 'hooks/useAptosWallet';
 // import { aptosClient } from 'config/aptosClient';
@@ -25,7 +18,6 @@ import { Types } from 'aptos';
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
   hippoAgg?: TradeAggregator;
-  hippoSwap?: HippoSwapClient;
   tokenStores?: Record<string, stdlib.Coin.CoinStore>;
   tokenInfos?: Record<string, CoinInfo>;
   getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
@@ -41,21 +33,6 @@ interface HippoClientContextType {
     uiAmtOutMin: number,
     callback: () => void
   ) => {};
-  requestDeposit?: (
-    lhsSymbol: string,
-    rhsSymbol: string,
-    poolType: PoolType,
-    lhsUiAmt: number,
-    rhsUiAmt: number
-  ) => Promise<boolean>;
-  requestWithdraw?: (
-    lhsSymbol: string,
-    rhsSymbol: string,
-    poolType: PoolType,
-    liqiudityAmt: UITokenAmount,
-    lhsMinAmt: UITokenAmount,
-    rhsMinAmt: UITokenAmount
-  ) => Promise<boolean>;
   transaction?: TTransaction;
   setTransaction: (trans?: TTransaction) => void;
   requestFaucet: (symbol: string) => Promise<boolean>;
@@ -220,88 +197,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     },
     [activeWallet, getNotificationMsg, signAndSubmitTransaction]
   );
-  /*
-  const requestDeposit = useCallback(
-    async (
-      lhsSymbol: string,
-      rhsSymbol: string,
-      poolType: PoolType,
-      lhsUiAmt: number,
-      rhsUiAmt: number
-    ) => {
-      let success = false;
-      try {
-        if (!activeWallet || !hippoSwap) {
-          throw new Error('Please login first');
-        }
-        const pool = hippoSwap.getDirectPoolsBySymbolsAndPoolType(lhsSymbol, rhsSymbol, poolType);
-        if (pool.length === 0) {
-          throw new Error('Desired pool does not exist');
-        }
-        const payload = await pool[0].makeAddLiquidityPayload(lhsUiAmt, rhsUiAmt);
-        const result = await signAndSubmitTransaction(payload);
-        if (result) {
-          message.success('Transaction Success');
-          getNotificationMsg(result.hash);
-          setRefresh(true);
-          success = true;
-        }
-      } catch (error) {
-        console.log('request deposit error:', error);
-        if (error instanceof Error) {
-          message.error(error?.message);
-        }
-        success = false;
-      } finally {
-        return success;
-      }
-    },
-    [hippoSwap, activeWallet, signAndSubmitTransaction]
-  );
-
-  const requestWithdraw = useCallback(
-    async (
-      lhsSymbol: string,
-      rhsSymbol: string,
-      poolType: PoolType,
-      liqiudityAmt: UITokenAmount,
-      lhsMinAmt: UITokenAmount,
-      rhsMinAmt: UITokenAmount
-    ) => {
-      let success = false;
-      try {
-        if (!activeWallet || !hippoSwap) {
-          throw new Error('Please login first');
-        }
-        const pool = hippoSwap.getDirectPoolsBySymbolsAndPoolType(lhsSymbol, rhsSymbol, poolType);
-        if (pool.length === 0) {
-          throw new Error('Desired pool does not exist');
-        }
-        const payload = await pool[0].makeRemoveLiquidityPayload(
-          liqiudityAmt,
-          lhsMinAmt,
-          rhsMinAmt
-        );
-        const result = await signAndSubmitTransaction(payload);
-        if (result) {
-          message.success('Transaction Success');
-          getNotificationMsg(result.hash);
-          setRefresh(true);
-          success = true;
-        }
-      } catch (error) {
-        console.log('request withdraw error:', error);
-        if (error instanceof Error) {
-          message.error(error?.message);
-        }
-        success = false;
-      } finally {
-        return success;
-      }
-    },
-    [hippoSwap, activeWallet, signAndSubmitTransaction]
-  );
-  */
 
   return (
     <HippoClientContext.Provider

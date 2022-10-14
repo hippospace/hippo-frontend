@@ -1,6 +1,5 @@
 import { Navigate, RouteObject, useLocation, useNavigate, useRoutes } from 'react-router-dom';
 
-import Pool from 'pages/Pool';
 import Swap from 'pages/Swap';
 import Faucet from 'pages/Faucet';
 import Home from 'pages/Home';
@@ -23,12 +22,6 @@ export const routes: TRoute[] = [
     path: 'swap',
     name: 'Swap',
     element: <Swap />
-  },
-  {
-    path: 'pools',
-    name: 'Pools',
-    hidden: true,
-    element: <Pool />
   },
   {
     path: 'faucet',

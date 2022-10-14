@@ -1851,10 +1851,10 @@
     eventemitter3 "^4.0.7"
     js-sha3 "^0.8.0"
 
-"@manahippo/hippo-sdk@0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.10.0.tgz#9c499b451e55322a72745e827bf81bea42e12f97"
-  integrity sha512-aAcZjGiCMaFntB8zF74npTYWCfpnkF4w772kFT7NkpNX8uR1ZUGhrlMFJUxUHDQ6fU1RHVZA+2aAfXMVaM6kXg==
+"@manahippo/hippo-sdk@0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.10.1.tgz#675aa4102be4c084846737f2044ac7a16feb39e6"
+  integrity sha512-qSpxo6rYgIGy2UY/Pv6toxsB+3bjhC1Fm4J7ueuAiHh7IdeG6EHXm0LoJQjeVDx1WKDvsX9ytE6XyLRl76pkxQ==
   dependencies:
     "@manahippo/move-to-ts" "0.4.3"
     aptos "1.3.15"
@@ -4169,11 +4169,6 @@ commander@^8.3.0:
   version "8.3.0"
   resolved "https://registry.npmjs.org/commander/-/commander-8.3.0.tgz"
   integrity sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==
-
-commander@^9.3.0:
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.0.tgz#bc4a40918fefe52e22450c111ecd6b7acce6f11c"
-  integrity sha512-sRPT+umqkz90UA8M1yqYfnHlZA7fF6nSphDtxeywPZ49ysjxDQybzk13CL+mXekDRG92skbcqCLVovuCusNmFw==
 
 common-path-prefix@^3.0.0:
   version "3.0.0"
@@ -12464,11 +12459,6 @@ yaml@^1.10.0, yaml@^1.10.2, yaml@^1.7.2:
   version "1.10.2"
   resolved "https://registry.npmjs.org/yaml/-/yaml-1.10.2.tgz"
   integrity sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==
-
-yaml@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.1.1.tgz#1e06fb4ca46e60d9da07e4f786ea370ed3c3cfec"
-  integrity sha512-o96x3OPo8GjWeSLF+wOAbrPfhFOGY0W00GNaxCDv+9hkcDJEnev1yh8S7pgHF0ik6zc8sQLuL8hjHjJULZp8bw==
 
 yargs-parser@^20.2.2:
   version "20.2.9"
