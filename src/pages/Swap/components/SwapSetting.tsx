@@ -129,7 +129,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
             isConfine={true}
             placeholder="0"
             min={0}
-            max={1000}
+            max={30000}
             onAmountChange={(v) => setFieldValue('maxGasFee', v)}
           />
           <div className="h6">Gas Units</div>

@@ -29,7 +29,11 @@ interface HippoClientContextType {
   tokenStores?: Record<string, stdlib.Coin.CoinStore>;
   tokenInfos?: Record<string, CoinInfo>;
   getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
-  requestSwapByRoute: (routeAndQuote: RouteAndQuote, slipTolerance: number) => Promise<boolean>;
+  requestSwapByRoute: (
+    routeAndQuote: RouteAndQuote,
+    slipTolerance: number,
+    options?: Partial<Types.SubmitTransactionRequest>
+  ) => Promise<boolean>;
   requestSwap?: (
     fromSymbol: string,
     toSymbol: string,
@@ -184,7 +188,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   const requestSwapByRoute = useCallback(
-    async (routeAndQuote: RouteAndQuote, slipTolerance: number) => {
+    async (routeAndQuote: RouteAndQuote, slipTolerance: number, options = {}) => {
       let success = false;
       try {
         const input = routeAndQuote.quote.inputUiAmt;
@@ -196,9 +200,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         const payload = routeAndQuote.route.makePayload(input, minOut, true);
         const result = await signAndSubmitTransaction(
           payload as Types.TransactionPayload_EntryFunctionPayload,
-          {
-            expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 3 * 60
-          }
+          options
         );
         if (result) {
           message.success('Transaction Success');

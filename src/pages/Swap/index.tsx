@@ -6,6 +6,7 @@ import { getSwapSettings } from 'modules/swap/reducer';
 import TokenSwap from './components/TokenSwap';
 import useHippoClient from 'hooks/useHippoClient';
 import { ISwapSettings } from './types';
+import { Types } from 'aptos';
 
 const validationSchema = yup.object({
   // currencyFrom: yup.object().shape({
@@ -37,7 +38,18 @@ const Swap: React.FC = () => {
       if (fromSymbol && toSymbol && fromUiAmt) {
         const quote = values.quoteChosen;
         if (quote) {
-          await requestSwapByRoute(quote, values.slipTolerance);
+          const options: Partial<Types.SubmitTransactionRequest> = {
+            expiration_timestamp_secs:
+              '' + (Math.floor(Date.now() / 1000) + values.trasactionDeadline),
+            max_gas_amount: '' + values.maxGasFee
+          };
+          const result = await requestSwapByRoute(quote, values.slipTolerance, options);
+          if (result) {
+            formikHelper.setFieldValue('currencyFrom', {
+              ...values.currencyFrom,
+              amount: 0
+            });
+          }
           formikHelper.setSubmitting(false);
         } else {
           // TODO: info bubble "route note available"
