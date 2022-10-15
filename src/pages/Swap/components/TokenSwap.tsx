@@ -9,7 +9,7 @@ import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import classNames from 'classnames';
-import { Drawer, message, Modal, Skeleton, Tooltip } from 'antd';
+import { Drawer, Modal, Skeleton, Tooltip } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
@@ -17,6 +17,7 @@ import { useInterval } from 'usehooks-ts';
 import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { openErrorNotification } from 'utils/notifications';
 
 interface IRoutesProps {
   className?: string;
@@ -368,7 +369,7 @@ const TokenSwap = () => {
       } catch (error) {
         console.log('Fetch swap routes:', error);
         if (error instanceof Error) {
-          message.error(error?.message);
+          openErrorNotification({ detail: error?.message, title: 'Fetch swap routes error' });
         }
 
         setFieldValue('currencyFrom', {

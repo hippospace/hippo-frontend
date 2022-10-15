@@ -23,6 +23,18 @@ module.exports = {
           500: '#8D78F7',
           700: '#634CD9',
           900: '#2F2273'
+        },
+        success: {
+          500: '#82CB7C'
+        },
+        error: {
+          500: '#EB6A5D'
+        },
+        info: {
+          500: '#5B6CFE'
+        },
+        warn: {
+          500: '#FFA24E'
         }
       },
       backgroundImage: {

@@ -27,3 +27,6 @@ export { ReactComponent as WalletNotConnectedIcon } from './walletNotConnected.s
 export { ReactComponent as WalletConnectedIcon } from './walletConnected.svg';
 export { ReactComponent as RefreshIcon } from './refresh.svg';
 export { ReactComponent as TrashIcon } from './trash.svg';
+export { ReactComponent as NotiSuccessIcon } from './notis/success.svg';
+export { ReactComponent as NotiErrorIcon } from './notis/error.svg';
+export { ReactComponent as NotiInfoIcon } from './notis/info.svg';

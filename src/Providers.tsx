@@ -14,7 +14,7 @@ import {
   RiseWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
-import { message } from 'antd';
+import { openErrorNotification } from 'utils/notifications';
 
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
 
@@ -52,12 +52,11 @@ const Providers: React.FC<TProps> = (props: TProps) => {
         wallets={wallets}
         autoConnect
         onError={(error: Error) => {
-          console.log('wallet errors: ', error);
-          let text = '';
+          let text = 'Unknow error';
           if (error.name === 'WalletNotReadyError') {
             text = 'Wallet not ready';
           }
-          message.error(error.message || text);
+          openErrorNotification({ detail: error.message || text, title: 'Wallet Error' });
         }}>
         <AptosWalletProvider>
           <ReduxProvider store={store}>

@@ -3,17 +3,14 @@ import { coinListClient, hippoTradeAggregator, hippoWalletClient } from 'config/
 import { HippoWalletClient, stdlib, CoinListClient } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
 import useAptosWallet from 'hooks/useAptosWallet';
-// import { aptosClient } from 'config/aptosClient';
-import { message } from 'components/Antd';
 import { TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
-import { MaybeHexString } from 'aptos';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
-import { useNotification } from 'hooks/useNotification';
 import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import { Types } from 'aptos';
+import { openErrorNotification, openTxSuccessNotification } from 'utils/notifications';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -47,7 +44,6 @@ const HippoClientContext = createContext<HippoClientContextType>({} as HippoClie
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { activeWallet } = useAptosWallet();
   const { signAndSubmitTransaction } = useWallet();
-  const { openNotification } = useNotification();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
   const [coinListCli, setCoinListCli] = useState<CoinListClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
@@ -112,25 +108,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     dispatch(swapAction.SET_TOKEN_LIST(coinListCli?.getCoinInfoList()));
   }, [coinListCli, dispatch]);
 
-  const getNotificationMsg = useCallback(
-    (txhash: MaybeHexString) => {
-      const description = (
-        <p>
-          You can verify the transaction by visiting the{' '}
-          <a
-            href={`https://explorer.aptoslabs.com/txn/${txhash}`}
-            target="_blank"
-            rel="noreferrer"
-            className="underline">
-            Aptos Transaction Explorer
-          </a>
-        </p>
-      );
-      return openNotification(description);
-    },
-    [openNotification]
-  );
-
   const requestFaucet = useCallback(
     async (symbol: string) => {
       let success = false;
@@ -144,24 +121,23 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
             expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 3 * 60
           });
           if (result) {
-            message.success('Faucet Success');
-            getNotificationMsg(result.hash);
+            openTxSuccessNotification(result.hash, `Requested ${uiAmtUsed} ${symbol} successfully`);
             await hippoWallet?.refreshStores();
             setRefreshWalletClient(true);
             success = true;
           }
         }
       } catch (error) {
-        console.log('request faucet error:', error);
+        console.error('Request faucet error:', error);
         if (error instanceof Error) {
-          message.error(error?.message);
+          openErrorNotification({ detail: error?.message });
         }
         success = false;
       } finally {
         return success;
       }
     },
-    [activeWallet, getNotificationMsg, hippoWallet, signAndSubmitTransaction, tokenInfos]
+    [activeWallet, hippoWallet, signAndSubmitTransaction, tokenInfos]
   );
 
   const requestSwapByRoute = useCallback(
@@ -180,22 +156,24 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           options
         );
         if (result) {
-          message.success('Transaction Success');
-          getNotificationMsg(result.hash);
+          openTxSuccessNotification(
+            result.hash,
+            `Swapped ${input} ${routeAndQuote.quote.inputSymbol} for ${routeAndQuote.quote.outputUiAmt} ${routeAndQuote.quote.outputSymbol}`
+          );
           setRefreshWalletClient(true);
           success = true;
         }
       } catch (error) {
-        console.log('request swap by route error:', error);
+        console.error('Request swap by route error:', error);
         if (error instanceof Error) {
-          message.error(error?.message);
+          openErrorNotification({ detail: error?.message });
         }
         success = false;
       } finally {
         return success;
       }
     },
-    [activeWallet, getNotificationMsg, signAndSubmitTransaction]
+    [activeWallet, signAndSubmitTransaction]
   );
 
   return (

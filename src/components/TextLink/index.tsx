@@ -12,7 +12,7 @@ interface TProps {
 const TextLink: React.FC<TProps> = ({ className, children, ...rest }) => {
   return (
     <a
-      className={cx('helpText bold text-grey-900 underline', className)}
+      className={cx('text-purple-700 underline hover:underline hover:text-purple-500', className)}
       {...rest}
       target="_blank"
       rel="noreferrer">

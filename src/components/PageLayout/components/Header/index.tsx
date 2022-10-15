@@ -131,7 +131,7 @@ const PageHeader: React.FC = () => {
       <Drawer
         visible={isSideMenuOpen}
         placement="left"
-        closeIcon={<CloseIcon />}
+        closeIcon={<CloseIcon className="font-icon h5 text-grey-500" />}
         width="70%"
         onClose={() => setIsSideMenuOpen(false)}>
         {!isResourcesNotFound && (

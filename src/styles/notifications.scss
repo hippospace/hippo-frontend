@@ -1,0 +1,31 @@
+.ant-notification {
+  .ant-notification-notice {
+    &::before {
+      content: '';
+      width: 16px;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    &.hippo-notification--success::before {
+      @apply bg-success-500;
+    }
+    &.hippo-notification--error::before {
+      @apply bg-error-500;
+    }
+    &.hippo-notification--warn::before {
+      @apply bg-warn-500;
+    }
+    &.hippo-notification--info::before {
+      @apply bg-info-500;
+    }
+    @apply rounded-[16px];
+    .ant-notification-notice-message {
+      @apply text-grey-900 h6 mb-3;
+    }
+    .ant-notification-notice-description {
+      @apply text-grey-700 largeTextNormal;
+    }
+  }
+}
