@@ -45,7 +45,7 @@
       @apply bg-primePurple-700 text-primePurple-100;
     }
     &:active {
-      @apply bg-primePurple-900 text-primePurple-100;
+      @apply bg-primePurple-900 text-primePurple-100 border-primePurple-900;
     }
     &:disabled {
       @apply opacity-40;

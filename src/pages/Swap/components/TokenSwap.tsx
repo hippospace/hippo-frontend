@@ -9,7 +9,7 @@ import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import classNames from 'classnames';
-import { Drawer, Modal, Skeleton, Tooltip } from 'antd';
+import { Drawer, Skeleton, Tooltip } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
@@ -486,6 +486,7 @@ const TokenSwap = () => {
   );
 
   const onSwap = useCallback(() => {
+    /*
     if (routeSelectedSerialized) {
       Modal.warning({
         title: 'Are you sure to proceed?',
@@ -500,8 +501,9 @@ const TokenSwap = () => {
       });
       return;
     }
+    */
     submitForm();
-  }, [routeSelectedSerialized, submitForm]);
+  }, [submitForm]);
 
   const cardXPadding = '32px';
   return (
