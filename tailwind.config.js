@@ -18,10 +18,11 @@ module.exports = {
           900: '#2D2D2D'
         },
         primePurple: {
-          100: '#F1EFFE',
-          300: '#B3A6FE',
-          700: '#5957AC',
-          900: '#414082'
+          100: '#EAE6FF',
+          300: '#CDC1FF',
+          500: '#8D78F7',
+          700: '#634CD9',
+          900: '#2F2273'
         }
       },
       backgroundImage: {
