@@ -6,7 +6,7 @@ import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
 import { useCallback, useRef, useState } from 'react';
 import CoinIcon from 'components/CoinIcon';
-import { Modal, Drawer, Skeleton } from 'components/Antd';
+import { Modal, Drawer } from 'components/Antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useSelector } from 'react-redux';
 import { getTokenList } from 'modules/swap/reducer';
@@ -17,6 +17,7 @@ import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import Button from 'components/Button';
+import Skeleton from 'components/Skeleton';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -164,7 +165,7 @@ const CurrencyInput: React.FC<TProps> = ({
               {tokenAmountFormatter(uiBalance, selectedSymbol)}
             </small>
           )}
-          {!isReady && <Skeleton.Button active className="!w-10 !h-4 !min-w-[40px] !rounded" />}
+          {!isReady && <Skeleton width={30} />}
         </div>
       )}
       {/* destroyOnClose is critical for getting the correct height of token list wrapper in CoinSelector */}

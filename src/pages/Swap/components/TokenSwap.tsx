@@ -9,7 +9,7 @@ import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import classNames from 'classnames';
-import { Drawer, Skeleton, Tooltip } from 'antd';
+import { Drawer, Tooltip } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
@@ -18,6 +18,7 @@ import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { openErrorNotification } from 'utils/notifications';
+import Skeleton from 'components/Skeleton';
 
 interface IRoutesProps {
   className?: string;
@@ -157,17 +158,17 @@ const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestP
           }
         )}>
         <div
-          className={classNames('w-full h-full p-2 rounded-lg', {
+          className={classNames('w-full h-full p-2 rounded-lg space-y-1', {
             'bg-selected': isSelected,
             'bg-grey-100': !isSelected
           })}>
-          <div className="flex justify-between items-center largeTextBold">
+          <div className="flex justify-between items-center largeTextBold text-grey-700">
             <div className="truncate" title={swapDexs}>
               {swapDexs}
             </div>
             <div className="largeTextBold">{outputFormatted}</div>
           </div>
-          <div className="flex justify-between items-center small font-bold text-grey-500">
+          <div className="flex font-semibold justify-between items-center small text-grey-500">
             <div>{swapRoutes}</div>
             <div className="invisible">${outputValue}</div>
           </div>
@@ -224,7 +225,17 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
         {isRefreshing && (
           <div className="h-full flex flex-col justify-around">
             {new Array(rows).fill(1).map((_, index) => (
-              <Skeleton.Button active block={true} key={`ske-${index}`} size="large" />
+              <div
+                key={`ske-${index}`}
+                style={{ height: `${routeRowHeight}px` }}
+                className="py-1 leading-none space-y-1">
+                <div>
+                  <Skeleton width={'80%'} />
+                </div>
+                <div>
+                  <Skeleton />
+                </div>
+              </div>
             ))}
           </div>
         )}

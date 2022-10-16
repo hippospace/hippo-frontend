@@ -1,6 +1,6 @@
 import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
-import { Skeleton } from 'antd';
 import cx from 'classnames';
+import Skeleton from 'components/Skeleton';
 import useHippoClient from 'hooks/useHippoClient';
 import React from 'react';
 
@@ -28,7 +28,7 @@ const CoinIcon: React.FC<TProps> = ({ logoSrc, size = 24, className, symbol, tok
   };
   return (
     <div className={cx(className)} style={{ width: `${size}px`, height: `${size}px` }}>
-      {!logoSrc && <Skeleton.Avatar active={true} size={size} shape="circle" />}
+      {!logoSrc && <Skeleton circle={true} height={'100%'} />}
       {logoSrc && (
         <img
           src={logoSrc}
