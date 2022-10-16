@@ -6,7 +6,7 @@ import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
 import { useCallback, useRef, useState } from 'react';
 import CoinIcon from 'components/CoinIcon';
-import { Drawer, Popover, Skeleton } from 'antd';
+import { Modal, Drawer, Skeleton } from 'components/Antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useSelector } from 'react-redux';
 import { getTokenList } from 'modules/swap/reducer';
@@ -38,7 +38,7 @@ const CoinSelectButton = ({
   return (
     <div
       className={classNames(
-        'flex items-center gap-2 font-bold cursor-pointer',
+        'flex items-center gap-2 font-bold cursor-pointer min-w-fit',
         {
           'cursor-not-allowed pointer-events-none': isDisabled
         },
@@ -69,8 +69,8 @@ const CurrencyInput: React.FC<TProps> = ({
   trashButtonContainerWidth = '32px'
 }) => {
   const [tokenAmountFormatter] = useTokenAmountFormatter();
-  const [isVisibile, setIsVisible] = useState(false);
-  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [isCoinSelectorVisible, setIsCoinSelectorVisible] = useState(false);
+  const [isCSDrawerVisible, setIsCSDrawerVisible] = useState(false);
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const { connected } = useWallet();
 
@@ -111,22 +111,17 @@ const CurrencyInput: React.FC<TProps> = ({
         'bg-primaryGrey w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2 relative group'
       )}>
       <div className="flex gap-1 items-center">
-        <Popover
-          className="mobile:hidden"
-          overlayClassName={styles.popover}
-          trigger="click"
-          visible={isVisibile}
-          onVisibleChange={(visible) => setIsVisible(!isCoinSelectorDisabled && visible)}
-          content={
-            <CoinSelector actionType={actionType} dismissiModal={() => setIsVisible(!isVisibile)} />
-          }>
-          <CoinSelectButton token={selectedCurrency?.token} isDisabled={isCoinSelectorDisabled} />
-        </Popover>
         <CoinSelectButton
-          className="hidden min-w-fit mobile:flex"
+          className="flex mobile:hidden"
           isDisabled={isCoinSelectorDisabled}
           token={selectedCurrency?.token}
-          onClick={() => setIsDrawerVisible(true)}
+          onClick={() => setIsCoinSelectorVisible(true)}
+        />
+        <CoinSelectButton
+          className="hidden mobile:flex"
+          isDisabled={isCSDrawerVisible}
+          token={selectedCurrency?.token}
+          onClick={() => setIsCSDrawerVisible(true)}
         />
         <PositiveFloatNumInput
           ref={inputRef}
@@ -172,14 +167,32 @@ const CurrencyInput: React.FC<TProps> = ({
           {!isReady && <Skeleton.Button active className="!w-10 !h-4 !min-w-[40px] !rounded" />}
         </div>
       )}
+      {/* destroyOnClose is critical for getting the correct height of token list wrapper in CoinSelector */}
+      <Modal
+        visible={isCoinSelectorVisible}
+        footer={null}
+        closable={false}
+        maskClosable={true}
+        centered
+        destroyOnClose
+        onCancel={() => setIsCoinSelectorVisible(false)}>
+        <div className="mobile:hidden">
+          <CoinSelector
+            actionType={actionType}
+            dismissiModal={() => setIsCoinSelectorVisible(false)}
+          />
+        </div>
+      </Modal>
       <Drawer
+        className="hidden mobile:block"
         title={<div className="paragraph bold text-black">Select a Token</div>}
         closable={false}
         height={'80vh'}
         placement={'bottom'}
-        onClose={() => setIsDrawerVisible(false)}
-        visible={isDrawerVisible}>
-        <CoinSelector actionType={actionType} dismissiModal={() => setIsDrawerVisible(false)} />
+        destroyOnClose
+        onClose={() => setIsCSDrawerVisible(false)}
+        visible={isCSDrawerVisible}>
+        <CoinSelector actionType={actionType} dismissiModal={() => setIsCSDrawerVisible(false)} />
       </Drawer>
     </div>
   );

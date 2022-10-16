@@ -1,7 +1,10 @@
+import { CONFIGS } from '@manahippo/hippo-sdk';
 import { AptosClient } from 'aptos';
 import { FaucetClient } from 'aptos';
-import { NODE_URL, FAUCET_URL } from './aptosConstants';
 
-export const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL);
+export const faucetClient = new FaucetClient(
+  CONFIGS.testnet.fullNodeUrl,
+  CONFIGS.testnet.faucetUrl
+);
 
-export const aptosClient = new AptosClient(NODE_URL);
+export const aptosClient = new AptosClient(CONFIGS.testnet.fullNodeUrl);

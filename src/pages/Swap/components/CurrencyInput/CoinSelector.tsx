@@ -2,7 +2,7 @@ import { List } from 'components/Antd';
 import { useFormikContext } from 'formik';
 import { getTokenList } from 'modules/swap/reducer';
 import { ISwapSettings } from 'pages/Swap/types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import VirtualList from 'rc-virtual-list';
 import CoinRow from './CoinRow';
@@ -105,36 +105,47 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     );
   }, [filter, onSelectToken, commonCoins]);
 
+  const listRef = useRef<HTMLDivElement>(null);
+  const [listHeight, setListHeight] = useState(0);
+
+  useEffect(() => {
+    if (listRef.current?.offsetHeight) setListHeight(listRef.current?.offsetHeight ?? 0);
+  }, []);
+
   const renderTokenList = useMemo(() => {
     return (
-      <div className="flex flex-col gap-2 mt-4">
+      <div className="flex flex-col gap-2 mt-4 flex-grow min-h-0">
         <div className="flex justify-between">
           <small className="text-grey-500 font-bold">Token</small>
           <small className="text-grey-500 font-bold">{hippoWallet ? 'Balance' : ''}</small>
         </div>
-        <List
-          className="h-[376px] overflow-y-scroll no-scrollbar border-0"
-          rowKey={(item) => `list-row-${(item as TokenInfo).symbol.str()}`}>
-          <VirtualList
-            data={tokenListBalance || []}
-            height={376}
-            itemHeight={73}
-            itemKey={(item) => `list-item-${item.token.symbol.str()}`}>
-            {(item) => (
-              <List.Item
-                className="!border-b-0 !px-0 cursor-pointer p-1"
-                onClick={() => onSelectToken(item.token)}>
-                <CoinRow item={item} />
-              </List.Item>
-            )}
-          </VirtualList>
-        </List>
+        <div className="h-auto flex-grow min-h-0" ref={listRef}>
+          {tokenListBalance && (
+            <List
+              className="overflow-y-scroll no-scrollbar border-0 h-full"
+              rowKey={(item) => `list-row-${(item as TokenInfo).symbol.str()}`}>
+              <VirtualList
+                data={tokenListBalance || []}
+                height={listHeight}
+                itemHeight={73}
+                itemKey={(item) => `list-item-${item.token.symbol.str()}`}>
+                {(item) => (
+                  <List.Item
+                    className="!border-b-0 !px-0 cursor-pointer p-1"
+                    onClick={() => onSelectToken(item.token)}>
+                    <CoinRow item={item} />
+                  </List.Item>
+                )}
+              </VirtualList>
+            </List>
+          )}
+        </div>
       </div>
     );
-  }, [hippoWallet, tokenListBalance, onSelectToken]);
+  }, [hippoWallet, tokenListBalance, listHeight, onSelectToken]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-[50vh] mobile:h-full">
       {renderHeaderSearch}
       {renderTokenList}
     </div>
