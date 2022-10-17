@@ -11,7 +11,8 @@ import {
   MartianWalletAdapter,
   PontemWalletAdapter,
   SpikaWalletAdapter,
-  RiseWalletAdapter
+  RiseWalletAdapter,
+  BitkeepWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
 import { openErrorNotification } from 'utils/notifications';
@@ -41,7 +42,8 @@ const Providers: React.FC<TProps> = (props: TProps) => {
       new MartianWalletAdapter(),
       new AptosWalletAdapter(),
       new PontemWalletAdapter(),
-      new SpikaWalletAdapter()
+      new SpikaWalletAdapter(),
+      new BitkeepWalletAdapter()
     ],
     []
   );
