@@ -1,0 +1,23 @@
+.ant-radio {
+  &.ant-radio-checked {
+    .ant-radio-inner {
+      @apply border-primePurple-500 shadow-none;
+      &::after {
+        @apply bg-primePurple-500;
+      }
+    }
+    &::after {
+      @apply border-primePurple-500 #{!important};
+    }
+  }
+  &:hover .ant-radio-inner {
+    @apply border-primePurple-300;
+  }
+}
+
+.ant-input {
+  @apply rounded-xl #{!important};
+  &:focus, &:hover {
+    @apply border-primePurple-100 shadow-none #{!important};
+  }
+}

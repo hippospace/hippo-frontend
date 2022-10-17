@@ -1,7 +1,7 @@
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, MoreArrowDown, RefreshIcon, SettingIcon, SwapIcon } from 'resources/icons';
+import { AdjustIcon, ArrowRight, MoreArrowDown, RefreshIcon, SwapIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
 import CurrencyInput from './CurrencyInput';
 import SwapDetail from './SwapDetail';
@@ -56,7 +56,7 @@ const SettingsButton = ({
       variant="icon"
       size="small"
       onClick={onClick}>
-      {values.slipTolerance}% <SettingIcon className="font-icon ml-1 !h6" />
+      {values.slipTolerance}% <AdjustIcon className="font-icon ml-1 !h6" />
     </Button>
   );
 };

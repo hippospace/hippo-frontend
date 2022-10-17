@@ -67,6 +67,7 @@ module.exports = {
       selected: '#F2F1FE'
     }),
     boxShadow: {
+      none: 'none',
       sm: '4px 4px 0px #2D2D2D',
       md: '0px 4px 8px rgba(0, 0, 0, 0.25)',
       figma: '8px 8px 0px #2D2D2D',

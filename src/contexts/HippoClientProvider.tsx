@@ -1,4 +1,4 @@
-import { createContext, FC, ReactNode, useCallback, useEffect, useState } from 'react';
+import { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { coinListClient, hippoTradeAggregator, hippoWalletClient } from 'config/hippoClients';
 import { HippoWalletClient, stdlib, CoinListClient } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
@@ -9,8 +9,9 @@ import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
-import { Types } from 'aptos';
+import { AptosClient, Types } from 'aptos';
 import { openErrorNotification, openTxSuccessNotification } from 'utils/notifications';
+import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -42,8 +43,8 @@ interface TProviderProps {
 const HippoClientContext = createContext<HippoClientContextType>({} as HippoClientContextType);
 
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
-  const { activeWallet } = useAptosWallet();
-  const { signAndSubmitTransaction } = useWallet();
+  const { activeWallet, connected } = useAptosWallet();
+  const { signAndSubmitTransaction, network } = useWallet();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
   const [coinListCli, setCoinListCli] = useState<CoinListClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
@@ -53,23 +54,39 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    const currentNetwork = process.env.REACT_APP_CURRENT_NETWORK;
+    if (connected && !new RegExp(currentNetwork, 'i').test(network?.name)) {
+      openErrorNotification({
+        detail: `Your wallet network is ${network.name} mismatched with the network of the site: ${currentNetwork}. This might cause transaction failures`,
+        title: 'Wallet Network Mismatch'
+      });
+    }
+  }, [connected, network?.name]);
+
+  const { networkCfg } = useNetworkConfiguration();
+  const aptosClient = useMemo(
+    () => new AptosClient(networkCfg.fullNodeUrl),
+    [networkCfg.fullNodeUrl]
+  );
+
   const getHippoWalletClient = useCallback(async () => {
     if (activeWallet) {
-      const client = await hippoWalletClient(activeWallet);
+      const client = await hippoWalletClient(activeWallet, networkCfg, aptosClient);
       await client?.refreshStores();
       setHippoWallet(client);
     } else {
       setHippoWallet(undefined);
     }
-  }, [activeWallet]);
+  }, [activeWallet, aptosClient, networkCfg]);
 
   const getHippoTradeAggregator = useCallback(async () => {
-    setHippoAgg(await hippoTradeAggregator());
-  }, []);
+    setHippoAgg(await hippoTradeAggregator(aptosClient));
+  }, [aptosClient]);
 
   const getCoinListClient = useCallback(async () => {
-    setCoinListCli(await coinListClient());
-  }, []);
+    setCoinListCli(await coinListClient(aptosClient));
+  }, [aptosClient]);
 
   const getTokenInfoByFullName = useCallback(
     (fullName: string) => {

@@ -1,11 +1,10 @@
-import { App, HippoWalletClient } from '@manahippo/hippo-sdk';
+import { App, HippoWalletClient, NetworkConfiguration } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk';
 import { CoinListClient } from '@manahippo/hippo-sdk';
 import { ActiveAptosWallet } from 'types/aptos';
-import { readConfig } from 'utils/hippoWalletUtil';
-import { aptosClient } from './aptosClient';
 import { debounce } from 'lodash';
 import { openErrorNotification } from 'utils/notifications';
+import { AptosClient } from 'aptos';
 
 const errorHandler = debounce(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,11 +16,14 @@ const errorHandler = debounce(
   { leading: false, trailing: true }
 );
 
-export const hippoWalletClient = async (account: ActiveAptosWallet) => {
+export const hippoWalletClient = async (
+  account: ActiveAptosWallet,
+  netConf: NetworkConfiguration,
+  aptosClient: AptosClient
+) => {
   let walletClient: HippoWalletClient | undefined;
   try {
     if (!account) return undefined;
-    const netConf = readConfig();
     walletClient = await HippoWalletClient.createInTwoCalls(netConf, new App(aptosClient), account);
   } catch (err: any) {
     if (err.errorCode === 'account_not_found') {
@@ -37,7 +39,7 @@ export const hippoWalletClient = async (account: ActiveAptosWallet) => {
   return walletClient;
 };
 
-export const hippoTradeAggregator = async () => {
+export const hippoTradeAggregator = async (aptosClient: AptosClient) => {
   let agg: TradeAggregator | undefined;
   try {
     agg = await TradeAggregator.create(aptosClient);
@@ -48,7 +50,7 @@ export const hippoTradeAggregator = async () => {
   return agg;
 };
 
-export const coinListClient = async () => {
+export const coinListClient = async (aptosClient: AptosClient) => {
   let client: CoinListClient | undefined;
   try {
     client = await CoinListClient.load(new App(aptosClient));

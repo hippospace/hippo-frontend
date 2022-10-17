@@ -52,6 +52,16 @@
     }
   }
 
+  &.plain {
+    @apply bg-secondary rounded-xxl shadow-main1;
+    &:hover {
+      @apply opacity-80;
+    }
+    &:active {
+      box-shadow: none;
+    }
+  }
+
   &.icon {
     @apply border-none p-0 w-fit h-fit;
     &:hover {

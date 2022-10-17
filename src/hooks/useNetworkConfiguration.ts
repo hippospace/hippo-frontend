@@ -1,0 +1,29 @@
+import { CONFIGS, NetworkConfiguration } from '@manahippo/hippo-sdk';
+import { getRPCEndpoint } from 'modules/common/reducer';
+import { useSelector } from 'react-redux';
+
+let aptosRPC = '';
+
+const useNetworkConfiguration = () => {
+  const currentNetworkEnv = process.env.REACT_APP_CURRENT_NETWORK;
+  const rpcEndpoint = useSelector(getRPCEndpoint);
+
+  let network: NetworkConfiguration;
+  if (currentNetworkEnv === 'testnet') {
+    network = CONFIGS.testnet;
+  } else if (currentNetworkEnv === 'localhost') {
+    network = CONFIGS.localhost;
+  } else {
+    throw new Error('Invalid network env');
+  }
+  if (!aptosRPC) aptosRPC = network.fullNodeUrl;
+  if (rpcEndpoint) {
+    network.fullNodeUrl = rpcEndpoint;
+  } else {
+    network.fullNodeUrl = aptosRPC;
+  }
+
+  return { networkCfg: network };
+};
+
+export default useNetworkConfiguration;

@@ -7,12 +7,13 @@ import styles from './Header.module.scss';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
 import GithubIcon from 'resources/icons/GitHub-Mark-Light-120px-plus.png';
-import { CloseIcon, MenuIcon } from 'resources/icons';
-import { Drawer } from 'antd';
+import { CloseIcon, MenuIcon, SettingIcon } from 'resources/icons';
+import { Drawer, Popover } from 'antd';
 import { useCallback, useState } from 'react';
 import Button from 'components/Button';
 import { useSelector } from 'react-redux';
 import { getIsResourcesNotFound } from 'modules/common/reducer';
+import Settings from 'components/Settings';
 
 const { Header } = Antd.Layout;
 
@@ -38,6 +39,11 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
     },
     [navigate, onRouteSelected]
   );
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+  const openSettings = useCallback(() => {
+    onRouteSelected();
+    setIsSettingsVisible(true);
+  }, [onRouteSelected]);
   return (
     <div className="h-full flex flex-col">
       <div className="w-full space-y-4">
@@ -56,7 +62,22 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
             );
           })}
       </div>
-      <div className="mt-auto title">V {process.env.REACT_APP_VERSION}</div>
+      <div className="mt-auto largeTextBold w-full">
+        <Button className="w-full" variant="plain" size="medium" onClick={openSettings}>
+          <SettingIcon className="font-icon mr-2" />
+          Settings
+        </Button>
+      </div>
+      <div className="mt-4 title">V {process.env.REACT_APP_VERSION}</div>
+      <Drawer
+        title={'Settings'}
+        closeIcon={<CloseIcon className="font-icon h5 text-grey-500" />}
+        width={'80vw'}
+        placement={'left'}
+        visible={isSettingsVisible}
+        onClose={() => setIsSettingsVisible(false)}>
+        <Settings />
+      </Drawer>
     </div>
   );
 };
@@ -124,6 +145,15 @@ const PageHeader: React.FC = () => {
           </Antd.Menu>
         </div>
         <div className="absolute right-0 top-0 h-full w-fit flex items-center">
+          <Popover
+            className="mobile:hidden"
+            content={<Settings />}
+            placement="bottomRight"
+            trigger="click">
+            <Button size="small" variant="plain" className="!p-3 mr-1">
+              <SettingIcon width={20} height={20} />
+            </Button>
+          </Popover>
           {currentPageName !== 'Home' && <WalletConnector />}
           {currentPageName === 'Home' && <SiteBadge />}
         </div>

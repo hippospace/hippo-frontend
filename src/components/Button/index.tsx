@@ -7,7 +7,7 @@ type TProps = {
   children?: any;
   disabled?: boolean;
   isLoading?: boolean;
-  variant?: 'primary' | 'secondary' | 'outlined' | 'icon' | 'gradient';
+  variant?: 'primary' | 'secondary' | 'outlined' | 'icon' | 'gradient' | 'plain';
   size?: 'large' | 'medium' | 'small';
   type?: 'button' | 'submit' | 'reset' | undefined;
   onClick?: (e: React.MouseEvent<HTMLElement>) => any;

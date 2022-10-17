@@ -1,0 +1,8 @@
+.ant-popover {
+  .ant-popover-arrow {
+    display: none;
+  }
+  .ant-popover-inner {
+    @apply rounded-xxl shadow-main1;
+  }
+}

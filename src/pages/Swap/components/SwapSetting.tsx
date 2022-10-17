@@ -67,7 +67,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
 
   return (
     <div className="w-full">
-      <div className="h6 text-grey-900 text-center mobile:hidden">Transaction Settings</div>
+      <div className="h6 text-grey-900 text-center tablet:hidden">Transaction Settings</div>
       <div className="mt-6 mobile:mt-0">
         <SubTitle>Slippage Tolerance</SubTitle>
         <div className="flex gap-x-2 gap-y-3 flex-wrap">
