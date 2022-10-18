@@ -7,8 +7,8 @@ import DevsIllu from 'resources/img/illu-devs-2x.png';
 import Card from 'components/Card';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
-import { getIsResourcesNotFound } from 'modules/common/reducer';
-import { useSelector } from 'react-redux';
+// import { getIsResourcesNotFound } from 'modules/common/reducer';
+// import { useSelector } from 'react-redux';
 // import { useScrollYPosition } from 'react-use-scroll-position';
 
 interface HomeBlogProps {
@@ -129,7 +129,7 @@ const Home = () => {
     };
   }, [scrollHandler]);
 
-  const isResourcesNotFound = useSelector(getIsResourcesNotFound);
+  // const isResourcesNotFound = useSelector(getIsResourcesNotFound);
 
   return (
     <div className="hippo-home text-center mx-auto pt-[98px]">
@@ -147,9 +147,9 @@ const Home = () => {
           <Button
             className="w-[320px]"
             variant="gradient"
-            disabled={isResourcesNotFound}
+            disabled={true}
             onClick={() => navigate('/swap')}>
-            TRY SWAP
+            Mainnet Deploying {/* TRY SWAP */}
           </Button>
         </div>
       </div>
@@ -170,9 +170,9 @@ const Home = () => {
               <Button
                 variant="outlined"
                 className="w-[260px]"
-                disabled={isResourcesNotFound}
+                disabled={true}
                 onClick={() => navigate('/swap')}>
-                Swap Now
+                Mainnet Deploying {/* Swap Now */}
               </Button>
             </div>
           </div>

@@ -19,8 +19,8 @@ const { Header } = Antd.Layout;
 
 const SiteBadge = () => {
   return (
-    <div className="bg-[#fe6e65] w-[300px] text-white text-center font-bold text-[22px] h-[44px] leading-[44px] rotate-45 translate-x-[140px] tablet:translate-x-[113px] mobile:scale-[0.6] mobile:pl-[72px]">
-      <img src={GithubIcon} className="w-6 inline-block" /> Testnet beta
+    <div className="bg-[#fe6e65] w-[300px] text-white text-center font-bold largeTextBold h-[44px] leading-[44px] rotate-45 translate-x-[140px] tablet:translate-x-[113px] mobile:scale-[0.6] mobile:pl-[72px]">
+      <img src={GithubIcon} className="w-6 inline-block" /> Mainnet Deploying
     </div>
   );
 };
@@ -145,15 +145,17 @@ const PageHeader: React.FC = () => {
           </Antd.Menu>
         </div>
         <div className="absolute right-0 top-0 h-full w-fit flex items-center">
-          <Popover
-            className="mobile:hidden"
-            content={<Settings />}
-            placement="bottomRight"
-            trigger="click">
-            <Button size="small" variant="plain" className="!p-3 mr-1">
-              <SettingIcon width={20} height={20} />
-            </Button>
-          </Popover>
+          {currentPageName !== 'Home' && (
+            <Popover
+              className="mobile:hidden"
+              content={<Settings />}
+              placement="bottomRight"
+              trigger="click">
+              <Button size="small" variant="plain" className="!p-3 mr-1">
+                <SettingIcon width={20} height={20} />
+              </Button>
+            </Popover>
+          )}
           {currentPageName !== 'Home' && <WalletConnector />}
           {currentPageName === 'Home' && <SiteBadge />}
         </div>
