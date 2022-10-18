@@ -10,7 +10,6 @@ import {
   AptosWalletAdapter,
   MartianWalletAdapter,
   PontemWalletAdapter,
-  SpikaWalletAdapter,
   RiseWalletAdapter,
   BitkeepWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
@@ -42,7 +41,6 @@ const Providers: React.FC<TProps> = (props: TProps) => {
       new MartianWalletAdapter(),
       new AptosWalletAdapter(),
       new PontemWalletAdapter(),
-      new SpikaWalletAdapter(),
       new BitkeepWalletAdapter()
     ],
     []

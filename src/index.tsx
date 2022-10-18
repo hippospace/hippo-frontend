@@ -6,7 +6,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 import 'normalize.css';
-import './index.scss';
+import './index.less';
+import './App.scss';
 
 setAutoFreeze(false);
 

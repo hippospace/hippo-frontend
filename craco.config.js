@@ -1,6 +1,28 @@
 const webpack = require('webpack');
+const CracoLessPlugin = require('craco-less');
 
 module.exports = {
+  plugins: [
+    {
+      plugin: CracoLessPlugin,
+      options: {
+        lessLoaderOptions: {
+          lessOptions: {
+            modifyVars: {
+              '@primary-color': '#8D78F7',
+              '@link-color': '#8D78F7',
+              '@success-color': '#82CB7C',
+              '@warning-color': '#FFA24E',
+              '@error-color': '#EB6A5D',
+              '@font-size-base': '16px',
+              '@border-radius-base': '10px'
+            },
+            javascriptEnabled: true,
+          },
+        },
+      },
+    },
+  ],
   webpack: {
     configure: (config) => {
       const rules = config.module.rules

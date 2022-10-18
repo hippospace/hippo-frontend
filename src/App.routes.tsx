@@ -16,19 +16,16 @@ export const routes: TRoute[] = [
   {
     path: '',
     name: 'Home',
-    hidden: true,
     element: <Home />
   },
   {
     path: 'swap',
     name: 'Swap',
-    hidden: true,
     element: <Swap />
   },
   {
     path: 'faucet',
     name: 'Faucet',
-    hidden: true,
     element: <Faucet />
   },
   /*
