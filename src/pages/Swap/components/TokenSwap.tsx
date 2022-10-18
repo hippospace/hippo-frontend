@@ -19,6 +19,7 @@ import usePrevious from 'hooks/usePrevious';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { openErrorNotification } from 'utils/notifications';
 import Skeleton from 'components/Skeleton';
+import { Types } from 'aptos';
 
 interface IRoutesProps {
   className?: string;
@@ -28,12 +29,14 @@ interface IRoutesProps {
   isDesktopScreen?: boolean;
   isRefreshing?: boolean;
   refreshButton?: ReactNode;
+  simuResults?: Types.UserTransaction[];
 }
 
 interface IRouteRowProps {
   route: AggregatorTypes.RouteAndQuote;
   isSelected?: boolean;
   isBestPrice: boolean;
+  simuResult?: Types.UserTransaction;
 }
 
 const serializeRouteQuote = (rq: RouteAndQuote) => {
@@ -129,7 +132,12 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
 };
 
 const routeRowHeight = 66;
-const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestPrice = false }) => {
+const RouteRow: React.FC<IRouteRowProps> = ({
+  route,
+  isSelected = false,
+  isBestPrice = false,
+  simuResult
+}) => {
   const swapDexs = route.route.steps
     .map((s) => AggregatorTypes.DEX_TYPE_NAME[s.pool.dexType])
     .join(' x ');
@@ -169,8 +177,9 @@ const RouteRow: React.FC<IRouteRowProps> = ({ route, isSelected = false, isBestP
             <div className="largeTextBold">{outputFormatted}</div>
           </div>
           <div className="flex font-semibold justify-between items-center small text-grey-500">
-            <div>{swapRoutes}</div>
-            <div className="invisible">${outputValue}</div>
+            <div className="mr-auto truncate">{swapRoutes}</div>
+            {simuResult && <div className="">{simuResult?.gas_used}Gas</div>}
+            <div className="hidden">${outputValue}</div>
           </div>
         </div>
         {isBestPrice && (
@@ -190,7 +199,8 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   className = '',
   isDesktopScreen = false,
   isRefreshing = false,
-  refreshButton
+  refreshButton,
+  simuResults = []
 }) => {
   const [isMore, setIsMore] = useState(false);
   const rowsWhenLess = 2;
@@ -218,7 +228,12 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
           routes.map((ro, index) => {
             return (
               <div key={`route-${index}`} onClick={() => onRouteSelected(ro, index)}>
-                <RouteRow route={ro} isSelected={ro === routeSelected} isBestPrice={index === 0} />
+                <RouteRow
+                  route={ro}
+                  isSelected={ro === routeSelected}
+                  isBestPrice={index === 0}
+                  simuResult={simuResults[index]}
+                />
               </div>
             );
           })}
@@ -265,7 +280,7 @@ const REFRESH_INTERVAL = 10; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
-  const { hippoAgg } = useHippoClient();
+  const { hippoAgg, simulateSwapByRoute } = useHippoClient();
   const fromSymbol = values.currencyFrom?.token?.symbol.str() || 'devUSDC';
   const toSymbol = values.currencyTo?.token?.symbol.str() || 'devBTC';
   const fromUiAmt = values.currencyFrom?.amount;
@@ -403,6 +418,23 @@ const TokenSwap = () => {
       values.currencyFrom
     ]
   );
+
+  const [simulateResults, setSimulateResults] = useState<Types.UserTransaction[]>([]);
+  useEffect(() => {
+    if (allRoutes.length > 0) {
+      const routesToTest = allRoutes.slice(0, 4);
+      routesToTest.forEach((route, i) => {
+        (async () => {
+          const result = await simulateSwapByRoute(route, values.slipTolerance, {
+            maxGasAmount: values.maxGasFee
+          });
+          simulateResults[i] = result;
+          setSimulateResults([...simulateResults]);
+        })();
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allRoutes, simulateSwapByRoute, values.slipTolerance]);
 
   const timePassedRef = useRef(0);
   timePassedRef.current = timePassedAfterRefresh;
@@ -558,6 +590,7 @@ const TokenSwap = () => {
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
+                simuResults={simulateResults}
               />
             </>
           )}
@@ -580,6 +613,7 @@ const TokenSwap = () => {
                   timePassedAfterRefresh={timePassedAfterRefresh}
                 />
               }
+              simuResults={simulateResults}
             />
             {routeSelected && (
               <SwapDetail

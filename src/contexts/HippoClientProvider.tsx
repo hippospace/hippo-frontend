@@ -12,6 +12,7 @@ import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_lis
 import { AptosClient, Types } from 'aptos';
 import { openErrorNotification, openTxSuccessNotification } from 'utils/notifications';
 import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
+import { OptionTransaction, simulatePayloadTxAndLog, SIM_KEYS } from '@manahippo/move-to-ts';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -24,13 +25,11 @@ interface HippoClientContextType {
     slipTolerance: number,
     options?: Partial<Types.SubmitTransactionRequest>
   ) => Promise<boolean>;
-  requestSwap?: (
-    fromSymbol: string,
-    toSymbol: string,
-    uiAmtIn: number,
-    uiAmtOutMin: number,
-    callback: () => void
-  ) => {};
+  simulateSwapByRoute: (
+    routeAndQuote: RouteAndQuote,
+    slipTolerance: number,
+    options?: OptionTransaction
+  ) => Promise<Types.UserTransaction>;
   transaction?: TTransaction;
   setTransaction: (trans?: TTransaction) => void;
   requestFaucet: (symbol: string) => Promise<boolean>;
@@ -161,9 +160,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     async (routeAndQuote: RouteAndQuote, slipTolerance: number, options = {}) => {
       let success = false;
       try {
+        if (!activeWallet) throw new Error('Please connect wallet first');
         const input = routeAndQuote.quote.inputUiAmt;
         const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
-        if (!activeWallet) throw new Error('Please connect wallet first');
         if (input <= 0) {
           throw new Error('Input amount needs to be greater than 0');
         }
@@ -193,6 +192,33 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [activeWallet, signAndSubmitTransaction]
   );
 
+  const simulateSwapByRoute = useCallback(
+    async (routeAndQuote: RouteAndQuote, slipTolerance: number, options?: OptionTransaction) => {
+      try {
+        const input = routeAndQuote.quote.inputUiAmt;
+        const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
+        if (input <= 0) {
+          return;
+        }
+        const payload = routeAndQuote.route.makePayload(input, minOut, true);
+        const result = await simulatePayloadTxAndLog(
+          aptosClient,
+          SIM_KEYS,
+          payload,
+          options,
+          false
+        );
+        console.log('simulate swap', result);
+        return result;
+      } catch (error) {
+        if (error instanceof Error) {
+          openErrorNotification({ detail: error?.message });
+        }
+      }
+    },
+    [aptosClient]
+  );
+
   return (
     <HippoClientContext.Provider
       value={{
@@ -202,6 +228,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         tokenInfos,
         getTokenInfoByFullName,
         requestSwapByRoute,
+        simulateSwapByRoute,
         transaction,
         setTransaction,
         requestFaucet
