@@ -285,6 +285,7 @@ const TokenSwap = () => {
   const toSymbol = values.currencyTo?.token?.symbol.str() || 'devBTC';
   const fromUiAmt = values.currencyFrom?.amount;
   const [allRoutes, setAllRoutes] = useState<AggregatorTypes.RouteAndQuote[]>([]);
+  const [routesSuccess, setAllRoutesSuccess] = useState<AggregatorTypes.RouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<AggregatorTypes.RouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
 
@@ -422,16 +423,22 @@ const TokenSwap = () => {
   const [simulateResults, setSimulateResults] = useState<Types.UserTransaction[]>([]);
   useEffect(() => {
     if (allRoutes.length > 0) {
-      const routesToTest = allRoutes.slice(0, 4);
-      routesToTest.forEach((route, i) => {
-        (async () => {
-          const result = await simulateSwapByRoute(route, values.slipTolerance, {
-            maxGasAmount: values.maxGasFee
-          });
-          simulateResults[i] = result;
-          setSimulateResults([...simulateResults]);
-        })();
-      });
+      let routesToTest = allRoutes.slice(0, 4);
+      (async () => {
+        const results = await Promise.all(
+          routesToTest.map(async (route) => {
+            const result = await simulateSwapByRoute(route, values.slipTolerance, {
+              maxGasAmount: values.maxGasFee
+            });
+            return result;
+          })
+        );
+        routesToTest = routesToTest.filter((_, i) => results[i].success);
+        setSimulateResults(results.filter((r) => r.success));
+        const rs = [...routesToTest, ...allRoutes.slice(4)];
+        setAllRoutesSuccess(rs);
+        if (!routeSelectedSerialized) setRoute(rs[0] || null);
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allRoutes, simulateSwapByRoute, values.slipTolerance]);
@@ -586,7 +593,7 @@ const TokenSwap = () => {
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
-                routes={allRoutes}
+                routes={routesSuccess}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
@@ -601,7 +608,7 @@ const TokenSwap = () => {
             )}>
             <RoutesAvailable
               isDesktopScreen={true}
-              routes={allRoutes}
+              routes={routesSuccess}
               routeSelected={routeSelected}
               onRouteSelected={onUserSelectRoute}
               isRefreshing={isRefreshingRoutes}
