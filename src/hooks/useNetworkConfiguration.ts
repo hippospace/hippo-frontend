@@ -9,10 +9,12 @@ const useNetworkConfiguration = () => {
   const rpcEndpoint = useSelector(getRPCEndpoint);
 
   let network: NetworkConfiguration;
-  if (currentNetworkEnv === 'testnet') {
-    network = CONFIGS.testnet;
-  } else if (currentNetworkEnv === 'localhost') {
+  if (currentNetworkEnv === 'localhost') {
     network = CONFIGS.localhost;
+  } else if (currentNetworkEnv === 'testnet') {
+    network = CONFIGS.testnet;
+  } else if (currentNetworkEnv === 'mainnet') {
+    network = CONFIGS.mainnet;
   } else {
     throw new Error('Invalid network env');
   }

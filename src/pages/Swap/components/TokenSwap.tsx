@@ -176,7 +176,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
             </div>
             <div className="largeTextBold">{outputFormatted}</div>
           </div>
-          <div className="flex font-semibold justify-between items-center small text-grey-500">
+          <div className="flex gap-x-4 font-semibold justify-between items-center small text-grey-500">
             <div className="mr-auto truncate">{swapRoutes}</div>
             {simuResult && <div className="">{simuResult?.gas_used}Gas</div>}
             <div className="hidden">${outputValue}</div>
@@ -276,7 +276,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 10; // seconds
+const REFRESH_INTERVAL = 15; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -285,7 +285,6 @@ const TokenSwap = () => {
   const toSymbol = values.currencyTo?.token?.symbol.str() || 'devBTC';
   const fromUiAmt = values.currencyFrom?.amount;
   const [allRoutes, setAllRoutes] = useState<AggregatorTypes.RouteAndQuote[]>([]);
-  const [routesSuccess, setAllRoutesSuccess] = useState<AggregatorTypes.RouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<AggregatorTypes.RouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
 
@@ -338,6 +337,19 @@ const TokenSwap = () => {
     [setFieldValue]
   );
 
+  const setRouteFromRoutes = useCallback(
+    (routes: AggregatorTypes.RouteAndQuote[]) => {
+      let manuallySelectedRoute: RouteAndQuote;
+      if (routeSelectedSerialized) {
+        manuallySelectedRoute = routes.find(
+          (r) => serializeRouteQuote(r) === routeSelectedSerialized
+        );
+      }
+      setRoute(manuallySelectedRoute || routes[0] || null);
+    },
+    [routeSelectedSerialized, setRoute]
+  );
+
   // To benchmark the key press debounce
   const lastFetchTs = useRef(0);
 
@@ -367,13 +379,6 @@ const TokenSwap = () => {
               !ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)
             ) {
               setAllRoutes(routes);
-              let manuallySelectedRoute: RouteAndQuote;
-              if (routeSelectedSerialized) {
-                manuallySelectedRoute = routes.find(
-                  (r) => serializeRouteQuote(r) === routeSelectedSerialized
-                );
-              }
-              setRoute(manuallySelectedRoute || routes[0] || null);
               if (isReload) {
                 // restart interval timer
                 setTimePassedAfterRefresh(0);
@@ -408,40 +413,54 @@ const TokenSwap = () => {
       }
     },
     [
-      hippoAgg,
       fromSymbol,
-      toSymbol,
       fromUiAmt,
+      hippoAgg,
       ifInputParametersDifferentWithLatest,
-      routeSelectedSerialized,
-      setRoute,
       setFieldValue,
+      setRoute,
+      toSymbol,
       values.currencyFrom
     ]
   );
 
   const [simulateResults, setSimulateResults] = useState<Types.UserTransaction[]>([]);
+  const simuTs = useRef(0);
+
   useEffect(() => {
     if (allRoutes.length > 0) {
-      let routesToTest = allRoutes.slice(0, 4);
-      (async () => {
-        const results = await Promise.all(
-          routesToTest.map(async (route) => {
-            const result = await simulateSwapByRoute(route, values.slipTolerance, {
-              maxGasAmount: values.maxGasFee
-            });
-            return result;
-          })
-        );
-        routesToTest = routesToTest.filter((_, i) => results[i].success);
-        setSimulateResults(results.filter((r) => r.success));
-        const rs = [...routesToTest, ...allRoutes.slice(4)];
-        setAllRoutesSuccess(rs);
-        if (!routeSelectedSerialized) setRoute(rs[0] || null);
-      })();
+      const simuCount = 4;
+
+      const ts = Date.now();
+      if ((ts - simuTs.current) / 1000 < REFRESH_INTERVAL - 1) {
+        // for the case useEffect runs twice when in React strict and debug mode
+        return;
+      }
+      simuTs.current = ts;
+      let routesToSimu = allRoutes.slice(0, simuCount);
+
+      const results = new Array(simuCount).fill(null);
+      routesToSimu.forEach((route, i) => {
+        (async () => {
+          const result = await simulateSwapByRoute(route, values.slipTolerance, {
+            maxGasAmount: values.maxGasFee
+          });
+          if (!results[i] && ts === simuTs.current) {
+            results[i] = result;
+            setSimulateResults([...results]);
+          }
+        })();
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRoutes, simulateSwapByRoute, values.slipTolerance]);
+  }, [allRoutes, simulateSwapByRoute, values.maxGasFee, values.slipTolerance]);
+
+  const routesFiltered = useMemo(() => {
+    return allRoutes.filter((route, i) => !simulateResults[i] || simulateResults[i].success);
+  }, [allRoutes, simulateResults]);
+
+  useEffect(() => {
+    setRouteFromRoutes(routesFiltered ?? allRoutes);
+  }, [allRoutes, routesFiltered, setRouteFromRoutes]);
 
   const timePassedRef = useRef(0);
   timePassedRef.current = timePassedAfterRefresh;
@@ -593,7 +612,7 @@ const TokenSwap = () => {
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
-                routes={routesSuccess}
+                routes={routesFiltered}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
@@ -608,7 +627,7 @@ const TokenSwap = () => {
             )}>
             <RoutesAvailable
               isDesktopScreen={true}
-              routes={routesSuccess}
+              routes={routesFiltered}
               routeSelected={routeSelected}
               onRouteSelected={onUserSelectRoute}
               isRefreshing={isRefreshingRoutes}
