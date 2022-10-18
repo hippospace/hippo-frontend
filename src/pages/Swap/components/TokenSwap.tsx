@@ -178,7 +178,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
           </div>
           <div className="flex gap-x-4 font-semibold justify-between items-center small text-grey-500">
             <div className="mr-auto truncate">{swapRoutes}</div>
-            {simuResult && <div className="">{simuResult?.gas_used}Gas</div>}
+            {simuResult && <div className="">{simuResult?.gas_used} Gas Unit</div>}
             <div className="hidden">${outputValue}</div>
           </div>
         </div>
