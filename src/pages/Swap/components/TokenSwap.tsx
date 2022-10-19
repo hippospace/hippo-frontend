@@ -439,9 +439,10 @@ const TokenSwap = () => {
   const [simulateResults, setSimulateResults] = useState<Types.UserTransaction[]>([]);
   const simuTs = useRef(0);
   const [aptBalance, isReady] = useTokenBalane('APT');
+  const [baseBalance] = useTokenBalane(values.currencyFrom?.token?.symbol.str());
 
   useEffect(() => {
-    if (allRoutes.length > 0 && isReady && aptBalance > 0) {
+    if (allRoutes.length > 0 && isReady && aptBalance > 0 && baseBalance > 0) {
       const simuCount = 4;
 
       const ts = Date.now();
@@ -465,7 +466,15 @@ const TokenSwap = () => {
         })();
       });
     }
-  }, [allRoutes, aptBalance, isReady, simulateSwapByRoute, values.maxGasFee, values.slipTolerance]);
+  }, [
+    allRoutes,
+    aptBalance,
+    baseBalance,
+    isReady,
+    simulateSwapByRoute,
+    values.maxGasFee,
+    values.slipTolerance
+  ]);
 
   const routesFiltered = useMemo(() => {
     return allRoutes.filter((route, i) => !simulateResults[i] || simulateResults[i].success);
