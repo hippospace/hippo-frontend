@@ -176,6 +176,7 @@ const CurrencyInput: React.FC<TProps> = ({
         maskClosable={true}
         centered
         destroyOnClose
+        width={400}
         onCancel={() => setIsCoinSelectorVisible(false)}>
         <div className="mobile:hidden">
           <CoinSelector
