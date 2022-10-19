@@ -51,7 +51,7 @@ const Settings = () => {
           </Radio>
           <Radio
             className="largeTextNormal"
-            value={'https://aptos-mainnet.nodereal.io/v1/3e18914c169e4dfaa5824895a8d1def9'}>
+            value={'https://aptos-mainnet.nodereal.io/v1/0d8ae3b20f034e029c49e4febe30cbc3'}>
             Nodereal
           </Radio>
         </Space>
