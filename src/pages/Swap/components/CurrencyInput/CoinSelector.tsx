@@ -53,7 +53,9 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
 
   const getFilteredTokenListWithBalance = useCallback(() => {
     let currentTokenList = tokenList
-      .filter((t) => ['WBTC', 'WETH', 'APT', 'USDC', 'USDT'].includes(t.symbol.str()))
+      .filter((t) =>
+        ['WBTC', 'WETH', 'APT', 'USDC', 'USDT', 'zUSDC', 'zUSDT', 'zWETH'].includes(t.symbol.str())
+      )
       ?.sort((a, b) => (a.symbol.str() <= b.symbol.str() ? -1 : 1))
       .map((t) => {
         const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol.str()];
