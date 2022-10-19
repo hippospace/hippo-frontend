@@ -1883,10 +1883,10 @@
     eventemitter3 "^4.0.7"
     js-sha3 "^0.8.0"
 
-"@manahippo/hippo-sdk@1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-1.0.7.tgz#c4f7dfec5b9e95af1eeb6f6b7680e9f7a2f7339b"
-  integrity sha512-wyNjlr7QF1axBxgV5B3DDPa9kLmtPKSArqSaqDtcw6nSrNwNzFI/QrXUkk9B1Llxb4jtt7x/OTKVJEiOQIIPdQ==
+"@manahippo/hippo-sdk@1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-1.0.8.tgz#cc5c2bf4f9306ab144751447d60ba2d4871a3957"
+  integrity sha512-YnKnWcJKj7m/ePK1rPBzq6Vc21aoBmzTAADMRxjTja9bnUjf56UDhCqrKUJG4YLMbi7BxmLkv5flbwnVNyIoyA==
   dependencies:
     "@manahippo/move-to-ts" "0.4.3"
     aptos "1.3.15"

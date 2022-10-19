@@ -138,8 +138,11 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   useEffect(() => {
     setTokenInfos(coinListCli?.symbolToCoinInfo);
-    dispatch(swapAction.SET_TOKEN_LIST(coinListCli?.getCoinInfoList()));
-  }, [coinListCli, dispatch]);
+    const tradableCoins = hippoAgg
+      ? hippoAgg.getTradableCoinInfo()
+      : coinListCli?.getCoinInfoList();
+    dispatch(swapAction.SET_TOKEN_LIST(tradableCoins));
+  }, [coinListCli, dispatch, hippoAgg]);
 
   const requestFaucet = useCallback(
     async (symbol: string) => {
