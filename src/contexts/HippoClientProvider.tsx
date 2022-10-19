@@ -42,8 +42,8 @@ interface TProviderProps {
 const HippoClientContext = createContext<HippoClientContextType>({} as HippoClientContextType);
 
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
-  const { activeWallet, connected } = useAptosWallet();
-  const { signAndSubmitTransaction, network } = useWallet();
+  const { activeWallet /*, connected*/ } = useAptosWallet();
+  const { signAndSubmitTransaction /*, network*/ } = useWallet();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
   const [coinListCli, setCoinListCli] = useState<CoinListClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
@@ -53,6 +53,8 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
   const dispatch = useDispatch();
 
+  /*
+  // detect 
   useEffect(() => {
     const currentNetwork = process.env.REACT_APP_CURRENT_NETWORK;
     if (connected && !new RegExp(currentNetwork, 'i').test(network?.name)) {
@@ -62,6 +64,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       });
     }
   }, [connected, network?.name]);
+  */
 
   const { networkCfg } = useNetworkConfiguration();
   const aptosClient = useMemo(
