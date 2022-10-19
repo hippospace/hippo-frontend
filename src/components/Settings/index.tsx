@@ -1,24 +1,39 @@
 import { Input, Radio, RadioChangeEvent, Space } from 'antd';
-import { getRPCEndpoint } from 'modules/common/reducer';
-import commonActions from 'modules/common/actions';
 import { useCallback, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
 import Button from 'components/Button';
 import { useLocalStorage } from 'hooks/useLocalStorage';
 import classNames from 'classnames';
 import openNotification, { openErrorNotification } from 'utils/notifications';
 import { isValidUrl } from 'utils/utility';
+import create from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+
+interface SettingsState {
+  RPCEendPoint: string;
+  setRPCEndPoint: (rpc: string) => void;
+}
+
+export const useSettingsStore = create<SettingsState>()(
+  devtools(
+    persist(
+      (set) => ({
+        RPCEendPoint: '',
+        setRPCEndPoint: (rpc) => set((state) => ({ ...state, RPCEendPoint: rpc }))
+      }),
+      { name: 'hippo-settings-store' }
+    )
+  )
+);
 
 const Settings = () => {
-  const rpcEndpoint = useSelector(getRPCEndpoint);
-  const dispatch = useDispatch();
+  const rpcEndpoint = useSettingsStore((state) => state.RPCEendPoint);
+  const setRPCEndPointInStore = useSettingsStore((state) => state.setRPCEndPoint);
   const setRpcEndpoint = useCallback(
     (v: string) => {
-      dispatch(commonActions.SET_RPC_ENDPOINT(v));
+      setRPCEndPointInStore(v);
       openNotification({ detail: 'RPC endpoint switched successfully', type: 'success' });
     },
-    [dispatch]
+    [setRPCEndPointInStore]
   );
 
   const { useLocalStorageState } = useLocalStorage();
@@ -59,7 +74,7 @@ const Settings = () => {
       <div className="flex gap-x-2 mt-2">
         <Input
           className={classNames({
-            'border-primePurple-700': rpcEndpoint === customRPCLS[0]
+            'text-primePurple-700 font-bold': rpcEndpoint === customRPCLS[0]
           })}
           placeholder="Cutom RPC Endpoint URL"
           value={customRPC}

@@ -47,7 +47,8 @@
     "usehooks-ts": "^2.6.0",
     "web-vitals": "^2.1.0",
     "web3": "^1.7.3",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "zustand": "^4.1.2"
   },
   "scripts": {
     "dev": "craco start",
