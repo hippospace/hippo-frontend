@@ -393,6 +393,7 @@ const TokenSwap = () => {
           if (fromUiAmt) {
             const maxSteps = 3;
             routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken, maxSteps, isReload);
+            routes = routes.filter((r) => r.quote.outputUiAmt > 0);
             // check if parameters are not stale
             if (
               routes.length > 0 &&
