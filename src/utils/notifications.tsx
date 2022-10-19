@@ -51,4 +51,24 @@ export const openTxSuccessNotification = (txHash: MaybeHexString, content: strin
   return openNotification({ detail, title: 'Transaction Success' });
 };
 
+export const openTxErrorNotification = (txHash: MaybeHexString, content: string) => {
+  const detail = (
+    <p>
+      <div>{content}</div>
+      <TextLink href={`https://explorer.aptoslabs.com/txn/${txHash}`}>View transaction</TextLink>
+    </p>
+  );
+  return openNotification({ type: 'error', detail, title: 'Swap Failed' });
+};
+
+export const openTxPendingNotification = (txHash: MaybeHexString, content: string) => {
+  const detail = (
+    <p>
+      <div>{content}</div>
+      <TextLink href={`https://explorer.aptoslabs.com/txn/${txHash}`}>View transaction</TextLink>
+    </p>
+  );
+  return openNotification({ type: 'info', detail, title: 'Transaction Pending' });
+};
+
 export default openNotification;

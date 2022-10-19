@@ -19,12 +19,18 @@ const errorHandler = debounce(
 export const hippoWalletClient = async (
   account: ActiveAptosWallet,
   netConf: NetworkConfiguration,
-  aptosClient: AptosClient
+  aptosClient: AptosClient,
+  version: undefined | number | bigint
 ) => {
   let walletClient: HippoWalletClient | undefined;
   try {
     if (!account) return undefined;
-    walletClient = await HippoWalletClient.createInTwoCalls(netConf, new App(aptosClient), account);
+    walletClient = await HippoWalletClient.createInTwoCalls(
+      netConf,
+      new App(aptosClient),
+      account,
+      version
+    );
   } catch (err: any) {
     if (err.errorCode === 'account_not_found') {
       openErrorNotification({

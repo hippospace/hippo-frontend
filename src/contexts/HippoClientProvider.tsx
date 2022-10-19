@@ -10,9 +10,15 @@ import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import { AptosClient, HexString, Types } from 'aptos';
-import { openErrorNotification, openTxSuccessNotification } from 'utils/notifications';
+import {
+  openErrorNotification,
+  openTxErrorNotification,
+  openTxPendingNotification,
+  openTxSuccessNotification
+} from 'utils/notifications';
 import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
 import { OptionTransaction, simulatePayloadTxAndLog, SimulationKeys } from '@manahippo/move-to-ts';
+import { UserTransaction } from 'aptos/src/generated';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -48,6 +54,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [coinListCli, setCoinListCli] = useState<CoinListClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
   const [refreshWalletClient, setRefreshWalletClient] = useState(false);
+  const [lastUpdateVersion, setLastUpdateVersion] = useState(undefined);
   const [transaction, setTransaction] = useState<TTransaction>();
   const [tokenStores, setTokenStores] = useState<Record<string, stdlib.Coin.CoinStore>>();
   const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
@@ -72,15 +79,18 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [networkCfg.fullNodeUrl]
   );
 
-  const getHippoWalletClient = useCallback(async () => {
-    if (activeWallet) {
-      const client = await hippoWalletClient(activeWallet, networkCfg, aptosClient);
-      await client?.refreshStores();
-      setHippoWallet(client);
-    } else {
-      setHippoWallet(undefined);
-    }
-  }, [activeWallet, aptosClient, networkCfg]);
+  const getHippoWalletClient = useCallback(
+    async (version: undefined | number | bigint = undefined) => {
+      if (activeWallet) {
+        const client = await hippoWalletClient(activeWallet, networkCfg, aptosClient, version);
+        await client?.refreshStores();
+        setHippoWallet(client);
+      } else {
+        setHippoWallet(undefined);
+      }
+    },
+    [activeWallet, aptosClient, networkCfg]
+  );
 
   const getHippoTradeAggregator = useCallback(async () => {
     setHippoAgg(await hippoTradeAggregator(aptosClient));
@@ -98,8 +108,8 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   useEffect(() => {
-    getHippoWalletClient();
-  }, [getHippoWalletClient]);
+    getHippoWalletClient(lastUpdateVersion);
+  }, [getHippoWalletClient, lastUpdateVersion]);
   useEffect(() => {
     getHippoTradeAggregator();
   }, [getHippoTradeAggregator]);
@@ -109,10 +119,10 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (refreshWalletClient) {
-      getHippoWalletClient();
+      getHippoWalletClient(lastUpdateVersion);
       setRefreshWalletClient(false);
     }
-  }, [getHippoWalletClient, refreshWalletClient]);
+  }, [getHippoWalletClient, lastUpdateVersion, refreshWalletClient]);
 
   useEffect(() => {
     if (hippoWallet) {
@@ -174,11 +184,25 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           payload as Types.TransactionPayload_EntryFunctionPayload,
           options
         );
-        if (result) {
-          openTxSuccessNotification(
-            result.hash,
-            `Swapped ${input} ${routeAndQuote.quote.inputSymbol} for ${routeAndQuote.quote.outputUiAmt} ${routeAndQuote.quote.outputSymbol}`
-          );
+        if (result && result.hash) {
+          // pending tx notification first
+          openTxPendingNotification(result.hash, 'Swap Transaction Pending');
+          const txnResult = (await aptosClient.waitForTransactionWithResult(result.hash, {
+            timeoutSecs: 10,
+            checkSuccess: true
+          })) as UserTransaction;
+          if (txnResult.success) {
+            openTxSuccessNotification(
+              result.hash,
+              `Swapped ${input} ${routeAndQuote.quote.inputSymbol} for ${routeAndQuote.quote.outputUiAmt} ${routeAndQuote.quote.outputSymbol}`
+            );
+          } else {
+            openTxErrorNotification(
+              result.hash,
+              `Failed to swap ${routeAndQuote.quote.inputSymbol} to ${routeAndQuote.quote.outputSymbol}`
+            );
+          }
+          setLastUpdateVersion(txnResult.version);
           setRefreshWalletClient(true);
           success = true;
         }
@@ -192,7 +216,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         return success;
       }
     },
-    [activeWallet, signAndSubmitTransaction]
+    [activeWallet, aptosClient, signAndSubmitTransaction]
   );
 
   const simulateSwapByRoute = useCallback(
