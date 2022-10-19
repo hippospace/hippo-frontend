@@ -9,10 +9,10 @@ import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
-import { AptosClient, Types } from 'aptos';
+import { AptosClient, HexString, Types } from 'aptos';
 import { openErrorNotification, openTxSuccessNotification } from 'utils/notifications';
 import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
-import { OptionTransaction, simulatePayloadTxAndLog, SIM_KEYS } from '@manahippo/move-to-ts';
+import { OptionTransaction, simulatePayloadTxAndLog, SimulationKeys } from '@manahippo/move-to-ts';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -43,7 +43,7 @@ const HippoClientContext = createContext<HippoClientContextType>({} as HippoClie
 
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { activeWallet /*, connected*/ } = useAptosWallet();
-  const { signAndSubmitTransaction /*, network*/ } = useWallet();
+  const { signAndSubmitTransaction, wallet /*, network*/ } = useWallet();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
   const [coinListCli, setCoinListCli] = useState<CoinListClient>();
   const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
@@ -204,13 +204,20 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           return;
         }
         const payload = routeAndQuote.route.makePayload(input, minOut, true);
-        const result = await simulatePayloadTxAndLog(
-          aptosClient,
-          SIM_KEYS,
-          payload,
-          options,
-          false
-        );
+        const publicKey = wallet?.adapter.publicAccount?.publicKey.toString();
+        const address = wallet?.adapter.publicAccount?.address.toString();
+        if (!publicKey || !address) {
+          return;
+        }
+        const simkeys: SimulationKeys = {
+          pubkey: new HexString(publicKey),
+          address: new HexString(address)
+        };
+        options = {
+          maxGasAmount: 20_000,
+          ...(options || {})
+        };
+        const result = await simulatePayloadTxAndLog(aptosClient, simkeys, payload, options, false);
         console.log('simulate swap', result);
         return result;
       } catch (error) {
@@ -219,7 +226,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         }
       }
     },
-    [aptosClient]
+    [aptosClient, wallet?.adapter.publicAccount?.address, wallet?.adapter.publicAccount.publicKey]
   );
 
   return (

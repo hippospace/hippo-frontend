@@ -150,11 +150,13 @@ const RouteRow: React.FC<IRouteRowProps> = ({
       </span>
     ))
   ];
+  const { values } = useFormikContext<ISwapSettings>();
   const toSymbol = route.route.steps.slice(-1)[0].yCoinInfo.symbol.str();
   const outputUiAmt = route.quote.outputUiAmt;
   const outputValue = 0; // TOD0: calculate the output value
   const [tokenAmountFormatter] = useTokenAmountFormatter();
   const outputFormatted = tokenAmountFormatter(outputUiAmt, toSymbol);
+  const customMaxGasAmount = values.maxGasFee;
 
   return (
     <div className={classNames('pt-2')} style={{ height: `${routeRowHeight}px` }}>
@@ -178,7 +180,21 @@ const RouteRow: React.FC<IRouteRowProps> = ({
           </div>
           <div className="flex gap-x-4 font-semibold justify-between items-center small text-grey-500">
             <div className="mr-auto truncate">{swapRoutes}</div>
-            {simuResult && <div className="">{simuResult?.gas_used} Gas Unit</div>}
+            {simuResult && (
+              <Tooltip
+                title={
+                  customMaxGasAmount >= parseFloat(simuResult.gas_used)
+                    ? 'Simulated gas cost'
+                    : 'Simulated gas cost is bigger than the custom max gas amount'
+                }>
+                <div
+                  className={classNames({
+                    'text-error-500': customMaxGasAmount < parseFloat(simuResult.gas_used)
+                  })}>
+                  {simuResult?.gas_used} Gas Unit
+                </div>
+              </Tooltip>
+            )}
             <div className="hidden">${outputValue}</div>
           </div>
         </div>
@@ -412,9 +428,11 @@ const TokenSwap = () => {
             detail = 'Too many requests. You need to wait 60s and try again';
           }
           openErrorNotification({ detail, title: 'Fetch API error' });
-        } else if (error instanceof Error) {
-          openErrorNotification({ detail: error?.message, title: 'Fetch swap routes error' });
         }
+        openErrorNotification({
+          detail: error?.message || JSON.stringify(error),
+          title: 'Fetch swap routes error'
+        });
 
         setFieldValue('currencyFrom', {
           ...values.currencyFrom,
@@ -436,13 +454,13 @@ const TokenSwap = () => {
     ]
   );
 
-  const [simulateResults, setSimulateResults] = useState<Types.UserTransaction[]>([]);
+  const [simulateResults, setSimulateResults] = useState<(Types.UserTransaction | null)[]>([]);
   const simuTs = useRef(0);
   const [aptBalance, isReady] = useTokenBalane('APT');
   const [baseBalance] = useTokenBalane(values.currencyFrom?.token?.symbol.str());
 
   useEffect(() => {
-    if (allRoutes.length > 0 && isReady && aptBalance > 0 && baseBalance > 0) {
+    if (allRoutes.length > 0 && isReady && aptBalance >= 0.02 && baseBalance >= fromUiAmt) {
       const simuCount = 4;
 
       const ts = Date.now();
@@ -456,9 +474,7 @@ const TokenSwap = () => {
       const results = new Array(simuCount).fill(null);
       routesToSimu.forEach((route, i) => {
         (async () => {
-          const result = await simulateSwapByRoute(route, values.slipTolerance, {
-            maxGasAmount: values.maxGasFee
-          });
+          const result = await simulateSwapByRoute(route, values.slipTolerance);
           if (!results[i] && ts === simuTs.current) {
             results[i] = result;
             setSimulateResults([...results]);
@@ -470,6 +486,7 @@ const TokenSwap = () => {
     allRoutes,
     aptBalance,
     baseBalance,
+    fromUiAmt,
     isReady,
     simulateSwapByRoute,
     values.maxGasFee,
@@ -638,7 +655,7 @@ const TokenSwap = () => {
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
-                simuResults={simulateResults}
+                simuResults={simulateResults.filter((r) => !r || r.success)}
               />
             </>
           )}
@@ -661,7 +678,7 @@ const TokenSwap = () => {
                   timePassedAfterRefresh={timePassedAfterRefresh}
                 />
               }
-              simuResults={simulateResults}
+              simuResults={simulateResults.filter((r) => !r || r.success)}
             />
             {routeSelected && (
               <SwapDetail
