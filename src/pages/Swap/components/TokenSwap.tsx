@@ -481,6 +481,8 @@ const TokenSwap = () => {
           }
         })();
       });
+    } else {
+      setSimulateResults([]);
     }
   }, [
     allRoutes,
