@@ -6,7 +6,6 @@ import cx from 'classnames';
 import styles from './Header.module.scss';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
-import GithubIcon from 'resources/icons/GitHub-Mark-Light-120px-plus.png';
 import { CloseIcon, MenuIcon, SettingIcon } from 'resources/icons';
 import { Drawer, Popover } from 'antd';
 import { useCallback, useState } from 'react';
@@ -16,7 +15,7 @@ import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Settings from 'components/Settings';
 
 const { Header } = Antd.Layout;
-
+/*
 const SiteBadge = () => {
   return (
     <div className="bg-[#fe6e65] w-[300px] text-white text-center font-bold largeTextBold h-[44px] leading-[44px] rotate-45 translate-x-[140px] tablet:translate-x-[113px] mobile:scale-[0.6] mobile:pl-[72px]">
@@ -24,6 +23,7 @@ const SiteBadge = () => {
     </div>
   );
 };
+*/
 
 interface ISideMenuProps {
   currentPageName: TRoute['name'];
@@ -157,7 +157,7 @@ const PageHeader: React.FC = () => {
             </Popover>
           )}
           {currentPageName !== 'Home' && <WalletConnector />}
-          {currentPageName === 'Home' && <SiteBadge />}
+          {/* currentPageName === 'Home' && <SiteBadge /> */}
         </div>
       </div>
       <Drawer

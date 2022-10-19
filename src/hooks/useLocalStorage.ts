@@ -15,7 +15,7 @@ export const useLocalStorage = () => {
         }
       } catch (error) {
         if (typeof window !== 'undefined') {
-          console.error(error);
+          console.log(error);
         }
       }
       return defaultState;

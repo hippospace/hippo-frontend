@@ -144,7 +144,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           }
         }
       } catch (error) {
-        console.error('Request faucet error:', error);
+        console.log('Request faucet error:', error);
         if (error instanceof Error) {
           openErrorNotification({ detail: error?.message });
         }
@@ -180,7 +180,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           success = true;
         }
       } catch (error) {
-        console.error('Request swap by route error:', error);
+        console.log('Request swap by route error:', error);
         if (error instanceof Error) {
           openErrorNotification({ detail: error?.message });
         }

@@ -26,6 +26,7 @@ export const routes: TRoute[] = [
   {
     path: 'faucet',
     name: 'Faucet',
+    hidden: true,
     element: <Faucet />
   },
   /*

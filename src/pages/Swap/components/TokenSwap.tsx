@@ -19,7 +19,7 @@ import usePrevious from 'hooks/usePrevious';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { openErrorNotification } from 'utils/notifications';
 import Skeleton from 'components/Skeleton';
-import { Types } from 'aptos';
+import { Types, ApiError } from 'aptos';
 
 interface IRoutesProps {
   className?: string;
@@ -276,7 +276,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 15; // seconds
+const REFRESH_INTERVAL = 2; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -358,7 +358,11 @@ const TokenSwap = () => {
       try {
         if (process.env.NODE_ENV !== 'production') {
           if (lastFetchTs.current !== 0) {
-            console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
+            console.log(
+              `Swap fetch route interval: ${
+                Date.now() - lastFetchTs.current
+              }, isReload: ${isReload}`
+            );
           }
           lastFetchTs.current = Date.now();
         }
@@ -400,7 +404,15 @@ const TokenSwap = () => {
         }
       } catch (error) {
         console.log('Fetch swap routes:', error);
-        if (error instanceof Error) {
+        if (error instanceof ApiError) {
+          // let detail = `${error.status} : ${error.errorCode} : ${error.vmErrorCode} : ${error.message}`;
+          let detail = error.message;
+          const msg = JSON.parse(error.message);
+          if (msg.message === 'Generic Error') {
+            detail = 'Too many requests. You need to wait 60s and try again';
+          }
+          openErrorNotification({ detail, title: 'Fetch API error' });
+        } else if (error instanceof Error) {
           openErrorNotification({ detail: error?.message, title: 'Fetch swap routes error' });
         }
 
