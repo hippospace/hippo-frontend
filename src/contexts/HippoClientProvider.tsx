@@ -75,7 +75,11 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   const { networkCfg } = useNetworkConfiguration();
   const aptosClient = useMemo(
-    () => new AptosClient(networkCfg.fullNodeUrl),
+    () =>
+      new AptosClient(networkCfg.fullNodeUrl, {
+        CREDENTIALS: 'same-origin',
+        WITH_CREDENTIALS: false
+      }),
     [networkCfg.fullNodeUrl]
   );
 
