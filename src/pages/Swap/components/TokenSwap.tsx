@@ -464,10 +464,12 @@ const TokenSwap = () => {
       const simuCount = 4;
 
       const ts = Date.now();
+      /* fix: this would shortcut user inputs
       if ((ts - simuTs.current) / 1000 < REFRESH_INTERVAL - 1) {
         // for the case useEffect runs twice when in React strict and debug mode
         return;
       }
+      */
       simuTs.current = ts;
       let routesToSimu = allRoutes.slice(0, simuCount);
 
@@ -484,11 +486,11 @@ const TokenSwap = () => {
     } else {
       setSimulateResults([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     allRoutes,
     aptBalance,
     baseBalance,
-    fromUiAmt,
     isReady,
     simulateSwapByRoute,
     values.maxGasFee,
