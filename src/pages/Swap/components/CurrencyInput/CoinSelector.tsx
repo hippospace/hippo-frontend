@@ -26,7 +26,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const tokenList = useSelector(getTokenList);
   const commonCoins = tokenList.filter((token) => {
-    return ['wBTC', 'USDT', 'USDC'].includes(token.symbol.str());
+    return ['APT', 'WBTC', 'WETH', 'USDT', 'USDC'].includes(token.symbol.str());
   });
   const [filter, setFilter] = useState<string>('');
   const { hippoWallet } = useHippoClient();
@@ -53,7 +53,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
 
   const getFilteredTokenListWithBalance = useCallback(() => {
     let currentTokenList = tokenList
-      .filter((t) => ['wBTC', 'wETH', 'APT', 'USDC', 'USDT'].includes(t.symbol.str()))
+      .filter((t) => ['WBTC', 'WETH', 'APT', 'USDC', 'USDT'].includes(t.symbol.str()))
       ?.sort((a, b) => (a.symbol.str() <= b.symbol.str() ? -1 : 1))
       .map((t) => {
         const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol.str()];
