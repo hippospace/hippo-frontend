@@ -428,11 +428,12 @@ const TokenSwap = () => {
             detail = 'Too many requests. You need to wait 60s and try again';
           }
           openErrorNotification({ detail, title: 'Fetch API error' });
+        } else {
+          openErrorNotification({
+            detail: error?.message || JSON.stringify(error),
+            title: 'Fetch swap routes error'
+          });
         }
-        openErrorNotification({
-          detail: error?.message || JSON.stringify(error),
-          title: 'Fetch swap routes error'
-        });
 
         setFieldValue('currencyFrom', {
           ...values.currencyFrom,
