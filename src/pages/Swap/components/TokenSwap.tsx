@@ -191,7 +191,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
                   className={classNames({
                     'text-error-500': customMaxGasAmount < parseFloat(simuResult.gas_used)
                   })}>
-                  {simuResult?.gas_used} Gas Unit
+                  {((parseFloat(simuResult.gas_used) * 100) / 100000000).toFixed(6)} APT Gas
                 </div>
               </Tooltip>
             )}
