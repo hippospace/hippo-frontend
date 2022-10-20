@@ -507,7 +507,7 @@ const TokenSwap = () => {
 
   const timePassedRef = useRef(0);
   timePassedRef.current = timePassedAfterRefresh;
-  const inputTriggerRefreshDelay = 3;
+  const inputTriggerRefreshDelay = 10;
   useEffect(() => {
     fetchSwapRoutes(!refreshRoutesTimerTick || timePassedRef.current > inputTriggerRefreshDelay);
   }, [fetchSwapRoutes, refreshRoutesTimerTick]);
