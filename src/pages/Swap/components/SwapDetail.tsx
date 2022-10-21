@@ -45,9 +45,9 @@ const SwapDetail = ({
     {
       label: 'Rate',
       value: (
-        <div className="flex items-center">
+        <div className="flex items-center" onClick={() => setIsPriceYToX(!isPriceYToX)}>
           <span className="mr-1">{rate}</span>
-          <Button variant="icon" onClick={() => setIsPriceYToX(!isPriceYToX)}>
+          <Button variant="icon">
             <ExchangeIcon className="w-4 h-4" />
           </Button>
         </div>

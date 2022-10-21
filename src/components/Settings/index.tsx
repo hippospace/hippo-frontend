@@ -1,49 +1,96 @@
 import { Input, Radio, RadioChangeEvent, Space } from 'antd';
 import { useCallback, useState } from 'react';
 import Button from 'components/Button';
-import { useLocalStorage } from 'hooks/useLocalStorage';
 import classNames from 'classnames';
 import openNotification, { openErrorNotification } from 'utils/notifications';
 import { isValidUrl } from 'utils/utility';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-interface SettingsState {
-  RPCEendPoint: string;
-  setRPCEndPoint: (rpc: string) => void;
+export enum RPCType {
+  Aptos = 'Aptos',
+  Nodereal = 'Nodereal',
+  Custom = 'Custom'
 }
+interface SettingsState {
+  RPCEndPoint: RPCType;
+  customRPCs: string[];
+  selectedCustomRPCIndex: number;
+  setRPCEndPoint: (rpc: RPCType) => void;
+  setCustomRPCs: (rpcs: string[]) => void;
+  setSelectedCustomRPCIndex: (i: number) => void;
+}
+
+const DEFAULT_RPC = RPCType.Nodereal;
+
+const preSetRpcs = new Map();
+preSetRpcs.set(
+  RPCType.Nodereal,
+  'https://aptos-mainnet.nodereal.io/v1/0d8ae3b20f034e029c49e4febe30cbc3'
+);
+preSetRpcs.set(RPCType.Aptos, '');
 
 export const useSettingsStore = create<SettingsState>()(
   devtools(
     persist(
       (set) => ({
-        RPCEendPoint: '',
-        setRPCEndPoint: (rpc) => set((state) => ({ ...state, RPCEendPoint: rpc }))
+        RPCEndPoint: DEFAULT_RPC,
+        customRPCs: [],
+        selectedCustomRPCIndex: 0, // currently only support one custom rpc
+        setRPCEndPoint: (rpc) => set((state) => ({ ...state, RPCEndPoint: rpc })),
+        setCustomRPCs: (rpcs) => set((state) => ({ ...state, customRPCs: rpcs })),
+        setSelectedCustomRPCIndex: (i) => set((state) => ({ ...state, selectedCustomRPCIndex: i }))
       }),
       { name: 'hippo-settings-store' }
     )
   )
 );
 
-const Settings = () => {
-  const rpcEndpoint = useSettingsStore((state) => state.RPCEendPoint);
+const useRpcEndpoint = () => {
+  const rpcEndpoint = useSettingsStore((state) => state.RPCEndPoint);
   const setRPCEndPointInStore = useSettingsStore((state) => state.setRPCEndPoint);
+  if (!Object.values(RPCType).includes(rpcEndpoint)) {
+    // Backward compatible
+    setRPCEndPointInStore(DEFAULT_RPC);
+    return DEFAULT_RPC;
+  }
+  return rpcEndpoint;
+};
+
+export const useRPCURL = () => {
+  const rpcEndpoint = useRpcEndpoint();
+  const selectedCustomRPCIndex = useSettingsStore((state) => state.selectedCustomRPCIndex);
+  const customRPCs = useSettingsStore((state) => state.customRPCs);
+  if (rpcEndpoint !== RPCType.Custom) {
+    return preSetRpcs.get(rpcEndpoint);
+  } else if (rpcEndpoint) {
+    return customRPCs[selectedCustomRPCIndex];
+  }
+};
+
+const Settings = () => {
+  const rpcEndpoint = useRpcEndpoint();
+  const setRPCEndPointInStore = useSettingsStore((state) => state.setRPCEndPoint);
+  const customRPCs = useSettingsStore((state) => state.customRPCs);
+  const setCustomRPCs = useSettingsStore((state) => state.setCustomRPCs);
+  const selectedCustomRPCIndex = useSettingsStore((state) => state.selectedCustomRPCIndex);
+  const setSelectedCustomRPCIndex = useSettingsStore((state) => state.setSelectedCustomRPCIndex);
+
   const setRpcEndpoint = useCallback(
-    (v: string) => {
+    (v: RPCType) => {
       setRPCEndPointInStore(v);
       openNotification({ detail: 'RPC endpoint switched successfully', type: 'success' });
     },
     [setRPCEndPointInStore]
   );
 
-  const { useLocalStorageState } = useLocalStorage();
-
-  const [customRPCLS, setCustomRPCLS] = useLocalStorageState<string[]>('hippo-custom-rpcs', []);
-  const [customRPC, setCustomRPC] = useState<string>(customRPCLS[0]);
+  const [customRPC, setCustomRPC] = useState<string | undefined>(
+    customRPCs[selectedCustomRPCIndex]
+  );
 
   const onChange = useCallback(
     (e: RadioChangeEvent) => {
-      setRpcEndpoint(e.target.value);
+      setRpcEndpoint(e.target.value as RPCType);
     },
     [setRpcEndpoint]
   );
@@ -52,31 +99,31 @@ const Settings = () => {
       openErrorNotification({ detail: 'Invalid RPC URL' });
       return;
     }
-    setRpcEndpoint(customRPC);
-    setCustomRPCLS([customRPC]);
-  }, [customRPC, setCustomRPCLS, setRpcEndpoint]);
+    setRpcEndpoint(RPCType.Custom);
+    setCustomRPCs([customRPC]);
+    setSelectedCustomRPCIndex(0);
+  }, [customRPC, setCustomRPCs, setRpcEndpoint, setSelectedCustomRPCIndex]);
 
   return (
     <div className="hippo-settings p-2 mobile:p-0">
       <div className="h6 mb-4">RPC Endpoint</div>
       <Radio.Group onChange={onChange} value={rpcEndpoint}>
         <Space direction="vertical">
-          <Radio className="largeTextNormal" value={''}>
-            Aptos
-          </Radio>
-          <Radio
-            className="largeTextNormal"
-            value={'https://aptos-mainnet.nodereal.io/v1/0d8ae3b20f034e029c49e4febe30cbc3'}>
-            Nodereal
-          </Radio>
+          {Array.from(preSetRpcs.keys()).map((rpc, index) => {
+            return (
+              <Radio key={`preset-rpc-${index}`} className="largeTextNormal" value={rpc}>
+                {rpc}
+              </Radio>
+            );
+          })}
         </Space>
       </Radio.Group>
       <div className="flex gap-x-2 mt-2">
         <Input
           className={classNames({
-            'text-primePurple-700 font-bold': rpcEndpoint === customRPCLS[0]
+            'text-primePurple-700': rpcEndpoint === RPCType.Custom
           })}
-          placeholder="Cutom RPC Endpoint URL"
+          placeholder="Cutom RPC URL"
           value={customRPC}
           onChange={(e) => setCustomRPC(e.target.value)}
         />
