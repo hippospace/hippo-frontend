@@ -9,6 +9,7 @@ import dittoLogo from 'resources/img/dexes/ditto.jpeg';
 import tortugaLogo from 'resources/img/dexes/tortuga.jpeg';
 import aptoSwapLogo from 'resources/img/dexes/aptoswap.png';
 import auxLogo from 'resources/img/dexes/aux.png';
+import animeSwapLog from 'resources/img/dexes/animeswap.png';
 import classNames from 'classnames';
 
 interface IPoolProviderProps {
@@ -34,8 +35,10 @@ const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
       return aptoSwapLogo;
     } else if (dexType === AggregatorTypes.DexType.Aux) {
       return auxLogo;
+    } else if (dexType === AggregatorTypes.DexType.AnimeSwap) {
+      return animeSwapLog;
     } else {
-      throw new Error('Invalid dex for pool provider');
+      return undefined;
     }
   }, [dexType]);
   return (
