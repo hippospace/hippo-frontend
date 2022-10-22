@@ -18,7 +18,7 @@ import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { openErrorNotification } from 'utils/notifications';
-import Skeleton from 'components/Skeleton';
+// import Skeleton from 'components/Skeleton';
 import { Types, ApiError } from 'aptos';
 
 interface IRoutesProps {
@@ -178,24 +178,29 @@ const RouteRow: React.FC<IRouteRowProps> = ({
             </div>
             <div className="largeTextBold">{outputFormatted}</div>
           </div>
-          <div className="flex gap-x-4 font-semibold justify-between items-center small text-grey-500">
+          <div className="flex gap-x-4 justify-between items-center label-large-bold text-grey-500 laptop:label-small-bold">
             <div className="mr-auto truncate">{swapRoutes}</div>
-            {simuResult && (
-              <Tooltip
-                title={
-                  customMaxGasAmount >= parseFloat(simuResult.gas_used)
-                    ? 'Simulated gas cost'
-                    : 'Simulated gas cost is bigger than the custom max gas amount'
-                }>
-                <div
-                  className={classNames({
-                    'text-error-500': customMaxGasAmount < parseFloat(simuResult.gas_used)
-                  })}>
-                  {((parseFloat(simuResult.gas_used) * 100) / 100000000).toFixed(6)} APT Gas
-                </div>
-              </Tooltip>
-            )}
-            <div className="hidden">${outputValue}</div>
+            <div className="whitespace-nowrap">
+              {simuResult?.success && (
+                <Tooltip
+                  title={
+                    customMaxGasAmount >= parseFloat(simuResult.gas_used)
+                      ? 'Simulated Gas cost'
+                      : 'Simulated Gas cost is bigger than the custom max gas amount'
+                  }>
+                  <div
+                    className={classNames({
+                      'text-error-500': customMaxGasAmount < parseFloat(simuResult.gas_used)
+                    })}>
+                    {((parseFloat(simuResult.gas_used) * 100) / 100000000).toFixed(6)} APT Gas
+                  </div>
+                </Tooltip>
+              )}
+              {simuResult && !simuResult.success && (
+                <div className={'text-error-500'}>Simulation failed</div>
+              )}
+              <div className="hidden">${outputValue}</div>
+            </div>
           </div>
         </div>
         {isBestPrice && (
@@ -214,7 +219,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   routeSelected,
   className = '',
   isDesktopScreen = false,
-  isRefreshing = false,
+  // isRefreshing = false,
   refreshButton,
   simuResults = []
 }) => {
@@ -226,7 +231,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
     ? `${Math.min(rowsOnDesktop, routes.length) * routeRowHeight}px`
     : `${Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight}px`;
 
-  const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
+  // const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
   return (
     <div className={className}>
       <div className="helpText text-grey-500 font-bold mb-2 flex justify-between items-center">
@@ -239,8 +244,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
           scrollbar: isDesktopScreen
         })}
         style={{ height }}>
-        {!isRefreshing &&
-          routeSelected &&
+        {routeSelected &&
           routes.map((ro, index) => {
             return (
               <div key={`route-${index}`} onClick={() => onRouteSelected(ro, index)}>
@@ -253,7 +257,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
               </div>
             );
           })}
-        {isRefreshing && (
+        {/* isRefreshing && (
           <div className="h-full flex flex-col justify-around">
             {new Array(rows).fill(1).map((_, index) => (
               <div
@@ -269,7 +273,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
               </div>
             ))}
           </div>
-        )}
+        ) */}
       </div>
       {!isDesktopScreen && routes.length > rowsWhenLess && (
         <div className="flex helpText text-grey-500 font-bold mt-2 justify-between">
@@ -292,7 +296,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 15; // seconds
+const REFRESH_INTERVAL = 30; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -400,6 +404,7 @@ const TokenSwap = () => {
               !ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)
             ) {
               setAllRoutes(routes);
+              setRouteFromRoutes(routes);
               if (isReload) {
                 // restart interval timer
                 setTimePassedAfterRefresh(0);
@@ -451,6 +456,7 @@ const TokenSwap = () => {
       ifInputParametersDifferentWithLatest,
       setFieldValue,
       setRoute,
+      setRouteFromRoutes,
       toSymbol,
       values.currencyFrom
     ]
@@ -496,14 +502,6 @@ const TokenSwap = () => {
     values.maxGasFee,
     values.slipTolerance
   ]);
-
-  const routesFiltered = useMemo(() => {
-    return allRoutes.filter((route, i) => !simulateResults[i] || simulateResults[i].success);
-  }, [allRoutes, simulateResults]);
-
-  useEffect(() => {
-    setRouteFromRoutes(routesFiltered ?? allRoutes);
-  }, [allRoutes, routesFiltered, setRouteFromRoutes]);
 
   const timePassedRef = useRef(0);
   timePassedRef.current = timePassedAfterRefresh;
@@ -655,11 +653,11 @@ const TokenSwap = () => {
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
-                routes={routesFiltered}
+                routes={allRoutes}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
-                simuResults={simulateResults.filter((r) => !r || r.success)}
+                simuResults={simulateResults}
               />
             </>
           )}
@@ -670,7 +668,7 @@ const TokenSwap = () => {
             )}>
             <RoutesAvailable
               isDesktopScreen={true}
-              routes={routesFiltered}
+              routes={allRoutes}
               routeSelected={routeSelected}
               onRouteSelected={onUserSelectRoute}
               isRefreshing={isRefreshingRoutes}
@@ -682,7 +680,7 @@ const TokenSwap = () => {
                   timePassedAfterRefresh={timePassedAfterRefresh}
                 />
               }
-              simuResults={simulateResults.filter((r) => !r || r.success)}
+              simuResults={simulateResults}
             />
             {routeSelected && (
               <SwapDetail

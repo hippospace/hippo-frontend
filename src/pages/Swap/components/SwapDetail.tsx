@@ -45,9 +45,11 @@ const SwapDetail = ({
     {
       label: 'Rate',
       value: (
-        <div className="flex items-center" onClick={() => setIsPriceYToX(!isPriceYToX)}>
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={() => setIsPriceYToX(!isPriceYToX)}>
           <span className="mr-1">{rate}</span>
-          <Button variant="icon">
+          <Button variant="icon" className="mobile:hidden">
             <ExchangeIcon className="w-4 h-4" />
           </Button>
         </div>
@@ -76,11 +78,13 @@ const SwapDetail = ({
   ];
 
   return (
-    <div className={classNames('flex flex-col gap-2 mt-6 px-2', className)}>
+    <div className={classNames('flex flex-col gap-1 mt-6 px-2', className)}>
       {details.map((detail) => (
-        <div className="flex justify-between mobile:block mobile:mb-1" key={detail.label}>
-          <div className="small font-semibold text-grey-500 laptop:text-[12px]">{detail.label}</div>
-          <div className="small font-bold text-grey-700 mobile:flex mobile:justify-end">
+        <div className="flex justify-between" key={detail.label}>
+          <div className="text-grey-500 label-large-bold laptop:label-small-bold">
+            {detail.label}
+          </div>
+          <div className="label-large-bold text-grey-700 mobile:flex mobile:justify-end mobile:label-small-bold">
             {detail.value}
           </div>
         </div>

@@ -77,11 +77,66 @@
     @apply text-sm;
   }
 
-  .subTitle-semiBold {
-    @apply text-[18px] leading-[22px] font-semibold;
-  }
-
   .subTitleBold {
     @apply text-[18px] leading-[22px] font-bold;
+  }
+
+
+  .subtitle-bold {
+    @apply text-[18px] leading-[1.25] font-bold;
+  }
+
+  .subtitle-semibold {
+    @apply text-[18px] leading-[1.25] font-semibold;
+  }
+
+  .subtitle-regular {
+    @apply text-[18px] leading-[1.25] font-normal;
+  }
+
+  // Body text
+  .body-regular {
+    @apply text-[16px] leading-[1.25] font-normal;
+  }
+
+  .body-bold {
+    @apply text-[16px] leading-[1.25] font-bold;
+  }
+
+  .body-semibold {
+    @apply text-[16px] leading-[1.25] font-semibold;
+  }
+
+  .body-thin {
+    @apply text-[16px] leading-[1.25] font-light;
+  }
+
+  .body-hint {
+    @apply text-[16px] leading-[1.25] font-light italic;
+  }
+
+  // Lable text
+  .label-large-regular {
+    @apply text-[14px] leading-[1.5] font-normal;
+  }
+
+  .label-small-regular {
+    @apply text-[12px] leading-[1.5] font-normal;
+  }
+
+  .label-large-bold {
+    @apply text-[14px] leading-[1.5] font-semibold; 
+  }
+
+  .label-small-bold {
+    @apply text-[12px] leading-[1.5] font-semibold; 
+  }
+
+  .label-large-thin {
+    @apply text-[14px] leading-[1.5] font-light; 
+  }
+
+  .label-small-thin {
+    @apply text-[12px] leading-[1.5] font-light;
   }
 }
