@@ -97,7 +97,7 @@ const VolumeChart = ({ data = [] }: { data: VolumeData[] }) => {
             {data.map((entry, index) => (
               <Cell
                 cursor="auto"
-                fill={index !== hoverIndex ? '#eae6ff' : '#8d78f7'}
+                fill={index !== hoverIndex ? '#CDC1FF' : '#8D78F7'}
                 key={`cell-${index}`}
               />
             ))}
