@@ -54,7 +54,7 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
             return (
               <Button
                 key={`${name}-${isCurrent}`}
-                className={classNames('w-full', { '!bg-primePurple-100': isCurrent })}
+                className={classNames('w-full', { '!bg-prime-100': isCurrent })}
                 variant={'outlined'}
                 onClick={() => onRoute(path)}>
                 {name}

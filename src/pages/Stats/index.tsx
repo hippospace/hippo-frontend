@@ -167,7 +167,7 @@ const Stats = () => {
       <div className="mb-6 flex items-end tablet:flex-col tablet:items-start tablet:gap-y-2">
         <div className="h3 mr-auto mobile:h5">HIPPO Stats Overview</div>
         <Segmented
-          className={classNames('shadow-main1 bg-secondary', styles.segmentedSelector)}
+          className={classNames('shadow-main bg-secondary', styles.segmentedSelector)}
           options={Periods as unknown as string[]}
           value={statsPeriod}
           onChange={switchToOtherPeriod}

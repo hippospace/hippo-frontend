@@ -96,7 +96,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
           ))}
         </div>
         <input
-          className="py-4 px-6 font-bold text-base bg-primaryGrey text-grey-900 rounded-xl focus:outline-none border-none"
+          className="py-4 px-6 font-bold text-base bg-grey-100 text-grey-900 rounded-xl focus:outline-none border-none"
           value={filter}
           onChange={(e) => setFilter(e.target.value.toLowerCase())}
           placeholder="Search"

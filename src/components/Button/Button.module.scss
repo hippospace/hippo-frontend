@@ -40,12 +40,12 @@
   }
 
   &.outlined {
-    @apply border-[2px] border-primePurple-700 text-primePurple-700 bg-transparent rounded-full;
+    @apply border-[2px] border-prime-700 text-prime-700 bg-transparent rounded-full;
     &:hover {
-      @apply bg-primePurple-700 text-primePurple-100;
+      @apply bg-prime-700 text-prime-100;
     }
     &:active {
-      @apply bg-primePurple-900 text-primePurple-100 border-primePurple-900;
+      @apply bg-prime-900 text-prime-100 border-prime-900;
     }
     &:disabled {
       @apply opacity-40;
@@ -53,7 +53,7 @@
   }
 
   &.plain {
-    @apply bg-secondary rounded-xxl shadow-main1;
+    @apply bg-secondary rounded-xxl shadow-main;
     &:hover {
       @apply opacity-80;
     }

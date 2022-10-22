@@ -12,7 +12,7 @@ const CoinRow: React.FC<TProps> = ({ item }) => {
   const { connected } = useWallet();
   const [tokenAmountFormatter] = useTokenAmountFormatter();
   return (
-    <div className="flex items-center justify-between gap-2 border-2 border-grey-300 w-full p-2 hover:bg-primePurple-100 rounded-xl">
+    <div className="flex items-center justify-between gap-2 border-2 border-grey-300 w-full p-2 hover:bg-prime-100 rounded-xl">
       <div className="flex items-center gap-2">
         <CoinIcon logoSrc={item.token.logo_url.str()} />
         <div className="">

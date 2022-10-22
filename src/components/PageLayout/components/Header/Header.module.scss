@@ -41,6 +41,6 @@
 @supports (backdrop-filter: blur()) {
   .blur {
     backdrop-filter: blur(40px);
-    @apply bg-primeBlack #{!important};
+    @apply bg-grey-100 #{!important};
   }
 }

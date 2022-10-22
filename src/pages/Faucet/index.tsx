@@ -72,7 +72,7 @@ const Faucet: React.FC = () => {
     if (!activeWallet) {
       return (
         <div className="flex items-center justify-center h-[calc(100vh_-_416px)]">
-          <Button className="shadow-main1 w-60" variant="gradient" onClick={openModal}>
+          <Button className="shadow-main w-60" variant="gradient" onClick={openModal}>
             Connect to Wallet
           </Button>
         </div>

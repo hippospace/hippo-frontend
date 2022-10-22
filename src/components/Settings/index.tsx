@@ -121,7 +121,7 @@ const Settings = () => {
       <div className="flex gap-x-2 mt-2">
         <Input
           className={classNames({
-            'text-primePurple-700': rpcEndpoint === RPCType.Custom
+            'text-prime-700': rpcEndpoint === RPCType.Custom
           })}
           placeholder="Cutom RPC URL"
           value={customRPC}

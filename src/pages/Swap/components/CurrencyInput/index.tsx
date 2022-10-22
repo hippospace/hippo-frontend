@@ -109,7 +109,7 @@ const CurrencyInput: React.FC<TProps> = ({
     <div
       className={cx(
         styles.currencyInput,
-        'bg-primaryGrey w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2 relative group'
+        'bg-grey-100 w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2 relative group'
       )}>
       <div className="flex gap-1 items-center">
         <CoinSelectButton

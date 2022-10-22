@@ -5,11 +5,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#2D2D2D',
-        primeBlack: 'rgba(45, 45, 45, 0.03)',
-        primeBlack20: 'rgba(45, 45, 45, 0.2)',
-        primeBlack50: 'rgba(45, 45, 45, 0.5)',
-        primeBlack80: 'rgba(45, 45, 45, 0.8)',
         grey: {
           100: '#F8F8F8',
           300: '#D5D5D5',
@@ -17,7 +12,7 @@ module.exports = {
           700: '#575757',
           900: '#2D2D2D'
         },
-        primePurple: {
+        prime: {
           100: '#EAE6FF',
           300: '#CDC1FF',
           500: '#8D78F7',
@@ -53,24 +48,12 @@ module.exports = {
     },
     backgroundColor: theme => ({
       ...theme('colors'),
-      primary: '#F6F8FA',
       secondary: '#FFFFFF',
-      prime: '#2D2D2D',
-      primeBlack: 'rgba(45, 45, 45, 0.03)',
-      primeBlack50: 'rgba(45, 45, 45, 0.5)',
-      primeBlack20: 'rgba(45, 45, 45, 0.2)',
-      primeBlack80: 'rgba(45, 45, 45, 0.8)',
-      input: '#F8F8F8',
       transparent: 'transparent',
-      primaryGrey: 'rgba(248, 248, 248, 0.8)',
-      selected: '#F2F1FE'
     }),
     boxShadow: {
       none: 'none',
-      sm: '4px 4px 0px #2D2D2D',
-      md: '0px 4px 8px rgba(0, 0, 0, 0.25)',
-      figma: '8px 8px 0px #2D2D2D',
-      main1: '0px 4px 35px rgba(0, 0, 0, 0.05)',
+      main: '0px 4px 35px rgba(0, 0, 0, 0.05)',
       home: '-4px 8px 32px rgba(211, 207, 230, 0.4)'
     },
     borderRadius: {
