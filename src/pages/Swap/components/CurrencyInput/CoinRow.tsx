@@ -17,16 +17,16 @@ const CoinRow: React.FC<TProps> = ({ item }) => {
         <CoinIcon logoSrc={item.token.logo_url.str()} />
         <div className="">
           <div className="font-bold text-grey-900">{item.token.symbol.str()}</div>
-          <small className="text-grey-500 font-bold">{item.token.name.str()}</small>
+          <div className="text-grey-500 label-large-bold">{item.token.name.str()}</div>
         </div>
       </div>
-      <small className="text-grey-700 font-bold">
+      <div className="text-grey-700 label-large-bold">
         {connected && item.balance < 0 && (
           <Skeleton.Button className="!w-10 !h-4 !min-w-0" active />
         )}
         {(!connected || item.balance >= 0) &&
           tokenAmountFormatter(item.balance, item.token.symbol.str())}
-      </small>
+      </div>
     </div>
   );
 };

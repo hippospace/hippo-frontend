@@ -56,7 +56,7 @@ const CoinSelectButton = ({
         </>
       ) : (
         <>
-          <div className="small">--</div>
+          <div className="label-large-bold">--</div>
           <CaretIcon className="font-icon text-grey-300" />
         </>
       )}
@@ -147,10 +147,10 @@ const CurrencyInput: React.FC<TProps> = ({
       </div>
       {connected && (
         <div className="flex justify-between font-bold text-grey-500 mt-1 cursor-auto pointer-events-none">
-          <small>Current Balance:</small>
+          <div className="label-large-bold">Current Balance:</div>
           {isReady && (
-            <small
-              className={classNames({
+            <div
+              className={classNames('label-large-bold', {
                 'cursor-pointer pointer-events-auto underline':
                   actionType === 'currencyFrom' && !isDisableAmountInput
               })}
@@ -163,7 +163,7 @@ const CurrencyInput: React.FC<TProps> = ({
                 }
               }}>
               {tokenAmountFormatter(uiBalance, selectedSymbol)}
-            </small>
+            </div>
           )}
           {!isReady && <Skeleton width={30} />}
         </div>
@@ -187,7 +187,7 @@ const CurrencyInput: React.FC<TProps> = ({
       </Modal>
       <Drawer
         className="hidden mobile:block"
-        title={<div className="paragraph bold text-black">Select a Token</div>}
+        title={<div className="body-bold text-black">Select a Token</div>}
         closable={false}
         height={'80vh'}
         placement={'bottom'}

@@ -111,7 +111,7 @@ const Settings = () => {
         <Space direction="vertical">
           {Array.from(preSetRpcs.keys()).map((rpc, index) => {
             return (
-              <Radio key={`preset-rpc-${index}`} className="largeTextNormal" value={rpc}>
+              <Radio key={`preset-rpc-${index}`} className="body-medium" value={rpc}>
                 {rpc}
               </Radio>
             );

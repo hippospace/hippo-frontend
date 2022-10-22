@@ -7,11 +7,11 @@
   }
   &.medium {
     height: 54px;
-    @apply subTitleBold;
+    @apply subtitle-bold;
   }
   &.small {
     height: 43px;
-    @apply largeTextBold;
+    @apply body-bold;
   }
 
   &:active {

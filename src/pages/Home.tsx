@@ -25,8 +25,10 @@ const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
         <img src={posterSrc} className="w-full h-[146px] object-cover rounded-xxl" />
       </div>
       {/* line-clamp will automatically truncate the text as boxes shrink but 'truncate' won't */}
-      <div className="h4 mb-2 mt-4 w-full text-center line-clamp-1 mobile:title">{title}</div>
-      <div className="subTitle-semiBold h-[88px] px-2 text-grey-700 opacity-50 w-full line-clamp-4 mb-9 mobile:paragraph">
+      <div className="h4 mb-2 mt-4 w-full text-center line-clamp-1 mobile:subtitle-regular">
+        {title}
+      </div>
+      <div className="subtitle-semibold h-[88px] px-2 text-grey-700 opacity-50 w-full line-clamp-4 mb-9 mobile:body-semibold">
         {summary}
       </div>
       <div className="w-full">
@@ -51,7 +53,7 @@ const Intro = ({ children, className }: { children: any; className: string }) =>
   return (
     <div
       className={classNames(
-        'h5 font-[500] text-gray-700 max-w-[798px] mobile:h6 mobile:font-[500]',
+        'h5 font-[500] leading-[29px] text-gray-700 max-w-[798px] mobile:h6 mobile:font-[500]',
         className
       )}>
       {children}

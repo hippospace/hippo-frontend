@@ -22,10 +22,10 @@
     }
     @apply rounded-[16px];
     .ant-notification-notice-message {
-      @apply text-grey-900 h6 mb-3;
+      @apply text-grey-900 h6 mb-2;
     }
     .ant-notification-notice-description {
-      @apply text-grey-700 largeTextNormal;
+      @apply text-grey-700 body-medium;
     }
   }
 }

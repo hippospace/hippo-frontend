@@ -19,7 +19,7 @@ const TopList: FC<ITopListProps> = ({ className, title, cols, flexs, datas }) =>
         <div className="flex mb-4 pl-4">
           {cols.map((c: string, i: number) => (
             <div
-              className="largeTextBold text-grey-500"
+              className="body-bold text-grey-500"
               key={`col-${i}`}
               style={{ flex: `${flexs[i]} ${flexs[i]} 0` }}>
               {c}

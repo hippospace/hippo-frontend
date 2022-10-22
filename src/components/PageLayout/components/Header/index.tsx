@@ -18,7 +18,7 @@ const { Header } = Antd.Layout;
 /*
 const SiteBadge = () => {
   return (
-    <div className="bg-[#fe6e65] w-[300px] text-white text-center font-bold largeTextBold h-[44px] leading-[44px] rotate-45 translate-x-[140px] tablet:translate-x-[113px] mobile:scale-[0.6] mobile:pl-[72px]">
+    <div className="bg-[#fe6e65] w-[300px] text-white text-center font-bold body-bold h-[44px] leading-[44px] rotate-45 translate-x-[140px] tablet:translate-x-[113px] mobile:scale-[0.6] mobile:pl-[72px]">
       <img src={GithubIcon} className="w-6 inline-block" /> Mainnet Deploying
     </div>
   );
@@ -62,13 +62,13 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
             );
           })}
       </div>
-      <div className="mt-auto largeTextBold w-full">
+      <div className="mt-auto body-bold w-full">
         <Button className="w-full" variant="plain" size="medium" onClick={openSettings}>
           <SettingIcon className="font-icon mr-2" />
           Settings
         </Button>
       </div>
-      <div className="mt-4 title">V {process.env.REACT_APP_VERSION}</div>
+      <div className="mt-4 subtitle-regular text-grey-500">V {process.env.REACT_APP_VERSION}</div>
       <Drawer
         title={'Settings'}
         closeIcon={<CloseIcon className="font-icon h5 text-grey-500" />}
@@ -92,7 +92,7 @@ const PageHeader: React.FC = () => {
       if (path === '*' || hidden) return null;
       return (
         <Antd.Menu.Item key={name}>
-          <Link to={path || '/'} className="header5 bold">
+          <Link to={path || '/'} className="h6 font-bold">
             {name}
           </Link>
         </Antd.Menu.Item>

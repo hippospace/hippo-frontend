@@ -99,7 +99,7 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   return (
-    <div className={classNames('w-full flex h-8 items-center mb-1 largeTextNormal', className)}>
+    <div className={classNames('w-full flex h-8 items-center mb-1 body-medium', className)}>
       <Card className="mr-auto h-full relative w-fit">
         <SettingsButton
           className="tablet:hidden mobile:hidden"
@@ -121,7 +121,7 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
       <Drawer
         height={'auto'}
         closable={false}
-        title={<div className="paragraph bold text-black">Transaction Settings</div>}
+        title={<div className="body-bold text-black">Transaction Settings</div>}
         placement={'bottom'}
         onClose={() => setIsMobileTxSettingsOpen(false)}
         visible={isMobileTxSettingsOpen}>
@@ -172,11 +172,11 @@ const RouteRow: React.FC<IRouteRowProps> = ({
             'bg-selected': isSelected,
             'bg-grey-100': !isSelected
           })}>
-          <div className="flex justify-between items-center largeTextBold text-grey-700">
+          <div className="flex justify-between items-center body-bold text-grey-700">
             <div className="truncate" title={swapDexs}>
               {swapDexs}
             </div>
-            <div className="largeTextBold">{outputFormatted}</div>
+            <div className="body-bold">{outputFormatted}</div>
           </div>
           <div className="flex gap-x-4 justify-between items-center label-large-bold text-grey-500 laptop:label-small-bold">
             <div className="mr-auto truncate">{swapRoutes}</div>
@@ -204,7 +204,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
           </div>
         </div>
         {isBestPrice && (
-          <div className="absolute -left-[2px] -top-2 h-4 px-2 small font-bold bg-[#D483FF] rounded-lg rounded-bl-none flex items-center text-white">
+          <div className="absolute -left-[2px] -top-2 h-4 px-2 label-large-bold bg-[#D483FF] rounded-lg rounded-bl-none flex items-center text-white">
             Best price
           </div>
         )}
@@ -234,7 +234,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   // const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
   return (
     <div className={className}>
-      <div className="helpText text-grey-500 font-bold mb-2 flex justify-between items-center">
+      <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
         <div>Total {routes.length} routes available</div>
         <div>{refreshButton}</div>
       </div>
@@ -276,7 +276,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
         ) */}
       </div>
       {!isDesktopScreen && routes.length > rowsWhenLess && (
-        <div className="flex helpText text-grey-500 font-bold mt-2 justify-between">
+        <div className="flex label-small-bold text-grey-500 mt-2 justify-between">
           <div
             className="ml-auto cursor-pointer hover:opacity-50"
             onClick={() => setIsMore(!isMore)}>
@@ -296,7 +296,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 30; // seconds
+const REFRESH_INTERVAL = 15; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -634,7 +634,7 @@ const TokenSwap = () => {
         <div
           className="w-full flex flex-col gap-1 mobile:!px-4"
           style={{ paddingLeft: cardXPadding, paddingRight: cardXPadding }}>
-          <div className="largeTextBold mb-2 flex">
+          <div className="body-bold mb-2 flex">
             <div className="mr-auto">Pay</div>
           </div>
           <CurrencyInput
@@ -645,7 +645,7 @@ const TokenSwap = () => {
           <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
             <SwapIcon />
           </Button>
-          <div className="largeTextBold mb-2 flex">
+          <div className="body-bold mb-2 flex">
             <div className="mr-auto">Receive</div>
           </div>
           <CurrencyInput actionType="currencyTo" />

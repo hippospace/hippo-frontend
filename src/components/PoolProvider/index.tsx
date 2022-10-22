@@ -44,7 +44,7 @@ const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
   return (
     <div className={classNames('flex items-center h-full', className)}>
       <img src={imgSrc} alt={'Dex logo'} className="w-6 h-6 rounded-full mr-2" />
-      <span className="largeTextBold text-grey-700">{AggregatorTypes.DexType[dexType]}</span>
+      <span className="body-bold text-grey-700">{AggregatorTypes.DexType[dexType]}</span>
     </div>
   );
 };

@@ -40,15 +40,15 @@ const Stats = () => {
       return [
         // eslint-disable-next-line react/jsx-key
         <div className="flex h-[65px] items-center">
-          <span className="w-5 largeTextBold text-grey-700">{index + 1}</span>
+          <span className="w-5 body-bold text-grey-700">{index + 1}</span>
           <PoolProvider dexType={pp.dex_type.toJsNumber()} />
         </div>,
         // eslint-disable-next-line react/jsx-key
         <>
-          <span className="largeTextBold text-grey-700 mobile:hidden">
+          <span className="body-bold text-grey-700 mobile:hidden">
             ${numberGroupFormat(pp.amount.toJsNumber() / volumeScale, 0)}
           </span>
-          <span className="largeTextBold text-grey-700 hidden mobile:block">
+          <span className="body-bold text-grey-700 hidden mobile:block">
             ${numberOfAbbr(pp.amount.toJsNumber() / volumeScale, 1)}
           </span>
         </>
@@ -63,15 +63,15 @@ const Stats = () => {
       return [
         // eslint-disable-next-line react/jsx-key
         <div className="flex h-[65px] items-center">
-          <span className="w-5 largeTextBold text-grey-700">{index + 1}</span>
+          <span className="w-5 body-bold text-grey-700">{index + 1}</span>
           <TradingPair base={tp.coin_x.str()} quote={tp.coin_y.str()} />
         </div>,
         // eslint-disable-next-line react/jsx-key
         <>
-          <span className="largeTextBold text-grey-700 mobile:hidden">
+          <span className="body-bold text-grey-700 mobile:hidden">
             ${numberGroupFormat(tp.amount.toJsNumber() / volumeScale, 0)}
           </span>
-          <span className="largeTextBold text-grey-700 hidden mobile:block">
+          <span className="body-bold text-grey-700 hidden mobile:block">
             ${numberOfAbbr(tp.amount.toJsNumber() / volumeScale, 1)}
           </span>
         </>

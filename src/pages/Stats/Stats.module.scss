@@ -18,7 +18,7 @@
       }
     }
     .ant-segmented-item-label {
-      @apply largeTextBold h-8 flex items-center justify-center w-[74px];
+      @apply body-bold h-8 flex items-center justify-center w-[74px];
     }
     .ant-segmented-thumb-motion-appear ~ .ant-segmented-item {
       .ant-segmented-item-label {

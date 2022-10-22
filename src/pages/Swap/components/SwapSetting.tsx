@@ -13,7 +13,7 @@ interface TProps {
 }
 
 const SubTitle = ({ children }: { children: string }) => {
-  return <div className="small font-extrabold text-grey-700 mb-4">{children}</div>;
+  return <div className="label-large-bold font-extrabold text-grey-700 mb-3">{children}</div>;
 };
 
 const Selectable = ({
@@ -67,7 +67,9 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
 
   return (
     <div className="w-full">
-      <div className="h6 text-grey-900 text-center tablet:hidden">Transaction Settings</div>
+      <div className="h6 font-bold text-grey-900 text-center tablet:hidden">
+        Transaction Settings
+      </div>
       <div className="mt-6 mobile:mt-0">
         <SubTitle>Slippage Tolerance</SubTitle>
         <div className="flex gap-x-2 gap-y-3 flex-wrap">
@@ -92,12 +94,12 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
               isConfine={true}
               placeholder="Custom"
               className={classNames(
-                'h6 rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 largeTextBold px-4'
+                'h6 rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 body-bold px-4'
               )}
               onAmountChange={(v) => setFieldValue('slipTolerance', v)}
             />
             <div
-              className={classNames('mx-4 text-grey-500 largeTextBold', {
+              className={classNames('mx-4 text-grey-500 body-bold', {
                 '!text-grey-900': isCustomSlippage
               })}>
               %

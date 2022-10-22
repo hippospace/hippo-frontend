@@ -21,7 +21,7 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
     // console.log('payload', JSON.stringify(payload));
     return (
       <Card className="p-4">
-        <p className="largeTextNormal text-grey-500">{`${payload[0].payload.label}`}</p>
+        <p className="body-medium text-grey-500">{`${payload[0].payload.label}`}</p>
         <p className="h6 text-grey-900 mt-2">
           ${numberGroupFormat((payload[0].value || 0) as number, 0)}
         </p>

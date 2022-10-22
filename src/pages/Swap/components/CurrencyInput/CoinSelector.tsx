@@ -116,8 +116,8 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     return (
       <div className="flex flex-col gap-2 mt-4 flex-grow min-h-0">
         <div className="flex justify-between">
-          <small className="text-grey-500 font-bold">Token</small>
-          <small className="text-grey-500 font-bold">{hippoWallet ? 'Balance' : ''}</small>
+          <div className="text-grey-500 label-large-bold">Token</div>
+          <div className="text-grey-500 label-large-bold">{hippoWallet ? 'Balance' : ''}</div>
         </div>
         <div className="h-auto flex-grow min-h-0" ref={listRef}>
           {tokenListBalance && (

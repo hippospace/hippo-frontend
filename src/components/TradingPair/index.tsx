@@ -11,7 +11,7 @@ const TradingPair = ({ base, quote }: { base: string; quote: string }) => {
         <CoinIcon token={xCoin} />
         <CoinIcon token={yCoin} />
       </div>
-      <div className="items-center largeTextBold text-grey-700">
+      <div className="items-center body-bold text-grey-700">
         {xCoin?.symbol.str() || '--'}/{yCoin?.symbol.str() || '--'}
       </div>
     </div>

@@ -18,7 +18,7 @@ const Link = ({ href, children }: { href: string; children: any }) => {
       target="_blank"
       rel="noreferrer"
       href={href}
-      className="flex header5 bold text-grey-900 opacity-50 gap-2 hover:text-grey-900 hover:opacity-100">
+      className="flex items-center h6 text-grey-900 opacity-50 gap-2 hover:text-grey-900 hover:opacity-100">
       {children}
     </a>
   );
@@ -30,7 +30,7 @@ const Label = ({ children }: { children: any }) => {
 
 const PageFooter: React.FC = () => {
   return (
-    <Footer className="flex gap-8 justify-center py-16 bg-transparent z-10">
+    <Footer className="flex gap-8 items-center justify-center py-16 bg-transparent z-10">
       <Link href={URLs.discord}>
         <DiscordIcon />
         <Label>Discord</Label>

@@ -1,7 +1,7 @@
 .volumeChart {
   :global {
     .recharts-cartesian-axis-tick tspan {
-      @apply subTitle-semiBold text-grey-500 fill-grey-500;
+      @apply subtitle-semibold text-grey-500 fill-grey-500;
     }
   }
 }

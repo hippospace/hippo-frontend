@@ -74,7 +74,9 @@ const WalletConnector: React.FC = () => {
       <Drawer
         className="hidden mobile:block"
         closable={false}
-        title={!activeWallet ? <h6 className="font-bold text-black">Connect your wallet</h6> : ''}
+        title={
+          !activeWallet ? <div className="h6 font-bold text-black">Connect your wallet</div> : ''
+        }
         height={'auto'}
         placement={'bottom'}
         onClose={() => closeModal()}

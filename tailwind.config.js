@@ -38,7 +38,6 @@ module.exports = {
         }
       },
       backgroundImage: {
-        'home-icons': 'url(resources/img/home/home-icons.png)',
         home1: 'linear-gradient(0deg, #F4F1FD 0%, #FDFDFF 100%)',
         home2: 'linear-gradient(90deg, #F8F7FF 26.08%, #F7F5FE 98.41%)',
         swap: 'linear-gradient(0deg, #F7F5FD 0%, #FDFDFF 100%)',

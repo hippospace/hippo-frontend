@@ -1,86 +1,51 @@
 @layer components {
-  .header4 {
-    @apply font-normal text-2xl;
-    &.bold {
-      @apply font-bold;
-    }
+  .h1 {
+    @apply text-[56px] leading-[1.125] font-bold;
   }
 
-  .header5 {
-    @apply font-normal text-xl;
-    &.bold {
-      @apply font-bold;
-    }
+  .h1d {
+    @apply text-[56px] leading-[1.125] font-semibold;
   }
 
-  title, .title {
-    @apply font-semibold text-lg;
-    &.bold {
-      @apply font-bold;
-    }
+  .h2 {
+    @apply text-[48px] leading-[1.125] font-bold;
+  }
+  
+  .h2d {
+    @apply text-[48px] leading-[1.125] font-semibold;
   }
 
-  .paragraph {
-    @apply font-semibold text-base;
-    &.bold {
-      @apply font-extrabold;
-    }
+  .h3 {
+    @apply text-[40px] leading-[1.25] font-bold;
+  }
+  
+  .h3d {
+    @apply text-[40px] leading-[1.25] font-light;
   }
 
-  .largeTextBold {
-    @apply text-base font-bold;
+  .h4 {
+    @apply text-[32px] leading-[1.25] font-semibold;
   }
 
-  .largeTextNormal {
-    @apply text-base font-medium;
+  .h4d {
+    @apply text-[32px] leading-[1.25] font-light;
   }
 
-  .helpText {
-    @apply font-normal text-sm;
-    &.bold {
-      @apply font-semibold;
-    }
-    &.hyperlink {
-      @apply underline;
-    }
+  .h5 {
+    @apply text-[24px] leading-[1.5] font-semibold;
   }
 
-  h1, .h1 {
-    @apply text-[56px] leading-[67px] font-bold;
+  .h5d {
+    @apply text-[24px] leading-[1.5] font-light;
   }
 
-  h2, .h2 {
-    @apply text-[48px] leading-[58px] font-bold;
+  .h6 {
+    @apply text-[20px] leading-[1.5] font-semibold;
   }
 
-  h3, .h3 {
-    @apply text-[40px] leading-[48px] font-bold;
+  .h6d {
+    @apply text-[20px] leading-[1.5] font-light;
   }
-
-  h4, .h4 {
-    @apply text-[32px] leading-[38px] font-bold;
-  }
-
-  h5, .h5 {
-    @apply text-2xl font-bold;
-  }
-
-  h6, .h6 {
-    @apply text-xl font-bold;
-  }
-
-  small, .small {
-    @apply text-[14px];
-  }
-
-  .helpText {
-    @apply text-sm;
-  }
-
-  .subTitleBold {
-    @apply text-[18px] leading-[22px] font-bold;
-  }
-
 
   .subtitle-bold {
     @apply text-[18px] leading-[1.25] font-bold;
@@ -105,6 +70,10 @@
 
   .body-semibold {
     @apply text-[16px] leading-[1.25] font-semibold;
+  }
+
+  .body-medium {
+    @apply text-[16px] leading-[1.25] font-medium;
   }
 
   .body-thin {

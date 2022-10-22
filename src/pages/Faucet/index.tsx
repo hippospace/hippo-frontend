@@ -16,7 +16,7 @@ const Balance = ({ symbol }: { symbol: string }) => {
   const [balance, isReady] = useTokenBalane(symbol);
   const [tokenAmountFormatter] = useTokenAmountFormatter();
   return (
-    <div className="text-grey-500 largeTextNormal font-[600]">
+    <div className="text-grey-500 body-medium font-[600]">
       {!isReady && <Skeleton.Button active className={'!w-16 !h-5 !rounded'} />}
       {isReady && (
         <>
