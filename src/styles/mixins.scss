@@ -10,8 +10,9 @@
     }
 
     input {
-      @apply text-right font-extrabold text-base text-grey-900 px-0;
+      @apply text-right body-regular text-grey-900 px-0;
       box-shadow: none;
+      font-weight: 800 !important;
 
       &:read-only {
         @apply text-[14px] font-bold text-grey-500;

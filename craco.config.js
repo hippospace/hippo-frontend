@@ -2,6 +2,9 @@ const webpack = require('webpack');
 const CracoLessPlugin = require('craco-less');
 
 module.exports = {
+  babel: {
+    plugins: ['preval', 'macros']
+  },
   plugins: [
     {
       plugin: CracoLessPlugin,
