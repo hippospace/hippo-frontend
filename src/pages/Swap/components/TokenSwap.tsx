@@ -121,7 +121,7 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
       <Drawer
         height={'auto'}
         closable={false}
-        title={<div className="body-bold text-black">Transaction Settings</div>}
+        title={<div className="body-bold text-grey-900">Transaction Settings</div>}
         placement={'bottom'}
         onClose={() => setIsMobileTxSettingsOpen(false)}
         visible={isMobileTxSettingsOpen}>
@@ -162,15 +162,15 @@ const RouteRow: React.FC<IRouteRowProps> = ({
     <div className={classNames('pt-2')} style={{ height: `${routeRowHeight}px` }}>
       <div
         className={classNames(
-          'relative h-full flex flex-col justify-center bg-clip-border rounded-lg border-2 cursor-pointer bg-grey-100 border-transparent',
+          'relative h-full flex flex-col justify-center bg-clip-border rounded-lg border-2 cursor-pointer bg-field border-transparent',
           {
             'bg-select-border bg-origin-border bg-cover': isSelected
           }
         )}>
         <div
           className={classNames('w-full h-full p-2 rounded-lg space-y-1', {
-            'bg-prime-100': isSelected,
-            'bg-grey-100': !isSelected
+            'bg-prime-100 dark:bg-prime-900': isSelected,
+            'bg-field': !isSelected
           })}>
           <div className="flex justify-between items-center body-bold text-grey-700">
             <div className="truncate" title={swapDexs}>
@@ -296,7 +296,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 15; // seconds
+const REFRESH_INTERVAL = 600; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();

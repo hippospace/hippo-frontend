@@ -29,23 +29,14 @@
   &.gradient {
     @apply bg-btn-gradient rounded-full text-white;
     &:hover {
-      background: linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%);
-    }
-    &:active {
-      background: linear-gradient(268.82deg, #B889DF -26.18%, #9688E1 3.15%, #6979D6 83.6%);
-    }
-    &:disabled {
-      background: linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%);
+      @apply opacity-90;
     }
   }
 
   &.outlined {
     @apply border-[2px] border-prime-700 text-prime-700 bg-transparent rounded-full;
-    &:hover {
+    &:hover, &:global(.hip-btn-selected) {
       @apply bg-prime-700 text-prime-100;
-    }
-    &:active {
-      @apply bg-prime-900 text-prime-100 border-prime-900;
     }
     &:disabled {
       @apply opacity-40;
@@ -53,7 +44,7 @@
   }
 
   &.plain {
-    @apply bg-secondary rounded-xxl shadow-main;
+    @apply bg-surface rounded-xxl shadow-main;
     &:hover {
       @apply opacity-80;
     }
@@ -69,6 +60,21 @@
     }
     &.disabled {
       @apply opacity-50;
+    }
+  }
+}
+
+// dark variant doesnot work with module css
+:global(.dark) {
+  .button {
+    &.outlined {
+      @apply border-prime-400 text-prime-400; 
+      &:hover, &:global(.hip-btn-selected) {
+        @apply bg-prime-100 text-prime-500 border-prime-100;
+      }
+    }
+    &.plain {
+      @apply bg-field;
     }
   }
 }

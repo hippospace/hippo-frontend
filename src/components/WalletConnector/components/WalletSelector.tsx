@@ -43,7 +43,7 @@ const WalletSelector = ({ onConnected }: { onConnected: () => any }) => {
 
   return (
     <div className="p-6 flex flex-col gap-6">
-      <div className="h6 font-bold text-black mobile:hidden">Connect your wallet</div>
+      <div className="h6 font-bold text-grey-900 mobile:hidden">Connect your wallet</div>
       <div className="flex flex-col gap-2">{renderButtonGroup}</div>
     </div>
   );

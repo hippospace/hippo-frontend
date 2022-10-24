@@ -50,7 +50,7 @@ const SwapDetail = ({
           onClick={() => setIsPriceYToX(!isPriceYToX)}>
           <span className="mr-1">{rate}</span>
           <Button variant="icon" className="mobile:hidden">
-            <ExchangeIcon className="w-4 h-4" />
+            <ExchangeIcon className="font-icon body-regular" />
           </Button>
         </div>
       )

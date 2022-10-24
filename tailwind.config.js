@@ -1,22 +1,25 @@
 const plugin = require('tailwindcss/plugin');
 
 module.exports = {
+  darkMode: 'class',
   content: ['./src/**/*.{js,jsx,ts,tsx}', './src/**/*.module.scss', './public/index.html'],
   theme: {
     extend: {
       colors: {
         grey: {
-          100: '#F8F8F8',
-          300: '#D5D5D5',
-          500: '#959595',
-          700: '#575757',
-          900: '#2D2D2D'
+          100: 'var(--hip-text-grey-100)',
+          300: 'var(--hip-text-grey-300)',
+          500: 'var(--hip-text-grey-500)',
+          700: 'var(--hip-text-grey-700)',
+          900: 'var(--hip-text-grey-900)'
         },
         prime: {
           100: '#EAE6FF',
           300: '#CDC1FF',
+          400: '#B7A6FF',
           500: '#8D78F7',
           700: '#634CD9',
+          800: '#4532A6',
           900: '#2F2273'
         },
         success: {
@@ -33,12 +36,11 @@ module.exports = {
         }
       },
       backgroundImage: {
-        home1: 'linear-gradient(0deg, #F4F1FD 0%, #FDFDFF 100%)',
-        home2: 'linear-gradient(90deg, #F8F7FF 26.08%, #F7F5FE 98.41%)',
-        swap: 'linear-gradient(0deg, #F7F5FD 0%, #FDFDFF 100%)',
-        'btn-gradient': 'linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%)',
-        'select-border': 'linear-gradient(90deg, #D483FF 86.1%, #9747FF 95.98%, #6E6CCA 105.2%)'
-      }
+        primeLight: 'linear-gradient(0deg, #F7F5FD 0%, #FDFDFF 100%)',
+        homeCard: 'var(--hip-bg-home-card)',
+        'btn-gradient': 'var(--hip-bg-btn-gradient)',
+        'select-border': 'var(--hip-bg-select-border)'
+      },
     },
     screens: {
       desktop: { max: '99999px'}, // desktop first
@@ -48,13 +50,15 @@ module.exports = {
     },
     backgroundColor: theme => ({
       ...theme('colors'),
-      secondary: '#FFFFFF',
+      primeDark: '#111111',
+      surface: 'var(--hip-bg-color-surface)',
+      field: 'var(--hip-bg-color-field)',
       transparent: 'transparent',
     }),
     boxShadow: {
       none: 'none',
       main: '0px 4px 35px rgba(0, 0, 0, 0.05)',
-      home: '-4px 8px 32px rgba(211, 207, 230, 0.4)'
+      home: 'var(--hip-shadow-home)'
     },
     borderRadius: {
       none: '0',

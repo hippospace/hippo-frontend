@@ -12,6 +12,12 @@ export enum RPCType {
   Nodereal = 'Nodereal',
   Custom = 'Custom'
 }
+
+export enum Theme {
+  Light = 'Light',
+  Dark = 'Dark',
+  Auto = 'Auto'
+}
 interface SettingsState {
   RPCEndPoint: RPCType;
   customRPCs: string[];
@@ -19,6 +25,8 @@ interface SettingsState {
   setRPCEndPoint: (rpc: RPCType) => void;
   setCustomRPCs: (rpcs: string[]) => void;
   setSelectedCustomRPCIndex: (i: number) => void;
+  theme: Theme;
+  setTheme: (m: Theme) => void;
 }
 
 const DEFAULT_RPC = RPCType.Nodereal;
@@ -39,7 +47,10 @@ export const useSettingsStore = create<SettingsState>()(
         selectedCustomRPCIndex: 0, // currently only support one custom rpc
         setRPCEndPoint: (rpc) => set((state) => ({ ...state, RPCEndPoint: rpc })),
         setCustomRPCs: (rpcs) => set((state) => ({ ...state, customRPCs: rpcs })),
-        setSelectedCustomRPCIndex: (i) => set((state) => ({ ...state, selectedCustomRPCIndex: i }))
+        setSelectedCustomRPCIndex: (i) => set((state) => ({ ...state, selectedCustomRPCIndex: i })),
+
+        theme: Theme.Light,
+        setTheme: (m) => set((state) => ({ ...state, theme: m }))
       }),
       { name: 'hippo-settings-store' }
     )
@@ -68,6 +79,27 @@ export const useRPCURL = () => {
   }
 };
 
+export const useThemeMode = () => {
+  return useSettingsStore((state) => state.theme);
+};
+
+export const useIsDarkMode = () => {
+  const theme = useThemeMode();
+  return (
+    theme === Theme.Dark ||
+    (theme === Theme.Auto && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  );
+};
+
+export const useTheme = () => {
+  const isDarkMode = useIsDarkMode();
+  if (isDarkMode) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+};
+
 const Settings = () => {
   const rpcEndpoint = useRpcEndpoint();
   const setRPCEndPointInStore = useSettingsStore((state) => state.setRPCEndPoint);
@@ -75,6 +107,9 @@ const Settings = () => {
   const setCustomRPCs = useSettingsStore((state) => state.setCustomRPCs);
   const selectedCustomRPCIndex = useSettingsStore((state) => state.selectedCustomRPCIndex);
   const setSelectedCustomRPCIndex = useSettingsStore((state) => state.setSelectedCustomRPCIndex);
+
+  const theme = useThemeMode();
+  const setDarkMode = useSettingsStore((state) => state.setTheme);
 
   const setRpcEndpoint = useCallback(
     (v: RPCType) => {
@@ -88,7 +123,7 @@ const Settings = () => {
     customRPCs[selectedCustomRPCIndex]
   );
 
-  const onChange = useCallback(
+  const setPredefinedRPC = useCallback(
     (e: RadioChangeEvent) => {
       setRpcEndpoint(e.target.value as RPCType);
     },
@@ -106,30 +141,49 @@ const Settings = () => {
 
   return (
     <div className="hippo-settings p-2 mobile:p-0">
-      <div className="h6 mb-4">RPC Endpoint</div>
-      <Radio.Group onChange={onChange} value={rpcEndpoint}>
-        <Space direction="vertical">
-          {Array.from(preSetRpcs.keys()).map((rpc, index) => {
-            return (
-              <Radio key={`preset-rpc-${index}`} className="body-medium" value={rpc}>
-                {rpc}
-              </Radio>
-            );
-          })}
-        </Space>
-      </Radio.Group>
-      <div className="flex gap-x-2 mt-2">
-        <Input
-          className={classNames({
-            'text-prime-700': rpcEndpoint === RPCType.Custom
-          })}
-          placeholder="Cutom RPC URL"
-          value={customRPC}
-          onChange={(e) => setCustomRPC(e.target.value)}
-        />
-        <Button variant="primary" size="small" onClick={switchCustomRPC}>
-          Switch
-        </Button>
+      <div className="mb-4">
+        <div className="h6 mb-2">Theme</div>
+        <Radio.Group onChange={(e) => setDarkMode(e.target.value)} value={theme}>
+          <Space direction="vertical">
+            {Object.values(Theme).map((mode, index) => {
+              return (
+                <Radio key={`preset-rpc-${index}`} className="body-medium" value={mode}>
+                  {mode}
+                </Radio>
+              );
+            })}
+          </Space>
+        </Radio.Group>
+      </div>
+      <div>
+        <div className="h6 mb-2">RPC Endpoint</div>
+        <Radio.Group onChange={setPredefinedRPC} value={rpcEndpoint}>
+          <Space direction="vertical">
+            {Array.from(preSetRpcs.keys()).map((rpc, index) => {
+              return (
+                <Radio key={`preset-rpc-${index}`} className="body-medium" value={rpc}>
+                  {rpc}
+                </Radio>
+              );
+            })}
+          </Space>
+        </Radio.Group>
+        <div className="flex gap-x-2 mt-2">
+          <div
+            className={classNames('flex-grow h-[44px] rounded-xl p-[2px]', {
+              'bg-select-border': rpcEndpoint === RPCType.Custom
+            })}>
+            <Input
+              className="w-full h-full"
+              placeholder="Cutom RPC URL"
+              value={customRPC}
+              onChange={(e) => setCustomRPC(e.target.value)}
+            />
+          </div>
+          <Button variant="primary" size="small" onClick={switchCustomRPC}>
+            Switch
+          </Button>
+        </div>
       </div>
     </div>
   );

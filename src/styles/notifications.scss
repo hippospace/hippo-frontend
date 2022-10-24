@@ -1,5 +1,6 @@
 .ant-notification {
   .ant-notification-notice {
+    @apply bg-surface;
     &::before {
       content: '';
       width: 16px;
@@ -22,7 +23,7 @@
     }
     @apply rounded-[16px];
     .ant-notification-notice-message {
-      @apply text-grey-900 h6 mb-2;
+      @apply text-grey-900 h6 mb-2 leading-[24px];
     }
     .ant-notification-notice-description {
       @apply text-grey-700 body-medium;

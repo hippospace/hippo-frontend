@@ -15,6 +15,7 @@ import Card from 'components/Card';
 import { numberGroupFormat, numberOfAbbr } from 'components/PositiveFloatNumInput/numberFormats';
 import styles from './VolumeChart.module.scss';
 import classNames from 'classnames';
+import { useIsDarkMode } from 'components/Settings';
 
 const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -60,6 +61,8 @@ const VolumeChart = ({ data = [] }: { data: VolumeData[] }) => {
     setHoverIndex(null);
   }, []);
 
+  const isDark = useIsDarkMode();
+
   return (
     <div className={classNames(styles.volumeChart, 'w-full h-[540px]')} ref={containerRef}>
       <ResponsiveContainer width="100%" height="100%">
@@ -97,7 +100,11 @@ const VolumeChart = ({ data = [] }: { data: VolumeData[] }) => {
             {data.map((entry, index) => (
               <Cell
                 cursor="auto"
-                fill={index !== hoverIndex ? '#CDC1FF' : '#8D78F7'}
+                fill={
+                  (index !== hoverIndex && !isDark) || (index === hoverIndex && isDark)
+                    ? '#CDC1FF'
+                    : '#8D78F7'
+                }
                 key={`cell-${index}`}
               />
             ))}

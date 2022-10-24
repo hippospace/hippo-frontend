@@ -18,6 +18,7 @@ body {
 
   font-size: 16px;
   line-height: 1.2;
+  @apply text-grey-900;
 }
 
 code {
@@ -50,5 +51,37 @@ code {
   
   .scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-grey-500;
+  }
+}
+
+:root {
+  --hip-text-grey-100: #F8F8F8;
+  --hip-text-grey-300: #D5D5D5;
+  --hip-text-grey-500: #959595;
+  --hip-text-grey-700: #575757;
+  --hip-text-grey-900: #2D2D2D;
+
+  --hip-bg-color-surface: #FFF;
+  --hip-bg-color-field: var(--hip-text-grey-100);
+  --hip-bg-btn-gradient: linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%);
+  --hip-bg-home-card: linear-gradient(90deg, #F8F7FF 26.08%, #F7F5FE 98.41%);
+  --hip-bg-select-border: linear-gradient(90deg, #D483FF 86.1%, #9747FF 95.98%, #6E6CCA 105.2%);
+
+  --hip-shadow-home: -4px 8px 32px rgba(211, 207, 230, 0.4);
+
+  &.dark {
+    --hip-text-grey-900: #F8F8F8;
+    --hip-text-grey-700: #D5D5D5;
+    --hip-text-grey-500: #959595;
+    --hip-text-grey-300: #575757;
+    --hip-text-grey-100: #2D2D2D;
+
+    --hip-bg-color-surface: #2C2D3C;
+    --hip-bg-color-field: #383a48;
+    --hip-bg-btn-gradient: linear-gradient(90.74deg, #4393F1 -31.76%, #651BDA 136.23%);
+    --hip-bg-home-card: linear-gradient(90.32deg, rgba(243, 241, 255, 0.03) 0.16%, rgba(241, 239, 254, 0.0255) 96.9%);
+    // --hip-bg-select-border: linear-gradient(90.74deg, #4393F1 -31.76%, #651BDA 136.23%);
+
+    --hip-shadow-home: 0px 4px 8px rgba(208, 207, 254, 0.2);
   }
 }
