@@ -6,6 +6,7 @@ import openNotification, { openErrorNotification } from 'utils/notifications';
 import { isValidUrl } from 'utils/utility';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import Hint from 'components/Hint';
 
 export enum RPCType {
   Aptos = 'Aptos',
@@ -14,9 +15,9 @@ export enum RPCType {
 }
 
 export enum Theme {
+  Auto = 'Auto',
   Light = 'Light',
-  Dark = 'Dark',
-  Auto = 'Auto'
+  Dark = 'Dark'
 }
 interface SettingsState {
   RPCEndPoint: RPCType;
@@ -49,7 +50,7 @@ export const useSettingsStore = create<SettingsState>()(
         setCustomRPCs: (rpcs) => set((state) => ({ ...state, customRPCs: rpcs })),
         setSelectedCustomRPCIndex: (i) => set((state) => ({ ...state, selectedCustomRPCIndex: i })),
 
-        theme: Theme.Light,
+        theme: Theme.Auto,
         setTheme: (m) => set((state) => ({ ...state, theme: m }))
       }),
       { name: 'hippo-settings-store' }
@@ -148,7 +149,7 @@ const Settings = () => {
             {Object.values(Theme).map((mode, index) => {
               return (
                 <Radio key={`preset-rpc-${index}`} className="body-medium" value={mode}>
-                  {mode}
+                  {mode} {mode === Theme.Auto && <Hint content="Will follow your OS settings" />}
                 </Radio>
               );
             })}

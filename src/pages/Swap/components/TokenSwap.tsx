@@ -296,7 +296,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 600; // seconds
+const REFRESH_INTERVAL = 15; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -643,7 +643,7 @@ const TokenSwap = () => {
             trashButtonContainerWidth={cardXPadding}
           />
           <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
-            <SwapIcon />
+            <SwapIcon className="font-icon text-[40px] text-grey-700" />
           </Button>
           <div className="body-bold mb-2 flex">
             <div className="mr-auto">Receive</div>
