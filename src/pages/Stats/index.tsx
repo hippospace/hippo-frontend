@@ -111,7 +111,6 @@ const Stats = () => {
   }, [statsPeriod, volume, volumeScale]);
 
   const volumeInPeriod = useMemo(() => {
-    // TODO: change to realtime value
     if (!volume) return null;
     const dataEndTime = volume.data_end_time.toJsNumber();
     if (statsPeriod === '24H') {
@@ -140,10 +139,9 @@ const Stats = () => {
   }, [statsPeriod, volume, volumeScale]);
 
   const volumeTotal = useMemo(() => {
-    // TODO: change to actual one
     if (!volume) return null;
     return volume.total_volume.toJsNumber() / volumeScale;
-  }, [statsPeriod, volume, volumeScale]);
+  }, [volume, volumeScale]);
 
   const switchToOtherPeriod = useCallback((v: string | number) => {
     setStatsPeriod(v as Peroid);
