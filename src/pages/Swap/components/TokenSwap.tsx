@@ -10,6 +10,7 @@ import useAptosWallet from 'hooks/useAptosWallet';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import classNames from 'classnames';
 import { Drawer, Tooltip } from 'antd';
+import VirtualList from 'rc-virtual-list';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
@@ -111,7 +112,7 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
         />
         <Card
           className={classNames(
-            'absolute top-9 w-[400px] -left-[420px] px-8 laptop:w-[368px] laptop:-left-[calc(368px+20px)] py-8 laptop:px-4 tablet:hidden scale-[50%] origin-top-right opacity-0 transition-all',
+            'absolute top-9 w-[400px] -left-[420px] px-8 laptop:w-[368px] laptop:-left-[calc(368px+20px)] py-8 laptop:px-4 tablet:hidden scale-[50%] origin-top-right opacity-0 transition-all transform-gpu will-change-transform',
             { '!opacity-100 !scale-100': isSettingsOpen }
           )}>
           <SwapSetting onClose={() => setIsSettingsOpen(false)} />
@@ -228,8 +229,8 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   const rowsWhenMore = 4;
   const rowsOnDesktop = 4;
   const height = isDesktopScreen
-    ? `${Math.min(rowsOnDesktop, routes.length) * routeRowHeight}px`
-    : `${Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight}px`;
+    ? Math.min(rowsOnDesktop, routes.length) * routeRowHeight
+    : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight;
 
   // const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
   return (
@@ -238,6 +239,24 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
         <div>Total {routes.length} routes available</div>
         <div>{refreshButton}</div>
       </div>
+      <VirtualList
+        className="pr-1 scrollbar"
+        height={height}
+        itemHeight={routeRowHeight}
+        data={routes}
+        itemKey={(item) => serializeRouteQuote(item)}>
+        {(ro, index) => (
+          <div onClick={() => onRouteSelected(ro, index)}>
+            <RouteRow
+              route={ro}
+              isSelected={ro === routeSelected}
+              isBestPrice={index === 0}
+              simuResult={simuResults[index]}
+            />
+          </div>
+        )}
+      </VirtualList>
+      {/*
       <div
         className={classNames('overflow-x-hidden overflow-y-auto pr-1', {
           'no-scrollbar': !isDesktopScreen,
@@ -257,24 +276,8 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
               </div>
             );
           })}
-        {/* isRefreshing && (
-          <div className="h-full flex flex-col justify-around">
-            {new Array(rows).fill(1).map((_, index) => (
-              <div
-                key={`ske-${index}`}
-                style={{ height: `${routeRowHeight}px` }}
-                className="py-1 leading-none space-y-1">
-                <div>
-                  <Skeleton width={'80%'} />
-                </div>
-                <div>
-                  <Skeleton />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) */}
       </div>
+      */}
       {!isDesktopScreen && routes.length > rowsWhenLess && (
         <div className="flex label-small-bold text-grey-500 mt-2 justify-between">
           <div
@@ -663,7 +666,7 @@ const TokenSwap = () => {
           )}
           <Card
             className={classNames(
-              'tablet:hidden absolute top-0 w-[420px] right-[-440px] px-4 laptop:w-[368px] laptop:right-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 -translate-x-[30%] -z-10',
+              'tablet:hidden absolute top-0 w-[420px] right-[-440px] px-4 laptop:w-[368px] laptop:right-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 -translate-x-[30%] -z-10 transform-gpu will-change-transform',
               { 'opacity-100 !translate-x-0': allRoutes.length > 0 && routeSelected }
             )}>
             <RoutesAvailable
