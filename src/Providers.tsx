@@ -11,6 +11,8 @@ import {
   MartianWalletAdapter,
   PontemWalletAdapter,
   RiseWalletAdapter,
+  NightlyWalletAdapter,
+  FewchaWalletAdapter,
   BitkeepWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
@@ -41,7 +43,9 @@ const Providers: React.FC<TProps> = (props: TProps) => {
       new MartianWalletAdapter(),
       new AptosWalletAdapter(),
       new PontemWalletAdapter(),
-      new BitkeepWalletAdapter()
+      new FewchaWalletAdapter(),
+      new BitkeepWalletAdapter(),
+      new NightlyWalletAdapter()
     ],
     []
   );
