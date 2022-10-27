@@ -7,7 +7,7 @@ import { TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
-import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { AptosClient, HexString, Types } from 'aptos';
 import {
   openErrorNotification,
@@ -26,12 +26,12 @@ interface HippoClientContextType {
   getTokenStoreByFullName: (fullName: string) => stdlib.Coin.CoinStore | undefined | false;
   getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
   requestSwapByRoute: (
-    routeAndQuote: RouteAndQuote,
+    routeAndQuote: IApiRouteAndQuote,
     slipTolerance: number,
     options?: Partial<Types.SubmitTransactionRequest>
   ) => Promise<boolean>;
   simulateSwapByRoute: (
-    routeAndQuote: RouteAndQuote,
+    routeAndQuote: IApiRouteAndQuote,
     slipTolerance: number,
     options?: OptionTransaction
   ) => Promise<Types.UserTransaction>;
@@ -196,7 +196,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   const requestSwapByRoute = useCallback(
-    async (routeAndQuote: RouteAndQuote, slipTolerance: number, options = {}) => {
+    async (routeAndQuote: IApiRouteAndQuote, slipTolerance: number, options = {}) => {
       let success = false;
       try {
         if (!activeWallet) throw new Error('Please connect wallet first');
@@ -246,7 +246,11 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   const simulateSwapByRoute = useCallback(
-    async (routeAndQuote: RouteAndQuote, slipTolerance: number, options?: OptionTransaction) => {
+    async (
+      routeAndQuote: IApiRouteAndQuote,
+      slipTolerance: number,
+      options?: OptionTransaction
+    ) => {
       try {
         const input = routeAndQuote.quote.inputUiAmt;
         const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);

@@ -1,4 +1,4 @@
-import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import classNames from 'classnames';
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
@@ -14,7 +14,7 @@ const SwapDetail = ({
   toToken,
   className = ''
 }: {
-  routeAndQuote: RouteAndQuote;
+  routeAndQuote: IApiRouteAndQuote;
   fromToken: CoinInfo;
   toToken: CoinInfo;
   className?: string;

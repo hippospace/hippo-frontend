@@ -1,7 +1,7 @@
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AdjustIcon, ArrowRight, MoreArrowDown, RefreshIcon, SwapIcon } from 'resources/icons';
+import { AdjustIcon, MoreArrowDown, RefreshIcon, SwapIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
 import CurrencyInput from './CurrencyInput';
 import SwapDetail from './SwapDetail';
@@ -17,16 +17,18 @@ import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useInterval } from 'usehooks-ts';
 import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
-import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { openErrorNotification } from 'utils/notifications';
 // import Skeleton from 'components/Skeleton';
 import { Types, ApiError } from 'aptos';
+import TokenSteps from './TokenSteps';
 
 interface IRoutesProps {
   className?: string;
-  routes: AggregatorTypes.RouteAndQuote[];
-  routeSelected: AggregatorTypes.RouteAndQuote | null;
-  onRouteSelected: (route: AggregatorTypes.RouteAndQuote, index: number) => void;
+  availableRoutesCount: number;
+  routes: IApiRouteAndQuote[];
+  routeSelected: IApiRouteAndQuote | null;
+  onRouteSelected: (route: IApiRouteAndQuote, index: number) => void;
   isDesktopScreen?: boolean;
   isRefreshing?: boolean;
   refreshButton?: ReactNode;
@@ -34,16 +36,16 @@ interface IRoutesProps {
 }
 
 interface IRouteRowProps {
-  route: AggregatorTypes.RouteAndQuote;
+  route: IApiRouteAndQuote;
   isSelected?: boolean;
   isBestPrice: boolean;
   simuResult?: Types.UserTransaction;
 }
 
-const serializeRouteQuote = (rq: RouteAndQuote) => {
-  return `${rq.quote.inputUiAmt}:${rq.route.steps
-    .map((s) => s.pool.dexType)
-    .join('x')}:${rq.route.tokens.map((t) => t.symbol).join('->')}`;
+const serializeRouteQuote = (rq: IApiRouteAndQuote) => {
+  return `${rq.quote.inputUiAmt}:${rq.route.steps.map((s) => s.dexType).join('x')}:${rq.route.tokens
+    .map((t) => t.symbol)
+    .join('->')}`;
 };
 
 const SettingsButton = ({
@@ -140,19 +142,10 @@ const RouteRow: React.FC<IRouteRowProps> = ({
   simuResult
 }) => {
   const swapDexs = route.route.steps
-    .map((s) => AggregatorTypes.DEX_TYPE_NAME[s.pool.dexType])
+    .map((s) => AggregatorTypes.DEX_TYPE_NAME[s.dexType])
     .join(' x ');
-  const swapRoutes = [
-    route.route.steps[0].xCoinInfo.symbol,
-    ...route.route.steps.map((s, index) => (
-      <span key={`r-${index}`}>
-        <ArrowRight className="font-icon inline-block mx-[2px]" />
-        {s.yCoinInfo.symbol}
-      </span>
-    ))
-  ];
   const { values } = useFormikContext<ISwapSettings>();
-  const toToken = route.route.steps.slice(-1)[0].yCoinInfo;
+  const toToken = route.route.yCoinInfo;
   const outputUiAmt = route.quote.outputUiAmt;
   const outputValue = 0; // TOD0: calculate the output value
   const [tokenAmountFormatter] = useTokenAmountFormatter();
@@ -180,7 +173,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
             <div className="body-bold">{outputFormatted}</div>
           </div>
           <div className="flex gap-x-4 justify-between items-center label-large-bold text-grey-500 laptop:label-small-bold">
-            <div className="mr-auto truncate">{swapRoutes}</div>
+            <TokenSteps className="mr-auto truncate" tokens={route.route.tokens} />
             <div className="whitespace-nowrap">
               {simuResult?.success && (
                 <Tooltip
@@ -216,6 +209,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
 
 const RoutesAvailable: React.FC<IRoutesProps> = ({
   routes,
+  availableRoutesCount,
   onRouteSelected,
   routeSelected,
   className = '',
@@ -236,7 +230,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   return (
     <div className={className}>
       <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
-        <div>Total {routes.length} routes available</div>
+        <div>Total {availableRoutesCount} routes available</div>
         <div>{refreshButton}</div>
       </div>
       <VirtualList
@@ -311,9 +305,10 @@ const TokenSwap = () => {
   const toSymbol = toToken?.symbol;
 
   const fromUiAmt = values.currencyFrom?.amount;
-  const [allRoutes, setAllRoutes] = useState<AggregatorTypes.RouteAndQuote[]>([]);
-  const [routeSelected, setRouteSelected] = useState<AggregatorTypes.RouteAndQuote | null>(null);
+  const [allRoutes, setAllRoutes] = useState<IApiRouteAndQuote[]>([]);
+  const [routeSelected, setRouteSelected] = useState<IApiRouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
+  const [availableRoutesCount, setAvailableRoutesCount] = useState(0);
 
   const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
   const [hasRoute, setHasRoute] = useState(false);
@@ -361,16 +356,16 @@ const TokenSwap = () => {
   );
 
   const setRoute = useCallback(
-    (ro: AggregatorTypes.RouteAndQuote | null) => {
+    (ro: IApiRouteAndQuote | null) => {
       setRouteSelected(ro);
       setFieldValue('quoteChosen', ro);
     },
     [setFieldValue]
   );
 
-  const setRouteFromRoutes = useCallback(
-    (routes: AggregatorTypes.RouteAndQuote[]) => {
-      let manuallySelectedRoute: RouteAndQuote;
+  const setSelectedRouteFromRoutes = useCallback(
+    (routes: IApiRouteAndQuote[]) => {
+      let manuallySelectedRoute: IApiRouteAndQuote;
       if (routeSelectedSerialized) {
         manuallySelectedRoute = routes.find(
           (r) => serializeRouteQuote(r) === routeSelectedSerialized
@@ -380,6 +375,13 @@ const TokenSwap = () => {
     },
     [routeSelectedSerialized, setRoute]
   );
+
+  const resetAllRoutes = useCallback(() => {
+    setAllRoutes([]);
+    setRoute(null);
+    setAvailableRoutesCount(0);
+    setRouteSelectedSerialized('');
+  }, [setRoute]);
 
   // To benchmark the key press debounce
   const lastFetchTs = useRef(0);
@@ -398,39 +400,42 @@ const TokenSwap = () => {
           lastFetchTs.current = Date.now();
         }
 
-        let routes: RouteAndQuote[] | AggregatorTypes.TradeRoute[] = [];
         if (hippoAgg && fromSymbol && toSymbol) {
           setIsRefreshingRoutes(isReload);
 
           if (fromUiAmt) {
             const maxSteps = 3;
-            routes = await hippoAgg.getQuotes(fromUiAmt, fromToken, toToken, maxSteps, isReload);
-            routes = routes.filter((r) => r.quote.outputUiAmt > 0);
+            const { routes, allRoutesCount } = await hippoAgg.getQuotesUni(
+              fromUiAmt,
+              fromToken,
+              toToken,
+              maxSteps,
+              isReload,
+              false,
+              false
+            );
             // check if parameters are not stale
-            if (
-              routes.length > 0 &&
-              !ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)
-            ) {
-              setAllRoutes(routes);
-              setRouteFromRoutes(routes);
-              if (isReload) {
-                // restart interval timer
-                setTimePassedAfterRefresh(0);
-                // random is used to make useInterval restart
-                setRefreshRoutesTimerTick(1_000 + 0.00001 * Math.random());
+            if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
+              if (routes.length > 0) {
+                setAllRoutes(routes);
+                setSelectedRouteFromRoutes(routes);
+                setAvailableRoutesCount(allRoutesCount);
+                if (isReload) {
+                  // restart interval timer
+                  setTimePassedAfterRefresh(0);
+                  // random is used to make useInterval restart
+                  setRefreshRoutesTimerTick(1_000 + 0.00001 * Math.random());
+                }
+              } else {
+                resetAllRoutes();
               }
+              setHasRoute(routes.length > 0);
             }
           } else {
-            routes = hippoAgg.getAllRoutes(fromToken, toToken);
+            setHasRoute(hippoAgg.getAllRoutes(fromToken, toToken).length > 0);
+            resetAllRoutes();
+            setRefreshRoutesTimerTick(null); // stop timer
           }
-        }
-
-        setHasRoute(routes.length > 0);
-        if (!fromUiAmt || routes.length === 0) {
-          setAllRoutes([]);
-          setRoute(null);
-          setRouteSelectedSerialized('');
-          setRefreshRoutesTimerTick(null); // stop timer
         }
       } catch (error) {
         console.log('Fetch swap routes:', error);
@@ -463,9 +468,9 @@ const TokenSwap = () => {
       fromUiAmt,
       hippoAgg,
       ifInputParametersDifferentWithLatest,
+      resetAllRoutes,
       setFieldValue,
-      setRoute,
-      setRouteFromRoutes,
+      setSelectedRouteFromRoutes,
       toSymbol,
       toToken,
       values.currencyFrom
@@ -600,7 +605,7 @@ const TokenSwap = () => {
   }, [preRouteSelected, routeSelected]);
 
   const onUserSelectRoute = useCallback(
-    (ro: RouteAndQuote, index: number) => {
+    (ro: IApiRouteAndQuote, index: number) => {
       setRoute(ro);
       setRouteSelectedSerialized(index === 0 ? '' : serializeRouteQuote(ro));
     },
@@ -665,6 +670,7 @@ const TokenSwap = () => {
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
+                availableRoutesCount={availableRoutesCount}
                 routes={allRoutes}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
@@ -679,6 +685,7 @@ const TokenSwap = () => {
               { 'opacity-100 !translate-x-0': allRoutes.length > 0 && routeSelected }
             )}>
             <RoutesAvailable
+              availableRoutesCount={availableRoutesCount}
               isDesktopScreen={true}
               routes={allRoutes}
               routeSelected={routeSelected}
