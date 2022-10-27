@@ -8,20 +8,26 @@ import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Stats from 'pages/Stats';
 
 export type TRoute = RouteObject & {
-  name: 'Home' | 'Pools' | 'Swap' | '404' | 'Faucet' | 'Stats';
+  name: 'Home' | 'Pools' | 'Swap' | '404' | 'Faucet' | 'Stats' | '_Swap';
   hidden?: boolean; //to hide the visibility in header menu
 };
 
 export const routes: TRoute[] = [
   {
-    path: '',
+    path: 'home',
     name: 'Home',
     element: <Home />
   },
   {
-    path: 'swap',
+    path: '',
     name: 'Swap',
     element: <Swap />
+  },
+  {
+    path: 'Swap',
+    hidden: true,
+    name: '_Swap',
+    element: <Navigate to={'/'} replace={true} />
   },
   {
     path: 'faucet',
