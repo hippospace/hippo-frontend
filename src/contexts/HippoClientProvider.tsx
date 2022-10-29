@@ -127,7 +127,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     (async () => {
       try {
         // Important: load full pool list
-        await hippoAgg.updatePoolLists();
+        // await hippoAgg.updatePoolLists();
       } catch (err) {
         console.log('Update Hippo trade aggregator failed', err);
         errorHandler(err);

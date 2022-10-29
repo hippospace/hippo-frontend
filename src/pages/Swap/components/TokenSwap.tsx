@@ -299,7 +299,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 15; // seconds
+const REFRESH_INTERVAL = 30; // seconds
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -404,8 +404,6 @@ const TokenSwap = () => {
 
           if (fromUiAmt) {
             const maxSteps = 3;
-            console.log('from token', fromToken);
-            console.log('To token', toToken);
             routes = await hippoAgg.getQuotes(fromUiAmt, fromToken, toToken, maxSteps, isReload);
             routes = routes.filter((r) => r.quote.outputUiAmt > 0);
             // check if parameters are not stale
@@ -519,7 +517,7 @@ const TokenSwap = () => {
 
   const timePassedRef = useRef(0);
   timePassedRef.current = timePassedAfterRefresh;
-  const inputTriggerRefreshDelay = 10;
+  const inputTriggerRefreshDelay = 15;
   useEffect(() => {
     fetchSwapRoutes(!refreshRoutesTimerTick || timePassedRef.current > inputTriggerRefreshDelay);
   }, [fetchSwapRoutes, refreshRoutesTimerTick]);
