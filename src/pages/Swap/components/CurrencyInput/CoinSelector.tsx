@@ -9,7 +9,7 @@ import CoinRow from './CoinRow';
 
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
-import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 import { TokenBalance } from 'types/hippo';
 
 interface TProps {
@@ -26,7 +26,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const tokenList = useSelector(getTokenList);
   const commonCoins = tokenList.filter((token) => {
-    return ['APT', 'WBTC', 'WETH', 'USDT', 'USDC'].includes(token.symbol.str());
+    return ['APT', 'WBTC', 'WETH', 'USDT', 'USDC'].includes(token.symbol);
   });
   const [filter, setFilter] = useState<string>('');
   const { hippoWallet } = useHippoClient();
@@ -36,7 +36,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     (token: TokenInfo) => {
       const otherActionType: TProps['actionType'] =
         actionType === 'currencyFrom' ? 'currencyTo' : 'currencyFrom';
-      if (token.symbol.str() === values[otherActionType]?.token?.symbol.str()) {
+      if (token.symbol === values[otherActionType]?.token?.symbol) {
         setFieldValue(otherActionType, {
           ...values[otherActionType],
           token: values[actionType]?.token
@@ -53,13 +53,13 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
 
   const getFilteredTokenListWithBalance = useCallback(() => {
     let currentTokenList = tokenList
-      ?.sort((a, b) => (a.symbol.str() <= b.symbol.str() ? -1 : 1))
+      ?.sort((a, b) => (a.symbol <= b.symbol ? -1 : 1))
       .map((t) => {
-        const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol.str()];
+        const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol];
         const balance = !hippoWallet
           ? -1
           : tokenStore
-          ? tokenStore.coin.value.toJsNumber() / Math.pow(10, t.decimals.toJsNumber())
+          ? tokenStore.coin.value.toJsNumber() / Math.pow(10, t.decimals)
           : 0;
         return {
           token: t,
@@ -70,9 +70,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
 
     if (filter) {
       currentTokenList = currentTokenList?.filter((token) => {
-        const keysForFilter = [token.token.name.str(), token.token.symbol.str()]
-          .join(',')
-          .toLowerCase();
+        const keysForFilter = [token.token.name, token.token.symbol].join(',').toLowerCase();
         return keysForFilter.includes(filter);
       });
     }
@@ -90,7 +88,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
           {commonCoins.map((coin) => (
             <CommonCoinButton
               coin={coin}
-              key={`common-coin-${coin.symbol.str()}`}
+              key={`common-coin-${coin.symbol}`}
               onClickToken={() => onSelectToken(coin)}
             />
           ))}
@@ -123,12 +121,12 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
           {tokenListBalance && (
             <List
               className="overflow-y-scroll no-scrollbar border-0 h-full"
-              rowKey={(item) => `list-row-${(item as TokenInfo).symbol.str()}`}>
+              rowKey={(item) => `list-row-${(item as TokenInfo).symbol}`}>
               <VirtualList
                 data={tokenListBalance || []}
                 height={listHeight}
                 itemHeight={73}
-                itemKey={(item) => `list-item-${item.token.symbol.str()}`}>
+                itemKey={(item) => `list-item-${item.token.symbol}`}>
                 {(item) => (
                   <List.Item
                     className="!border-b-0 !px-0 cursor-pointer p-1"

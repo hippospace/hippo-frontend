@@ -9,7 +9,7 @@ import { devtools, persist } from 'zustand/middleware';
 
 export enum RPCType {
   Aptos = 'Aptos',
-  Nodereal = 'Nodereal',
+  // Nodereal = 'Nodereal',
   Custom = 'Custom'
 }
 interface SettingsState {
@@ -21,13 +21,15 @@ interface SettingsState {
   setSelectedCustomRPCIndex: (i: number) => void;
 }
 
-const DEFAULT_RPC = RPCType.Nodereal;
+const DEFAULT_RPC = RPCType.Aptos;
 
 const preSetRpcs = new Map();
+/*
 preSetRpcs.set(
   RPCType.Nodereal,
   'https://aptos-mainnet.nodereal.io/v1/3e18914c169e4dfaa5824895a8d1def9/v1'
 );
+*/
 preSetRpcs.set(RPCType.Aptos, '');
 
 export const useSettingsStore = create<SettingsState>()(

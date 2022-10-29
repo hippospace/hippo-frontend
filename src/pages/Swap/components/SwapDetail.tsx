@@ -6,16 +6,17 @@ import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useState } from 'react';
 import { ExchangeIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
+import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 
 const SwapDetail = ({
   routeAndQuote,
-  fromSymbol,
-  toSymbol,
+  fromToken,
+  toToken,
   className = ''
 }: {
   routeAndQuote: RouteAndQuote;
-  fromSymbol: string;
-  toSymbol: string;
+  fromToken: CoinInfo;
+  toToken: CoinInfo;
   className?: string;
 }) => {
   const { values: swapSettings } = useFormikContext<ISwapSettings>();
@@ -23,11 +24,11 @@ const SwapDetail = ({
   const [tokenAmountFormatter] = useTokenAmountFormatter();
 
   const outputUiAmt = routeAndQuote.quote.outputUiAmt;
-  const output = `${tokenAmountFormatter(outputUiAmt, toSymbol)} ${toSymbol}`;
+  const output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
   const minimum = `${tokenAmountFormatter(
     outputUiAmt * (1 - swapSettings.slipTolerance / 100),
-    toSymbol
-  )} ${toSymbol}`;
+    toToken
+  )} ${toToken.symbol}`;
   const priceImpact =
     (routeAndQuote.quote.priceImpact || 0) >= 0.0001
       ? `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`
@@ -38,8 +39,10 @@ const SwapDetail = ({
     !avgPrice || avgPrice === Infinity
       ? 'n/a'
       : isPriceYToX
-      ? `1 ${fromSymbol} ≈ ${tokenAmountFormatter(avgPrice, toSymbol)} ${toSymbol}`
-      : `1 ${toSymbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromSymbol)} ${fromSymbol}`;
+      ? `1 ${fromToken.symbol} ≈ ${tokenAmountFormatter(avgPrice, toToken)} ${toToken.symbol}`
+      : `1 ${toToken.symbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromToken)} ${
+          fromToken.symbol
+        }`;
 
   const details = [
     {

@@ -13,11 +13,11 @@ import { getTokenList } from 'modules/swap/reducer';
 import classNames from 'classnames';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import useDebouncedCallback from 'hooks/useDebouncedCallback';
-import { CoinInfo as TokenInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import Button from 'components/Button';
 import Skeleton from 'components/Skeleton';
+import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -49,8 +49,8 @@ const CoinSelectButton = ({
       {token?.symbol ? (
         <>
           <div className="flex gap-2 items-center">
-            <CoinIcon logoSrc={token.logo_url.str()} />
-            {token.symbol.str()}
+            <CoinIcon logoSrc={token.logo_url} />
+            {token.symbol}
           </div>
           <CaretIcon className="font-icon text-grey-300" />
         </>
@@ -76,8 +76,8 @@ const CurrencyInput: React.FC<TProps> = ({
   const { connected } = useWallet();
 
   const selectedCurrency = values[actionType];
-  const selectedSymbol = selectedCurrency?.token?.symbol.str();
-  const [uiBalance, isReady] = useTokenBalane(selectedSymbol);
+  const selectedToken = selectedCurrency?.token;
+  const [uiBalance, isReady] = useTokenBalane(selectedToken);
   const tokenList = useSelector(getTokenList);
   const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
 
@@ -128,7 +128,7 @@ const CurrencyInput: React.FC<TProps> = ({
           ref={inputRef}
           min={0}
           max={1e11}
-          maxDecimals={values[actionType]?.token?.decimals.toJsNumber() || 9}
+          maxDecimals={values[actionType]?.token?.decimals || 9}
           isDisabled={actionType === 'currencyTo' || isDisableAmountInput}
           placeholder="0.00"
           className="grow h6 font-[900] bg-transparent text-right pr-0 pl-1"
@@ -162,7 +162,7 @@ const CurrencyInput: React.FC<TProps> = ({
                   });
                 }
               }}>
-              {tokenAmountFormatter(uiBalance, selectedSymbol)}
+              {tokenAmountFormatter(uiBalance, selectedToken)}
             </div>
           )}
           {!isReady && <Skeleton width={30} />}

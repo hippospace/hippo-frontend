@@ -1,4 +1,4 @@
-import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
+import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 import { Types } from 'aptos';
 
 export type TTransaction = {

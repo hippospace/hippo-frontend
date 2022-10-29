@@ -1,14 +1,13 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { coinListClient, hippoTradeAggregator, hippoWalletClient } from 'config/hippoClients';
-import { HippoWalletClient, stdlib, CoinListClient } from '@manahippo/hippo-sdk';
-import { TradeAggregator } from '@manahippo/hippo-sdk/dist/aggregator/aggregator';
+import { HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
+import { TradeAggregator } from '@manahippo/hippo-sdk';
+import { CoinListClient, RawCoinInfo as CoinInfo, NetworkType } from '@manahippo/coin-list';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
 import { RouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
-import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import { AptosClient, HexString, Types } from 'aptos';
 import {
   openErrorNotification,
@@ -19,12 +18,12 @@ import {
 import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
 import { OptionTransaction, simulatePayloadTxAndLog, SimulationKeys } from '@manahippo/move-to-ts';
 import { UserTransaction } from 'aptos/src/generated';
+import { debounce } from 'lodash';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
   hippoAgg?: TradeAggregator;
-  tokenStores?: Record<string, stdlib.Coin.CoinStore>;
-  tokenInfos?: Record<string, CoinInfo>;
+  getTokenStoreByFullName: (fullName: string) => stdlib.Coin.CoinStore | undefined | false;
   getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
   requestSwapByRoute: (
     routeAndQuote: RouteAndQuote,
@@ -45,35 +44,32 @@ interface TProviderProps {
   children: ReactNode;
 }
 
+const errorHandler = debounce(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (_err: any) => {
+    // store.dispatch(commonActions.SET_RESOURCES_NOT_FOUND(true));
+    openErrorNotification({ detail: 'Resource not found or loaded' });
+    throw _err;
+  },
+  1000,
+  { leading: false, trailing: true }
+);
+
 const HippoClientContext = createContext<HippoClientContextType>({} as HippoClientContextType);
 
 const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const { activeWallet /*, connected*/ } = useAptosWallet();
   const { signAndSubmitTransaction, wallet /*, network*/ } = useWallet();
   const [hippoWallet, setHippoWallet] = useState<HippoWalletClient>();
-  const [coinListCli, setCoinListCli] = useState<CoinListClient>();
-  const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
+  // const [coinListCli, setCoinListCli] = useState<CoinListClient>();
+  // const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
   const [refreshWalletClient, setRefreshWalletClient] = useState(false);
   const [lastUpdateVersion, setLastUpdateVersion] = useState(undefined);
   const [transaction, setTransaction] = useState<TTransaction>();
-  const [tokenStores, setTokenStores] = useState<Record<string, stdlib.Coin.CoinStore>>();
-  const [tokenInfos, setTokenInfos] = useState<Record<string, CoinInfo>>();
   const dispatch = useDispatch();
 
-  /*
-  // detect 
-  useEffect(() => {
-    const currentNetwork = process.env.REACT_APP_CURRENT_NETWORK;
-    if (connected && !new RegExp(currentNetwork, 'i').test(network?.name)) {
-      openErrorNotification({
-        detail: `Your wallet network is ${network.name} mismatched with the network of the site: ${currentNetwork}. This might cause transaction failures`,
-        title: 'Wallet Network Mismatch'
-      });
-    }
-  }, [connected, network?.name]);
-  */
-
   const { networkCfg } = useNetworkConfiguration();
+
   const aptosClient = useMemo(
     () =>
       new AptosClient(networkCfg.fullNodeUrl, {
@@ -83,26 +79,61 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [networkCfg.fullNodeUrl]
   );
 
+  const coinListCli = useMemo(
+    () => new CoinListClient(networkCfg.name as NetworkType),
+    [networkCfg.name]
+  );
+  useEffect(() => {
+    (async () => {
+      try {
+        // Important: load full coin list
+        await coinListCli.update(aptosClient);
+      } catch (err) {
+        console.log('Update coin list client failed', err);
+        errorHandler(err);
+      }
+    })();
+  }, [aptosClient, coinListCli]);
+
   const getHippoWalletClient = useCallback(
     async (version: undefined | number | bigint = undefined) => {
-      if (activeWallet) {
-        const client = await hippoWalletClient(activeWallet, networkCfg, aptosClient, version);
-        await client?.refreshStores();
-        setHippoWallet(client);
-      } else {
-        setHippoWallet(undefined);
+      try {
+        if (activeWallet) {
+          const client = new HippoWalletClient(aptosClient, activeWallet, networkCfg, coinListCli);
+          await client?.refreshStores(version);
+          setHippoWallet(client);
+        } else {
+          setHippoWallet(undefined);
+        }
+      } catch (err) {
+        if (err.errorCode === 'account_not_found') {
+          openErrorNotification({
+            detail: "Cann't find your account. Please fund your account first."
+          });
+          return;
+        }
+        console.log('Get hippo wallet client failed', err);
+        errorHandler(err);
       }
     },
-    [activeWallet, aptosClient, networkCfg]
+    [activeWallet, aptosClient, coinListCli, networkCfg]
   );
 
-  const getHippoTradeAggregator = useCallback(async () => {
-    setHippoAgg(await hippoTradeAggregator(aptosClient));
-  }, [aptosClient]);
-
-  const getCoinListClient = useCallback(async () => {
-    setCoinListCli(await coinListClient(aptosClient));
-  }, [aptosClient]);
+  const hippoAgg = useMemo(
+    () => new TradeAggregator(aptosClient, networkCfg, coinListCli),
+    [aptosClient, coinListCli, networkCfg]
+  );
+  useEffect(() => {
+    (async () => {
+      try {
+        // Important: load full pool list
+        await hippoAgg.updatePoolLists();
+      } catch (err) {
+        console.log('Update Hippo trade aggregator failed', err);
+        errorHandler(err);
+      }
+    })();
+  }, [hippoAgg]);
 
   const getTokenInfoByFullName = useCallback(
     (fullName: string) => {
@@ -111,15 +142,14 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [coinListCli?.fullnameToCoinInfo]
   );
 
+  const getTokenStoreByFullName = useCallback(
+    (fullName: string) => !!hippoWallet && hippoWallet.fullnameToCoinStore[fullName],
+    [hippoWallet]
+  );
+
   useEffect(() => {
     getHippoWalletClient(lastUpdateVersion);
   }, [getHippoWalletClient, lastUpdateVersion]);
-  useEffect(() => {
-    getHippoTradeAggregator();
-  }, [getHippoTradeAggregator]);
-  useEffect(() => {
-    getCoinListClient();
-  }, [getCoinListClient]);
 
   useEffect(() => {
     if (refreshWalletClient) {
@@ -129,18 +159,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   }, [getHippoWalletClient, lastUpdateVersion, refreshWalletClient]);
 
   useEffect(() => {
-    if (hippoWallet) {
-      setTokenStores(hippoWallet?.symbolToCoinStore);
-    } else {
-      setTokenStores(undefined);
-    }
-  }, [hippoWallet?.symbolToCoinStore, hippoWallet]);
-
-  useEffect(() => {
-    setTokenInfos(coinListCli?.symbolToCoinInfo);
-    const tradableCoins = hippoAgg
-      ? hippoAgg.getTradableCoinInfo()
-      : coinListCli?.getCoinInfoList();
+    const tradableCoins = coinListCli?.getCoinInfoList();
     dispatch(swapAction.SET_TOKEN_LIST(tradableCoins));
   }, [coinListCli, dispatch, hippoAgg]);
 
@@ -151,7 +170,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (!activeWallet) throw new Error('Please login first');
         const uiAmtUsed = symbol === 'devBTC' ? 0.01 : 10;
         const payload = hippoWallet?.makeFaucetMintToPayload(uiAmtUsed, symbol, true);
-        if (payload && tokenInfos) {
+        if (payload) {
           let pl = payload as Types.TransactionPayload_EntryFunctionPayload;
           const result = await signAndSubmitTransaction(pl, {
             expiration_timestamp_secs: Math.floor(Date.now() / 1000) + 3 * 60
@@ -173,7 +192,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         return success;
       }
     },
-    [activeWallet, hippoWallet, signAndSubmitTransaction, tokenInfos]
+    [activeWallet, hippoWallet, signAndSubmitTransaction]
   );
 
   const requestSwapByRoute = useCallback(
@@ -265,8 +284,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       value={{
         hippoWallet,
         hippoAgg,
-        tokenStores,
-        tokenInfos,
+        getTokenStoreByFullName,
         getTokenInfoByFullName,
         requestSwapByRoute,
         simulateSwapByRoute,

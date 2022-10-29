@@ -1,27 +1,22 @@
-import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import classNames from 'classnames';
 import Skeleton from 'components/Skeleton';
 import useHippoClient from 'hooks/useHippoClient';
 import React, { useCallback, useState } from 'react';
+import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 
 interface TProps {
   logoSrc?: string;
   className?: string;
-  symbol?: string;
   token?: CoinInfo;
   size?: number;
 }
 
 // Use size instead of className to set the size of images
-const CoinIcon: React.FC<TProps> = ({ logoSrc, size = 24, className, symbol, token }) => {
-  const { tokenInfos } = useHippoClient();
+const CoinIcon: React.FC<TProps> = ({ logoSrc, size = 24, className, token }) => {
+  const { getTokenInfoByFullName } = useHippoClient();
   const [isLoaded, setIsLoaded] = useState(false);
   if (!logoSrc) {
-    if (token) logoSrc = token?.logo_url.str();
-    if (symbol) {
-      token = tokenInfos && tokenInfos[symbol];
-      logoSrc = token?.logo_url.str();
-    }
+    if (token) logoSrc = getTokenInfoByFullName(token.token_type.type).logo_url;
   }
   const onImgError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
     event.currentTarget.src = '';

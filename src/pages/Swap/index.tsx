@@ -33,8 +33,8 @@ const Swap: React.FC = () => {
 
   const onSubmitSwap = useCallback(
     async (values: ISwapSettings, formikHelper: FormikHelpers<ISwapSettings>) => {
-      const fromSymbol = values.currencyFrom?.token?.symbol.str();
-      const toSymbol = values.currencyTo?.token?.symbol.str();
+      const fromSymbol = values.currencyFrom?.token?.symbol;
+      const toSymbol = values.currencyTo?.token?.symbol;
       const fromUiAmt = values.currencyFrom?.amount;
       const quote = values.quoteChosen;
       if (fromSymbol && toSymbol && fromUiAmt && quote) {

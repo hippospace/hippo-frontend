@@ -43,7 +43,7 @@ interface IRouteRowProps {
 const serializeRouteQuote = (rq: RouteAndQuote) => {
   return `${rq.quote.inputUiAmt}:${rq.route.steps
     .map((s) => s.pool.dexType)
-    .join('x')}:${rq.route.tokens.map((t) => t.symbol.str()).join('->')}`;
+    .join('x')}:${rq.route.tokens.map((t) => t.symbol).join('->')}`;
 };
 
 const SettingsButton = ({
@@ -143,20 +143,20 @@ const RouteRow: React.FC<IRouteRowProps> = ({
     .map((s) => AggregatorTypes.DEX_TYPE_NAME[s.pool.dexType])
     .join(' x ');
   const swapRoutes = [
-    route.route.steps[0].xCoinInfo.symbol.str(),
+    route.route.steps[0].xCoinInfo.symbol,
     ...route.route.steps.map((s, index) => (
       <span key={`r-${index}`}>
         <ArrowRight className="font-icon inline-block mx-[2px]" />
-        {s.yCoinInfo.symbol.str()}
+        {s.yCoinInfo.symbol}
       </span>
     ))
   ];
   const { values } = useFormikContext<ISwapSettings>();
-  const toSymbol = route.route.steps.slice(-1)[0].yCoinInfo.symbol.str();
+  const toToken = route.route.steps.slice(-1)[0].yCoinInfo;
   const outputUiAmt = route.quote.outputUiAmt;
   const outputValue = 0; // TOD0: calculate the output value
   const [tokenAmountFormatter] = useTokenAmountFormatter();
-  const outputFormatted = tokenAmountFormatter(outputUiAmt, toSymbol);
+  const outputFormatted = tokenAmountFormatter(outputUiAmt, toToken);
   const customMaxGasAmount = values.maxGasFee;
 
   return (
@@ -304,8 +304,12 @@ const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
   const { hippoAgg, simulateSwapByRoute } = useHippoClient();
-  const fromSymbol = values.currencyFrom?.token?.symbol.str() || 'USDC';
-  const toSymbol = values.currencyTo?.token?.symbol.str() || 'APT';
+
+  const fromToken = values.currencyFrom?.token;
+  const toToken = values.currencyTo?.token;
+  const fromSymbol = fromToken?.symbol;
+  const toSymbol = toToken?.symbol;
+
   const fromUiAmt = values.currencyFrom?.amount;
   const [allRoutes, setAllRoutes] = useState<AggregatorTypes.RouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<AggregatorTypes.RouteAndQuote | null>(null);
@@ -319,16 +323,20 @@ const TokenSwap = () => {
   useEffect(() => {
     if (hippoAgg) {
       if (!values.currencyFrom?.token) {
-        setFieldValue(
-          'currencyFrom.token',
-          hippoAgg.registryClient.getCoinInfoBySymbol(fromSymbol)
-        );
+        setFieldValue('currencyFrom.token', hippoAgg.coinListClient.getCoinInfoBySymbol('USDC')[0]);
       }
       if (!values.currencyTo?.token) {
-        setFieldValue('currencyTo.token', hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol));
+        setFieldValue('currencyTo.token', hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]);
       }
     }
-  }, [fromSymbol, hippoAgg, setFieldValue, toSymbol, values.currencyFrom, values.currencyTo]);
+  }, [
+    fromSymbol,
+    hippoAgg,
+    setFieldValue,
+    toSymbol,
+    values.currencyFrom?.token,
+    values.currencyTo?.token
+  ]);
 
   const latestInputParams = useRef({
     fromSymbol,
@@ -392,14 +400,13 @@ const TokenSwap = () => {
 
         let routes: RouteAndQuote[] | AggregatorTypes.TradeRoute[] = [];
         if (hippoAgg && fromSymbol && toSymbol) {
-          const xToken = hippoAgg.registryClient.getCoinInfoBySymbol(fromSymbol);
-          const yToken = hippoAgg.registryClient.getCoinInfoBySymbol(toSymbol);
-
           setIsRefreshingRoutes(isReload);
 
           if (fromUiAmt) {
             const maxSteps = 3;
-            routes = await hippoAgg.getQuotes(fromUiAmt, xToken, yToken, maxSteps, isReload);
+            console.log('from token', fromToken);
+            console.log('To token', toToken);
+            routes = await hippoAgg.getQuotes(fromUiAmt, fromToken, toToken, maxSteps, isReload);
             routes = routes.filter((r) => r.quote.outputUiAmt > 0);
             // check if parameters are not stale
             if (
@@ -416,7 +423,7 @@ const TokenSwap = () => {
               }
             }
           } else {
-            routes = hippoAgg.getAllRoutes(xToken, yToken);
+            routes = hippoAgg.getAllRoutes(fromToken, toToken);
           }
         }
 
@@ -454,6 +461,7 @@ const TokenSwap = () => {
     },
     [
       fromSymbol,
+      fromToken,
       fromUiAmt,
       hippoAgg,
       ifInputParametersDifferentWithLatest,
@@ -461,14 +469,17 @@ const TokenSwap = () => {
       setRoute,
       setRouteFromRoutes,
       toSymbol,
+      toToken,
       values.currencyFrom
     ]
   );
 
   const [simulateResults, setSimulateResults] = useState<(Types.UserTransaction | null)[]>([]);
   const simuTs = useRef(0);
-  const [aptBalance, isReady] = useTokenBalane('APT');
-  const [baseBalance] = useTokenBalane(values.currencyFrom?.token?.symbol.str());
+  const [aptBalance, isReady] = useTokenBalane(
+    hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]
+  );
+  const [baseBalance] = useTokenBalane(fromToken);
 
   useEffect(() => {
     const ts = Date.now();
@@ -535,7 +546,7 @@ const TokenSwap = () => {
     setFieldValue('currencyTo', tokenFrom);
   }, [values, setFieldValue]);
 
-  const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromSymbol);
+  const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromToken);
   const isSwapEnabled =
     (hasRoute && !connected && values.currencyFrom?.token) || // to connect wallet
     (values.quoteChosen &&
@@ -686,11 +697,7 @@ const TokenSwap = () => {
               simuResults={simulateResults}
             />
             {routeSelected && (
-              <SwapDetail
-                routeAndQuote={routeSelected}
-                fromSymbol={fromSymbol}
-                toSymbol={toSymbol}
-              />
+              <SwapDetail routeAndQuote={routeSelected} fromToken={fromToken} toToken={toToken} />
             )}
           </Card>
           <Button
@@ -705,8 +712,8 @@ const TokenSwap = () => {
             <SwapDetail
               className="hidden tablet:flex"
               routeAndQuote={routeSelected}
-              fromSymbol={fromSymbol}
-              toSymbol={toSymbol}
+              fromToken={fromToken}
+              toToken={toToken}
             />
           )}
         </div>

@@ -1,6 +1,6 @@
-import { CoinInfo } from '@manahippo/hippo-sdk/dist/generated/coin_list/coin_list';
 import Button from 'components/Button';
 import CoinIcon from 'components/CoinIcon';
+import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 
 interface TProps {
   coin: CoinInfo;
@@ -13,7 +13,7 @@ const CommonCoinButton: React.FC<TProps> = ({ coin, onClickToken }) => {
       variant="icon"
       onClick={onClickToken}
       className="p-0 overflow-hidden rounded-full !border-0">
-      <CoinIcon logoSrc={coin.logo_url.str()} />
+      <CoinIcon logoSrc={coin.logo_url} />
       {/* {coin.symbol} */}
     </Button>
   );
