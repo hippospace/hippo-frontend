@@ -214,7 +214,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           // pending tx notification first
           openTxPendingNotification(result.hash, 'Swap Transaction Pending');
           const txnResult = (await aptosClient.waitForTransactionWithResult(result.hash, {
-            timeoutSecs: 10,
+            timeoutSecs: 20,
             checkSuccess: true
           })) as UserTransaction;
           if (txnResult.success) {
