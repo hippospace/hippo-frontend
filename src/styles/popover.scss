@@ -3,6 +3,10 @@
     display: none;
   }
   .ant-popover-inner {
-    @apply rounded-xxl shadow-main;
+    @apply rounded-xxl shadow-main bg-surface;
+  }
+  .ant-popover-inner-content {
+    @apply text-grey-900;
   }
 }
+

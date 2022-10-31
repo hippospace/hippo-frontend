@@ -25,7 +25,7 @@ const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
         <img src={posterSrc} className="w-full h-[146px] object-cover rounded-xxl" />
       </div>
       {/* line-clamp will automatically truncate the text as boxes shrink but 'truncate' won't */}
-      <div className="h4 mb-2 mt-4 w-full text-center line-clamp-1 mobile:subtitle-regular">
+      <div className="h4 mb-2 mt-4 w-full text-center line-clamp-1 text-grey-900 mobile:subtitle-regular">
         {title}
       </div>
       <div className="subtitle-semibold h-[88px] px-2 text-grey-700 opacity-50 w-full line-clamp-4 mb-9 mobile:body-semibold">
@@ -46,14 +46,16 @@ const HomeBlog: FC<HomeBlogProps> = ({ posterSrc, title, summary, url }) => {
 };
 
 const SubTitle = ({ children }: { children: any }) => (
-  <div className="text-[64px] leading-[77px] font-bold mb-12 mobile:h4 mobile:mb-6">{children}</div>
+  <div className="text-[64px] leading-[77px] font-bold mb-12 text-grey-900 mobile:h4 mobile:mb-6">
+    {children}
+  </div>
 );
 
 const Intro = ({ children, className }: { children: any; className: string }) => {
   return (
     <div
       className={classNames(
-        'h5 font-[500] leading-[29px] text-gray-700 max-w-[798px] mobile:h6 mobile:font-[500]',
+        'h5 font-[500] leading-[29px] text-grey-700 max-w-[798px] mobile:h6 mobile:font-[500]',
         className
       )}>
       {children}
@@ -158,10 +160,10 @@ const Home = () => {
       <div className="space-y-16 mt-[162px] mb-[72px]">
         <div
           ref={card1Ref}
-          className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tl-xxl rounded-bl-xxl w-full px-[110px] translate-x-[5%] space-x-12 tablet:pl-4 tablet:pr-8 tablet:space-x-0 transition-transform duration-300"
+          className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-homeCard shadow-home rounded-tl-xxl rounded-bl-xxl w-full px-[110px] translate-x-[5%] space-x-12 tablet:pl-4 tablet:pr-8 tablet:space-x-0 transition-transform duration-300"
           style={{ transform: `translateX(${card1TranslatePercent}%)` }}>
           <div className="space-y-12 text-left tablet:mt-16">
-            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary mobile:h4">
+            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary dark:text-gradient-primary mobile:h4">
               Trade Aggregation
             </div>
             <Intro className="max-w-[749px]">
@@ -187,7 +189,7 @@ const Home = () => {
         </div>
         <div
           ref={card2Ref}
-          className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-home2 shadow-home rounded-tr-xxl rounded-br-xxl w-full px-[110px] -translate-x-[5%] space-x-12 tablet:pr-4 tablet:pl-8 tablet:space-x-0 transition-transform duration-300"
+          className="h-[728px] tablet:h-auto flex tablet:flex-col items-center justify-between bg-homeCard shadow-home rounded-tr-xxl rounded-br-xxl w-full px-[110px] -translate-x-[5%] space-x-12 tablet:pr-4 tablet:pl-8 tablet:space-x-0 transition-transform duration-300"
           style={{ transform: `translateX(${card2TranslatePercent}%)` }}>
           <div className="my-4 h-full tablet:mt-8 tablet:w-full tablet:h-auto">
             <img
@@ -196,7 +198,7 @@ const Home = () => {
             />
           </div>
           <div className="space-y-12 text-left tablet:mb-16">
-            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary mobile:h4">
+            <div className="text-[72px] leading-[86px] font-bold text-gradient-secondary dark:text-gradient-primary mobile:h4">
               Developer Tools
             </div>
             <Intro className="max-w-[749px]">

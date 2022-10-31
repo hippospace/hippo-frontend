@@ -27,10 +27,9 @@ const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <Antd.Layout
-      className={classNames('relative min-h-screen bg-white overflow-hidden', {
-        'bg-home1': currentPageName === 'Home',
-        'bg-swap': currentPageName !== 'Home'
-      })}>
+      className={classNames(
+        'relative min-h-screen bg-white overflow-hidden bg-primeLight dark:bg-primeDark dark:bg-none'
+      )}>
       {(['Swap', 'Faucet'] as TRoute['name'][]).includes(currentPageName) && (
         <>
           <img src={SwapIllu} className="absolute top-0 left-0 mx-auto w-full" />

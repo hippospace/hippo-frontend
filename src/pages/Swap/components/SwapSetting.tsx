@@ -30,15 +30,14 @@ const Selectable = ({
   return (
     <div
       className={classNames(
-        'rounded-full h-[40px] h6 border-[2px] border-transparent bg-grey-100 text-grey-700 cursor-pointer',
+        'rounded-full h-[40px] h6 border-[2px] border-transparent bg-field text-grey-700 cursor-pointer',
         {
-          'bg-[linear-gradient(90deg,#D483FF_86.1%,#9747FF_95.98%,#6E6CCA_105.2%)] bg-clip-border bg-origin-border bg-cover':
-            isSelected
+          'bg-select-border bg-clip-border bg-origin-border bg-cover': isSelected
         },
         className
       )}
       onClick={onClick}>
-      <div className="h-full w-full rounded-full bg-grey-100 flex items-center justify-center">
+      <div className="h-full w-full rounded-full bg-field flex items-center justify-center">
         {children}
       </div>
     </div>
@@ -111,7 +110,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
         <SubTitle>Transaction Deadline</SubTitle>
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="grow rounded-full bg-grey-100 px-4 w-[180px] h-[40px] h6"
+            className="grow rounded-full bg-field px-4 w-[180px] h-[40px] h6 text-grey-700"
             inputAmount={values.trasactionDeadline}
             isConfine={true}
             placeholder="0"
@@ -119,21 +118,21 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
             max={600}
             onAmountChange={(v) => setFieldValue('trasactionDeadline', v)}
           />
-          <div className="h6">Seconds</div>
+          <div className="h6 text-grey-700">Seconds</div>
         </div>
       </div>
       <div className="mt-6">
         <SubTitle>Max Gas Fee</SubTitle>
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="grow rounded-full bg-grey-100 px-4 w-[180px] h-[40px] h6"
+            className="grow rounded-full bg-field px-4 w-[180px] h-[40px] h6 text-grey-700"
             inputAmount={values.maxGasFee}
             isConfine={true}
             placeholder="0"
             min={0}
             onAmountChange={(v) => setFieldValue('maxGasFee', v)}
           />
-          <div className="h6">Gas Units</div>
+          <div className="h6 text-grey-700">Gas Units</div>
         </div>
       </div>
       <div className="mt-6 flex gap-6">

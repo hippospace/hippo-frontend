@@ -54,7 +54,7 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
             return (
               <Button
                 key={`${name}-${isCurrent}`}
-                className={classNames('w-full', { '!bg-prime-100': isCurrent })}
+                className={classNames('w-full', { 'hip-btn-selected': isCurrent })}
                 variant={'outlined'}
                 onClick={() => onRoute(path)}>
                 {name}
@@ -107,7 +107,7 @@ const PageHeader: React.FC = () => {
       )}>
       <div className="mx-auto h-full top-0 left-0 flex items-center relative">
         <MenuIcon
-          className="hidden w-[24px] h-[24px] mr-4 mobile:inline-block"
+          className="!hidden font-icon h5 text-grey-900 mr-4 mobile:!inline-block"
           onClick={() => setIsSideMenuOpen(true)}
         />
         <div
@@ -126,7 +126,7 @@ const PageHeader: React.FC = () => {
             />
           </Link>
           <div
-            className={classNames('hidden h6 h-full', {
+            className={classNames('hidden h6 h-full text-grey-900', {
               'mobile:flex mobile:items-center': currentPageName !== 'Home'
             })}>
             {currentPageName}
@@ -147,12 +147,12 @@ const PageHeader: React.FC = () => {
         <div className="absolute right-0 top-0 h-full w-fit flex items-center">
           {currentPageName !== 'Home' && (
             <Popover
-              className="mobile:hidden"
+              className="mobile:!hidden"
               content={<Settings />}
               placement="bottomRight"
               trigger="click">
               <Button size="small" variant="plain" className="!p-3 mr-1">
-                <SettingIcon width={20} height={20} />
+                <SettingIcon className="font-icon h6 text-grey-900" />
               </Button>
             </Popover>
           )}

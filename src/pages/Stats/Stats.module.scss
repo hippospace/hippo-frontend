@@ -2,7 +2,10 @@
   @apply p-1;
   @apply rounded-full #{!important};
   &:hover {
-    @apply bg-secondary #{!important};
+    @apply bg-surface #{!important};
+  }
+  &:global(.ant-segmented) {
+    @apply text-grey-700;
   }
   :global {
     .ant-segmented-item {

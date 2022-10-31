@@ -1,3 +1,23 @@
 .ant-input {
-  @apply shadow-none border-none bg-grey-100 #{!important};
+  @apply shadow-none border-none text-grey-900 bg-field #{!important};
+}
+
+.ant-radio-wrapper {
+  @apply text-grey-900;
+}
+
+.ant-drawer-wrapper-body {
+  @apply bg-surface;
+}
+
+.ant-drawer-title {
+  @apply text-grey-900;
+}
+
+.ant-drawer-header {
+  @apply border-b-grey-300;
+}
+
+.ant-radio-inner {
+  @apply bg-surface;
 }

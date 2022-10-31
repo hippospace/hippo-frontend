@@ -74,7 +74,7 @@ const WalletConnector: React.FC = () => {
             {activeWallet ? (
               <WalletConnectedIcon className="w-6" />
             ) : (
-              <WalletNotConnectedIcon className="w-6" />
+              <WalletNotConnectedIcon className="w-6 dark:fill-grey-900" />
             )}
           </div>
           <Drawer
@@ -82,7 +82,7 @@ const WalletConnector: React.FC = () => {
             closable={false}
             title={
               !activeWallet ? (
-                <div className="h6 font-bold text-black">Connect your wallet</div>
+                <div className="h6 font-bold text-grey-900">Connect your wallet</div>
               ) : (
                 ''
               )

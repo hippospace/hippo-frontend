@@ -32,23 +32,23 @@ const PageFooter: React.FC = () => {
   return (
     <Footer className="flex gap-8 items-center justify-center py-16 bg-transparent z-10">
       <Link href={URLs.discord}>
-        <DiscordIcon />
+        <DiscordIcon className="fill-grey-900" />
         <Label>Discord</Label>
       </Link>
       <Link href={URLs.medium}>
-        <MediumIcon />
+        <MediumIcon className="fill-grey-900" />
         <Label>Medium</Label>
       </Link>
       <Link href={URLs.twitter}>
-        <TwitterIcon />
+        <TwitterIcon className="fill-grey-900" />
         <Label>Twitter</Label>
       </Link>
       <Link href={URLs.github}>
-        <GithubIcon />
+        <GithubIcon className="fill-grey-900" />
         <Label>Github</Label>
       </Link>
       <Link href={URLs.docs}>
-        <DocsIcon />
+        <DocsIcon className="fill-grey-900" />
         <Label>Docs</Label>
       </Link>
     </Footer>

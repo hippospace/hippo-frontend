@@ -109,7 +109,7 @@ const CurrencyInput: React.FC<TProps> = ({
     <div
       className={cx(
         styles.currencyInput,
-        'bg-grey-100 w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2 relative group'
+        'bg-field w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2 relative group'
       )}>
       <div className="flex gap-1 items-center">
         <CoinSelectButton
@@ -131,7 +131,7 @@ const CurrencyInput: React.FC<TProps> = ({
           maxDecimals={values[actionType]?.token?.decimals || 9}
           isDisabled={actionType === 'currencyTo' || isDisableAmountInput}
           placeholder="0.00"
-          className="grow h6 font-[900] bg-transparent text-right pr-0 pl-1"
+          className="grow h5 bg-transparent text-right pr-0 pl-1 text-grey-900"
           inputAmount={selectedCurrency?.amount || 0}
           onAmountChange={onAmountChange}
         />
@@ -187,7 +187,7 @@ const CurrencyInput: React.FC<TProps> = ({
       </Modal>
       <Drawer
         className="hidden mobile:block"
-        title={<div className="body-bold text-black">Select a Token</div>}
+        title={<div className="body-bold text-grey-900">Select a Token</div>}
         closable={false}
         height={'80vh'}
         placement={'bottom'}

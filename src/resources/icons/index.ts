@@ -1,8 +1,8 @@
-export { ReactComponent as TwitterIcon } from './twitter.svg';
-export { ReactComponent as MediumIcon } from './medium.svg';
-export { ReactComponent as DiscordIcon } from './discord.svg';
-export { ReactComponent as GithubIcon } from './github.svg';
-export { ReactComponent as DocsIcon } from './docs.svg';
+export { ReactComponent as TwitterIcon } from './socialMedias/twitter.svg';
+export { ReactComponent as MediumIcon } from './socialMedias/medium.svg';
+export { ReactComponent as DiscordIcon } from './socialMedias/discord.svg';
+export { ReactComponent as GithubIcon } from './socialMedias/github.svg';
+export { ReactComponent as DocsIcon } from './socialMedias/docs.svg';
 export { ReactComponent as SearchIcon } from './search.svg';
 export { ReactComponent as SettingIcon } from './setting.svg';
 export { ReactComponent as SwapIcon } from './swap.svg';
@@ -31,3 +31,4 @@ export { ReactComponent as NotiSuccessIcon } from './notis/success.svg';
 export { ReactComponent as NotiErrorIcon } from './notis/error.svg';
 export { ReactComponent as NotiInfoIcon } from './notis/info.svg';
 export { ReactComponent as AdjustIcon } from './adjust.svg';
+export { ReactComponent as QuestionIcon } from './question.svg';
