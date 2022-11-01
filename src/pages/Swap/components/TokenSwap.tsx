@@ -14,7 +14,7 @@ import VirtualList from 'rc-virtual-list';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
-import { useInterval } from 'usehooks-ts';
+import { useInterval, useTimeout } from 'usehooks-ts';
 import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
 import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
@@ -294,6 +294,10 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
 };
 
 const REFRESH_INTERVAL = 30; // seconds
+const INPUT_TRIGGER_RELOAD_THRESHOLD = 20;
+const POOL_RELOAD_MIN_INTERVAL = 15_000; // ms!
+const ERROR_429_WAIT_SECONDS = 5 * 60;
+
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -313,7 +317,8 @@ const TokenSwap = () => {
   const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
   const [hasRoute, setHasRoute] = useState(false);
   const [timePassedAfterRefresh, setTimePassedAfterRefresh] = useState(0);
-  const [refreshRoutesTimerTick, setRefreshRoutesTimerTick] = useState<null | number>(null); // ms
+  const [refreshRoutesTimerTick, setRefreshRoutesTimerTick] = useState<null | number>(1_000); // ms
+  const [isPeriodicRefreshPaused, setIsPeriodicRefreshPaused] = useState(false);
 
   useEffect(() => {
     if (hippoAgg) {
@@ -383,35 +388,58 @@ const TokenSwap = () => {
     setRouteSelectedSerialized('');
   }, [setRoute]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  const stopTimer = useCallback(() => {
+    setRefreshRoutesTimerTick(null); // stop timer
+  }, []);
+
+  const restartTimer = useCallback(() => {
+    // restart interval timer
+    setTimePassedAfterRefresh(0);
+    // random is used to make useInterval restart
+    setRefreshRoutesTimerTick(1_000 + 0.00001 * Math.random());
+  }, []);
+
+  const timePassedRef = useRef(0);
+  timePassedRef.current = timePassedAfterRefresh;
+
+  const previousFromUiAmt = usePrevious(fromUiAmt);
+  const previousFromToken = usePrevious(fromToken);
+  const previousToToken = usePrevious(toToken);
+  const isFromToTokensChanged = previousFromToken !== fromToken || previousToToken !== toToken;
+
   // To benchmark the key press debounce
   const lastFetchTs = useRef(0);
 
   const fetchSwapRoutes = useCallback(
-    async (isReload = true) => {
+    async (isReload: boolean | undefined = undefined) => {
       try {
         if (process.env.NODE_ENV !== 'production') {
           if (lastFetchTs.current !== 0) {
-            console.log(
-              `Swap fetch route interval: ${
-                Date.now() - lastFetchTs.current
-              }, isReload: ${isReload}`
-            );
+            console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
           }
           lastFetchTs.current = Date.now();
         }
 
-        if (hippoAgg && fromSymbol && toSymbol) {
-          setIsRefreshingRoutes(isReload);
-
+        console.log(
+          `FetchSwapRoutes: isFromToTokensChanged: ${isFromToTokensChanged}, timePassedRef.current: ${timePassedRef.current}`
+        );
+        if (hippoAgg && fromToken && toToken) {
+          const maxSteps = 3;
           if (fromUiAmt) {
-            const maxSteps = 3;
+            const isReloadInternal =
+              isReload ??
+              (isFromToTokensChanged || timePassedRef.current > INPUT_TRIGGER_RELOAD_THRESHOLD);
+            setIsRefreshingRoutes(isReloadInternal);
+
             const { routes, allRoutesCount } = await hippoAgg.getQuotesUni(
               fromUiAmt,
               fromToken,
               toToken,
               maxSteps,
-              isReload,
+              isReloadInternal,
               false,
+              POOL_RELOAD_MIN_INTERVAL,
               false
             );
             // check if parameters are not stale
@@ -420,21 +448,34 @@ const TokenSwap = () => {
                 setAllRoutes(routes);
                 setSelectedRouteFromRoutes(routes);
                 setAvailableRoutesCount(allRoutesCount);
-                if (isReload) {
-                  // restart interval timer
-                  setTimePassedAfterRefresh(0);
-                  // random is used to make useInterval restart
-                  setRefreshRoutesTimerTick(1_000 + 0.00001 * Math.random());
+                if (isReloadInternal) {
+                  restartTimer();
                 }
               } else {
                 resetAllRoutes();
               }
               setHasRoute(routes.length > 0);
+              if (isReloadInternal) {
+                setIsPeriodicRefreshPaused(false);
+              }
             }
           } else {
-            setHasRoute(hippoAgg.getAllRoutes(fromToken, toToken).length > 0);
+            const isReloadInternal = isReload ?? !(previousFromUiAmt > 0);
+            const routes = await hippoAgg.reloadPools(
+              fromToken,
+              toToken,
+              maxSteps,
+              isReloadInternal,
+              false,
+              POOL_RELOAD_MIN_INTERVAL
+            );
+            setHasRoute(routes.length > 0);
             resetAllRoutes();
-            setRefreshRoutesTimerTick(null); // stop timer
+            // stopTimer();
+            if (isReloadInternal) {
+              restartTimer();
+              setIsPeriodicRefreshPaused(false);
+            }
           }
         }
       } catch (error) {
@@ -445,8 +486,9 @@ const TokenSwap = () => {
           const msg = JSON.parse(error.message);
           if (msg.message === 'Generic Error') {
             detail = 'Too many requests. You need to wait 60s and try again';
+            setIsPeriodicRefreshPaused(true);
           }
-          openErrorNotification({ detail, title: 'Fetch API error' });
+          if (fromUiAmt) openErrorNotification({ detail, title: 'Fetch API error' });
         } else {
           openErrorNotification({
             detail: error?.message || JSON.stringify(error),
@@ -468,7 +510,10 @@ const TokenSwap = () => {
       fromUiAmt,
       hippoAgg,
       ifInputParametersDifferentWithLatest,
+      isFromToTokensChanged,
+      previousFromUiAmt,
       resetAllRoutes,
+      restartTimer,
       setFieldValue,
       setSelectedRouteFromRoutes,
       toSymbol,
@@ -520,16 +565,25 @@ const TokenSwap = () => {
     values.slipTolerance
   ]);
 
-  const timePassedRef = useRef(0);
-  timePassedRef.current = timePassedAfterRefresh;
-  const inputTriggerRefreshDelay = 15;
+  useTimeout(
+    () => {
+      setIsPeriodicRefreshPaused(false);
+    },
+    isPeriodicRefreshPaused ? ERROR_429_WAIT_SECONDS * 1_000 : null
+  );
+
   useEffect(() => {
-    fetchSwapRoutes(!refreshRoutesTimerTick || timePassedRef.current > inputTriggerRefreshDelay);
-  }, [fetchSwapRoutes, refreshRoutesTimerTick]);
+    fetchSwapRoutes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromToken, toToken, fromUiAmt, hippoAgg]);
 
   useInterval(() => {
     setTimePassedAfterRefresh(timePassedAfterRefresh + 1);
-    if (timePassedAfterRefresh % REFRESH_INTERVAL === 0 && timePassedAfterRefresh !== 0) {
+    if (
+      timePassedAfterRefresh % REFRESH_INTERVAL === 0 &&
+      timePassedAfterRefresh !== 0 &&
+      !isPeriodicRefreshPaused
+    ) {
       fetchSwapRoutes();
     }
   }, refreshRoutesTimerTick);
@@ -642,7 +696,7 @@ const TokenSwap = () => {
             className="hidden tablet:block"
             isDisabled={!refreshRoutesTimerTick}
             isRefreshing={isRefreshingRoutes}
-            onRefreshClicked={fetchSwapRoutes}
+            onRefreshClicked={() => fetchSwapRoutes(true)}
             timePassedAfterRefresh={timePassedAfterRefresh}
           />
         }
@@ -695,7 +749,7 @@ const TokenSwap = () => {
                 <RefreshButton
                   isDisabled={!refreshRoutesTimerTick}
                   isRefreshing={isRefreshingRoutes}
-                  onRefreshClicked={fetchSwapRoutes}
+                  onRefreshClicked={() => fetchSwapRoutes(true)}
                   timePassedAfterRefresh={timePassedAfterRefresh}
                 />
               }

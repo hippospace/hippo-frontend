@@ -163,7 +163,10 @@ const Settings = () => {
             {Array.from(preSetRpcs.keys()).map((rpc, index) => {
               return (
                 <Radio key={`preset-rpc-${index}`} className="body-medium" value={rpc}>
-                  {rpc}
+                  {rpc}{' '}
+                  {rpc === RPCType.Nodereal && (
+                    <span className="text-grey-500 body-hint">(Recommended)</span>
+                  )}
                 </Radio>
               );
             })}
