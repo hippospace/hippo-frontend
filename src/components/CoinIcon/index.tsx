@@ -18,9 +18,8 @@ const CoinIcon: React.FC<TProps> = ({ logoSrc, size = 24, className, token }) =>
   if (!logoSrc) {
     if (token) logoSrc = getTokenInfoByFullName(token.token_type.type).logo_url;
   }
-  const onImgError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    event.currentTarget.src = '';
-    event.currentTarget.className = 'bg-black';
+  const onImgError = () => {
+    setIsLoaded(false);
   };
   const onImgLoad = useCallback(() => {
     setIsLoaded(true);

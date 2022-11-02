@@ -14,7 +14,7 @@ const SwapDetail = ({
   toToken,
   className = ''
 }: {
-  routeAndQuote: IApiRouteAndQuote;
+  routeAndQuote: IApiRouteAndQuote | null | undefined;
   fromToken: CoinInfo;
   toToken: CoinInfo;
   className?: string;
@@ -23,26 +23,32 @@ const SwapDetail = ({
   const [isPriceYToX, setIsPriceYToX] = useState(true);
   const [tokenAmountFormatter] = useTokenAmountFormatter();
 
-  const outputUiAmt = routeAndQuote.quote.outputUiAmt;
-  const output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
-  const minimum = `${tokenAmountFormatter(
-    outputUiAmt * (1 - swapSettings.slipTolerance / 100),
-    toToken
-  )} ${toToken.symbol}`;
-  const priceImpact =
-    (routeAndQuote.quote.priceImpact || 0) >= 0.0001
-      ? `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`
-      : '<0.01%';
+  let rate: string = '-';
+  let output: string = '-';
+  let minimum: string = '-';
+  let priceImpact: string = '-';
+  if (routeAndQuote) {
+    const outputUiAmt = routeAndQuote.quote.outputUiAmt;
+    output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
+    minimum = `${tokenAmountFormatter(
+      outputUiAmt * (1 - swapSettings.slipTolerance / 100),
+      toToken
+    )} ${toToken.symbol}`;
+    priceImpact =
+      (routeAndQuote.quote.priceImpact || 0) >= 0.0001
+        ? `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`
+        : '<0.01%';
 
-  const avgPrice = routeAndQuote.quote.outputUiAmt / routeAndQuote.quote.inputUiAmt;
-  const rate =
-    !avgPrice || avgPrice === Infinity
-      ? 'n/a'
-      : isPriceYToX
-      ? `1 ${fromToken.symbol} ≈ ${tokenAmountFormatter(avgPrice, toToken)} ${toToken.symbol}`
-      : `1 ${toToken.symbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromToken)} ${
-          fromToken.symbol
-        }`;
+    const avgPrice = routeAndQuote.quote.outputUiAmt / routeAndQuote.quote.inputUiAmt;
+    rate =
+      !avgPrice || avgPrice === Infinity
+        ? 'n/a'
+        : isPriceYToX
+        ? `1 ${fromToken.symbol} ≈ ${tokenAmountFormatter(avgPrice, toToken)} ${toToken.symbol}`
+        : `1 ${toToken.symbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromToken)} ${
+            fromToken.symbol
+          }`;
+  }
 
   const details = [
     {

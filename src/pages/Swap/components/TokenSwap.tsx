@@ -23,6 +23,7 @@ import { openErrorNotification } from 'utils/notifications';
 import { Types, ApiError } from 'aptos';
 import TokenSteps from './TokenSteps';
 import { RPCType, useRpcEndpoint } from 'components/Settings';
+import { useBreakpoint } from 'hooks/useBreakpoint';
 
 interface IRoutesProps {
   className?: string;
@@ -102,35 +103,44 @@ const RefreshButton = ({
 const CardHeader = ({ className = '', right }: { className?: string; right?: ReactNode }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
+  const { isTablet } = useBreakpoint('tablet');
   return (
     <div className={classNames('w-full flex h-8 items-center mb-1 body-medium', className)}>
       <Card className="mr-auto h-full relative w-fit">
-        <SettingsButton
-          className="tablet:hidden mobile:hidden"
-          onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-        />
-        <SettingsButton
-          className="cursor-pointer hidden mobile:flex tablet:flex"
-          onClick={() => setIsMobileTxSettingsOpen(true)}
-        />
-        <Card
-          className={classNames(
-            'absolute top-9 w-[400px] -left-[420px] px-8 laptop:w-[368px] laptop:-left-[calc(368px+20px)] py-8 laptop:px-4 tablet:hidden scale-[50%] origin-top-right opacity-0 transition-all transform-gpu will-change-transform',
-            { '!opacity-100 !scale-100': isSettingsOpen }
-          )}>
-          <SwapSetting onClose={() => setIsSettingsOpen(false)} />
-        </Card>
+        {!isTablet && (
+          <SettingsButton
+            className="tablet:hidden"
+            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+          />
+        )}
+        {isTablet && (
+          <SettingsButton
+            className="cursor-pointer hidden tablet:flex"
+            onClick={() => setIsMobileTxSettingsOpen(true)}
+          />
+        )}
+        {!isTablet && (
+          <Card
+            className={classNames(
+              'absolute top-9 w-[400px] -left-[420px] px-8 laptop:w-[368px] laptop:-left-[calc(368px+20px)] py-8 laptop:px-4 tablet:hidden scale-[50%] origin-top-right opacity-0 transition-all transform-gpu will-change-transform',
+              { '!opacity-100 !scale-100': isSettingsOpen }
+            )}>
+            <SwapSetting onClose={() => setIsSettingsOpen(false)} />
+          </Card>
+        )}
       </Card>
       {right}
-      <Drawer
-        height={'auto'}
-        closable={false}
-        title={<div className="body-bold text-grey-900">Transaction Settings</div>}
-        placement={'bottom'}
-        onClose={() => setIsMobileTxSettingsOpen(false)}
-        visible={isMobileTxSettingsOpen}>
-        <SwapSetting onClose={() => setIsMobileTxSettingsOpen(false)} />
-      </Drawer>
+      {isTablet && (
+        <Drawer
+          height={'auto'}
+          closable={false}
+          title={<div className="body-bold text-grey-900">Transaction Settings</div>}
+          placement={'bottom'}
+          onClose={() => setIsMobileTxSettingsOpen(false)}
+          visible={isMobileTxSettingsOpen}>
+          <SwapSetting onClose={() => setIsMobileTxSettingsOpen(false)} />
+        </Drawer>
+      )}
     </div>
   );
 };
@@ -251,28 +261,6 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
           </div>
         )}
       </VirtualList>
-      {/*
-      <div
-        className={classNames('overflow-x-hidden overflow-y-auto pr-1', {
-          'no-scrollbar': !isDesktopScreen,
-          scrollbar: isDesktopScreen
-        })}
-        style={{ height }}>
-        {routeSelected &&
-          routes.map((ro, index) => {
-            return (
-              <div key={`route-${index}`} onClick={() => onRouteSelected(ro, index)}>
-                <RouteRow
-                  route={ro}
-                  isSelected={ro === routeSelected}
-                  isBestPrice={index === 0}
-                  simuResult={simuResults[index]}
-                />
-              </div>
-            );
-          })}
-      </div>
-      */}
       {!isDesktopScreen && routes.length > rowsWhenLess && (
         <div className="flex label-small-bold text-grey-500 mt-2 justify-between">
           <div
@@ -311,7 +299,6 @@ const TokenSwap = () => {
   const [availableRoutesCount, setAvailableRoutesCount] = useState(0);
 
   const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
-  const [hasRoute, setHasRoute] = useState(false);
   const [timePassedAfterRefresh, setTimePassedAfterRefresh] = useState(0);
   const [refreshRoutesTimerTick, setRefreshRoutesTimerTick] = useState<null | number>(1_000); // ms
   const [isPeriodicRefreshPaused, setIsPeriodicRefreshPaused] = useState(false);
@@ -319,16 +306,27 @@ const TokenSwap = () => {
   const rpcEndpoint = useRpcEndpoint();
 
   let refreshInterval = 20; // seconds
+  let isInputAmtTriggerReload = false;
   let inputTriggerReloadThreshold = 20;
-  let poolReloadMinInterval = 15_000; // ms!
+  let poolReloadMinInterval = 10_000; // ms!
   let error429WaitSeconds = 60;
 
   if (rpcEndpoint === RPCType.Aptos) {
     refreshInterval = 60; // seconds
-    inputTriggerReloadThreshold = 20;
+    isInputAmtTriggerReload = true;
+    inputTriggerReloadThreshold = 30;
     poolReloadMinInterval = 20_000; // ms!
     error429WaitSeconds = 5 * 60;
   }
+
+  const hasRoute = useMemo(() => {
+    return !!(
+      fromToken &&
+      toToken &&
+      hippoAgg.getAllRoutes(fromToken, toToken, 3, false).length > 0
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromToken, hippoAgg, hippoAgg.allPools, toToken]);
 
   useEffect(() => {
     if (hippoAgg) {
@@ -439,7 +437,9 @@ const TokenSwap = () => {
           if (fromUiAmt) {
             const isReloadInternal =
               isReload ??
-              (isFromToTokensChanged || timePassedRef.current >= inputTriggerReloadThreshold);
+              (isFromToTokensChanged ||
+                // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
+                (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold));
             setIsRefreshingRoutes(isReloadInternal);
 
             const { routes, allRoutesCount } = await hippoAgg.getQuotesUni(
@@ -464,22 +464,22 @@ const TokenSwap = () => {
               } else {
                 resetAllRoutes();
               }
-              setHasRoute(routes.length > 0);
               if (isReloadInternal) {
                 setIsPeriodicRefreshPaused(false);
               }
             }
           } else {
             const isReloadInternal = isReload ?? !(previousFromUiAmt > 0);
-            const routes = await hippoAgg.reloadPools(
-              fromToken,
-              toToken,
-              maxSteps,
-              isReloadInternal,
-              false,
-              poolReloadMinInterval
-            );
-            setHasRoute(routes.length > 0);
+            if (isReloadInternal) {
+              await hippoAgg.reloadPools(
+                fromToken,
+                toToken,
+                maxSteps,
+                true,
+                false,
+                poolReloadMinInterval
+              );
+            }
             resetAllRoutes();
             // stopTimer();
             if (isReloadInternal) {
@@ -515,14 +515,15 @@ const TokenSwap = () => {
       }
     },
     [
-      inputTriggerReloadThreshold,
-      poolReloadMinInterval,
       fromSymbol,
       fromToken,
       fromUiAmt,
       hippoAgg,
       ifInputParametersDifferentWithLatest,
+      inputTriggerReloadThreshold,
       isFromToTokensChanged,
+      isInputAmtTriggerReload,
+      poolReloadMinInterval,
       previousFromUiAmt,
       resetAllRoutes,
       restartTimer,
@@ -618,11 +619,7 @@ const TokenSwap = () => {
   const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromToken);
   const isSwapEnabled =
     (hasRoute && !connected && values.currencyFrom?.token) || // to connect wallet
-    (values.quoteChosen &&
-      fromUiAmt &&
-      fromCurrentBalance &&
-      fromUiAmt <= fromCurrentBalance &&
-      !isRefreshingRoutes);
+    (values.quoteChosen && fromUiAmt && fromCurrentBalance && fromUiAmt <= fromCurrentBalance);
 
   const swapButtonText = useMemo(() => {
     if (!values.currencyFrom?.token) {
@@ -698,19 +695,23 @@ const TokenSwap = () => {
     submitForm();
   }, [submitForm]);
 
+  const { isTablet } = useBreakpoint('tablet');
+
   const cardXPadding = '32px';
   return (
     <div className="w-full" ref={swapRef}>
       <CardHeader
         className="pointer-events-auto"
         right={
-          <RefreshButton
-            className="hidden tablet:block"
-            isDisabled={!refreshRoutesTimerTick}
-            isRefreshing={isRefreshingRoutes}
-            onRefreshClicked={() => fetchSwapRoutes(true)}
-            timePassedAfterRefresh={timePassedAfterRefresh}
-          />
+          isTablet && (
+            <RefreshButton
+              className="hidden tablet:block"
+              isDisabled={!refreshRoutesTimerTick}
+              isRefreshing={isRefreshingRoutes}
+              onRefreshClicked={() => fetchSwapRoutes(true)}
+              timePassedAfterRefresh={timePassedAfterRefresh}
+            />
+          )
         }
       />
       <Card className="w-full min-h-[430px] flex flex-col py-8 relative pointer-events-auto">
@@ -732,7 +733,7 @@ const TokenSwap = () => {
             <div className="mr-auto">Receive</div>
           </div>
           <CurrencyInput actionType="currencyTo" />
-          {allRoutes.length > 0 && routeSelected && (
+          {isTablet && fromUiAmt && allRoutes.length > 0 && routeSelected && (
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
@@ -745,32 +746,32 @@ const TokenSwap = () => {
               />
             </>
           )}
-          <Card
-            className={classNames(
-              'tablet:hidden absolute top-0 w-[420px] right-[-440px] px-4 laptop:w-[368px] laptop:right-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 -translate-x-[30%] -z-10 transform-gpu will-change-transform',
-              { 'opacity-100 !translate-x-0': allRoutes.length > 0 && routeSelected }
-            )}>
-            <RoutesAvailable
-              availableRoutesCount={availableRoutesCount}
-              isDesktopScreen={true}
-              routes={allRoutes}
-              routeSelected={routeSelected}
-              onRouteSelected={onUserSelectRoute}
-              isRefreshing={isRefreshingRoutes}
-              refreshButton={
-                <RefreshButton
-                  isDisabled={!refreshRoutesTimerTick}
-                  isRefreshing={isRefreshingRoutes}
-                  onRefreshClicked={() => fetchSwapRoutes(true)}
-                  timePassedAfterRefresh={timePassedAfterRefresh}
-                />
-              }
-              simuResults={simulateResults}
-            />
-            {routeSelected && (
+          {!isTablet && (
+            <Card
+              className={classNames(
+                'tablet:hidden absolute top-0 w-[420px] right-[-440px] px-4 laptop:w-[368px] laptop:right-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 -translate-x-[30%] -z-10 transform-gpu will-change-transform',
+                { 'opacity-100 !translate-x-0': fromUiAmt && allRoutes.length > 0 && routeSelected }
+              )}>
+              <RoutesAvailable
+                availableRoutesCount={availableRoutesCount}
+                isDesktopScreen={true}
+                routes={allRoutes}
+                routeSelected={routeSelected}
+                onRouteSelected={onUserSelectRoute}
+                isRefreshing={isRefreshingRoutes}
+                refreshButton={
+                  <RefreshButton
+                    isDisabled={!refreshRoutesTimerTick}
+                    isRefreshing={isRefreshingRoutes}
+                    onRefreshClicked={() => fetchSwapRoutes(true)}
+                    timePassedAfterRefresh={timePassedAfterRefresh}
+                  />
+                }
+                simuResults={simulateResults}
+              />
               <SwapDetail routeAndQuote={routeSelected} fromToken={fromToken} toToken={toToken} />
-            )}
-          </Card>
+            </Card>
+          )}
           <Button
             isLoading={isSubmitting}
             className="mt-8"
@@ -779,7 +780,7 @@ const TokenSwap = () => {
             onClick={!connected ? openModal : onSwap}>
             {swapButtonText}
           </Button>
-          {routeSelected && (
+          {isTablet && routeSelected && (
             <SwapDetail
               className="hidden tablet:flex"
               routeAndQuote={routeSelected}
