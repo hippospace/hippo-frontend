@@ -439,7 +439,7 @@ const TokenSwap = () => {
           if (fromUiAmt) {
             const isReloadInternal =
               isReload ??
-              (isFromToTokensChanged || timePassedRef.current > inputTriggerReloadThreshold);
+              (isFromToTokensChanged || timePassedRef.current >= inputTriggerReloadThreshold);
             setIsRefreshingRoutes(isReloadInternal);
 
             const { routes, allRoutesCount } = await hippoAgg.getQuotesUni(
@@ -596,7 +596,7 @@ const TokenSwap = () => {
       timePassedAfterRefresh !== 0 &&
       !isPeriodicRefreshPaused
     ) {
-      fetchSwapRoutes();
+      fetchSwapRoutes(true);
     }
   }, refreshRoutesTimerTick);
 
