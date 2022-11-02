@@ -58,7 +58,7 @@ export const useSettingsStore = create<SettingsState>()(
   )
 );
 
-const useRpcEndpoint = () => {
+export const useRpcEndpoint = () => {
   const rpcEndpoint = useSettingsStore((state) => state.RPCEndPoint);
   const setRPCEndPointInStore = useSettingsStore((state) => state.setRPCEndPoint);
   if (!Object.values(RPCType).includes(rpcEndpoint)) {

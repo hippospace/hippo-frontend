@@ -22,6 +22,7 @@ import { openErrorNotification } from 'utils/notifications';
 // import Skeleton from 'components/Skeleton';
 import { Types, ApiError } from 'aptos';
 import TokenSteps from './TokenSteps';
+import { RPCType, useRpcEndpoint } from 'components/Settings';
 
 interface IRoutesProps {
   className?: string;
@@ -293,11 +294,6 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const REFRESH_INTERVAL = 30; // seconds
-const INPUT_TRIGGER_RELOAD_THRESHOLD = 20;
-const POOL_RELOAD_MIN_INTERVAL = 15_000; // ms!
-const ERROR_429_WAIT_SECONDS = 5 * 60;
-
 const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
@@ -319,6 +315,20 @@ const TokenSwap = () => {
   const [timePassedAfterRefresh, setTimePassedAfterRefresh] = useState(0);
   const [refreshRoutesTimerTick, setRefreshRoutesTimerTick] = useState<null | number>(1_000); // ms
   const [isPeriodicRefreshPaused, setIsPeriodicRefreshPaused] = useState(false);
+
+  const rpcEndpoint = useRpcEndpoint();
+
+  let refreshInterval = 20; // seconds
+  let inputTriggerReloadThreshold = 20;
+  let poolReloadMinInterval = 15_000; // ms!
+  let error429WaitSeconds = 60;
+
+  if (rpcEndpoint === RPCType.Aptos) {
+    refreshInterval = 60; // seconds
+    inputTriggerReloadThreshold = 20;
+    poolReloadMinInterval = 20_000; // ms!
+    error429WaitSeconds = 5 * 60;
+  }
 
   useEffect(() => {
     if (hippoAgg) {
@@ -429,7 +439,7 @@ const TokenSwap = () => {
           if (fromUiAmt) {
             const isReloadInternal =
               isReload ??
-              (isFromToTokensChanged || timePassedRef.current > INPUT_TRIGGER_RELOAD_THRESHOLD);
+              (isFromToTokensChanged || timePassedRef.current > inputTriggerReloadThreshold);
             setIsRefreshingRoutes(isReloadInternal);
 
             const { routes, allRoutesCount } = await hippoAgg.getQuotesUni(
@@ -439,7 +449,7 @@ const TokenSwap = () => {
               maxSteps,
               isReloadInternal,
               false,
-              POOL_RELOAD_MIN_INTERVAL,
+              poolReloadMinInterval,
               false
             );
             // check if parameters are not stale
@@ -467,7 +477,7 @@ const TokenSwap = () => {
               maxSteps,
               isReloadInternal,
               false,
-              POOL_RELOAD_MIN_INTERVAL
+              poolReloadMinInterval
             );
             setHasRoute(routes.length > 0);
             resetAllRoutes();
@@ -505,6 +515,8 @@ const TokenSwap = () => {
       }
     },
     [
+      inputTriggerReloadThreshold,
+      poolReloadMinInterval,
       fromSymbol,
       fromToken,
       fromUiAmt,
@@ -569,7 +581,7 @@ const TokenSwap = () => {
     () => {
       setIsPeriodicRefreshPaused(false);
     },
-    isPeriodicRefreshPaused ? ERROR_429_WAIT_SECONDS * 1_000 : null
+    isPeriodicRefreshPaused ? error429WaitSeconds * 1_000 : null
   );
 
   useEffect(() => {
@@ -580,7 +592,7 @@ const TokenSwap = () => {
   useInterval(() => {
     setTimePassedAfterRefresh(timePassedAfterRefresh + 1);
     if (
-      timePassedAfterRefresh % REFRESH_INTERVAL === 0 &&
+      timePassedAfterRefresh % refreshInterval === 0 &&
       timePassedAfterRefresh !== 0 &&
       !isPeriodicRefreshPaused
     ) {

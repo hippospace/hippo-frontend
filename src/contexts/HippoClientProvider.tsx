@@ -19,6 +19,7 @@ import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
 import { OptionTransaction, simulatePayloadTxAndLog, SimulationKeys } from '@manahippo/move-to-ts';
 import { UserTransaction } from 'aptos/src/generated';
 import { debounce } from 'lodash';
+import { RPCType, useRpcEndpoint } from 'components/Settings';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -83,17 +84,26 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     () => new CoinListClient(networkCfg.name as NetworkType),
     [networkCfg.name]
   );
+
+  const updateCoinlist = useCallback(() => {
+    const tradableCoins = coinListCli?.getCoinInfoList();
+    dispatch(swapAction.SET_TOKEN_LIST(tradableCoins));
+  }, [coinListCli, dispatch]);
+
+  useEffect(updateCoinlist, [updateCoinlist]);
+
   useEffect(() => {
     (async () => {
       try {
         // Important: load full coin list
         await coinListCli.update(aptosClient);
+        updateCoinlist();
       } catch (err) {
         console.log('Update coin list client failed', err);
         errorHandler(err);
       }
     })();
-  }, [aptosClient, coinListCli]);
+  }, [aptosClient, coinListCli, updateCoinlist]);
 
   const getHippoWalletClient = useCallback(
     async (version: undefined | number | bigint = undefined) => {
@@ -119,9 +129,17 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [activeWallet, aptosClient, coinListCli, networkCfg]
   );
 
+  const rpcEndpoint = useRpcEndpoint();
+
   const hippoAgg = useMemo(
-    () => new TradeAggregator(aptosClient, networkCfg, coinListCli),
-    [aptosClient, coinListCli, networkCfg]
+    () =>
+      new TradeAggregator(
+        aptosClient,
+        networkCfg,
+        coinListCli,
+        rpcEndpoint === RPCType.Aptos ? Infinity : 400
+      ),
+    [aptosClient, coinListCli, networkCfg, rpcEndpoint]
   );
   useEffect(() => {
     (async () => {
@@ -157,11 +175,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       setRefreshWalletClient(false);
     }
   }, [getHippoWalletClient, lastUpdateVersion, refreshWalletClient]);
-
-  useEffect(() => {
-    const tradableCoins = coinListCli?.getCoinInfoList();
-    dispatch(swapAction.SET_TOKEN_LIST(tradableCoins));
-  }, [coinListCli, dispatch, hippoAgg]);
 
   const requestFaucet = useCallback(
     async (symbol: string) => {
