@@ -623,7 +623,9 @@ const TokenSwap = () => {
   const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromToken);
   const isSwapEnabled =
     (hasRoute && !connected && values.currencyFrom?.token) || // to connect wallet
-    (values.quoteChosen && fromUiAmt && fromCurrentBalance && fromUiAmt <= fromCurrentBalance);
+    (values.quoteChosen &&
+      fromUiAmt &&
+      !(isCurrentBalanceReady && fromCurrentBalance && fromUiAmt > fromCurrentBalance));
 
   const swapButtonText = useMemo(() => {
     if (!values.currencyFrom?.token) {
@@ -632,20 +634,12 @@ const TokenSwap = () => {
       return 'No Available Route';
     } else if (!connected) {
       return 'Connect to Wallet';
-      /*
-    } else if (!isCurrentBalanceReady) {
-      return 'Loading Balance...';
-      */
     } else if (!fromUiAmt) {
       return 'Enter an Amount';
     } else if (isRefreshingRoutes) {
       return 'Loading Routes...';
     } else if (isCurrentBalanceReady && fromUiAmt > fromCurrentBalance) {
       return 'Insufficient Balance';
-      /*
-    } else if (!values.quoteChosen) {
-      return 'No Available Route';
-    */
     }
     return 'SWAP';
   }, [
