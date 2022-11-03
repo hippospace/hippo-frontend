@@ -88,6 +88,7 @@ const PositiveFloatNumInput = forwardRef<
         className={classNames(
           'positiveFloatNumInput',
           'px-1 focus: outline-none min-w-0',
+          { 'cursor-not-allowed': isDisabled },
           className
         )}
         value={displayText}
