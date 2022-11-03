@@ -315,7 +315,7 @@ const TokenSwap = () => {
   if (rpcEndpoint === RPCType.Aptos) {
     refreshInterval = 60; // seconds
     isInputAmtTriggerReload = true;
-    inputTriggerReloadThreshold = 30;
+    inputTriggerReloadThreshold = 40;
     poolReloadMinInterval = 20_000; // ms!
     error429WaitSeconds = 5 * 60;
   }
@@ -443,9 +443,8 @@ const TokenSwap = () => {
           if (fromUiAmt) {
             const isReloadInternal =
               isReload ??
-              (!tokenPairUnchanged ||
-                // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
-                (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold));
+              // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
+              (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold);
             setIsRefreshingRoutes(isReloadInternal);
 
             const { routes, allRoutesCount } = await hippoAgg.getQuotesUni(
@@ -467,12 +466,9 @@ const TokenSwap = () => {
                 if (isReloadInternal) {
                   restartTimer();
                 }
-              }
-              /*
               } else {
                 resetAllRoutes();
               }
-              */
               if (isReloadInternal) {
                 setIsPeriodicRefreshPaused(false);
               }
@@ -625,7 +621,8 @@ const TokenSwap = () => {
   const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromToken);
   const isSwapEnabled =
     (hasRoute && !connected && values.currencyFrom?.token) || // to connect wallet
-    (values.quoteChosen &&
+    (hasRoute &&
+      values.quoteChosen &&
       fromUiAmt &&
       !(isCurrentBalanceReady && fromCurrentBalance && fromUiAmt > fromCurrentBalance));
 
