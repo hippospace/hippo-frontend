@@ -624,7 +624,7 @@ const TokenSwap = () => {
     (hasRoute &&
       values.quoteChosen &&
       fromUiAmt &&
-      !(isCurrentBalanceReady && fromCurrentBalance && fromUiAmt > fromCurrentBalance));
+      (!isCurrentBalanceReady || (fromCurrentBalance && fromUiAmt <= fromCurrentBalance)));
 
   const swapButtonText = useMemo(() => {
     if (!values.currencyFrom?.token) {

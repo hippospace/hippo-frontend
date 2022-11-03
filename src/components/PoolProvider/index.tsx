@@ -11,6 +11,7 @@ import aptoSwapLogo from 'resources/img/dexes/aptoswap.png';
 import auxLogo from 'resources/img/dexes/aux.png';
 import animeSwapLogo from 'resources/img/dexes/animeswap.png';
 import cetusLogo from 'resources/img/dexes/cetus.png';
+import pancakeLogo from 'resources/img/dexes/pancake.jpeg';
 import classNames from 'classnames';
 
 interface IPoolProviderProps {
@@ -40,6 +41,8 @@ const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
       return animeSwapLogo;
     } else if (dexType === AggregatorTypes.DexType.Cetus) {
       return cetusLogo;
+    } else if (dexType === AggregatorTypes.DexType.Pancake) {
+      return pancakeLogo;
     } else {
       return undefined;
     }
