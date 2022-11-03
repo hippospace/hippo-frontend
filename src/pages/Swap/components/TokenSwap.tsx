@@ -635,6 +635,8 @@ const TokenSwap = () => {
       return 'Connect to Wallet';
     } else if (!fromUiAmt) {
       return 'Enter an Amount';
+    } else if (isRefreshingRoutes) {
+      return 'Loading Routes...';
     } else if (isCurrentBalanceReady && fromUiAmt > fromCurrentBalance) {
       return 'Insufficient Balance';
     }
@@ -644,6 +646,7 @@ const TokenSwap = () => {
     hasRoute,
     connected,
     fromUiAmt,
+    isRefreshingRoutes,
     isCurrentBalanceReady,
     fromCurrentBalance
   ]);
