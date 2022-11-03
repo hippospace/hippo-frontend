@@ -70,9 +70,7 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "supports es6-module and supports bigint"
     ],
     "development": [
       "last 1 chrome version",

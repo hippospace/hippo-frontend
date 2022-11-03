@@ -1,3 +1,4 @@
 {
-    "svg.preview.background": "editor"
+    "svg.preview.background": "editor",
+    "liveServer.settings.root": "/build"
 }
