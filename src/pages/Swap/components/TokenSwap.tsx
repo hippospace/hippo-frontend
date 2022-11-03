@@ -238,6 +238,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
     : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight;
 
   // const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
+
   return (
     <div className={className}>
       <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
@@ -346,6 +347,7 @@ const TokenSwap = () => {
     values.currencyTo?.token
   ]);
 
+  /*
   const latestInputParams = useRef({
     fromSymbol,
     toSymbol,
@@ -367,6 +369,7 @@ const TokenSwap = () => {
     },
     []
   );
+  */
 
   const setRoute = useCallback(
     (ro: IApiRouteAndQuote | null) => {
@@ -416,18 +419,19 @@ const TokenSwap = () => {
   const previousToToken = usePrevious(toToken);
   const isFromToTokensChanged = previousFromToken !== fromToken || previousToToken !== toToken;
 
-  // To benchmark the key press debounce
   const lastFetchTs = useRef(0);
 
   const fetchSwapRoutes = useCallback(
     async (isReload: boolean | undefined = undefined) => {
       try {
         if (process.env.NODE_ENV !== 'production') {
+          // Check the key press debounce
           if (lastFetchTs.current !== 0) {
             console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
           }
-          lastFetchTs.current = Date.now();
         }
+        const now = Date.now();
+        lastFetchTs.current = now;
 
         console.log(
           `FetchSwapRoutes: isFromToTokensChanged: ${isFromToTokensChanged}, timePassedRef.current: ${timePassedRef.current}`
@@ -452,8 +456,8 @@ const TokenSwap = () => {
               poolReloadMinInterval,
               false
             );
-            // check if parameters are not stale
-            if (!ifInputParametersDifferentWithLatest(fromSymbol, toSymbol, fromUiAmt)) {
+            // check if it's the latest reqeust
+            if (now === lastFetchTs.current) {
               if (routes.length > 0) {
                 setAllRoutes(routes);
                 setSelectedRouteFromRoutes(routes);
@@ -461,9 +465,12 @@ const TokenSwap = () => {
                 if (isReloadInternal) {
                   restartTimer();
                 }
+              }
+              /*
               } else {
                 resetAllRoutes();
               }
+              */
               if (isReloadInternal) {
                 setIsPeriodicRefreshPaused(false);
               }
@@ -515,11 +522,9 @@ const TokenSwap = () => {
       }
     },
     [
-      fromSymbol,
       fromToken,
       fromUiAmt,
       hippoAgg,
-      ifInputParametersDifferentWithLatest,
       inputTriggerReloadThreshold,
       isFromToTokensChanged,
       isInputAmtTriggerReload,
@@ -529,7 +534,6 @@ const TokenSwap = () => {
       restartTimer,
       setFieldValue,
       setSelectedRouteFromRoutes,
-      toSymbol,
       toToken,
       values.currencyFrom
     ]
@@ -628,27 +632,30 @@ const TokenSwap = () => {
       return 'No Available Route';
     } else if (!connected) {
       return 'Connect to Wallet';
+      /*
     } else if (!isCurrentBalanceReady) {
       return 'Loading Balance...';
+      */
     } else if (!fromUiAmt) {
       return 'Enter an Amount';
-    } else if (!fromCurrentBalance || fromUiAmt > fromCurrentBalance) {
-      return 'Insufficient Balance';
     } else if (isRefreshingRoutes) {
       return 'Loading Routes...';
+    } else if (isCurrentBalanceReady && fromUiAmt > fromCurrentBalance) {
+      return 'Insufficient Balance';
+      /*
     } else if (!values.quoteChosen) {
       return 'No Available Route';
+    */
     }
     return 'SWAP';
   }, [
-    connected,
-    fromCurrentBalance,
-    fromUiAmt,
-    isCurrentBalanceReady,
     values.currencyFrom?.token,
+    hasRoute,
+    connected,
+    fromUiAmt,
     isRefreshingRoutes,
-    values.quoteChosen,
-    hasRoute
+    isCurrentBalanceReady,
+    fromCurrentBalance
   ]);
 
   // Scroll the Swap box to vertical middle
