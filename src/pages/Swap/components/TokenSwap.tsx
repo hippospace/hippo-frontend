@@ -417,7 +417,9 @@ const TokenSwap = () => {
   const previousFromUiAmt = usePrevious(fromUiAmt);
   const previousFromToken = usePrevious(fromToken);
   const previousToToken = usePrevious(toToken);
-  const isFromToTokensChanged = previousFromToken !== fromToken || previousToToken !== toToken;
+  const tokenPairUnchanged =
+    (previousFromToken === fromToken && previousToToken === toToken) ||
+    (previousFromToken === toToken && previousToToken === fromToken);
 
   const lastFetchTs = useRef(0);
 
@@ -434,14 +436,14 @@ const TokenSwap = () => {
         lastFetchTs.current = now;
 
         console.log(
-          `FetchSwapRoutes: isFromToTokensChanged: ${isFromToTokensChanged}, timePassedRef.current: ${timePassedRef.current}`
+          `FetchSwapRoutes: tokenPairUnchanged: ${tokenPairUnchanged}, timePassedRef.current: ${timePassedRef.current}`
         );
         if (hippoAgg && fromToken && toToken) {
           const maxSteps = 3;
           if (fromUiAmt) {
             const isReloadInternal =
               isReload ??
-              (isFromToTokensChanged ||
+              (!tokenPairUnchanged ||
                 // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
                 (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold));
             setIsRefreshingRoutes(isReloadInternal);
@@ -526,7 +528,7 @@ const TokenSwap = () => {
       fromUiAmt,
       hippoAgg,
       inputTriggerReloadThreshold,
-      isFromToTokensChanged,
+      tokenPairUnchanged,
       isInputAmtTriggerReload,
       poolReloadMinInterval,
       previousFromUiAmt,
