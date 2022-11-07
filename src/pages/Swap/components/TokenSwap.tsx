@@ -314,8 +314,8 @@ const TokenSwap = () => {
 
   if (rpcEndpoint === RPCType.Aptos) {
     refreshInterval = 60; // seconds
-    isInputAmtTriggerReload = true;
-    inputTriggerReloadThreshold = 40;
+    isInputAmtTriggerReload = false;
+    inputTriggerReloadThreshold = 60;
     poolReloadMinInterval = 20_000; // ms!
     error429WaitSeconds = 5 * 60;
   }

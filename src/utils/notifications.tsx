@@ -13,7 +13,12 @@ interface INotificationArgs {
   duration?: number;
 }
 
-const openNotification = ({ detail, type = 'success', title = '' }: INotificationArgs) => {
+const openNotification = ({
+  detail,
+  type = 'success',
+  title = '',
+  duration = 6
+}: INotificationArgs) => {
   if (!title) {
     title = type[0].toUpperCase() + type.slice(1);
   }
@@ -34,7 +39,7 @@ const openNotification = ({ detail, type = 'success', title = '' }: INotificatio
     icon,
     className: `hippo-notification hippo-notification--${type}`,
     closeIcon: <CloseIcon className="font-icon h5 text-grey-500" />,
-    duration: 6,
+    duration,
     maxCount: 5
   });
 };

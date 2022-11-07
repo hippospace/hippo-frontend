@@ -93,7 +93,7 @@ const CurrencyInput: React.FC<TProps> = ({
       },
       [actionType, selectedCurrency, setFieldValue]
     ),
-    200
+    0
   );
 
   const inputRef = useRef<HTMLInputElement>(null);

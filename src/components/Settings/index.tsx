@@ -116,6 +116,14 @@ const Settings = () => {
     (v: RPCType) => {
       setRPCEndPointInStore(v);
       openNotification({ detail: 'RPC endpoint switched successfully', type: 'success' });
+      if (v === RPCType.Aptos) {
+        openNotification({
+          type: 'info',
+          detail: 'We recommend to use Aptos only as a backup',
+          title: 'Note',
+          duration: 9
+        });
+      }
     },
     [setRPCEndPointInStore]
   );

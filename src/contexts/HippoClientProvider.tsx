@@ -19,7 +19,6 @@ import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
 import { OptionTransaction, simulatePayloadTxAndLog, SimulationKeys } from '@manahippo/move-to-ts';
 import { UserTransaction } from 'aptos/src/generated';
 import { debounce } from 'lodash';
-import { RPCType, useRpcEndpoint } from 'components/Settings';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -129,17 +128,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [activeWallet, aptosClient, coinListCli, networkCfg]
   );
 
-  const rpcEndpoint = useRpcEndpoint();
-
   const hippoAgg = useMemo(
-    () =>
-      new TradeAggregator(
-        aptosClient,
-        networkCfg,
-        coinListCli,
-        rpcEndpoint === RPCType.Aptos ? Infinity : 400
-      ),
-    [aptosClient, coinListCli, networkCfg, rpcEndpoint]
+    () => new TradeAggregator(aptosClient, networkCfg, coinListCli, 400),
+    [aptosClient, coinListCli, networkCfg]
   );
   useEffect(() => {
     (async () => {
