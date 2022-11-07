@@ -324,7 +324,7 @@ const TokenSwap = () => {
     return !!(
       fromToken &&
       toToken &&
-      hippoAgg.getAllRoutes(fromToken, toToken, 3, false).length > 0
+      hippoAgg.getAllRoutes(fromToken, toToken, false, 3, false).length > 0
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, hippoAgg, hippoAgg.allPools, toToken]);
@@ -479,6 +479,7 @@ const TokenSwap = () => {
               await hippoAgg.reloadPools(
                 fromToken,
                 toToken,
+                false,
                 maxSteps,
                 true,
                 false,
