@@ -45,9 +45,10 @@ interface IRouteRowProps {
 }
 
 const serializeRouteQuote = (rq: IApiRouteAndQuote) => {
-  return `${rq.quote.inputUiAmt}:${rq.route.steps.map((s) => s.dexType).join('x')}:${rq.route.tokens
-    .map((t) => t.symbol)
-    .join('->')}`;
+  // Same dexType might have different poolTypes
+  return `${rq.quote.inputUiAmt}->${rq.quote.outputUiAmt}:${rq.route.steps
+    .map((s) => `${s.dexType}(${s.poolType.toJsNumber()})`)
+    .join('x')}:${rq.route.tokens.map((t) => t.symbol).join('->')}`;
 };
 
 const SettingsButton = ({
@@ -415,11 +416,13 @@ const TokenSwap = () => {
   timePassedRef.current = timePassedAfterRefresh;
 
   const previousFromUiAmt = usePrevious(fromUiAmt);
+  /*
   const previousFromToken = usePrevious(fromToken);
   const previousToToken = usePrevious(toToken);
   const tokenPairUnchanged =
     (previousFromToken === fromToken && previousToToken === toToken) ||
     (previousFromToken === toToken && previousToToken === fromToken);
+  */
 
   const lastFetchTs = useRef(0);
 
@@ -435,9 +438,11 @@ const TokenSwap = () => {
         const now = Date.now();
         lastFetchTs.current = now;
 
+        /*
         console.log(
           `FetchSwapRoutes: tokenPairUnchanged: ${tokenPairUnchanged}, timePassedRef.current: ${timePassedRef.current}`
         );
+        */
         if (hippoAgg && fromToken && toToken) {
           const maxSteps = 3;
           if (fromUiAmt) {
@@ -525,7 +530,6 @@ const TokenSwap = () => {
       fromUiAmt,
       hippoAgg,
       inputTriggerReloadThreshold,
-      tokenPairUnchanged,
       isInputAmtTriggerReload,
       poolReloadMinInterval,
       previousFromUiAmt,
