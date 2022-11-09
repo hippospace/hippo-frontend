@@ -1883,34 +1883,34 @@
     eventemitter3 "^4.0.7"
     js-sha3 "^0.8.0"
 
-"@manahippo/coin-list@1.0.20":
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-1.0.20.tgz#b3f4b85b6fc942641128c768cf7fe45e7025efa0"
-  integrity sha512-RjfxlDZqd7p6F6bE7agh8XCLxzgkwOQc9xfEPWvdtMOVDLuTbyg14GJx689mtsMLg+n5n1jai0QLjyj7OntgzA==
+"@manahippo/coin-list@1.0.21":
+  version "1.0.21"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-1.0.21.tgz#be2e438fcde1e976e647f5c279b6a3d5331e24fb"
+  integrity sha512-7IGNJYr35hs5FR6P8f/5eA2iNJgnHPcdKVzuDroWXeRO+T+wJ7g9c/QSiL0y0tLZr0Z12InxB2CnflLRzN3ESw==
   dependencies:
-    "@manahippo/move-to-ts" "0.4.3"
+    "@manahippo/move-to-ts" "0.4.4"
     aptos "1.3.15"
     big-integer "^1.6.51"
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/hippo-sdk@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-3.0.0.tgz#1ab0c905158d9f645075fe8d9d796862bed4fed6"
-  integrity sha512-K4g9jbXK6pTRHh8mPOmnUxCHIaCCz6yAR7+76P/BcVdeWfwxX8JH68M5jv2jR/g9tyTjV7xQqHrwciaXbRM+ZA==
+"@manahippo/hippo-sdk@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-3.0.2.tgz#c1d7cdb1f9b13c8ffa3619d2e8f97b0e4c1d6d36"
+  integrity sha512-7RUSzAv+3lXnV5pETut2+kRN80SRH1G4/0qH1mGWMhwAzxL6jgtPkwOzCnKqBXzN22Cy/Go83k607Jtz0bO4Wg==
   dependencies:
-    "@manahippo/coin-list" "1.0.20"
-    "@manahippo/move-to-ts" "0.4.3"
+    "@manahippo/coin-list" "1.0.21"
+    "@manahippo/move-to-ts" "0.4.4"
     aptos "1.3.15"
     commander "^9.3.0"
     promise-throttle "1.1.2"
     wretch "2.1.5"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@0.4.3":
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.4.3.tgz#bc74d27e87bba0294accb8b2982961359692c7a8"
-  integrity sha512-54yOI16Mer3qV/+MNz52i+/CiW0Hk17h+hZR97tEUkZl5/S0flDn2IJMyALlsvxfxxEEk3VTLES/UddZGo3UpQ==
+"@manahippo/move-to-ts@0.4.4":
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.4.4.tgz#63aefe96f673a0665e38e14e1c39cb18f2d0420e"
+  integrity sha512-8KqbHGisE+/wMgsDbiGb3NHus1Hb0Si0AoUI8XC+JcpiwVdfcREzui+RFmsNFNaod49W3Znc/gBuUxOq85+Hvw==
   dependencies:
     aptos "1.3.15"
     big-integer "^1.6.51"
