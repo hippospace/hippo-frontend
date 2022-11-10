@@ -1883,10 +1883,10 @@
     eventemitter3 "^4.0.7"
     js-sha3 "^0.8.0"
 
-"@manahippo/coin-list@1.0.21":
-  version "1.0.21"
-  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-1.0.21.tgz#be2e438fcde1e976e647f5c279b6a3d5331e24fb"
-  integrity sha512-7IGNJYr35hs5FR6P8f/5eA2iNJgnHPcdKVzuDroWXeRO+T+wJ7g9c/QSiL0y0tLZr0Z12InxB2CnflLRzN3ESw==
+"@manahippo/coin-list@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-2.0.1.tgz#f4bbca449d223f87d6a05cee1b8fead69a1c563a"
+  integrity sha512-xNhRL27evFScKMedpjo9TCWhfySXD5zjP0nIEp4M9l6UHYeppfHvd+RXg+xOSNZYc2MLnEBNdYLxS+6328Z9Cw==
   dependencies:
     "@manahippo/move-to-ts" "0.4.4"
     aptos "1.3.15"
@@ -1894,12 +1894,12 @@
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/hippo-sdk@3.0.4":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-3.0.4.tgz#0d7bc604850dc03442605a95afafa785247dea80"
-  integrity sha512-aL3cAe7hNMmayshL+Kag0q2Grf+Q9xjBt1v3N0Pe/+uFr+LaGr692I+fsXGqfQbppA++wlQ8jdg240XgXIKx9g==
+"@manahippo/hippo-sdk@3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-3.0.6.tgz#d5ed6d8b55d3a8eee6643100eb4d19eae8dbdf88"
+  integrity sha512-RVbsimekEj67+SOCThV4BlNd6xUTlo00qcMrYe5K9coEIc8+VD5y6yuAGFdiXYN28VXteWFiC0qQvwbrpMpKbQ==
   dependencies:
-    "@manahippo/coin-list" "1.0.21"
+    "@manahippo/coin-list" "2.0.1"
     "@manahippo/move-to-ts" "0.4.4"
     aptos "1.3.15"
     commander "^9.3.0"
