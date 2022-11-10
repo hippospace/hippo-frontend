@@ -162,8 +162,13 @@ const Stats = () => {
 
   return (
     <div className="max-w-[1321px] mx-auto mt-[106px] tablet:mt-[64px] mobile:mt-[32px]">
-      <div className="mb-6 flex items-end tablet:flex-col tablet:items-start tablet:gap-y-2">
-        <div className="h3 mr-auto mobile:h5">HIPPO Stats Overview</div>
+      <div className="mb-8 tablet:mb-4 flex items-end tablet:flex-col tablet:items-start tablet:gap-y-8">
+        <div className="mr-auto">
+          <div className="h3 mb-2 mobile:h5 text-grey-500">HIPPO Stats Overview</div>
+          {volumeTotal && (
+            <div className="h2 mobile:h4">Total Volume ${numberGroupFormat(volumeTotal, 0)}</div>
+          )}
+        </div>
         <Segmented
           className={classNames('shadow-main bg-surface', styles.segmentedSelector)}
           options={Periods as unknown as string[]}
@@ -175,15 +180,14 @@ const Stats = () => {
         {volumeInPeriod && volumeTotal ? (
           <>
             <div className="mr-auto">
-              <div className="h-6 font-bold mb-3 tablet:mb-1">Trading Volume {statsPeriod}</div>
+              <div className="h6 mobile:subtitle-bold font-bold mb-3 tablet:mb-1">
+                Trading Volume {statsPeriod}
+              </div>
               <div className="textLargeNormal text-grey-500">{volumeInPeriod.peroid}</div>
             </div>
             <div>
-              <div className="h2 mobile:h5 mb-3 tablet:mb-1">
+              <div className="h4 mobile:h5 mb-3 tablet:mb-1">
                 ${numberGroupFormat(volumeInPeriod.amount, 0)}
-              </div>
-              <div className="textLargeNormal text-grey-500 font-[500] text-right tablet:text-left">
-                ${numberGroupFormat(volumeTotal, 0)} Total Volume
               </div>
             </div>
           </>
