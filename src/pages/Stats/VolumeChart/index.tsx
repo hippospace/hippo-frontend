@@ -86,9 +86,9 @@ const VolumeChart = ({ data = [] }: { data: VolumeData[] }) => {
             axisLine={false}
             tickLine={false}
             tickCount={4}
-            tickMargin={24}
+            tickMargin={10}
             tick={data.length !== 0}
-            tickFormatter={(v) => (typeof v === 'number' ? numberOfAbbr(v, 0) : v)}
+            tickFormatter={(v) => (typeof v === 'number' ? numberOfAbbr(v, 1) : v)}
           />
           <Tooltip cursor={false} content={<CustomTooltip />} />
           <Bar
