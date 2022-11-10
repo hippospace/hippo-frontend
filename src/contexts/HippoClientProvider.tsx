@@ -95,7 +95,10 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     (async () => {
       try {
         // Important: load full coin list
-        await coinListCli.update(aptosClient);
+        await coinListCli.update(aptosClient, undefined, {
+          maxGasAmount: 40_000,
+          expireTimestamp: Math.floor(Date.now() / 1000) + 60
+        });
         updateCoinlist();
       } catch (err) {
         console.log('Update coin list client failed', err);
@@ -272,7 +275,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           address: new HexString(address)
         };
         options = {
-          maxGasAmount: 20_000,
+          maxGasAmount: 40_000,
           expireTimestamp: Math.floor(Date.now() / 1000) + 60,
           ...(options || {})
         };
