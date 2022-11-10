@@ -273,6 +273,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         };
         options = {
           maxGasAmount: 20_000,
+          expireTimestamp: Math.floor(Date.now() / 1000) + 60,
           ...(options || {})
         };
         const result = await simulatePayloadTxAndLog(aptosClient, simkeys, payload, options, false);
