@@ -1,3 +1,5 @@
+import { MaybeHexString } from 'aptos';
+
 /** Convert string to hex-encoded utf-8 bytes. */
 export const stringToHex = (text: string) => {
   const encoder = new TextEncoder();
@@ -23,3 +25,6 @@ export const isValidUrl = (value: string) => {
     value
   );
 };
+
+export const txExplorerUrl = (txHash: MaybeHexString) =>
+  `https://tracemove.io/transaction/${txHash}`;

@@ -3,6 +3,7 @@ import { notification } from 'components/Antd';
 import TextLink from 'components/TextLink';
 import { ReactNode } from 'react';
 import { CloseIcon, NotiErrorIcon, NotiInfoIcon, NotiSuccessIcon } from 'resources/icons';
+import { txExplorerUrl } from './utility';
 
 type NotificationType = 'success' | 'error' | 'info' | 'warn';
 
@@ -51,7 +52,7 @@ export const openTxSuccessNotification = (txHash: MaybeHexString, content: strin
   const detail = (
     <p>
       <div>{content}</div>
-      <TextLink href={`https://explorer.aptoslabs.com/txn/${txHash}`}>View transaction</TextLink>
+      <TextLink href={txExplorerUrl(txHash)}>View transaction</TextLink>
     </p>
   );
   return openNotification({ detail, title: 'Transaction Success' });
@@ -61,7 +62,7 @@ export const openTxErrorNotification = (txHash: MaybeHexString, content: string)
   const detail = (
     <p>
       <div>{content}</div>
-      <TextLink href={`https://explorer.aptoslabs.com/txn/${txHash}`}>View transaction</TextLink>
+      <TextLink href={txExplorerUrl(txHash)}>View transaction</TextLink>
     </p>
   );
   return openNotification({ type: 'error', detail, title: 'Transaction Failed' });
@@ -71,7 +72,7 @@ export const openTxPendingNotification = (txHash: MaybeHexString, content: strin
   const detail = (
     <p>
       <div>{content}</div>
-      <TextLink href={`https://explorer.aptoslabs.com/txn/${txHash}`}>View transaction</TextLink>
+      <TextLink href={txExplorerUrl(txHash)}>View transaction</TextLink>
     </p>
   );
   return openNotification({ type: 'info', detail, title: 'Transaction Pending' });
