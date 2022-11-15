@@ -13,6 +13,7 @@ import {
   RiseWalletAdapter,
   NightlyWalletAdapter,
   FewchaWalletAdapter,
+  SpikaWalletAdapter,
   BitkeepWalletAdapter
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
@@ -45,6 +46,7 @@ const Providers: React.FC<TProps> = (props: TProps) => {
       new PontemWalletAdapter(),
       new FewchaWalletAdapter(),
       new BitkeepWalletAdapter(),
+      new SpikaWalletAdapter(),
       new NightlyWalletAdapter()
     ],
     []
