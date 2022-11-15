@@ -31,7 +31,7 @@ const SwapDetail = ({
   let rate: string = '-';
   let output: string = '-';
   let minimum: string = '-';
-  let priceImpact: string = '-';
+  let priceImpactText: string = '-';
   let rateCompareToCoingecko = <>-</>;
   if (routeAndQuote) {
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
@@ -40,10 +40,8 @@ const SwapDetail = ({
       outputUiAmt * (1 - swapSettings.slipTolerance / 100),
       toToken
     )} ${toToken.symbol}`;
-    priceImpact =
-      (routeAndQuote.quote.priceImpact || 0) >= 0.0001
-        ? `${((routeAndQuote.quote.priceImpact || 0) * 100).toFixed(2)}%`
-        : '<0.01%';
+    priceImpact = Math.abs(routeAndQuote.quote.priceImpact || 0);
+    priceImpactText = priceImpact >= 0.0001 ? `${(priceImpact * 100).toFixed(2)}%` : '<0.01%';
 
     const avgPrice = routeAndQuote.quote.outputUiAmt / routeAndQuote.quote.inputUiAmt;
     rate =
@@ -122,7 +120,16 @@ const SwapDetail = ({
     },
     {
       label: 'Price Impact',
-      value: priceImpact
+      value: (
+        <div
+          className={classNames({
+            'text-success-500': priceImpact <= 0.01,
+            'text-warn-500': priceImpact > 0.01 && priceImpact <= 0.05,
+            'text-error-500': priceImpact > 0.05
+          })}>
+          {priceImpactText}
+        </div>
+      )
     },
     {
       label: 'Slippage Tolerance',

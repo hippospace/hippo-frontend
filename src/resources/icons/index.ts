@@ -32,3 +32,4 @@ export { ReactComponent as NotiErrorIcon } from './notis/error.svg';
 export { ReactComponent as NotiInfoIcon } from './notis/info.svg';
 export { ReactComponent as AdjustIcon } from './adjust.svg';
 export { ReactComponent as QuestionIcon } from './question.svg';
+export { ReactComponent as WarningIcon } from './warning.svg';

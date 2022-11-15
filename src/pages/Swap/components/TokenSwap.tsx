@@ -1,7 +1,7 @@
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AdjustIcon, MoreArrowDown, RefreshIcon, SwapIcon } from 'resources/icons';
+import { AdjustIcon, MoreArrowDown, RefreshIcon, SwapIcon, WarningIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
 import CurrencyInput from './CurrencyInput';
 import SwapDetail from './SwapDetail';
@@ -701,6 +701,19 @@ const TokenSwap = () => {
     submitForm();
   }, [submitForm]);
 
+  const priceImpact = useMemo(
+    () => Math.abs(routeSelected?.quote.priceImpact || 0),
+    [routeSelected?.quote.priceImpact]
+  );
+
+  const priceImpactTooHigh = useMemo(() => {
+    return priceImpact >= 0.05;
+  }, [priceImpact]);
+
+  const hasErrors = useMemo(() => {
+    return priceImpactTooHigh;
+  }, [priceImpactTooHigh]);
+
   const { isTablet } = useBreakpoint('tablet');
   const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
   const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
@@ -804,6 +817,23 @@ const TokenSwap = () => {
           )}
         </div>
       </Card>
+      {hasErrors && (
+        <Card className="px-8 py-2 my-4">
+          {priceImpactTooHigh && (
+            <div>
+              <div className="text-error-500 body-bold ml-5 relative">
+                <div className="absolute w-fit -left-5 bottom-0 top-0 flex items-center">
+                  <WarningIcon className="font-icon" />
+                </div>
+                Price impact is {(priceImpact * 100).toFixed(2)}%
+              </div>
+              <div className="text-grey-500 label-large-regular ml-5">
+                Try reducing your trade size
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 };
