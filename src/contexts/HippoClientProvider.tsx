@@ -235,7 +235,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
               `Failed to swap ${routeAndQuote.quote.inputSymbol} to ${routeAndQuote.quote.outputSymbol}`
             );
           }
-          setLastUpdateVersion(txnResult.version);
+          setLastUpdateVersion(BigInt(txnResult.version));
           setRefreshWalletClient(true);
           success = true;
         }

@@ -35,7 +35,8 @@ const CoinIcon: React.FC<TProps> = ({ logoSrc, size = 24, className, token }) =>
       {logoSrc && (
         <img
           src={logoSrc}
-          className={classNames('w-full h-full rounded-full', { invisible: !isLoaded })}
+          // eslint-disable-next-line prettier/prettier
+          className={classNames('w-full h-full rounded-full', { 'invisible': !isLoaded })}
           alt="coin icon"
           onError={onImgError}
           onLoad={onImgLoad}
