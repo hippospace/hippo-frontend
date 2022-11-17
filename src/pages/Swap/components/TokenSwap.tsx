@@ -24,6 +24,7 @@ import { Types, ApiError } from 'aptos';
 import TokenSteps from './TokenSteps';
 import { RPCType, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
+import { useCoingeckoValue } from 'hooks/useCoingecko';
 
 interface IRoutesProps {
   className?: string;
@@ -701,6 +702,8 @@ const TokenSwap = () => {
   }, [submitForm]);
 
   const { isTablet } = useBreakpoint('tablet');
+  const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
+  const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
 
   const cardXPadding = '32px';
   return (
@@ -723,8 +726,11 @@ const TokenSwap = () => {
         <div
           className="w-full flex flex-col gap-1 mobile:!px-4"
           style={{ paddingLeft: cardXPadding, paddingRight: cardXPadding }}>
-          <div className="body-bold mb-2 flex">
+          <div className="body-bold mb-2 flex items-end">
             <div className="mr-auto">Pay</div>
+            {payValue && fromUiAmt > 0 && (
+              <div className="label-large-bold text-grey-500 leading-none">${payValue}</div>
+            )}
           </div>
           <CurrencyInput
             actionType="currencyFrom"
@@ -734,8 +740,11 @@ const TokenSwap = () => {
           <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
             <SwapIcon className="font-icon text-[40px] text-grey-700" />
           </Button>
-          <div className="body-bold mb-2 flex">
+          <div className="body-bold mb-2 flex items-end">
             <div className="mr-auto">Receive</div>
+            {toValue && fromUiAmt > 0 && (
+              <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
+            )}
           </div>
           <CurrencyInput actionType="currencyTo" />
           {isTablet && fromUiAmt && allRoutes.length > 0 && routeSelected && (

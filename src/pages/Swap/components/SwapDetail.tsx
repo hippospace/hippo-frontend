@@ -7,6 +7,9 @@ import { useState } from 'react';
 import { ExchangeIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
+import useCoingeckoRate from 'hooks/useCoingecko';
+import TextLink from 'components/TextLink';
+import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 
 const SwapDetail = ({
   routeAndQuote,
@@ -19,14 +22,17 @@ const SwapDetail = ({
   toToken: CoinInfo;
   className?: string;
 }) => {
+  const [coingeckoRate, coingeckoApi] = useCoingeckoRate(fromToken, toToken);
+
   const { values: swapSettings } = useFormikContext<ISwapSettings>();
-  const [isPriceYToX, setIsPriceYToX] = useState(true);
+  const [isPriceYToX, setIsPriceYToX] = useState(false);
   const [tokenAmountFormatter] = useTokenAmountFormatter();
 
   let rate: string = '-';
   let output: string = '-';
   let minimum: string = '-';
   let priceImpact: string = '-';
+  let rateCompareToCoingecko = <>-</>;
   if (routeAndQuote) {
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
     output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
@@ -48,19 +54,61 @@ const SwapDetail = ({
         : `1 ${toToken.symbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromToken)} ${
             fromToken.symbol
           }`;
+
+    const toTokenRate = 1 / avgPrice;
+
+    if (coingeckoRate && toTokenRate) {
+      const coingeckoRateLink = (
+        <TextLink href={coingeckoApi} className="">
+          CoinGecko rate
+        </TextLink>
+      );
+      const diff = Math.abs(toTokenRate - coingeckoRate) / coingeckoRate;
+      const diffStr = diff < 0.0001 ? '<0.01%' : `${cutDecimals('' + diff * 100, 2)}%`;
+      if (toTokenRate <= coingeckoRate) {
+        rateCompareToCoingecko = (
+          <>
+            <span className={classNames('text-success-500')}>{diffStr} cheaper than</span>{' '}
+            {coingeckoRateLink}
+          </>
+        );
+      } else if (diff <= 0.01) {
+        rateCompareToCoingecko = (
+          <>
+            <span className="text-success-500">Within {diffStr}</span> {coingeckoRateLink}
+          </>
+        );
+      } else {
+        rateCompareToCoingecko = (
+          <>
+            <span
+              className={classNames({
+                'text-error-500': diff >= 0.05,
+                'text-warn-500': diff < 0.05
+              })}>
+              {diffStr} more expensive than
+            </span>{' '}
+            {coingeckoRateLink}
+          </>
+        );
+      }
+    }
   }
 
   const details = [
     {
       label: 'Rate',
       value: (
-        <div
-          className="flex items-center cursor-pointer"
-          onClick={() => setIsPriceYToX(!isPriceYToX)}>
-          <span className="mr-1">{rate}</span>
-          <Button variant="icon" className="mobile:hidden">
-            <ExchangeIcon className="font-icon body-regular" />
-          </Button>
+        <div className="flex flex-col items-end mb-1">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() => setIsPriceYToX(!isPriceYToX)}>
+            <span className="mr-1">{rate}</span>
+            <Button variant="icon" className="mobile:hidden">
+              <ExchangeIcon className="font-icon body-regular" />
+            </Button>
+          </div>
+          <div>{rateCompareToCoingecko}</div>
         </div>
       )
     },
