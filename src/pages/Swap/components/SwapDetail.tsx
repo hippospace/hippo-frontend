@@ -15,12 +15,14 @@ const SwapDetail = ({
   routeAndQuote,
   fromToken,
   toToken,
-  className = ''
+  className = '',
+  fromValue
 }: {
   routeAndQuote: IApiRouteAndQuote | null | undefined;
   fromToken: CoinInfo;
   toToken: CoinInfo;
   className?: string;
+  fromValue?: number;
 }) => {
   const [coingeckoRate, coingeckoApi] = useCoingeckoRate(fromToken, toToken);
 
@@ -32,7 +34,9 @@ const SwapDetail = ({
   let output: string = '-';
   let minimum: string = '-';
   let priceImpactText: string = '-';
+  let priceImpact = 0;
   let rateCompareToCoingecko = <>-</>;
+  const isPriceImpactEnabled = fromValue && fromValue >= 50;
   if (routeAndQuote) {
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
     output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
@@ -41,7 +45,9 @@ const SwapDetail = ({
       toToken
     )} ${toToken.symbol}`;
     priceImpact = Math.abs(routeAndQuote.quote.priceImpact || 0);
-    priceImpactText = priceImpact >= 0.0001 ? `${(priceImpact * 100).toFixed(2)}%` : '<0.01%';
+    if (isPriceImpactEnabled) {
+      priceImpactText = priceImpact >= 0.0001 ? `${(priceImpact * 100).toFixed(2)}%` : '<0.01%';
+    }
 
     const avgPrice = routeAndQuote.quote.outputUiAmt / routeAndQuote.quote.inputUiAmt;
     rate =
@@ -123,9 +129,9 @@ const SwapDetail = ({
       value: (
         <div
           className={classNames({
-            'text-success-500': priceImpact <= 0.01,
-            'text-warn-500': priceImpact > 0.01 && priceImpact <= 0.05,
-            'text-error-500': priceImpact > 0.05
+            'text-success-500': isPriceImpactEnabled && priceImpact <= 0.01,
+            'text-warn-500': priceImpact > 0.01 && priceImpact <= 0.05 && isPriceImpactEnabled,
+            'text-error-500': priceImpact > 0.05 && isPriceImpactEnabled
           })}>
           {priceImpactText}
         </div>

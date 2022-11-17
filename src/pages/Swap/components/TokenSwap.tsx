@@ -796,7 +796,12 @@ const TokenSwap = () => {
                 }
                 simuResults={simulateResults}
               />
-              <SwapDetail routeAndQuote={routeSelected} fromToken={fromToken} toToken={toToken} />
+              <SwapDetail
+                routeAndQuote={routeSelected}
+                fromToken={fromToken}
+                toToken={toToken}
+                fromValue={payValue}
+              />
             </Card>
           )}
           <Button
@@ -813,6 +818,7 @@ const TokenSwap = () => {
               routeAndQuote={routeSelected}
               fromToken={fromToken}
               toToken={toToken}
+              fromValue={payValue}
             />
           )}
         </div>
