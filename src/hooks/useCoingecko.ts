@@ -9,8 +9,8 @@ const useCoingeckoRate = (fromToken: RawCoinInfo, toToken: RawCoinInfo) => {
   let isLoading = false;
   let rate: number | undefined = undefined;
   const key = useMemo(() => {
-    if (!fromToken || !toToken) return null;
-    const ids = [fromToken, toToken].map((t) => t.coingecko_id);
+    if (!(fromToken?.coingecko_id && toToken?.coingecko_id)) return null;
+    const ids = [fromToken, toToken].map((t) => t.coingecko_id).sort();
     return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
       ids.join(',')
     )}&vs_currencies=usd`;
@@ -27,7 +27,7 @@ const useCoingeckoRate = (fromToken: RawCoinInfo, toToken: RawCoinInfo) => {
 
 export const useCoingeckoPrice = (token: RawCoinInfo) => {
   const key = useMemo(() => {
-    if (!token) return null;
+    if (!token?.coingecko_id) return null;
     return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
       token.coingecko_id
     )}&vs_currencies=usd`;
@@ -44,7 +44,9 @@ export const useCoingeckoPrice = (token: RawCoinInfo) => {
 export const useCoingeckoValue = (token: RawCoinInfo, amount: number) => {
   const [price, error] = useCoingeckoPrice(token);
   let value: string | undefined = undefined;
-  value = cutDecimals('' + price * amount, 2);
+  if (typeof price === 'number') {
+    value = cutDecimals('' + price * amount, 2);
+  }
   return [value, error];
 };
 
