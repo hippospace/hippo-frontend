@@ -701,22 +701,25 @@ const TokenSwap = () => {
     submitForm();
   }, [submitForm]);
 
+  const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
+  const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
+
+  const isPriceImpactEnabled = payValue && payValue >= 50;
+
   const priceImpact = useMemo(
     () => Math.abs(routeSelected?.quote.priceImpact || 0),
     [routeSelected?.quote.priceImpact]
   );
 
   const priceImpactTooHigh = useMemo(() => {
-    return priceImpact >= 0.05;
-  }, [priceImpact]);
+    return isPriceImpactEnabled && priceImpact >= 0.05;
+  }, [isPriceImpactEnabled, priceImpact]);
 
   const hasErrors = useMemo(() => {
     return priceImpactTooHigh;
   }, [priceImpactTooHigh]);
 
   const { isTablet } = useBreakpoint('tablet');
-  const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
-  const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
 
   const cardXPadding = '32px';
   return (
@@ -800,7 +803,7 @@ const TokenSwap = () => {
                 routeAndQuote={routeSelected}
                 fromToken={fromToken}
                 toToken={toToken}
-                fromValue={payValue}
+                isPriceImpactEnabled={isPriceImpactEnabled}
               />
             </Card>
           )}
@@ -818,7 +821,7 @@ const TokenSwap = () => {
               routeAndQuote={routeSelected}
               fromToken={fromToken}
               toToken={toToken}
-              fromValue={payValue}
+              isPriceImpactEnabled={isPriceImpactEnabled}
             />
           )}
         </div>

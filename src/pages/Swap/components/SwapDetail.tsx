@@ -16,13 +16,13 @@ const SwapDetail = ({
   fromToken,
   toToken,
   className = '',
-  fromValue
+  isPriceImpactEnabled = true
 }: {
   routeAndQuote: IApiRouteAndQuote | null | undefined;
   fromToken: CoinInfo;
   toToken: CoinInfo;
   className?: string;
-  fromValue?: number;
+  isPriceImpactEnabled?: boolean;
 }) => {
   const [coingeckoRate, coingeckoApi] = useCoingeckoRate(fromToken, toToken);
 
@@ -36,7 +36,6 @@ const SwapDetail = ({
   let priceImpactText: string = '-';
   let priceImpact = 0;
   let rateCompareToCoingecko = <>-</>;
-  const isPriceImpactEnabled = fromValue && fromValue >= 50;
   if (routeAndQuote) {
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
     output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
@@ -61,7 +60,13 @@ const SwapDetail = ({
 
     const toTokenRate = 1 / avgPrice;
 
-    if (coingeckoRate && toTokenRate) {
+    if (
+      coingeckoRate &&
+      toTokenRate &&
+      // for cases when switching tokens
+      fromToken.token_type.type === routeAndQuote.route.xCoinInfo.token_type.type &&
+      toToken.token_type.type === routeAndQuote.route.yCoinInfo.token_type.type
+    ) {
       const coingeckoRateLink = (
         <TextLink href={coingeckoApi} className="">
           CoinGecko rate
