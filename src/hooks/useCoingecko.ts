@@ -16,7 +16,7 @@ const useCoingeckoRate = (fromToken: RawCoinInfo, toToken: RawCoinInfo) => {
     )}&vs_currencies=usd`;
   }, [fromToken, toToken]);
 
-  const { data, error } = useSWR(key, fetcher, { refreshInterval: 20_000 });
+  const { data, error } = useSWR(key, fetcher, { refreshInterval: 30_000 });
   if (!data) isLoading = true;
   if (data) {
     rate = data[toToken.coingecko_id].usd / data[fromToken.coingecko_id].usd;
@@ -33,7 +33,7 @@ export const useCoingeckoPrice = (token: RawCoinInfo) => {
     )}&vs_currencies=usd`;
   }, [token]);
 
-  const { data, error } = useSWR(key, fetcher, { refreshInterval: 20_000 });
+  const { data, error } = useSWR(key, fetcher, { refreshInterval: 30_000 });
   let price: number | undefined = undefined;
   if (data) {
     price = data[token.coingecko_id].usd;

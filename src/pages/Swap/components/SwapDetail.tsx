@@ -10,6 +10,48 @@ import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 import useCoingeckoRate from 'hooks/useCoingecko';
 import TextLink from 'components/TextLink';
 import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
+import { useBinanceRate } from 'hooks/useBinance';
+import Hint from 'components/Hint';
+
+const RateCompare = ({
+  rate,
+  rateReferrence,
+  apiReferrence,
+  referrenceName,
+  tip
+}: {
+  rate: number;
+  rateReferrence: number;
+  apiReferrence: string;
+  referrenceName: string;
+  tip?: string;
+}) => {
+  const diff = Math.abs(rate - rateReferrence) / rateReferrence;
+  const diffStr = diff < 0.0001 ? '<0.01%' : `${cutDecimals('' + diff * 100, 2)}%`;
+
+  return (
+    <div>
+      {rate <= rateReferrence && (
+        <span className={classNames('text-success-500')}>{diffStr} cheaper than</span>
+      )}
+      {rate > rateReferrence && diff <= 0.01 && (
+        <span className="text-success-500">Within {diffStr}</span>
+      )}
+      {rate > rateReferrence && diff > 0.01 && (
+        <span
+          className={classNames({
+            'text-error-500': diff >= 0.05,
+            'text-warn-500': diff < 0.05
+          })}>
+          {diffStr} more expensive than
+        </span>
+      )}{' '}
+      <TextLink href={apiReferrence} className="">
+        {referrenceName} {tip && <Hint content={tip} />}
+      </TextLink>
+    </div>
+  );
+};
 
 const SwapDetail = ({
   routeAndQuote,
@@ -25,6 +67,7 @@ const SwapDetail = ({
   isPriceImpactEnabled?: boolean;
 }) => {
   const [coingeckoRate, coingeckoApi] = useCoingeckoRate(fromToken, toToken);
+  const [binanceRate, binanceApi] = useBinanceRate(fromToken, toToken);
 
   const { values: swapSettings } = useFormikContext<ISwapSettings>();
   const [isPriceYToX, setIsPriceYToX] = useState(false);
@@ -35,7 +78,7 @@ const SwapDetail = ({
   let minimum: string = '-';
   let priceImpactText: string = '-';
   let priceImpact = 0;
-  let rateCompareToCoingecko = <>-</>;
+  let toTokenRate = undefined;
   if (routeAndQuote) {
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
     output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
@@ -58,50 +101,7 @@ const SwapDetail = ({
             fromToken.symbol
           }`;
 
-    const toTokenRate = 1 / avgPrice;
-
-    if (
-      coingeckoRate &&
-      toTokenRate &&
-      // for cases when switching tokens
-      fromToken.token_type.type === routeAndQuote.route.xCoinInfo.token_type.type &&
-      toToken.token_type.type === routeAndQuote.route.yCoinInfo.token_type.type
-    ) {
-      const coingeckoRateLink = (
-        <TextLink href={coingeckoApi} className="">
-          CoinGecko rate
-        </TextLink>
-      );
-      const diff = Math.abs(toTokenRate - coingeckoRate) / coingeckoRate;
-      const diffStr = diff < 0.0001 ? '<0.01%' : `${cutDecimals('' + diff * 100, 2)}%`;
-      if (toTokenRate <= coingeckoRate) {
-        rateCompareToCoingecko = (
-          <>
-            <span className={classNames('text-success-500')}>{diffStr} cheaper than</span>{' '}
-            {coingeckoRateLink}
-          </>
-        );
-      } else if (diff <= 0.01) {
-        rateCompareToCoingecko = (
-          <>
-            <span className="text-success-500">Within {diffStr}</span> {coingeckoRateLink}
-          </>
-        );
-      } else {
-        rateCompareToCoingecko = (
-          <>
-            <span
-              className={classNames({
-                'text-error-500': diff >= 0.05,
-                'text-warn-500': diff < 0.05
-              })}>
-              {diffStr} more expensive than
-            </span>{' '}
-            {coingeckoRateLink}
-          </>
-        );
-      }
-    }
+    toTokenRate = 1 / avgPrice;
   }
 
   const details = [
@@ -117,7 +117,31 @@ const SwapDetail = ({
               <ExchangeIcon className="font-icon body-regular" />
             </Button>
           </div>
-          <div>{rateCompareToCoingecko}</div>
+          {coingeckoRate &&
+            toTokenRate &&
+            // for cases when switching tokens
+            fromToken.token_type.type === routeAndQuote.route.xCoinInfo.token_type.type &&
+            toToken.token_type.type === routeAndQuote.route.yCoinInfo.token_type.type && (
+              <RateCompare
+                rate={toTokenRate}
+                rateReferrence={coingeckoRate}
+                apiReferrence={coingeckoApi}
+                referrenceName={'CoinGecko rate'}
+              />
+            )}
+          {binanceRate &&
+            toTokenRate &&
+            // for cases when switching tokens
+            fromToken.token_type.type === routeAndQuote.route.xCoinInfo.token_type.type &&
+            toToken.token_type.type === routeAndQuote.route.yCoinInfo.token_type.type && (
+              <RateCompare
+                rate={toTokenRate}
+                rateReferrence={binanceRate}
+                apiReferrence={binanceApi}
+                referrenceName={'Binance rate'}
+                tip={'Assuming the ratio of USDC to BUSD is 1:1'}
+              />
+            )}
         </div>
       )
     },
