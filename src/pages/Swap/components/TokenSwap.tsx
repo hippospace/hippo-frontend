@@ -25,6 +25,7 @@ import TokenSteps from './TokenSteps';
 import { RPCType, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import { useCoingeckoValue } from 'hooks/useCoingecko';
+import { useParams } from 'react-router-dom';
 
 interface IRoutesProps {
   className?: string;
@@ -286,6 +287,14 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
 };
 
 const TokenSwap = () => {
+  const {
+    fromSymbol: intialFromish,
+    toSymbol: initialToish,
+    fromAmount: initialFromAmt
+  } = useParams();
+
+  // console.log('Token swap rendering');
+
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
   const { hippoAgg, simulateSwapByRoute } = useHippoClient();
@@ -334,20 +343,52 @@ const TokenSwap = () => {
   useEffect(() => {
     if (hippoAgg) {
       if (!values.currencyFrom?.token) {
-        setFieldValue('currencyFrom.token', hippoAgg.coinListClient.getCoinInfoBySymbol('USDC')[0]);
+        const initialFromToken =
+          (intialFromish?.includes('::')
+            ? hippoAgg.coinListClient.getCoinInfoByFullName(intialFromish)
+            : hippoAgg.coinListClient.getCoinInfoBySymbol(intialFromish)[0]) ||
+          hippoAgg.coinListClient.getCoinInfoBySymbol('USDC')[0];
+        setFieldValue('currencyFrom.token', initialFromToken);
       }
       if (!values.currencyTo?.token) {
-        setFieldValue('currencyTo.token', hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]);
+        const initailToToken =
+          (initialToish?.includes('::')
+            ? hippoAgg.coinListClient.getCoinInfoByFullName(initialToish)
+            : hippoAgg.coinListClient.getCoinInfoBySymbol(initialToish)[0]) ||
+          hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0];
+        setFieldValue('currencyTo.token', initailToToken);
+      }
+
+      if (values.currencyFrom?.amount === undefined && initialFromAmt) {
+        setFieldValue('currencyFrom.amount', parseFloat(initialFromAmt) || undefined);
       }
     }
   }, [
     fromSymbol,
     hippoAgg,
+    initialFromAmt,
+    initialToish,
+    intialFromish,
     setFieldValue,
     toSymbol,
+    values.currencyFrom?.amount,
     values.currencyFrom?.token,
     values.currencyTo?.token
   ]);
+
+  useEffect(() => {
+    if (window.history.replaceState && fromToken && toToken) {
+      // Prevents browser from storing history with each change
+      window.history.replaceState(
+        {},
+        null,
+        location.origin +
+          `/swap/from/${fromToken.symbol}${fromUiAmt ? `/amt/${fromUiAmt}` : ''}/to/${
+            toToken.symbol
+          }`
+      );
+    }
+  }, [fromToken, toToken, fromUiAmt]);
 
   /*
   const latestInputParams = useRef({

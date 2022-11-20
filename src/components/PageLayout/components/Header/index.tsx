@@ -49,11 +49,11 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
       <div className="w-full space-y-4">
         {routes
           .filter((r) => r.path !== '*' && !r.hidden)
-          .map(({ name, path }) => {
+          .map(({ name, path }, index) => {
             const isCurrent = currentPageName === name;
             return (
               <Button
-                key={`${name}-${isCurrent}`}
+                key={`${name}-${index}-${isCurrent}`}
                 className={classNames('w-full', { 'hip-btn-selected': isCurrent })}
                 variant={'outlined'}
                 onClick={() => onRoute(path)}>

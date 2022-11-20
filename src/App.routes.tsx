@@ -24,10 +24,16 @@ export const routes: TRoute[] = [
     element: <Swap />
   },
   {
-    path: 'Swap',
+    path: 'swap/from/:fromSymbol/to/:toSymbol',
+    name: 'Swap',
     hidden: true,
-    name: '_Swap',
-    element: <Navigate to={'/'} replace={true} />
+    element: <Swap />
+  },
+  {
+    path: 'swap/from/:fromSymbol/amt/:fromAmount/to/:toSymbol',
+    name: 'Swap',
+    hidden: true,
+    element: <Swap />
   },
   {
     path: 'faucet',

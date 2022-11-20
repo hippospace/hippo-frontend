@@ -71,7 +71,7 @@
   },
   "browserslist": {
     "production": [
-      "supports es6-module and supports bigint"
+      "supports es6-module and supports bigint and supports history"
     ],
     "development": [
       "last 1 chrome version",
