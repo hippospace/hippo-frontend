@@ -49,6 +49,10 @@ const Swap: React.FC = () => {
             ...values.currencyFrom,
             amount: 0
           });
+          formikHelper.setFieldValue('currencyTo', {
+            ...values.currencyTo,
+            amount: 0
+          });
         }
         formikHelper.setSubmitting(false);
       } else {

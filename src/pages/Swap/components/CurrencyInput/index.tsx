@@ -18,6 +18,7 @@ import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import Button from 'components/Button';
 import Skeleton from 'components/Skeleton';
 import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
+import { useBreakpoint } from 'hooks/useBreakpoint';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -85,7 +86,8 @@ const CurrencyInput: React.FC<TProps> = ({
   const onAmountChange = useDebouncedCallback(
     useCallback(
       (a: number) => {
-        console.log(`Currency input num: ${a} of type ${typeof a}`);
+        console.log(`${actionType} input num: ${a} of type ${typeof a}`);
+        setFieldValue('isFixedOutput', actionType === 'currencyTo');
         setFieldValue(actionType, {
           ...selectedCurrency,
           amount: a
@@ -98,12 +100,15 @@ const CurrencyInput: React.FC<TProps> = ({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const onTrashClick = useCallback(() => {
+    setFieldValue('isFixedOutput', actionType === 'currencyTo');
     setFieldValue(actionType, {
       ...selectedCurrency,
       amount: 0
     });
     inputRef.current?.focus();
   }, [actionType, selectedCurrency, setFieldValue]);
+
+  const { isMobile } = useBreakpoint('mobile');
 
   return (
     <div
@@ -112,30 +117,34 @@ const CurrencyInput: React.FC<TProps> = ({
         'bg-field w-full py-4 px-3 rounded-xl h-[77px] flex flex-col justify-center mobile:px-2 relative group'
       )}>
       <div className="flex gap-1 items-center">
-        <CoinSelectButton
-          className="flex mobile:hidden"
-          isDisabled={isCoinSelectorDisabled}
-          token={selectedCurrency?.token}
-          onClick={() => setIsCoinSelectorVisible(true)}
-        />
-        <CoinSelectButton
-          className="hidden mobile:flex"
-          isDisabled={isCSDrawerVisible}
-          token={selectedCurrency?.token}
-          onClick={() => setIsCSDrawerVisible(true)}
-        />
+        {!isMobile && (
+          <CoinSelectButton
+            className="flex mobile:hidden"
+            isDisabled={isCoinSelectorDisabled}
+            token={selectedCurrency?.token}
+            onClick={() => setIsCoinSelectorVisible(true)}
+          />
+        )}
+        {isMobile && (
+          <CoinSelectButton
+            className="hidden mobile:flex"
+            isDisabled={isCSDrawerVisible}
+            token={selectedCurrency?.token}
+            onClick={() => setIsCSDrawerVisible(true)}
+          />
+        )}
         <PositiveFloatNumInput
           ref={inputRef}
           min={0}
           max={1e11}
           maxDecimals={values[actionType]?.token?.decimals || 9}
-          isDisabled={actionType === 'currencyTo' || isDisableAmountInput}
+          isDisabled={isDisableAmountInput}
           placeholder="0.00"
           className="grow h5 bg-transparent text-right pr-0 pl-1 text-grey-900"
           inputAmount={selectedCurrency?.amount || 0}
           onAmountChange={onAmountChange}
         />
-        {actionType === 'currencyFrom' && !!selectedCurrency?.amount && (
+        {!!selectedCurrency?.amount && (
           <div
             style={{ width: trashButtonContainerWidth, right: `-${trashButtonContainerWidth}` }}
             className="mobile:hidden tablet:hidden absolute h-full flex opacity-0 group-hover:opacity-100 hover:opacity-100 items-center justify-center">

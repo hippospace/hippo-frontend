@@ -30,7 +30,9 @@ export const initState: SwapState = {
       token: undefined,
       amount: undefined,
       balance: 0
-    }
+    },
+
+    isFixedOutput: false
   }
 };
 

@@ -304,7 +304,10 @@ const TokenSwap = () => {
   const fromSymbol = fromToken?.symbol;
   const toSymbol = toToken?.symbol;
 
+  const isFixedOutput = values.isFixedOutput;
   const fromUiAmt = values.currencyFrom?.amount;
+  const toUiAmt = values.currencyTo?.amount;
+
   const [allRoutes, setAllRoutes] = useState<IApiRouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<IApiRouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
@@ -458,6 +461,7 @@ const TokenSwap = () => {
   timePassedRef.current = timePassedAfterRefresh;
 
   const previousFromUiAmt = usePrevious(fromUiAmt);
+  const previousToUiAmt = usePrevious(toUiAmt);
   /*
   const previousFromToken = usePrevious(fromToken);
   const previousToToken = usePrevious(toToken);
@@ -465,6 +469,14 @@ const TokenSwap = () => {
     (previousFromToken === fromToken && previousToToken === toToken) ||
     (previousFromToken === toToken && previousToToken === fromToken);
   */
+
+  const resetInputs = useCallback(() => {
+    setFieldValue('isFixedOutput', false);
+    setFieldValue('currencyFrom', {
+      ...values.currencyFrom,
+      amount: 0
+    });
+  }, [setFieldValue, values.currencyFrom]);
 
   const lastFetchTs = useRef(0);
 
@@ -480,30 +492,51 @@ const TokenSwap = () => {
         const now = Date.now();
         lastFetchTs.current = now;
 
-        /*
-        console.log(
-          `FetchSwapRoutes: tokenPairUnchanged: ${tokenPairUnchanged}, timePassedRef.current: ${timePassedRef.current}`
-        );
-        */
+        // console.log(`FetchSwapRoutes: timePassedRef.current: ${timePassedRef.current}`);
+
         if (hippoAgg && fromToken && toToken) {
           const maxSteps = 3;
-          if (fromUiAmt) {
+          // Using isFixedOutput is necessary as the other side amount would not change immediately to 0 when the input amount is cleared
+          if ((!isFixedOutput && fromUiAmt) || (isFixedOutput && toUiAmt)) {
             const isReloadInternal =
               isReload ??
               // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
               (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold);
             setIsRefreshingRoutes(isReloadInternal);
 
-            const { routes, allRoutesCount } = await hippoAgg.getQuotesUni(
-              fromUiAmt,
-              fromToken,
-              toToken,
-              maxSteps,
-              isReloadInternal,
-              false,
-              poolReloadMinInterval,
-              false
-            );
+            const { routes, allRoutesCount } = await (async () => {
+              if (!isFixedOutput) {
+                const result = await hippoAgg.getQuotesUni(
+                  fromUiAmt,
+                  fromToken,
+                  toToken,
+                  maxSteps,
+                  isReloadInternal,
+                  false,
+                  poolReloadMinInterval,
+                  false
+                );
+                return result;
+              } else {
+                const routeAndQuotes = await hippoAgg.getQuotesWithFixedOutput(
+                  toUiAmt,
+                  fromToken,
+                  toToken,
+                  isReloadInternal,
+                  false,
+                  poolReloadMinInterval
+                );
+                const apiRoutes = routeAndQuotes.map((r) => ({
+                  ...r,
+                  route: r.route.toApiTradeRoute()
+                }));
+                return {
+                  allRoutesCount: routeAndQuotes.length,
+                  routes: apiRoutes
+                };
+              }
+            })();
+
             // check if it's the latest reqeust
             if (now === lastFetchTs.current) {
               if (routes.length > 0) {
@@ -521,12 +554,15 @@ const TokenSwap = () => {
               }
             }
           } else {
-            const isReloadInternal = isReload ?? !(previousFromUiAmt > 0);
+            const isReloadInternal =
+              isReload ??
+              ((!isFixedOutput && !(previousFromUiAmt > 0)) ||
+                (isFixedOutput && !(previousToUiAmt > 0)));
             if (isReloadInternal) {
               await hippoAgg.reloadPools(
                 fromToken,
                 toToken,
-                false,
+                isFixedOutput,
                 maxSteps,
                 true,
                 false,
@@ -559,10 +595,7 @@ const TokenSwap = () => {
           });
         }
 
-        setFieldValue('currencyFrom', {
-          ...values.currencyFrom,
-          amount: 0
-        });
+        resetInputs();
       } finally {
         setIsRefreshingRoutes(false);
       }
@@ -572,15 +605,17 @@ const TokenSwap = () => {
       fromUiAmt,
       hippoAgg,
       inputTriggerReloadThreshold,
+      isFixedOutput,
       isInputAmtTriggerReload,
       poolReloadMinInterval,
       previousFromUiAmt,
+      previousToUiAmt,
       resetAllRoutes,
+      resetInputs,
       restartTimer,
-      setFieldValue,
       setSelectedRouteFromRoutes,
       toToken,
-      values.currencyFrom
+      toUiAmt
     ]
   );
 
@@ -635,9 +670,14 @@ const TokenSwap = () => {
   );
 
   useEffect(() => {
-    fetchSwapRoutes();
+    if (!isFixedOutput) fetchSwapRoutes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken, fromUiAmt, hippoAgg]);
+  }, [fromToken, toToken, fromUiAmt, hippoAgg, isFixedOutput]);
+
+  useEffect(() => {
+    if (isFixedOutput) fetchSwapRoutes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromToken, toToken, toUiAmt, hippoAgg, isFixedOutput]);
 
   useInterval(() => {
     setTimePassedAfterRefresh(timePassedAfterRefresh + 1);
@@ -651,12 +691,19 @@ const TokenSwap = () => {
   }, refreshRoutesTimerTick);
 
   useEffect(() => {
-    setFieldValue('currencyTo', {
-      ...values.currencyTo,
-      amount: routeSelected?.quote.outputUiAmt || ''
-    });
+    if (!isFixedOutput) {
+      setFieldValue('currencyTo', {
+        ...values.currencyTo,
+        amount: routeSelected?.quote.outputUiAmt || ''
+      });
+    } else {
+      setFieldValue('currencyFrom', {
+        ...values.currencyFrom,
+        amount: routeSelected?.quote.inputUiAmt || ''
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeSelected, setFieldValue]);
+  }, [routeSelected, setFieldValue, isFixedOutput]);
 
   const onClickSwapToken = useCallback(() => {
     const tokenFrom = values.currencyFrom;
@@ -762,6 +809,11 @@ const TokenSwap = () => {
 
   const { isTablet } = useBreakpoint('tablet');
 
+  const isRoutesVisible =
+    allRoutes.length > 0 &&
+    routeSelected &&
+    ((!isFixedOutput && fromUiAmt > 0) || (isFixedOutput && toUiAmt > 0));
+
   const cardXPadding = '32px';
   return (
     <div className="w-full" ref={swapRef}>
@@ -803,8 +855,8 @@ const TokenSwap = () => {
               <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
             )}
           </div>
-          <CurrencyInput actionType="currencyTo" />
-          {isTablet && fromUiAmt && allRoutes.length > 0 && routeSelected && (
+          <CurrencyInput actionType="currencyTo" isDisableAmountInput={!hasRoute} />
+          {isTablet && isRoutesVisible && (
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
@@ -821,7 +873,7 @@ const TokenSwap = () => {
             <Card
               className={classNames(
                 'tablet:hidden absolute top-0 w-[420px] right-[-440px] px-4 laptop:w-[368px] laptop:right-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 -translate-x-[30%] -z-10 transform-gpu will-change-transform',
-                { 'opacity-100 !translate-x-0': fromUiAmt && allRoutes.length > 0 && routeSelected }
+                { 'opacity-100 !translate-x-0': isRoutesVisible }
               )}>
               <RoutesAvailable
                 availableRoutesCount={availableRoutesCount}

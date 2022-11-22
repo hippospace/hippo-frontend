@@ -7,7 +7,6 @@ const useCurrentPage = () => {
   const [selectedKey, setSelectedKey] = useState<TRoute['name']>('Home');
 
   const rootPath = pathname.split('/')[1];
-  console.log(`current pathname: ${pathname}, rootpath: ${rootPath}`);
   const pageName =
     routes?.find((r) => {
       const pathStart = r.path.split('/')[0];

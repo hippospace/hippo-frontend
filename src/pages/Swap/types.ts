@@ -16,4 +16,6 @@ export interface ISwapSettings {
     amount?: number;
     balance: number;
   };
+
+  isFixedOutput: boolean;
 }
