@@ -290,7 +290,8 @@ const TokenSwap = () => {
   const {
     fromSymbol: intialFromish,
     toSymbol: initialToish,
-    fromAmount: initialFromAmt
+    fromAmount: initialFromAmt,
+    toAmount: initialToAmt
   } = useParams();
 
   // console.log('Token swap rendering');
@@ -301,8 +302,6 @@ const TokenSwap = () => {
 
   const fromToken = values.currencyFrom?.token;
   const toToken = values.currencyTo?.token;
-  const fromSymbol = fromToken?.symbol;
-  const toSymbol = toToken?.symbol;
 
   const isFixedOutput = values.isFixedOutput;
   const fromUiAmt = values.currencyFrom?.amount;
@@ -351,7 +350,10 @@ const TokenSwap = () => {
             ? hippoAgg.coinListClient.getCoinInfoByFullName(intialFromish)
             : hippoAgg.coinListClient.getCoinInfoBySymbol(intialFromish)[0]) ||
           hippoAgg.coinListClient.getCoinInfoBySymbol('USDC')[0];
-        setFieldValue('currencyFrom.token', initialFromToken);
+        setFieldValue('currencyFrom', {
+          ...values.currencyFrom,
+          token: initialFromToken
+        });
       }
       if (!values.currencyTo?.token) {
         const initailToToken =
@@ -359,24 +361,36 @@ const TokenSwap = () => {
             ? hippoAgg.coinListClient.getCoinInfoByFullName(initialToish)
             : hippoAgg.coinListClient.getCoinInfoBySymbol(initialToish)[0]) ||
           hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0];
-        setFieldValue('currencyTo.token', initailToToken);
+        setFieldValue('currencyTo', {
+          ...values.currencyTo,
+          token: initailToToken
+        });
       }
 
       if (values.currencyFrom?.amount === undefined && initialFromAmt) {
-        setFieldValue('currencyFrom.amount', parseFloat(initialFromAmt) || undefined);
+        setFieldValue('isFixedOutput', false);
+        setFieldValue('currencyFrom', {
+          ...values.currencyFrom,
+          amount: parseFloat(initialFromAmt) || undefined
+        });
+      }
+      if (values.currencyTo?.amount === undefined && initialToAmt) {
+        setFieldValue('isFixedOutput', true);
+        setFieldValue('currencyTo', {
+          ...values.currencyTo,
+          amount: parseFloat(initialToAmt) || undefined
+        });
       }
     }
   }, [
-    fromSymbol,
     hippoAgg,
     initialFromAmt,
+    initialToAmt,
     initialToish,
     intialFromish,
     setFieldValue,
-    toSymbol,
-    values.currencyFrom?.amount,
-    values.currencyFrom?.token,
-    values.currencyTo?.token
+    values.currencyFrom,
+    values.currencyTo
   ]);
 
   useEffect(() => {
@@ -386,12 +400,12 @@ const TokenSwap = () => {
         {},
         null,
         location.origin +
-          `/swap/from/${fromToken.symbol}${fromUiAmt ? `/amt/${fromUiAmt}` : ''}/to/${
-            toToken.symbol
-          }`
+          `/swap/from/${fromToken.symbol}${
+            !isFixedOutput && fromUiAmt ? `/amt/${fromUiAmt}` : ''
+          }/to/${toToken.symbol}${isFixedOutput && toUiAmt ? `/amt/${toUiAmt}` : ''}`
       );
     }
-  }, [fromToken, toToken, fromUiAmt]);
+  }, [fromToken, toToken, fromUiAmt, isFixedOutput, toUiAmt]);
 
   /*
   const latestInputParams = useRef({
@@ -493,7 +507,6 @@ const TokenSwap = () => {
         lastFetchTs.current = now;
 
         // console.log(`FetchSwapRoutes: timePassedRef.current: ${timePassedRef.current}`);
-
         if (hippoAgg && fromToken && toToken) {
           const maxSteps = 3;
           // Using isFixedOutput is necessary as the other side amount would not change immediately to 0 when the input amount is cleared
@@ -691,15 +704,16 @@ const TokenSwap = () => {
   }, refreshRoutesTimerTick);
 
   useEffect(() => {
-    if (!isFixedOutput) {
+    // Note we compare amount with undefined to avoid initial states
+    if (!isFixedOutput && fromUiAmt !== undefined) {
       setFieldValue('currencyTo', {
         ...values.currencyTo,
-        amount: routeSelected?.quote.outputUiAmt || ''
+        amount: routeSelected?.quote.outputUiAmt || 0
       });
-    } else {
+    } else if (toUiAmt !== undefined) {
       setFieldValue('currencyFrom', {
         ...values.currencyFrom,
-        amount: routeSelected?.quote.inputUiAmt || ''
+        amount: routeSelected?.quote.inputUiAmt || 0
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
