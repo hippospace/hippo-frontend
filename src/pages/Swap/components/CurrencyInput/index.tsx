@@ -144,7 +144,7 @@ const CurrencyInput: React.FC<TProps> = ({
           inputAmount={selectedCurrency?.amount || 0}
           onAmountChange={onAmountChange}
         />
-        {!!selectedCurrency?.amount && (
+        {!isDisableAmountInput && !!selectedCurrency?.amount && (
           <div
             style={{ width: trashButtonContainerWidth, right: `-${trashButtonContainerWidth}` }}
             className="mobile:hidden tablet:hidden absolute h-full flex opacity-0 group-hover:opacity-100 hover:opacity-100 items-center justify-center">

@@ -855,7 +855,7 @@ const TokenSwap = () => {
               <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
             )}
           </div>
-          <CurrencyInput actionType="currencyTo" isDisableAmountInput={!hasRoute} />
+          <CurrencyInput actionType="currencyTo" isDisableAmountInput={true} />
           {isTablet && isRoutesVisible && (
             <>
               <RoutesAvailable
