@@ -286,6 +286,20 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
+const ErrorBody = ({ title, detail }: { title: string; detail?: string }) => {
+  return (
+    <div>
+      <div className="text-error-500 body-bold ml-5 relative">
+        <div className="absolute w-fit -left-5 bottom-0 top-0 flex items-center">
+          <WarningIcon className="font-icon" />
+        </div>
+        {title}
+      </div>
+      {detail && <div className="text-grey-500 label-large-regular ml-5">{detail}</div>}
+    </div>
+  );
+};
+
 const TokenSwap = () => {
   const {
     fromSymbol: intialFromish,
@@ -682,13 +696,22 @@ const TokenSwap = () => {
     isPeriodicRefreshPaused ? error429WaitSeconds * 1_000 : null
   );
 
+  const [toTokenRateOnSwap, setToTokenRateOnSwap] = useState(0);
+
   useEffect(() => {
-    if (!isFixedOutput) fetchSwapRoutes();
+    if (!isFixedOutput) {
+      fetchSwapRoutes();
+      // For the case users even neither approve nor reject the transaction
+      setToTokenRateOnSwap(0);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken, fromUiAmt, hippoAgg, isFixedOutput]);
 
   useEffect(() => {
-    if (isFixedOutput) fetchSwapRoutes();
+    if (isFixedOutput) {
+      fetchSwapRoutes();
+      setToTokenRateOnSwap(0);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken, toUiAmt, hippoAgg, isFixedOutput]);
 
@@ -783,25 +806,36 @@ const TokenSwap = () => {
     [setRoute]
   );
 
-  const onSwap = useCallback(() => {
-    /*
-    if (routeSelectedSerialized) {
-      Modal.warning({
-        title: 'Are you sure to proceed?',
-        content: "You're not chosing the best price route",
-        okText: 'Proceed anyway',
-        okCancel: true,
-        cancelText: 'Cancel',
-        maskClosable: true,
-        onOk: () => {
-          submitForm();
-        }
-      });
-      return;
+  const rateChangeAfterSubmit = useMemo(() => {
+    let change = 0;
+    if (toTokenRateOnSwap && fromUiAmt && toUiAmt) {
+      const currentToTokenRate = fromUiAmt / toUiAmt;
+      change = (currentToTokenRate - toTokenRateOnSwap) / toTokenRateOnSwap;
     }
+    return change;
+  }, [fromUiAmt, toTokenRateOnSwap, toUiAmt]);
+  const isRateChangeAfterSubmitTooBig = useMemo(
+    () => rateChangeAfterSubmit >= 0.05,
+    [rateChangeAfterSubmit]
+  ); // output has decreased to 1 / 1.05 =~ 0.95
+
+  const onSwap = useCallback(async () => {
+    // For debugging the rate change feature
+    /*
+    setTimeout(() => {
+      setFieldValue('currencyTo', {
+        ...values.currencyTo,
+        amount: toUiAmt * 0.8
+      });
+    }, 3000);
     */
-    submitForm();
-  }, [submitForm]);
+    setToTokenRateOnSwap(fromUiAmt && toUiAmt ? fromUiAmt / toUiAmt : 0);
+    try {
+      await submitForm();
+    } finally {
+      setToTokenRateOnSwap(0);
+    }
+  }, [fromUiAmt, submitForm, toUiAmt]);
 
   const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
   const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
@@ -818,8 +852,8 @@ const TokenSwap = () => {
   }, [isPriceImpactEnabled, priceImpact]);
 
   const hasErrors = useMemo(() => {
-    return priceImpactTooHigh;
-  }, [priceImpactTooHigh]);
+    return priceImpactTooHigh || isRateChangeAfterSubmitTooBig;
+  }, [isRateChangeAfterSubmitTooBig, priceImpactTooHigh]);
 
   const { isTablet } = useBreakpoint('tablet');
 
@@ -936,17 +970,18 @@ const TokenSwap = () => {
       {hasErrors && (
         <Card className="px-8 py-2 my-4">
           {priceImpactTooHigh && (
-            <div>
-              <div className="text-error-500 body-bold ml-5 relative">
-                <div className="absolute w-fit -left-5 bottom-0 top-0 flex items-center">
-                  <WarningIcon className="font-icon" />
-                </div>
-                Price impact is {(priceImpact * 100).toFixed(2)}%
-              </div>
-              <div className="text-grey-500 label-large-regular ml-5">
-                Try reducing your trade size
-              </div>
-            </div>
+            <ErrorBody
+              title={`Price impact is ${(priceImpact * 100).toFixed(2)}%`}
+              detail={'Try reducing your trade size'}
+            />
+          )}
+          {isRateChangeAfterSubmitTooBig && (
+            <ErrorBody
+              title={`The rate has changed ${(rateChangeAfterSubmit * 100).toFixed(2)}%`}
+              detail={
+                "after you clicked Swap. You may reject the transaction if you haven't approved it."
+              }
+            />
           )}
         </Card>
       )}
