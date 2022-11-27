@@ -11,12 +11,15 @@ import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
 import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 import { TokenBalance } from 'types/hippo';
+import classNames from 'classnames';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
   // isVisible: boolean;
   dismissiModal: () => void;
 }
+
+type Filter = 'All' | 'Native' | 'LayerZero' | 'Wormhole' | 'Celer';
 
 // interface TokenWithBalance extends ITokenInfo {
 //   balance: string;
@@ -28,9 +31,15 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const commonCoins = tokenList.filter((token) => {
     return ['APT', 'WBTC', 'WETH', 'USDT', 'USDC'].includes(token.symbol);
   });
-  const [filter, setFilter] = useState<string>('');
+  const [searchPattern, setSearchPattern] = useState<string>('');
   const { hippoWallet } = useHippoClient();
   const [tokenListBalance, setTokenListBalance] = useState<TokenBalance[]>();
+
+  const [filter, setFilter] = useState<Filter>('All');
+  const filterTitles: Filter[] = useMemo(
+    () => ['All', 'Native', 'LayerZero', 'Wormhole', 'Celer'],
+    []
+  );
 
   const onSelectToken = useCallback(
     (token: TokenInfo) => {
@@ -52,7 +61,25 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   );
 
   const getFilteredTokenListWithBalance = useCallback(() => {
-    let currentTokenList = tokenList
+    let tokenListFiltered = tokenList;
+    if (searchPattern) {
+      tokenListFiltered = tokenListFiltered?.filter((token) => {
+        const keysForFilter = [token.name, token.symbol].join(',').toLowerCase();
+        return keysForFilter.includes(searchPattern);
+      });
+    }
+    if (filter !== 'All') {
+      tokenListFiltered = tokenListFiltered?.filter((token) => {
+        const nonNatives: Filter[] = ['LayerZero', 'Wormhole', 'Celer'];
+        if (nonNatives.includes(filter)) {
+          return new RegExp(filter, 'i').test(token.name);
+        } else {
+          return !new RegExp(nonNatives.join('|'), 'i').test(token.name);
+        }
+      });
+    }
+
+    const tokenListMapped = tokenListFiltered
       ?.sort((a, b) => (a.symbol <= b.symbol ? -1 : 1))
       .map((t) => {
         const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol];
@@ -68,14 +95,8 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
       })
       .sort((a, b) => b.balance - a.balance); // TODO: sort by values
 
-    if (filter) {
-      currentTokenList = currentTokenList?.filter((token) => {
-        const keysForFilter = [token.token.name, token.token.symbol].join(',').toLowerCase();
-        return keysForFilter.includes(filter);
-      });
-    }
-    setTokenListBalance(currentTokenList);
-  }, [filter, hippoWallet, tokenList]);
+    setTokenListBalance(tokenListMapped);
+  }, [tokenList, searchPattern, filter, hippoWallet]);
 
   useEffect(() => {
     getFilteredTokenListWithBalance();
@@ -95,13 +116,13 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         </div>
         <input
           className="bg-field py-4 px-6 body-bold text-grey-900 rounded-xl focus:outline-none border-none"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value.toLowerCase())}
+          value={searchPattern}
+          onChange={(e) => setSearchPattern(e.target.value.toLowerCase())}
           placeholder="Search"
         />
       </div>
     );
-  }, [filter, onSelectToken, commonCoins]);
+  }, [searchPattern, onSelectToken, commonCoins]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(0);
@@ -110,9 +131,30 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     if (listRef.current?.offsetHeight) setListHeight(listRef.current?.offsetHeight ?? 0);
   }, []);
 
+  const filters = useMemo(() => {
+    return (
+      <div className="flex gap-x-0">
+        {filterTitles.map((f) => (
+          <div
+            key={f}
+            className={classNames(
+              'body-bold px-2 py-2 flex-grow text-center cursor-pointer rounded-full text-grey-500 hover:text-grey-700',
+              {
+                'bg-field !text-grey-900': f === filter
+              }
+            )}
+            onClick={() => setFilter(f)}>
+            {f}
+          </div>
+        ))}
+      </div>
+    );
+  }, [filter, filterTitles]);
+
   const renderTokenList = useMemo(() => {
     return (
       <div className="flex flex-col gap-2 mt-4 flex-grow min-h-0">
+        {filters}
         <div className="flex justify-between">
           <div className="text-grey-500 label-large-bold">Token</div>
           <div className="text-grey-500 label-large-bold">{hippoWallet ? 'Balance' : ''}</div>
@@ -140,7 +182,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         </div>
       </div>
     );
-  }, [hippoWallet, tokenListBalance, listHeight, onSelectToken]);
+  }, [filters, hippoWallet, tokenListBalance, listHeight, onSelectToken]);
 
   return (
     <div className="flex flex-col gap-2 h-[50vh] mobile:h-full">
