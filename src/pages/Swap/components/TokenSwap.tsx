@@ -864,7 +864,7 @@ const TokenSwap = () => {
 
   const cardXPadding = '32px';
   return (
-    <div className="w-full" ref={swapRef}>
+    <div className="w-full min-h-[620px] tablet:h-auto" ref={swapRef}>
       <CardHeader
         className="pointer-events-auto"
         right={
