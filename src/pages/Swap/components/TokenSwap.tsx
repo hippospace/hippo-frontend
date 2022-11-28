@@ -286,10 +286,18 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   );
 };
 
-const ErrorBody = ({ title, detail }: { title: string; detail?: string }) => {
+const ErrorBody = ({
+  title,
+  detail,
+  titleClassName = ''
+}: {
+  title: string;
+  detail?: string;
+  titleClassName?: string;
+}) => {
   return (
     <div>
-      <div className="text-error-500 body-bold ml-5 relative">
+      <div className={classNames('text-error-500 body-bold ml-5 relative', titleClassName)}>
         <div className="absolute w-fit -left-5 bottom-0 top-0 flex items-center">
           <WarningIcon className="font-icon" />
         </div>
@@ -696,21 +704,20 @@ const TokenSwap = () => {
     isPeriodicRefreshPaused ? error429WaitSeconds * 1_000 : null
   );
 
-  const [toTokenRateOnSwap, setToTokenRateOnSwap] = useState(0);
+  const [minToTokenRateAfterLastInput, setMinToTokenRateAfterLastInput] = useState(Infinity);
 
   useEffect(() => {
     if (!isFixedOutput) {
+      setMinToTokenRateAfterLastInput(Infinity);
       fetchSwapRoutes();
-      // For the case users even neither approve nor reject the transaction
-      setToTokenRateOnSwap(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken, fromUiAmt, hippoAgg, isFixedOutput]);
 
   useEffect(() => {
     if (isFixedOutput) {
+      setMinToTokenRateAfterLastInput(Infinity);
       fetchSwapRoutes();
-      setToTokenRateOnSwap(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken, toUiAmt, hippoAgg, isFixedOutput]);
@@ -806,36 +813,37 @@ const TokenSwap = () => {
     [setRoute]
   );
 
-  const rateChangeAfterSubmit = useMemo(() => {
-    let change = 0;
-    if (toTokenRateOnSwap && fromUiAmt && toUiAmt) {
-      const currentToTokenRate = fromUiAmt / toUiAmt;
-      change = (currentToTokenRate - toTokenRateOnSwap) / toTokenRateOnSwap;
+  const getCurrentToTokenRate = useCallback(
+    () =>
+      routeSelected ? routeSelected.quote.inputUiAmt / routeSelected.quote.outputUiAmt : Infinity,
+    [routeSelected]
+  );
+
+  useEffect(() => {
+    const latestToTokenRate = getCurrentToTokenRate();
+    if (latestToTokenRate < minToTokenRateAfterLastInput) {
+      setMinToTokenRateAfterLastInput(latestToTokenRate);
     }
+  }, [getCurrentToTokenRate, minToTokenRateAfterLastInput]);
+
+  const rateChangeBeforeSubmit = useMemo(() => {
+    const currentToTokenRate = getCurrentToTokenRate();
+    const change =
+      minToTokenRateAfterLastInput &&
+      minToTokenRateAfterLastInput !== Infinity &&
+      currentToTokenRate !== Infinity
+        ? (currentToTokenRate - minToTokenRateAfterLastInput) / minToTokenRateAfterLastInput
+        : 0;
     return change;
-  }, [fromUiAmt, toTokenRateOnSwap, toUiAmt]);
+  }, [getCurrentToTokenRate, minToTokenRateAfterLastInput]);
   const isRateChangeAfterSubmitTooBig = useMemo(
-    () => rateChangeAfterSubmit >= 0.05,
-    [rateChangeAfterSubmit]
-  ); // output has decreased to 1 / 1.05 =~ 0.95
+    () => rateChangeBeforeSubmit >= 0.01,
+    [rateChangeBeforeSubmit]
+  ); // output has decreased to 1 / 1.01 =~ 0.99
 
   const onSwap = useCallback(async () => {
-    // For debugging the rate change feature
-    /*
-    setTimeout(() => {
-      setFieldValue('currencyTo', {
-        ...values.currencyTo,
-        amount: toUiAmt * 0.8
-      });
-    }, 3000);
-    */
-    setToTokenRateOnSwap(fromUiAmt && toUiAmt ? fromUiAmt / toUiAmt : 0);
-    try {
-      await submitForm();
-    } finally {
-      setToTokenRateOnSwap(0);
-    }
-  }, [fromUiAmt, submitForm, toUiAmt]);
+    await submitForm();
+  }, [submitForm]);
 
   const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
   const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
@@ -940,12 +948,14 @@ const TokenSwap = () => {
                 }
                 simuResults={simulateResults}
               />
-              <SwapDetail
-                routeAndQuote={routeSelected}
-                fromToken={fromToken}
-                toToken={toToken}
-                isPriceImpactEnabled={isPriceImpactEnabled}
-              />
+              {routeSelected && (
+                <SwapDetail
+                  routeAndQuote={routeSelected}
+                  fromToken={fromToken}
+                  toToken={toToken}
+                  isPriceImpactEnabled={isPriceImpactEnabled}
+                />
+              )}
             </Card>
           )}
           <Button
@@ -977,10 +987,13 @@ const TokenSwap = () => {
           )}
           {isRateChangeAfterSubmitTooBig && (
             <ErrorBody
-              title={`The rate has changed ${(rateChangeAfterSubmit * 100).toFixed(2)}%`}
+              title={`The ${toToken.symbol} rate has changed ${(
+                rateChangeBeforeSubmit * 100
+              ).toFixed(2)}%`}
               detail={
-                "after you clicked Swap. You may reject the transaction if you haven't approved it."
+                "after the last input. You may reject the transaction if you haven't approved it."
               }
+              titleClassName="text-warn-500"
             />
           )}
         </Card>

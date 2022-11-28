@@ -81,11 +81,11 @@ const SwapDetail = ({
   let toTokenRate = undefined;
   if (routeAndQuote) {
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
-    output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken.symbol}`;
+    output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken?.symbol}`;
     minimum = `${tokenAmountFormatter(
       outputUiAmt * (1 - swapSettings.slipTolerance / 100),
       toToken
-    )} ${toToken.symbol}`;
+    )} ${toToken?.symbol}`;
     priceImpact = Math.abs(routeAndQuote.quote.priceImpact || 0);
     if (isPriceImpactEnabled) {
       priceImpactText = priceImpact >= 0.0001 ? `${(priceImpact * 100).toFixed(2)}%` : '<0.01%';
@@ -96,9 +96,9 @@ const SwapDetail = ({
       !avgPrice || avgPrice === Infinity
         ? 'n/a'
         : isPriceYToX
-        ? `1 ${fromToken.symbol} ≈ ${tokenAmountFormatter(avgPrice, toToken)} ${toToken.symbol}`
-        : `1 ${toToken.symbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromToken)} ${
-            fromToken.symbol
+        ? `1 ${fromToken?.symbol} ≈ ${tokenAmountFormatter(avgPrice, toToken)} ${toToken?.symbol}`
+        : `1 ${toToken?.symbol} ≈ ${tokenAmountFormatter(1 / avgPrice, fromToken)} ${
+            fromToken?.symbol
           }`;
 
     toTokenRate = 1 / avgPrice;
