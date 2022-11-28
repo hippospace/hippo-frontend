@@ -708,7 +708,6 @@ const TokenSwap = () => {
 
   useEffect(() => {
     if (!isFixedOutput) {
-      setMinToTokenRateAfterLastInput(Infinity);
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -716,7 +715,6 @@ const TokenSwap = () => {
 
   useEffect(() => {
     if (isFixedOutput) {
-      setMinToTokenRateAfterLastInput(Infinity);
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -815,17 +813,28 @@ const TokenSwap = () => {
 
   const getCurrentToTokenRate = useCallback(
     () =>
-      routeSelected ? routeSelected.quote.inputUiAmt / routeSelected.quote.outputUiAmt : Infinity,
-    [routeSelected]
+      routeSelected &&
+      fromUiAmt &&
+      toUiAmt &&
+      ((routeSelected.quote.inputUiAmt === fromUiAmt && !isFixedOutput) ||
+        (routeSelected.quote.outputUiAmt === toUiAmt && isFixedOutput))
+        ? routeSelected.quote.inputUiAmt / routeSelected.quote.outputUiAmt
+        : Infinity,
+    [fromUiAmt, isFixedOutput, routeSelected, toUiAmt]
   );
 
   useEffect(() => {
     const latestToTokenRate = getCurrentToTokenRate();
-    if (latestToTokenRate < minToTokenRateAfterLastInput) {
+    if (latestToTokenRate < minToTokenRateAfterLastInput || latestToTokenRate === Infinity) {
       setMinToTokenRateAfterLastInput(latestToTokenRate);
     }
   }, [getCurrentToTokenRate, minToTokenRateAfterLastInput]);
 
+  /*
+  console.log(
+    `min token rate: ${minToTokenRateAfterLastInput}, current rate: ${getCurrentToTokenRate()}`
+  );
+  */
   const rateChangeBeforeSubmit = useMemo(() => {
     const currentToTokenRate = getCurrentToTokenRate();
     const change =
