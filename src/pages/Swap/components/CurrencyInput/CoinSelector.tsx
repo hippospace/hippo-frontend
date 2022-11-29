@@ -131,6 +131,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     if (listRef.current?.offsetHeight) setListHeight(listRef.current?.offsetHeight ?? 0);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   const filters = useMemo(() => {
     return (
       <div className="flex gap-x-0">
@@ -154,7 +155,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const renderTokenList = useMemo(() => {
     return (
       <div className="flex flex-col gap-2 mt-4 flex-grow min-h-0">
-        {filters}
+        {/* filters */}
         <div className="flex justify-between">
           <div className="text-grey-500 label-large-bold">Token</div>
           <div className="text-grey-500 label-large-bold">{hippoWallet ? 'Balance' : ''}</div>
@@ -182,7 +183,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         </div>
       </div>
     );
-  }, [filters, hippoWallet, tokenListBalance, listHeight, onSelectToken]);
+  }, [hippoWallet, tokenListBalance, listHeight, onSelectToken]);
 
   return (
     <div className="flex flex-col gap-2 h-[50vh] mobile:h-full">
