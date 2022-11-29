@@ -69,6 +69,7 @@ const Providers: React.FC<TProps> = (props: TProps) => {
             text = 'Wallet not ready';
           }
           openErrorNotification({ detail: error.message || text, title: 'Wallet Error' });
+          console.log(error);
         }}>
         <AptosWalletProvider>
           <ReduxProvider store={store}>

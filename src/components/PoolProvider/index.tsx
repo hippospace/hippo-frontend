@@ -1,7 +1,6 @@
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { FC, useMemo } from 'react';
 
-import hippoLogo from 'resources/img/hippo-icon.svg';
 import basiqLogo from 'resources/img/dexes/basiq.jpeg';
 import econiaLogo from 'resources/img/dexes/econia.jpeg';
 import pontemLogo from 'resources/img/dexes/pontem.jpeg';
@@ -14,20 +13,23 @@ import cetusLogo from 'resources/img/dexes/cetus.png';
 import pancakeLogo from 'resources/img/dexes/pancake.jpeg';
 import obricLogo from 'resources/img/dexes/obric.png';
 import classNames from 'classnames';
+import { Tooltip } from 'antd';
 
 interface IPoolProviderProps {
   dexType: AggregatorTypes.DexType;
   className?: string;
 }
 
-const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
+interface IPoolIconProps extends IPoolProviderProps {
+  title?: string;
+}
+
+export const PoolIcon: FC<IPoolIconProps> = ({ dexType, className = '', title }) => {
   const imgSrc = useMemo(() => {
     if (dexType === AggregatorTypes.DexType.Basiq) {
       return basiqLogo;
     } else if (dexType === AggregatorTypes.DexType.Econia) {
       return econiaLogo;
-    } else if (dexType === AggregatorTypes.DexType.Hippo) {
-      return hippoLogo;
     } else if (dexType === AggregatorTypes.DexType.Pontem) {
       return pontemLogo;
     } else if (dexType === AggregatorTypes.DexType.Ditto) {
@@ -50,10 +52,19 @@ const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
       return undefined;
     }
   }, [dexType]);
+  const name = AggregatorTypes.DexType[dexType];
+  return (
+    <Tooltip placement="left" title={title ?? name}>
+      <img src={imgSrc} alt={name} className={classNames('w-6 h-6 rounded-full', className)} />
+    </Tooltip>
+  );
+};
+
+const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
   return (
     <div className={classNames('flex items-center h-full', className)}>
-      <img src={imgSrc} alt={'Dex logo'} className="w-6 h-6 rounded-full mr-2" />
-      <span className="body-bold text-grey-700">{AggregatorTypes.DexType[dexType]}</span>
+      <PoolIcon dexType={dexType} />
+      <span className="body-bold text-grey-700 ml-2">{AggregatorTypes.DexType[dexType]}</span>
     </div>
   );
 };

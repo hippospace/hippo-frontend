@@ -7,7 +7,6 @@ import CurrencyInput from './CurrencyInput';
 import SwapDetail from './SwapDetail';
 import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
-import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import classNames from 'classnames';
 import { Drawer, Tooltip } from 'antd';
 import VirtualList from 'rc-virtual-list';
@@ -17,7 +16,6 @@ import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useInterval, useTimeout } from 'usehooks-ts';
 import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
-import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { openErrorNotification } from 'utils/notifications';
 // import Skeleton from 'components/Skeleton';
 import { Types, ApiError } from 'aptos';
@@ -26,13 +24,17 @@ import { RPCType, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import { useCoingeckoValue } from 'hooks/useCoingecko';
 import { useParams } from 'react-router-dom';
+import { GeneralRouteAndQuote } from 'types/hippo';
+import SwapDexes from './SwapDexes';
+import { ApiTradeStep } from '@manahippo/hippo-sdk/dist/aggregator/types/step/ApiTradeStep';
+import { AggregatorTypes } from '@manahippo/hippo-sdk';
 
 interface IRoutesProps {
   className?: string;
   availableRoutesCount: number;
-  routes: IApiRouteAndQuote[];
-  routeSelected: IApiRouteAndQuote | null;
-  onRouteSelected: (route: IApiRouteAndQuote, index: number) => void;
+  routes: GeneralRouteAndQuote[];
+  routeSelected: GeneralRouteAndQuote | null;
+  onRouteSelected: (route: GeneralRouteAndQuote, index: number) => void;
   isDesktopScreen?: boolean;
   isRefreshing?: boolean;
   refreshButton?: ReactNode;
@@ -40,17 +42,32 @@ interface IRoutesProps {
 }
 
 interface IRouteRowProps {
-  route: IApiRouteAndQuote;
+  route: GeneralRouteAndQuote;
   isSelected?: boolean;
   isBestPrice: boolean;
   simuResult?: Types.UserTransaction;
 }
 
-const serializeRouteQuote = (rq: IApiRouteAndQuote) => {
+const serializeRouteQuote = (rq: GeneralRouteAndQuote) => {
+  const stepStr = (s: ApiTradeStep) => `${s.dexType}(${s.poolType.toJsNumber()})`;
+  const steps = (r: AggregatorTypes.ApiTradeRoute | AggregatorTypes.SplitTradeRoute) => {
+    if (r instanceof AggregatorTypes.ApiTradeRoute) {
+      return r.steps.map((s) => stepStr(s)).join('x');
+    } else if (r instanceof AggregatorTypes.SplitTradeRoute) {
+      return r.splitSteps
+        .map((ss) =>
+          ss.units.map((u) => `${u.scale}*${stepStr(u.step.toApiTradeStep())}`).join('|')
+        )
+        .join('x');
+    } else {
+      throw new Error('Invalid route type to print steps');
+    }
+  };
+
   // Same dexType might have different poolTypes
-  return `${rq.quote.inputUiAmt}->${rq.quote.outputUiAmt}:${rq.route.steps
-    .map((s) => `${s.dexType}(${s.poolType.toJsNumber()})`)
-    .join('x')}:${rq.route.tokens.map((t) => t.symbol).join('->')}`;
+  return `${rq.quote.inputUiAmt}->${rq.quote.outputUiAmt}:${steps(rq.route)}:${rq.route.tokens
+    .map((t) => t.symbol)
+    .join('->')}`;
 };
 
 const SettingsButton = ({
@@ -148,16 +165,13 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
   );
 };
 
-const routeRowHeight = 66;
+const routeRowMinHeight = 66;
 const RouteRow: React.FC<IRouteRowProps> = ({
   route,
   isSelected = false,
   isBestPrice = false,
   simuResult
 }) => {
-  const swapDexs = route.route.steps
-    .map((s) => AggregatorTypes.DEX_TYPE_NAME[s.dexType])
-    .join(' x ');
   const { values } = useFormikContext<ISwapSettings>();
   const toToken = route.route.yCoinInfo;
   const outputUiAmt = route.quote.outputUiAmt;
@@ -166,8 +180,14 @@ const RouteRow: React.FC<IRouteRowProps> = ({
   const outputFormatted = tokenAmountFormatter(outputUiAmt, toToken);
   const customMaxGasAmount = values.maxGasFee;
 
+  let rowH = routeRowMinHeight;
+  if (route.route instanceof AggregatorTypes.SplitTradeRoute) {
+    const maxUnits = Math.max(...route.route.splitSteps.map((ss) => ss.units.length));
+    rowH = routeRowMinHeight + 12 + (maxUnits - 1) * 21;
+  }
+
   return (
-    <div className={classNames('pt-2')} style={{ height: `${routeRowHeight}px` }}>
+    <div className={classNames('pt-2')} style={{ height: `${rowH}px` }}>
       <div
         className={classNames(
           'relative h-full flex flex-col justify-center bg-clip-border rounded-lg border-2 cursor-pointer bg-field border-transparent',
@@ -181,10 +201,8 @@ const RouteRow: React.FC<IRouteRowProps> = ({
             'bg-field': !isSelected
           })}>
           <div className="flex justify-between items-center body-bold text-grey-700">
-            <div className="truncate" title={swapDexs}>
-              {swapDexs}
-            </div>
-            <div className="body-bold">{outputFormatted}</div>
+            <SwapDexes r={route} />
+            <div className="body-bold ml-1">{outputFormatted}</div>
           </div>
           <div className="flex gap-x-4 justify-between items-center label-large-bold text-grey-500 laptop:label-small-bold">
             <TokenSteps className="mr-auto truncate" tokens={route.route.tokens} />
@@ -237,8 +255,8 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   const rowsWhenMore = 4;
   const rowsOnDesktop = 4;
   const height = isDesktopScreen
-    ? Math.min(rowsOnDesktop, routes.length) * routeRowHeight
-    : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowHeight;
+    ? Math.min(rowsOnDesktop, routes.length) * routeRowMinHeight
+    : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowMinHeight;
 
   // const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
 
@@ -251,7 +269,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
       <VirtualList
         className="pr-1 scrollbar"
         height={height}
-        itemHeight={routeRowHeight}
+        itemHeight={routeRowMinHeight}
         data={routes}
         itemKey={(item) => serializeRouteQuote(item)}>
         {(ro, index) => (
@@ -329,8 +347,8 @@ const TokenSwap = () => {
   const fromUiAmt = values.currencyFrom?.amount;
   const toUiAmt = values.currencyTo?.amount;
 
-  const [allRoutes, setAllRoutes] = useState<IApiRouteAndQuote[]>([]);
-  const [routeSelected, setRouteSelected] = useState<IApiRouteAndQuote | null>(null);
+  const [allRoutes, setAllRoutes] = useState<GeneralRouteAndQuote[]>([]);
+  const [routeSelected, setRouteSelected] = useState<GeneralRouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
   const [availableRoutesCount, setAvailableRoutesCount] = useState(0);
 
@@ -454,7 +472,7 @@ const TokenSwap = () => {
   */
 
   const setRoute = useCallback(
-    (ro: IApiRouteAndQuote | null) => {
+    (ro: GeneralRouteAndQuote | null) => {
       setRouteSelected(ro);
       setFieldValue('quoteChosen', ro);
     },
@@ -462,8 +480,8 @@ const TokenSwap = () => {
   );
 
   const setSelectedRouteFromRoutes = useCallback(
-    (routes: IApiRouteAndQuote[]) => {
-      let manuallySelectedRoute: IApiRouteAndQuote;
+    (routes: GeneralRouteAndQuote[]) => {
+      let manuallySelectedRoute: GeneralRouteAndQuote;
       if (routeSelectedSerialized) {
         manuallySelectedRoute = routes.find(
           (r) => serializeRouteQuote(r) === routeSelectedSerialized
@@ -541,17 +559,31 @@ const TokenSwap = () => {
 
             const { routes, allRoutesCount } = await (async () => {
               if (!isFixedOutput) {
-                const result = await hippoAgg.getQuotesUni(
+                const [routeAndQuotes, split] = await hippoAgg.getQuotesV1V2(
                   fromUiAmt,
                   fromToken,
                   toToken,
                   maxSteps,
                   isReloadInternal,
                   false,
-                  poolReloadMinInterval,
-                  false
+                  poolReloadMinInterval
                 );
-                return result;
+                console.log('split routes', split);
+                const apiRoutes: GeneralRouteAndQuote[] = routeAndQuotes.map((r) => ({
+                  ...r,
+                  route: r.route.toApiTradeRoute()
+                }));
+                if (
+                  split.length > 0 &&
+                  split[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
+                ) {
+                  console.log('split has a better output');
+                  apiRoutes.unshift(split[0]);
+                }
+                return {
+                  allRoutesCount: routeAndQuotes.length,
+                  routes: apiRoutes
+                };
               } else {
                 const routeAndQuotes = await hippoAgg.getQuotesWithFixedOutput(
                   toUiAmt,
@@ -804,7 +836,7 @@ const TokenSwap = () => {
   }, [preRouteSelected, routeSelected]);
 
   const onUserSelectRoute = useCallback(
-    (ro: IApiRouteAndQuote, index: number) => {
+    (ro: GeneralRouteAndQuote, index: number) => {
       setRoute(ro);
       setRouteSelectedSerialized(index === 0 ? '' : serializeRouteQuote(ro));
     },
@@ -816,11 +848,13 @@ const TokenSwap = () => {
       routeSelected &&
       fromUiAmt &&
       toUiAmt &&
+      routeSelected.quote.inputSymbol === fromToken?.symbol &&
+      routeSelected.quote.outputSymbol === toToken?.symbol &&
       ((routeSelected.quote.inputUiAmt === fromUiAmt && !isFixedOutput) ||
         (routeSelected.quote.outputUiAmt === toUiAmt && isFixedOutput))
         ? routeSelected.quote.inputUiAmt / routeSelected.quote.outputUiAmt
         : Infinity,
-    [fromUiAmt, isFixedOutput, routeSelected, toUiAmt]
+    [fromToken?.symbol, fromUiAmt, isFixedOutput, routeSelected, toToken?.symbol, toUiAmt]
   );
 
   useEffect(() => {

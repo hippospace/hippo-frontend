@@ -3,11 +3,10 @@ import { HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk';
 import { CoinListClient, RawCoinInfo as CoinInfo, NetworkType } from '@manahippo/coin-list';
 import useAptosWallet from 'hooks/useAptosWallet';
-import { TTransaction } from 'types/hippo';
+import { GeneralRouteAndQuote, TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
-import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { AptosClient, HexString, Types } from 'aptos';
 import {
   openErrorNotification,
@@ -26,12 +25,12 @@ interface HippoClientContextType {
   getTokenStoreByFullName: (fullName: string) => stdlib.Coin.CoinStore | undefined | false;
   getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
   requestSwapByRoute: (
-    routeAndQuote: IApiRouteAndQuote,
+    routeAndQuote: GeneralRouteAndQuote,
     slipTolerance: number,
     options?: Partial<Types.SubmitTransactionRequest>
   ) => Promise<boolean>;
   simulateSwapByRoute: (
-    routeAndQuote: IApiRouteAndQuote,
+    routeAndQuote: GeneralRouteAndQuote,
     slipTolerance: number,
     options?: OptionTransaction
   ) => Promise<Types.UserTransaction>;
@@ -139,7 +138,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     (async () => {
       try {
         // Important: load full pool list
-        await hippoAgg.updatePoolLists();
+        // await hippoAgg.updatePoolLists();
       } catch (err) {
         console.log('Update Hippo trade aggregator failed', err);
         errorHandler(err);
@@ -203,7 +202,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   const requestSwapByRoute = useCallback(
-    async (routeAndQuote: IApiRouteAndQuote, slipTolerance: number, options = {}) => {
+    async (routeAndQuote: GeneralRouteAndQuote, slipTolerance: number, options = {}) => {
       let success = false;
       try {
         if (!activeWallet) throw new Error('Please connect wallet first');
@@ -212,7 +211,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (input <= 0) {
           throw new Error('Input amount needs to be greater than 0');
         }
-        const payload = routeAndQuote.route.makePayload(input, minOut, true);
+        const payload = routeAndQuote.route.makeSwapPayload(input, minOut, true);
         const result = await signAndSubmitTransaction(
           payload as Types.TransactionPayload_EntryFunctionPayload,
           options
@@ -240,11 +239,11 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           success = true;
         }
       } catch (error) {
-        console.log('Request swap by route error:', error);
         if (error instanceof Error) {
           openErrorNotification({ detail: error?.message });
         }
         success = false;
+        throw error;
       } finally {
         return success;
       }
@@ -254,7 +253,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
 
   const simulateSwapByRoute = useCallback(
     async (
-      routeAndQuote: IApiRouteAndQuote,
+      routeAndQuote: GeneralRouteAndQuote,
       slipTolerance: number,
       options?: OptionTransaction
     ) => {
@@ -264,7 +263,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (input <= 0) {
           return;
         }
-        const payload = routeAndQuote.route.makePayload(input, minOut, true);
+        const payload = routeAndQuote.route.makeSwapPayload(input, minOut, false);
         const publicKey = wallet?.adapter.publicAccount?.publicKey.toString();
         const address = wallet?.adapter.publicAccount?.address.toString();
         if (!publicKey || !address) {
@@ -286,6 +285,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         if (error instanceof Error) {
           openErrorNotification({ detail: error?.message });
         }
+        throw error;
       }
     },
     [aptosClient, wallet?.adapter.publicAccount?.address, wallet?.adapter.publicAccount.publicKey]

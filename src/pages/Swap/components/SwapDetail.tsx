@@ -1,4 +1,3 @@
-import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 import classNames from 'classnames';
 import Button from 'components/Button';
 import { useFormikContext } from 'formik';
@@ -12,6 +11,7 @@ import TextLink from 'components/TextLink';
 import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 import { useBinanceRate } from 'hooks/useBinance';
 import Hint from 'components/Hint';
+import { GeneralRouteAndQuote } from 'types/hippo';
 
 const RateCompare = ({
   rate,
@@ -60,7 +60,7 @@ const SwapDetail = ({
   className = '',
   isPriceImpactEnabled = true
 }: {
-  routeAndQuote: IApiRouteAndQuote | null | undefined;
+  routeAndQuote: GeneralRouteAndQuote | null | undefined;
   fromToken: CoinInfo;
   toToken: CoinInfo;
   className?: string;
