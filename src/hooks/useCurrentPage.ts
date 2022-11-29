@@ -9,7 +9,7 @@ const useCurrentPage = () => {
   const rootPath = pathname.split('/')[1];
   const pageName =
     routes?.find((r) => {
-      const pathStart = r.path.split('/')[0];
+      const pathStart = r.path?.split('/')[0];
       return pathStart === rootPath;
     })?.name || routes[0].name;
   if (pageName !== selectedKey) {

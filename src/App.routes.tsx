@@ -8,8 +8,9 @@ import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Stats from 'pages/Stats';
 
 export type TRoute = RouteObject & {
-  name: 'Home' | 'Pools' | 'Swap' | '404' | 'Faucet' | 'Stats' | '_Swap';
+  name: 'Home' | 'Swap' | '404' | 'Faucet' | 'Stats' | 'Bridge';
   hidden?: boolean; //to hide the visibility in header menu
+  type?: 'Page' | 'Button';
 };
 
 export const routes: TRoute[] = [
@@ -40,6 +41,10 @@ export const routes: TRoute[] = [
     name: 'Swap',
     hidden: true,
     element: <Swap />
+  },
+  {
+    name: 'Bridge',
+    type: 'Button'
   },
   {
     path: 'faucet',

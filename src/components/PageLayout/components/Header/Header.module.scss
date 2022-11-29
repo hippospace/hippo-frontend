@@ -34,9 +34,10 @@
   }
 }
 
+/*
 .blur {
   --fallback-background: #fbf5ff;
-  background-color: var(--fallback-background) !important; /* Fallback */
+  background-color: var(--fallback-background) !important; // Fallback
 }
 @supports (backdrop-filter: blur()) {
   .blur {
@@ -44,3 +45,4 @@
     @apply bg-grey-100 #{!important};
   }
 }
+*/

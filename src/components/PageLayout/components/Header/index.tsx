@@ -8,11 +8,12 @@ import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
 import { CloseIcon, MenuIcon, SettingIcon } from 'resources/icons';
 import { Drawer, Popover } from 'antd';
-import { useCallback, useState } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 import Button from 'components/Button';
 import { useSelector } from 'react-redux';
 import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Settings from 'components/Settings';
+import TextLink from 'components/TextLink';
 
 const { Header } = Antd.Layout;
 /*
@@ -30,6 +31,23 @@ interface ISideMenuProps {
   onRouteSelected: () => void;
 }
 
+const DropDownLink = ({ children, href }: { children: ReactNode; href: string }) => {
+  return (
+    <TextLink href={href} className="block h6 no-underline">
+      {children}
+    </TextLink>
+  );
+};
+
+const BridgesMenu = () => {
+  return (
+    <div className="flex flex-col gap-y-2 p-y-4">
+      <DropDownLink href="https://theaptosbridge.com/bridge">LayerZero</DropDownLink>
+      <DropDownLink href="https://www.portalbridge.com/#/transfer">Wormhole</DropDownLink>
+    </div>
+  );
+};
+
 const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
   const navigate = useNavigate();
   const onRoute = useCallback(
@@ -40,23 +58,32 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
     [navigate, onRouteSelected]
   );
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+  const [isBridgesVisible, setIsBridgesVisible] = useState(false);
+
   const openSettings = useCallback(() => {
     onRouteSelected();
     setIsSettingsVisible(true);
   }, [onRouteSelected]);
+
+  const openBridges = useCallback(() => {
+    setIsBridgesVisible(true);
+  }, []);
+
   return (
     <div className="h-full flex flex-col">
       <div className="w-full space-y-4">
         {routes
           .filter((r) => r.path !== '*' && !r.hidden)
-          .map(({ name, path }, index) => {
+          .map(({ name, path, type }, index) => {
             const isCurrent = currentPageName === name;
             return (
               <Button
                 key={`${name}-${index}-${isCurrent}`}
                 className={classNames('w-full', { 'hip-btn-selected': isCurrent })}
                 variant={'outlined'}
-                onClick={() => onRoute(path)}>
+                onClick={() =>
+                  type === 'Button' && name === 'Bridge' ? openBridges() : onRoute(path)
+                }>
                 {name}
               </Button>
             );
@@ -78,6 +105,15 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
         onClose={() => setIsSettingsVisible(false)}>
         <Settings />
       </Drawer>
+      <Drawer
+        title={'Bridge'}
+        closeIcon={<CloseIcon className="font-icon h5 text-grey-500" />}
+        width={'50vw'}
+        placement={'left'}
+        visible={isBridgesVisible}
+        onClose={() => setIsBridgesVisible(false)}>
+        <BridgesMenu />
+      </Drawer>
     </div>
   );
 };
@@ -87,18 +123,32 @@ const PageHeader: React.FC = () => {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const isResourcesNotFound = useSelector(getIsResourcesNotFound);
 
+  const [isBridegMenuOpen, setIsBridgeMenuOpen] = useState(false);
+
   const renderNavItems = useCallback(() => {
-    return routes.map(({ name, path, hidden }) => {
+    return routes.map(({ name, path, hidden, type }) => {
       if (path === '*' || hidden) return null;
       return (
         <Antd.Menu.Item key={name}>
-          <Link to={path || '/'} className="h6 font-bold">
-            {name}
-          </Link>
+          {type === 'Button' && (
+            <Popover
+              trigger="click"
+              visible={isBridegMenuOpen}
+              onVisibleChange={(visible) => setIsBridgeMenuOpen(visible)}
+              content={<BridgesMenu />}
+              placement="bottomLeft">
+              <a className="h6 text-grey-500 font-bold">{name}</a>
+            </Popover>
+          )}
+          {(type === 'Page' || !type) && (
+            <Link to={path || '/'} className="h6 font-bold">
+              {name}
+            </Link>
+          )}
         </Antd.Menu.Item>
       );
     });
-  }, []);
+  }, [isBridegMenuOpen]);
 
   return (
     <Header
