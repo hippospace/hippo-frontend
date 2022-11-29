@@ -6,7 +6,7 @@ import cx from 'classnames';
 import styles from './Header.module.scss';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
-import { CloseIcon, MenuIcon, SettingIcon } from 'resources/icons';
+import { CloseIcon, LinkIcon, MenuIcon, SettingIcon } from 'resources/icons';
 import { Drawer, Popover } from 'antd';
 import { ReactNode, useCallback, useState } from 'react';
 import Button from 'components/Button';
@@ -33,7 +33,7 @@ interface ISideMenuProps {
 
 const DropDownLink = ({ children, href }: { children: ReactNode; href: string }) => {
   return (
-    <TextLink href={href} className="block h6 no-underline">
+    <TextLink href={href} className="block body-bold no-underline !text-grey-700">
       {children}
     </TextLink>
   );
@@ -41,9 +41,13 @@ const DropDownLink = ({ children, href }: { children: ReactNode; href: string })
 
 const BridgesMenu = () => {
   return (
-    <div className="flex flex-col gap-y-2 p-y-4">
-      <DropDownLink href="https://theaptosbridge.com/bridge">LayerZero</DropDownLink>
-      <DropDownLink href="https://www.portalbridge.com/#/transfer">Wormhole</DropDownLink>
+    <div className="flex flex-col gap-y-3 px-1">
+      <DropDownLink href="https://theaptosbridge.com/bridge">
+        LayerZero <LinkIcon className="font-icon" />
+      </DropDownLink>
+      <DropDownLink href="https://www.portalbridge.com/#/transfer">
+        Wormhole <LinkIcon className="font-icon" />
+      </DropDownLink>
     </div>
   );
 };
@@ -136,7 +140,7 @@ const PageHeader: React.FC = () => {
               visible={isBridegMenuOpen}
               onVisibleChange={(visible) => setIsBridgeMenuOpen(visible)}
               content={<BridgesMenu />}
-              placement="bottomLeft">
+              placement="bottom">
               <a className="h6 text-grey-500 font-bold">{name}</a>
             </Popover>
           )}

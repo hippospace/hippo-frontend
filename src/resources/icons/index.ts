@@ -33,3 +33,4 @@ export { ReactComponent as NotiInfoIcon } from './notis/info.svg';
 export { ReactComponent as AdjustIcon } from './adjust.svg';
 export { ReactComponent as QuestionIcon } from './question.svg';
 export { ReactComponent as WarningIcon } from './warning.svg';
+export { ReactComponent as LinkIcon } from './link.svg';
