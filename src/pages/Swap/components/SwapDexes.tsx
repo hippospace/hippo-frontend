@@ -33,7 +33,7 @@ const SplitStepDex = ({
   );
 };
 
-const SplitSwapDexes = ({ route }: { route: AggregatorTypes.SplitTradeRoute }) => {
+const SplitSwapDexes = ({ route }: { route: AggregatorTypes.SplitSingleRoute }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isCompact, setIsCompact] = useState(false);
 
@@ -81,8 +81,8 @@ const SwapDexes = ({ r }: { r: GeneralRouteAndQuote }) => {
         })}
       </div>
     );
-  } else if (r.route instanceof AggregatorTypes.SplitTradeRoute) {
-    const route = r.route as AggregatorTypes.SplitTradeRoute;
+  } else if (r.route instanceof AggregatorTypes.SplitSingleRoute) {
+    const route = r.route as AggregatorTypes.SplitSingleRoute;
     return <SplitSwapDexes route={route} />;
   } else {
     throw new Error('Invalid Route type for swap dexes');

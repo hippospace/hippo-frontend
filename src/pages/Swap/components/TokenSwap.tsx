@@ -50,10 +50,10 @@ interface IRouteRowProps {
 
 const serializeRouteQuote = (rq: GeneralRouteAndQuote) => {
   const stepStr = (s: ApiTradeStep) => `${s.dexType}(${s.poolType.toJsNumber()})`;
-  const steps = (r: AggregatorTypes.ApiTradeRoute | AggregatorTypes.SplitTradeRoute) => {
+  const steps = (r: AggregatorTypes.ApiTradeRoute | AggregatorTypes.SplitSingleRoute) => {
     if (r instanceof AggregatorTypes.ApiTradeRoute) {
       return r.steps.map((s) => stepStr(s)).join('x');
-    } else if (r instanceof AggregatorTypes.SplitTradeRoute) {
+    } else if (r instanceof AggregatorTypes.SplitSingleRoute) {
       return r.splitSteps
         .map((ss) =>
           ss.units.map((u) => `${u.scale}*${stepStr(u.step.toApiTradeStep())}`).join('|')
@@ -181,7 +181,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
   const customMaxGasAmount = values.maxGasFee;
 
   let rowH = routeRowMinHeight;
-  if (route.route instanceof AggregatorTypes.SplitTradeRoute) {
+  if (route.route instanceof AggregatorTypes.SplitSingleRoute) {
     const maxUnits = Math.max(...route.route.splitSteps.map((ss) => ss.units.length));
     rowH = routeRowMinHeight + 12 + (maxUnits - 1) * 21;
   }
@@ -559,7 +559,7 @@ const TokenSwap = () => {
 
             const { routes, allRoutesCount } = await (async () => {
               if (!isFixedOutput) {
-                const [routeAndQuotes, split] = await hippoAgg.getQuotesV1V2(
+                const [routeAndQuotes, splitSingle] = await hippoAgg.getQuotesV1V2V3(
                   fromUiAmt,
                   fromToken,
                   toToken,
@@ -568,17 +568,17 @@ const TokenSwap = () => {
                   false,
                   poolReloadMinInterval
                 );
-                console.log('split routes', split);
+                console.log('split routes', splitSingle);
                 const apiRoutes: GeneralRouteAndQuote[] = routeAndQuotes.map((r) => ({
                   ...r,
                   route: r.route.toApiTradeRoute()
                 }));
                 if (
-                  split.length > 0 &&
-                  split[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
+                  splitSingle.length > 0 &&
+                  splitSingle[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
                 ) {
                   console.log('split has a better output');
-                  apiRoutes.unshift(split[0]);
+                  apiRoutes.unshift(splitSingle[0]);
                 }
                 return {
                   allRoutesCount: routeAndQuotes.length,

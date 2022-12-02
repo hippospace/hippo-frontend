@@ -1,5 +1,8 @@
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
-import { IApiRouteAndQuote, SplitRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import {
+  IApiRouteAndQuote,
+  SplitSingleRouteAndQuote
+} from '@manahippo/hippo-sdk/dist/aggregator/types';
 import { Types } from 'aptos';
 
 export type TTransaction = {
@@ -14,4 +17,4 @@ export interface TokenBalance {
   balance: number;
 }
 
-export type GeneralRouteAndQuote = IApiRouteAndQuote | SplitRouteAndQuote;
+export type GeneralRouteAndQuote = IApiRouteAndQuote | SplitSingleRouteAndQuote;

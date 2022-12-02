@@ -22,9 +22,15 @@ interface IPoolProviderProps {
 
 interface IPoolIconProps extends IPoolProviderProps {
   title?: string;
+  isTitleEnabled?: boolean;
 }
 
-export const PoolIcon: FC<IPoolIconProps> = ({ dexType, className = '', title }) => {
+export const PoolIcon: FC<IPoolIconProps> = ({
+  dexType,
+  className = '',
+  title,
+  isTitleEnabled = true
+}) => {
   const imgSrc = useMemo(() => {
     if (dexType === AggregatorTypes.DexType.Basiq) {
       return basiqLogo;
@@ -54,7 +60,7 @@ export const PoolIcon: FC<IPoolIconProps> = ({ dexType, className = '', title })
   }, [dexType]);
   const name = AggregatorTypes.DexType[dexType];
   return (
-    <Tooltip placement="left" title={title ?? name}>
+    <Tooltip placement="left" title={isTitleEnabled ? title ?? name : ''}>
       <img src={imgSrc} alt={name} className={classNames('w-6 h-6 rounded-full', className)} />
     </Tooltip>
   );
@@ -63,7 +69,7 @@ export const PoolIcon: FC<IPoolIconProps> = ({ dexType, className = '', title })
 const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
   return (
     <div className={classNames('flex items-center h-full', className)}>
-      <PoolIcon dexType={dexType} />
+      <PoolIcon dexType={dexType} isTitleEnabled={false} />
       <span className="body-bold text-grey-700 ml-2">{AggregatorTypes.DexType[dexType]}</span>
     </div>
   );
