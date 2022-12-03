@@ -19,15 +19,15 @@ import usePrevious from 'hooks/usePrevious';
 import { openErrorNotification } from 'utils/notifications';
 // import Skeleton from 'components/Skeleton';
 import { Types, ApiError } from 'aptos';
-import TokenSteps from './TokenSteps';
 import { RPCType, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import { useCoingeckoValue } from 'hooks/useCoingecko';
 import { useParams } from 'react-router-dom';
 import { GeneralRouteAndQuote } from 'types/hippo';
-import SwapDexes from './SwapDexes';
 import { ApiTradeStep } from '@manahippo/hippo-sdk/dist/aggregator/types/step/ApiTradeStep';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
+import { RawCoinInfo } from '@manahippo/coin-list';
+import SwapRoute from './SwapRoute';
 
 interface IRoutesProps {
   className?: string;
@@ -50,24 +50,34 @@ interface IRouteRowProps {
 
 const serializeRouteQuote = (rq: GeneralRouteAndQuote) => {
   const stepStr = (s: ApiTradeStep) => `${s.dexType}(${s.poolType.toJsNumber()})`;
-  const steps = (r: AggregatorTypes.ApiTradeRoute | AggregatorTypes.SplitSingleRoute) => {
+
+  const tokensStr = (tokens: RawCoinInfo[]) => tokens.map((t) => t.symbol).join('->');
+
+  const routesStr = (
+    r:
+      | AggregatorTypes.ApiTradeRoute
+      | AggregatorTypes.SplitSingleRoute
+      | AggregatorTypes.SplitMultiRoute
+  ) => {
     if (r instanceof AggregatorTypes.ApiTradeRoute) {
-      return r.steps.map((s) => stepStr(s)).join('x');
+      return r.steps.map((s) => stepStr(s)).join('x') + `:${tokensStr(r.tokens)}`;
     } else if (r instanceof AggregatorTypes.SplitSingleRoute) {
-      return r.splitSteps
-        .map((ss) =>
-          ss.units.map((u) => `${u.scale}*${stepStr(u.step.toApiTradeStep())}`).join('|')
-        )
-        .join('x');
+      return (
+        r.splitSteps
+          .map((ss) =>
+            ss.units.map((u) => `${u.scale}*${stepStr(u.step.toApiTradeStep())}`).join('|')
+          )
+          .join('x') + `:${tokensStr(r.tokens)}`
+      );
+    } else if (r instanceof AggregatorTypes.SplitMultiRoute) {
+      return r.units.map((u) => `[${u.scale}*${routesStr(u.route)}]`);
     } else {
       throw new Error('Invalid route type to print steps');
     }
   };
 
   // Same dexType might have different poolTypes
-  return `${rq.quote.inputUiAmt}->${rq.quote.outputUiAmt}:${steps(rq.route)}:${rq.route.tokens
-    .map((t) => t.symbol)
-    .join('->')}`;
+  return `${rq.quote.inputUiAmt}->${rq.quote.outputUiAmt}:${routesStr(rq.route)}`;
 };
 
 const SettingsButton = ({
@@ -165,7 +175,7 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
   );
 };
 
-const routeRowMinHeight = 66;
+const routeRowMinHeight = 70;
 const RouteRow: React.FC<IRouteRowProps> = ({
   route,
   isSelected = false,
@@ -181,9 +191,9 @@ const RouteRow: React.FC<IRouteRowProps> = ({
   const customMaxGasAmount = values.maxGasFee;
 
   let rowH = routeRowMinHeight;
-  if (route.route instanceof AggregatorTypes.SplitSingleRoute) {
-    const maxUnits = Math.max(...route.route.splitSteps.map((ss) => ss.units.length));
-    rowH = routeRowMinHeight + 12 + (maxUnits - 1) * 21;
+  if (route.route instanceof AggregatorTypes.SplitMultiRoute) {
+    const routesCount = route.route.units.length;
+    rowH += (routesCount - 1) * 24;
   }
 
   return (
@@ -196,17 +206,13 @@ const RouteRow: React.FC<IRouteRowProps> = ({
           }
         )}>
         <div
-          className={classNames('w-full h-full p-2 rounded-lg space-y-1', {
+          className={classNames('w-full h-full px-2 pt-2 pb-[6px] rounded-lg space-y-1', {
             'bg-prime-100 dark:bg-prime-900': isSelected,
             'bg-field': !isSelected
           })}>
           <div className="flex justify-between items-center body-bold text-grey-700">
-            <SwapDexes r={route} />
-            <div className="body-bold ml-1">{outputFormatted}</div>
-          </div>
-          <div className="flex gap-x-4 justify-between items-center label-large-bold text-grey-500 laptop:label-small-bold">
-            <TokenSteps className="mr-auto truncate" tokens={route.route.tokens} />
-            <div className="whitespace-nowrap">
+            <div className="body-bold mr-1">{outputFormatted}</div>
+            <div className="whitespace-nowrap text-grey-500 label-small-bold">
               {simuResult?.success && (
                 <Tooltip
                   title={
@@ -227,6 +233,9 @@ const RouteRow: React.FC<IRouteRowProps> = ({
               )}
               <div className="hidden">${outputValue}</div>
             </div>
+          </div>
+          <div className="text-grey-500 label-small-bold">
+            <SwapRoute r={route} />
           </div>
         </div>
         {isBestPrice && (
@@ -559,7 +568,8 @@ const TokenSwap = () => {
 
             const { routes, allRoutesCount } = await (async () => {
               if (!isFixedOutput) {
-                const [routeAndQuotes, splitSingle] = await hippoAgg.getQuotesV1V2V3(
+                console.time('GetQuotes');
+                const [routeAndQuotes, splitSingle, splitMulti] = await hippoAgg.getQuotesV1V2V3(
                   fromUiAmt,
                   fromToken,
                   toToken,
@@ -568,17 +578,22 @@ const TokenSwap = () => {
                   false,
                   poolReloadMinInterval
                 );
-                console.log('split routes', splitSingle);
+                console.timeEnd('GetQuotes');
                 const apiRoutes: GeneralRouteAndQuote[] = routeAndQuotes.map((r) => ({
                   ...r,
                   route: r.route.toApiTradeRoute()
                 }));
+                if (splitSingle.length > 0) {
+                  console.log('Split single has a better output');
+                  apiRoutes.push(...splitSingle);
+                  apiRoutes.sort((a, b) => b.quote.outputUiAmt - a.quote.outputUiAmt);
+                }
                 if (
-                  splitSingle.length > 0 &&
-                  splitSingle[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
+                  splitMulti.length > 0 &&
+                  splitMulti[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
                 ) {
-                  console.log('split has a better output');
-                  apiRoutes.unshift(splitSingle[0]);
+                  console.log('Split multi has a better output');
+                  apiRoutes.unshift(splitMulti[0]);
                 }
                 return {
                   allRoutesCount: routeAndQuotes.length,

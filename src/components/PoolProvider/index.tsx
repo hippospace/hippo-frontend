@@ -1,5 +1,5 @@
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
-import { FC, useMemo } from 'react';
+import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import basiqLogo from 'resources/img/dexes/basiq.jpeg';
 import econiaLogo from 'resources/img/dexes/econia.jpeg';
@@ -23,13 +23,117 @@ interface IPoolProviderProps {
 interface IPoolIconProps extends IPoolProviderProps {
   title?: string;
   isTitleEnabled?: boolean;
+  style?: CSSProperties;
+  onMouseHover?: (h: boolean) => void;
 }
+
+export const PoolStack = ({
+  dexes,
+  titles = [],
+  className = '',
+  iconSize = 20,
+  visibleRatios,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  unFoldDirection = 'right'
+}: {
+  dexes: AggregatorTypes.DexType[];
+  titles?: string[];
+  className?: string;
+  iconSize?: number;
+  visibleRatios?: number[];
+  unFoldDirection?: 'left' | 'right';
+}) => {
+  const defaultVisibleRatio = 0.5;
+  const defaultScaleTimes = 1.5;
+
+  const [hoverIndex, setHoverIndex] = useState(-1);
+  const offsetOnHover =
+    (defaultScaleTimes -
+      1 +
+      ((unFoldDirection === 'right' && hoverIndex > 0) ||
+      (unFoldDirection === 'left' && hoverIndex < dexes.length - 1)
+        ? 0.5
+        : 0)) *
+    iconSize;
+
+  if (!visibleRatios) {
+    visibleRatios = [1, ...new Array(dexes.length - 1).fill(defaultVisibleRatio)];
+  }
+  const hoverIndexRef = useRef(-1); // use Ref for comparing as it would change immediately
+
+  const width =
+    visibleRatios.reduce((p, c) => p + c) * iconSize + (hoverIndex >= 0 ? offsetOnHover : 0);
+
+  const padding = hoverIndex >= 0 ? offsetOnHover : 0;
+  const pdProp = unFoldDirection === 'right' ? 'paddingLeft' : 'paddingRight';
+
+  return (
+    <div
+      className={classNames('whitespace-nowrap transition-all', className)}
+      style={{ width, [pdProp]: padding }}>
+      {dexes.map((d, i) => {
+        const left =
+          -iconSize *
+          visibleRatios
+            .map((v) => 1 - v)
+            .slice(0, i + 1)
+            .reduce((p, c) => p + c);
+        const zIndex = hoverIndex === i ? dexes.length + 1 : dexes.length - i;
+
+        const translateX =
+          (unFoldDirection === 'right' && i < hoverIndex) ||
+          (unFoldDirection === 'left' && i > hoverIndex)
+            ? offsetOnHover * (unFoldDirection === 'right' ? -1 : 1)
+            : 0;
+        const scale = i === hoverIndex ? defaultScaleTimes : 1;
+
+        return (
+          <PoolIcon
+            dexType={d}
+            title={titles[i]}
+            key={i}
+            className={classNames(
+              'relative inline-block transform-gpu scale-100 transition-transform translate-x-0',
+              {
+                'origin-bottom-left': unFoldDirection === 'left',
+                'origin-bottom-right': unFoldDirection === 'right'
+              }
+            )}
+            style={
+              {
+                width: iconSize,
+                height: iconSize,
+                left: `${left}px`,
+                zIndex,
+                '--tw-scale-x': scale, // overrides
+                '--tw-scale-y': scale,
+                '--tw-translate-x': `${translateX}px`
+              } as CSSProperties
+            }
+            onMouseHover={(h) => {
+              // console.log(`icon ${i} hover: ${h}`);
+              if (!h && hoverIndexRef.current === i) {
+                hoverIndexRef.current = -1;
+                setHoverIndex(-1);
+              } else if (h && hoverIndexRef.current !== i) {
+                hoverIndexRef.current = i;
+                setHoverIndex(i);
+              }
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+};
 
 export const PoolIcon: FC<IPoolIconProps> = ({
   dexType,
   className = '',
   title,
-  isTitleEnabled = true
+  isTitleEnabled = true,
+  style,
+  onMouseHover = () => {}
 }) => {
   const imgSrc = useMemo(() => {
     if (dexType === AggregatorTypes.DexType.Basiq) {
@@ -59,9 +163,23 @@ export const PoolIcon: FC<IPoolIconProps> = ({
     }
   }, [dexType]);
   const name = AggregatorTypes.DexType[dexType];
+  const [isHover, setIsHover] = useState(false);
+
+  useEffect(() => {
+    onMouseHover(isHover);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHover]);
+
   return (
-    <Tooltip placement="left" title={isTitleEnabled ? title ?? name : ''}>
-      <img src={imgSrc} alt={name} className={classNames('w-6 h-6 rounded-full', className)} />
+    <Tooltip placement="top" title={isTitleEnabled ? title ?? name : ''}>
+      <img
+        src={imgSrc}
+        alt={name}
+        className={classNames('w-6 h-6 rounded-full', className)}
+        style={style}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
+      />
     </Tooltip>
   );
 };
