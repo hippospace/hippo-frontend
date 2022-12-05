@@ -1,5 +1,6 @@
 import classNames from 'classnames';
-import { forwardRef, useEffect, useMemo, useState } from 'react';
+import usePrevious from 'hooks/usePrevious';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 import { avoidScientificNotation, cutDecimals, numToGrouped } from './numberFormats';
 
@@ -51,6 +52,9 @@ const PositiveFloatNumInput = forwardRef<
       'Max decimals prop value invalid'
     );
 
+    const inputRef = useRef<HTMLInputElement>(null);
+    useImperativeHandle(ref, () => inputRef.current);
+
     const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
       if (event.key === 'Enter') {
         onEnter();
@@ -73,7 +77,7 @@ const PositiveFloatNumInput = forwardRef<
     const [internalAmountText, setInternalAmountText] = useState<string>(inputToInternalAmount); // can be ''
 
     useEffect(() => {
-      // Input only changes internal state when there will be an value update for the zero input cases like 0.0000, 1.0000
+      // Input only changes internal state when there will be an value update to avoid breaking the zero input cases like 0.0000, 1.0000
       if (inputAmount !== parseFloat(internalAmountText)) {
         setInternalAmountText(inputToInternalAmount);
       }
@@ -81,10 +85,22 @@ const PositiveFloatNumInput = forwardRef<
     }, [inputAmount]);
 
     const displayText = numToGrouped(internalAmountText);
+    const prevoiusDisplayText = usePrevious(displayText);
+
+    const selectionStart = inputRef.current?.selectionStart;
+    const previousSelectionStart = usePrevious(selectionStart);
+
+    useEffect(() => {
+      const textLengthChange = displayText.length - (prevoiusDisplayText?.length ?? 0);
+      if (!isDisabled && Math.abs(textLengthChange) > 0) {
+        const fixedCursorPos = previousSelectionStart + textLengthChange;
+        inputRef.current.setSelectionRange(fixedCursorPos, fixedCursorPos);
+      }
+    }, [displayText.length, isDisabled, previousSelectionStart, prevoiusDisplayText]);
 
     return (
       <input
-        ref={ref}
+        ref={inputRef}
         className={classNames(
           'positiveFloatNumInput',
           'px-1 focus: outline-none min-w-0',
