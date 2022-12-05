@@ -1902,10 +1902,10 @@
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/hippo-sdk@0.103.2":
-  version "0.103.2"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.103.2.tgz#182d6c6971ef988d7acce059479d53ec6a0f14b6"
-  integrity sha512-cY/iRO+sIwu0nAAyb8U6h+ntf9bJI83kIVOUbPy7tu/jtQgGXprGVHoCn9OS8wwAY2rJRVDHJG8fqYCkY3ZWYQ==
+"@manahippo/hippo-sdk@0.103.6":
+  version "0.103.6"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.103.6.tgz#9dd691040b9c2d5e5cfd8869e1fcff56e99b277c"
+  integrity sha512-lwuddEkgzMqb2XN+eDdrhOPjvXDQSqTcfacr3yD79scBw6cIF1sNmwkDDScfQeVXwTmQeCl9sMG1Pjr1zofmgQ==
   dependencies:
     "@manahippo/coin-list" "2.2.0"
     "@manahippo/move-to-ts" "0.5.0"
