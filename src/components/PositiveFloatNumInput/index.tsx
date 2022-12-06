@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import usePrevious from 'hooks/usePrevious';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 import { avoidScientificNotation, cutDecimals, numToGrouped } from './numberFormats';
@@ -85,18 +84,34 @@ const PositiveFloatNumInput = forwardRef<
     }, [inputAmount]);
 
     const displayText = numToGrouped(internalAmountText);
-    const prevoiusDisplayText = usePrevious(displayText);
+    const prevoiusDisplayText = useRef<string>(''); // don't use usePrevious
 
     const selectionStart = inputRef.current?.selectionStart;
-    const previousSelectionStart = usePrevious(selectionStart);
+    const previousSelectionStart = useRef<number>(0);
 
     useEffect(() => {
-      const textLengthChange = displayText.length - (prevoiusDisplayText?.length ?? 0);
+      const textLengthChange = displayText.length - (prevoiusDisplayText.current?.length ?? 0);
       if (!isDisabled && Math.abs(textLengthChange) > 0) {
-        const fixedCursorPos = previousSelectionStart + textLengthChange;
+        const fixedCursorPos = Math.min(
+          displayText.length,
+          Math.max(0, previousSelectionStart.current + textLengthChange)
+        );
+        previousSelectionStart.current = fixedCursorPos;
         inputRef.current.setSelectionRange(fixedCursorPos, fixedCursorPos);
+      } else {
+        previousSelectionStart.current = selectionStart;
       }
-    }, [displayText.length, isDisabled, previousSelectionStart, prevoiusDisplayText]);
+      prevoiusDisplayText.current = displayText;
+      // Caret moving would trigger input re-render
+    }, [displayText, isDisabled, selectionStart]);
+
+    const [isCommaDeleted, setIsCommaDeleted] = useState(false);
+    useEffect(() => {
+      if (!isDisabled && isCommaDeleted) {
+        inputRef.current.setSelectionRange(selectionStart, selectionStart);
+        setIsCommaDeleted(false);
+      }
+    }, [isCommaDeleted, isDisabled, selectionStart]);
 
     return (
       <input
@@ -142,10 +157,14 @@ const PositiveFloatNumInput = forwardRef<
               else return;
             }
           }
-          setInternalAmountText(valueStr);
           onInputChange(event);
-          // When internal value is '', convert to 0
-          onAmountChange(parseFloat(valueStr || '0'));
+          if (valueStr !== internalAmountText) {
+            setInternalAmountText(valueStr);
+            // When internal value is '', convert to 0
+            onAmountChange(parseFloat(valueStr || '0'));
+          } else {
+            setIsCommaDeleted(true);
+          }
         }}
       />
     );
