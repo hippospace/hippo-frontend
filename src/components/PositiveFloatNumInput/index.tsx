@@ -86,22 +86,24 @@ const PositiveFloatNumInput = forwardRef<
     const displayText = numToGrouped(internalAmountText);
     const prevoiusDisplayText = useRef<string>(''); // don't use usePrevious
 
-    const selectionStart = inputRef.current?.selectionStart;
+    const selectionStart = inputRef.current?.selectionEnd; // fix ctrl-a
     const previousSelectionStart = useRef<number>(0);
 
     useEffect(() => {
       const textLengthChange = displayText.length - (prevoiusDisplayText.current?.length ?? 0);
-      if (!isDisabled && Math.abs(textLengthChange) > 0) {
-        const fixedCursorPos = Math.min(
-          displayText.length,
-          Math.max(0, previousSelectionStart.current + textLengthChange)
-        );
-        previousSelectionStart.current = fixedCursorPos;
-        inputRef.current.setSelectionRange(fixedCursorPos, fixedCursorPos);
-      } else {
-        previousSelectionStart.current = selectionStart;
+      if (!isDisabled) {
+        if (Math.abs(textLengthChange) > 0) {
+          const fixedCursorPos = Math.min(
+            displayText.length,
+            Math.max(0, previousSelectionStart.current + textLengthChange)
+          );
+          previousSelectionStart.current = fixedCursorPos;
+          inputRef.current.setSelectionRange(fixedCursorPos, fixedCursorPos);
+        } else {
+          previousSelectionStart.current = selectionStart;
+        }
+        prevoiusDisplayText.current = displayText;
       }
-      prevoiusDisplayText.current = displayText;
       // Caret moving would trigger input re-render
     }, [displayText, isDisabled, selectionStart]);
 
