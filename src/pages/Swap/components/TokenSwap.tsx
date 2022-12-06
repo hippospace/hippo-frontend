@@ -358,7 +358,7 @@ const TokenSwap = () => {
 
   const [allRoutes, setAllRoutes] = useState<GeneralRouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<GeneralRouteAndQuote | null>(null);
-  const [routeSelectedSerialized, setRouteSelectedSerialized] = useState('');
+  const [routeSelectedSerialized, setRouteSelectedSerialized] = useState(''); // '' represents the first route
   const [availableRoutesCount, setAvailableRoutesCount] = useState(0);
 
   const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
@@ -861,6 +861,7 @@ const TokenSwap = () => {
   const getCurrentToTokenRate = useCallback(
     () =>
       routeSelected &&
+      !routeSelectedSerialized &&
       fromUiAmt &&
       toUiAmt &&
       routeSelected.quote.inputSymbol === fromToken?.symbol &&
@@ -869,7 +870,15 @@ const TokenSwap = () => {
         (routeSelected.quote.outputUiAmt === toUiAmt && isFixedOutput))
         ? routeSelected.quote.inputUiAmt / routeSelected.quote.outputUiAmt
         : Infinity,
-    [fromToken?.symbol, fromUiAmt, isFixedOutput, routeSelected, toToken?.symbol, toUiAmt]
+    [
+      fromToken?.symbol,
+      fromUiAmt,
+      isFixedOutput,
+      routeSelected,
+      routeSelectedSerialized,
+      toToken?.symbol,
+      toUiAmt
+    ]
   );
 
   useEffect(() => {
