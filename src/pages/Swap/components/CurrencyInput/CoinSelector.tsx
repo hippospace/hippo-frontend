@@ -70,12 +70,8 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     }
     if (filter !== 'All') {
       tokenListFiltered = tokenListFiltered?.filter((token) => {
-        const nonNatives: Filter[] = ['LayerZero', 'Wormhole', 'Celer'];
-        if (nonNatives.includes(filter)) {
-          return new RegExp(filter, 'i').test(token.name);
-        } else {
-          return !new RegExp(nonNatives.join('|'), 'i').test(token.name);
-        }
+        const bridgeArray = token.extensions.data.find((a) => a[0] === 'bridge');
+        return bridgeArray && bridgeArray[1]?.startsWith(filter.toLowerCase());
       });
     }
 
@@ -155,7 +151,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const renderTokenList = useMemo(() => {
     return (
       <div className="flex flex-col gap-2 mt-4 flex-grow min-h-0">
-        {/* filters */}
+        {filters}
         <div className="flex justify-between">
           <div className="text-grey-500 label-large-bold">Token</div>
           <div className="text-grey-500 label-large-bold">{hippoWallet ? 'Balance' : ''}</div>
@@ -183,7 +179,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         </div>
       </div>
     );
-  }, [hippoWallet, tokenListBalance, listHeight, onSelectToken]);
+  }, [filters, hippoWallet, tokenListBalance, listHeight, onSelectToken]);
 
   return (
     <div className="flex flex-col gap-2 h-[50vh] mobile:h-full">

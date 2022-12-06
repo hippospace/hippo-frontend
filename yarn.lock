@@ -1891,10 +1891,10 @@
     js-sha3 "^0.8.0"
     msafe-iframe "^1.0.8"
 
-"@manahippo/coin-list@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-2.2.0.tgz#991ae0886a23124ad8c858fc00532d7f6a51e9b4"
-  integrity sha512-xnvXZoNmdK+kdoTSVDsWceWBwXQRLQEy25+y3fMHDpjo3Pd6Wtp6lqU+2/s/NaZcIt3pGTAjc0KC4sZLN/hY6w==
+"@manahippo/coin-list@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-2.3.0.tgz#13a65bf7702fb7e0baf5dafe3fc5f89ffe48c229"
+  integrity sha512-qcv+E2FI4LV68CckP0KVVTcH2DRFwD8YdqizsTcq1DOxdZmFqGBdU81ieMamcxGOyHOevlxyTIQP470beDoyBA==
   dependencies:
     "@manahippo/move-to-ts" "0.5.0"
     aptos "1.3.15"
@@ -1902,12 +1902,12 @@
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/hippo-sdk@0.103.6":
-  version "0.103.6"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.103.6.tgz#9dd691040b9c2d5e5cfd8869e1fcff56e99b277c"
-  integrity sha512-lwuddEkgzMqb2XN+eDdrhOPjvXDQSqTcfacr3yD79scBw6cIF1sNmwkDDScfQeVXwTmQeCl9sMG1Pjr1zofmgQ==
+"@manahippo/hippo-sdk@0.103.8":
+  version "0.103.8"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-0.103.8.tgz#3d0b7eea89f15098ef2fff9017da70d2690c5750"
+  integrity sha512-MAriN85W0S6LS52a9krOV/5RtcZMc3yV49akPsERRWm0vPVYCHgOgrzJUEkHbo5tWu/1fhBHCY02rseGbRqh/A==
   dependencies:
-    "@manahippo/coin-list" "2.2.0"
+    "@manahippo/coin-list" "2.3.0"
     "@manahippo/move-to-ts" "0.5.0"
     "@vividnetwork/swap-sdk" "^0.2.2"
     aptos "1.3.15"
