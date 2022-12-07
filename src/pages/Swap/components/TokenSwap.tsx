@@ -586,9 +586,7 @@ const TokenSwap = () => {
                 if (splitSingle.length > 0) {
                   console.log('Split single has a better output');
                   apiRoutes.push(...splitSingle);
-                  apiRoutes.sort((a, b) => b.quote.outputUiAmt - a.quote.outputUiAmt);
                 }
-                console.log('Split multi output', splitMulti);
                 if (
                   splitMulti.length > 0 &&
                   splitMulti[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
@@ -596,6 +594,12 @@ const TokenSwap = () => {
                   console.log('Split multi has a better output');
                   apiRoutes.unshift(splitMulti[0]);
                 }
+                /*
+                if (splitMulti.length > 0) {
+                  apiRoutes.push(...splitMulti);
+                }
+                */
+                apiRoutes.sort((a, b) => b.quote.outputUiAmt - a.quote.outputUiAmt);
                 return {
                   allRoutesCount: routeAndQuotes.length,
                   routes: apiRoutes
