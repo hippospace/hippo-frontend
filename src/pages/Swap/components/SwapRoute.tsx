@@ -32,7 +32,7 @@ const SplitSingleRouteComp = ({ r, scale }: { r: SplitSingleRoute; scale?: numbe
 const SplitMultiRouteComp = ({ r }: { r: SplitMultiRoute }) => {
   return (
     <div className="space-y-1">
-      {r.units
+      {[...r.units]
         .sort((a, b) => b.scale - a.scale)
         .map((u, index) => {
           return <SplitSingleRouteComp key={index} r={u.route} scale={u.scale} />;

@@ -9,7 +9,7 @@ export const SplitSingleRouteDexes = ({ sr }: { sr: AggregatorTypes.SplitSingleR
   return (
     <div className="flex items-center">
       {sr.splitSteps.map((step, index) => {
-        const unitsSorted = step.units.sort((a, b) => b.scale - a.scale);
+        const unitsSorted = [...step.units].sort((a, b) => b.scale - a.scale);
         const titles = unitsSorted.map(
           (u) =>
             `${AggregatorTypes.DEX_TYPE_NAME[u.step.pool.dexType]}: ${Math.round(u.scale * 100)}%`

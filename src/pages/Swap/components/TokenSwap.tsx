@@ -569,8 +569,7 @@ const TokenSwap = () => {
             const { routes, allRoutesCount } = await (async () => {
               if (!isFixedOutput) {
                 console.time('GetQuotes');
-                // const [routeAndQuotes, splitSingle, splitMulti] = await hippoAgg.getQuotesV1V2(
-                const [routeAndQuotes, splitSingle] = await hippoAgg.getQuotesV1V2(
+                const [routeAndQuotes, splitSingle, splitMulti] = await hippoAgg.getQuotesV1V2V3(
                   fromUiAmt,
                   fromToken,
                   toToken,
@@ -589,7 +588,7 @@ const TokenSwap = () => {
                   apiRoutes.push(...splitSingle);
                   apiRoutes.sort((a, b) => b.quote.outputUiAmt - a.quote.outputUiAmt);
                 }
-                /*
+                console.log('Split multi output', splitMulti);
                 if (
                   splitMulti.length > 0 &&
                   splitMulti[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
@@ -597,7 +596,6 @@ const TokenSwap = () => {
                   console.log('Split multi has a better output');
                   apiRoutes.unshift(splitMulti[0]);
                 }
-                */
                 return {
                   allRoutesCount: routeAndQuotes.length,
                   routes: apiRoutes
