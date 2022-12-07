@@ -9,9 +9,13 @@ import CoinRow from './CoinRow';
 
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
-import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
+import { CoinListClient, RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 import { TokenBalance } from 'types/hippo';
 import classNames from 'classnames';
+import create from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import { CloseCircleIcon } from 'resources/icons';
+import Button from 'components/Button';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -25,17 +29,88 @@ type Filter = 'All' | 'Native' | 'LayerZero' | 'Wormhole' | 'Celer';
 //   balance: string;
 // }
 
+const preSetTokens = ['APT', 'WBTC', 'WETH', 'USDT', 'USDC'];
+
+interface ICoinSelectorState {
+  filter: Filter;
+  setFilter: (f: Filter) => void;
+
+  searchPattern: string;
+  setSearchPattern: (s: string) => void;
+
+  recentSelectedTokens: string[];
+  addRecentSelectedToken: (fullName: string, coinListCli: CoinListClient) => void;
+}
+
+const useCoinSelectorStore = create<ICoinSelectorState>()(
+  devtools(
+    persist(
+      (set) => ({
+        filter: 'All',
+        setFilter: (f) => set((state) => ({ ...state, filter: f })),
+
+        searchPattern: '',
+        setSearchPattern: (s) => set((state) => ({ ...state, searchPattern: s })),
+
+        recentSelectedTokens: [],
+        addRecentSelectedToken: (fullName, coinListCli) =>
+          set((state) => {
+            if (
+              state.recentSelectedTokens.includes(fullName) ||
+              preSetTokens.includes(coinListCli.getCoinInfoByFullName(fullName).symbol)
+            )
+              return state;
+            return {
+              ...state,
+              recentSelectedTokens: [
+                ...state.recentSelectedTokens.slice(
+                  state.recentSelectedTokens.length === 5 ? 1 : 0
+                ),
+                fullName
+              ]
+            };
+          })
+      }),
+      { name: 'hippo-coin-selector-store' }
+    )
+  )
+);
+
+const isTokenOfFilter = (token: TokenInfo, filter: Filter) => {
+  if (filter === 'All') return true;
+  const bridgeArray = token.extensions.data.find((a) => a[0] === 'bridge');
+  return bridgeArray && bridgeArray[1]?.startsWith(filter.toLowerCase());
+};
+
 const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
+  const { hippoAgg } = useHippoClient();
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const tokenList = useSelector(getTokenList);
-  const commonCoins = tokenList.filter((token) => {
-    return ['APT', 'WBTC', 'WETH', 'USDT', 'USDC'].includes(token.symbol);
-  });
-  const [searchPattern, setSearchPattern] = useState<string>('');
+  // const [filter, setFilter] = useState<Filter>('All');
+
+  const filter = useCoinSelectorStore((state) => state.filter);
+  const setFilter = useCoinSelectorStore((state) => state.setFilter);
+
+  const recentSelectedTokens = useCoinSelectorStore((state) => state.recentSelectedTokens);
+  const addRecentSelectedToken = useCoinSelectorStore((state) => state.addRecentSelectedToken);
+
+  const commonCoins = useMemo(
+    () =>
+      preSetTokens
+        .map((s) => hippoAgg.coinListClient.getCoinInfoBySymbol(s)[0])
+        .concat(
+          ...recentSelectedTokens.map((f) => hippoAgg.coinListClient.getCoinInfoByFullName(f))
+        ),
+    [hippoAgg.coinListClient, recentSelectedTokens]
+  );
+
+  // const [searchPattern, setSearchPattern] = useState<string>('');
+  const searchPattern = useCoinSelectorStore((state) => state.searchPattern);
+  const setSearchPattern = useCoinSelectorStore((state) => state.setSearchPattern);
+
   const { hippoWallet } = useHippoClient();
   const [tokenListBalance, setTokenListBalance] = useState<TokenBalance[]>();
 
-  const [filter, setFilter] = useState<Filter>('All');
   const filterTitles: Filter[] = useMemo(
     () => ['All', 'Native', 'LayerZero', 'Wormhole', 'Celer'],
     []
@@ -55,9 +130,17 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         ...values[actionType],
         token
       });
+      addRecentSelectedToken(token.token_type.type, hippoAgg.coinListClient);
       dismissiModal();
     },
-    [actionType, values, setFieldValue, dismissiModal]
+    [
+      actionType,
+      values,
+      setFieldValue,
+      addRecentSelectedToken,
+      hippoAgg.coinListClient,
+      dismissiModal
+    ]
   );
 
   const getFilteredTokenListWithBalance = useCallback(() => {
@@ -68,12 +151,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         return keysForFilter.includes(searchPattern);
       });
     }
-    if (filter !== 'All') {
-      tokenListFiltered = tokenListFiltered?.filter((token) => {
-        const bridgeArray = token.extensions.data.find((a) => a[0] === 'bridge');
-        return bridgeArray && bridgeArray[1]?.startsWith(filter.toLowerCase());
-      });
-    }
+    tokenListFiltered = tokenListFiltered?.filter((token) => isTokenOfFilter(token, filter));
 
     const tokenListMapped = tokenListFiltered
       ?.sort((a, b) => (a.symbol <= b.symbol ? -1 : 1))
@@ -110,15 +188,22 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
             />
           ))}
         </div>
-        <input
-          className="bg-field py-4 px-6 body-bold text-grey-900 rounded-xl focus:outline-none border-none"
-          value={searchPattern}
-          onChange={(e) => setSearchPattern(e.target.value.toLowerCase())}
-          placeholder="Search"
-        />
+        <div className="flex items-center bg-field p-4 rounded-xl">
+          <input
+            className="bg-transparent flex-grow min-w-0 body-bold text-grey-900 focus:outline-none border-none"
+            value={searchPattern}
+            onChange={(e) => setSearchPattern(e.target.value.toLowerCase())}
+            placeholder="Search"
+          />
+          {searchPattern && (
+            <Button variant="icon" onClick={() => setSearchPattern('')}>
+              <CloseCircleIcon className="font-icon h6" />
+            </Button>
+          )}
+        </div>
       </div>
     );
-  }, [searchPattern, onSelectToken, commonCoins]);
+  }, [commonCoins, searchPattern, onSelectToken, setSearchPattern]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(0);
@@ -146,7 +231,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         ))}
       </div>
     );
-  }, [filter, filterTitles]);
+  }, [filter, filterTitles, setFilter]);
 
   const renderTokenList = useMemo(() => {
     return (

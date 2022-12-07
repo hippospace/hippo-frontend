@@ -1,6 +1,7 @@
 import Button from 'components/Button';
 import CoinIcon from 'components/CoinIcon';
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
+import { Tooltip } from 'antd';
 
 interface TProps {
   coin: CoinInfo;
@@ -9,13 +10,15 @@ interface TProps {
 
 const CommonCoinButton: React.FC<TProps> = ({ coin, onClickToken }) => {
   return (
-    <Button
-      variant="icon"
-      onClick={onClickToken}
-      className="p-0 overflow-hidden rounded-full !border-0">
-      <CoinIcon logoSrc={coin.logo_url} />
-      {/* {coin.symbol} */}
-    </Button>
+    <Tooltip placement="top" title={coin.name}>
+      <Button
+        variant="icon"
+        onClick={onClickToken}
+        className="p-0 overflow-hidden rounded-full !border-0">
+        <CoinIcon logoSrc={coin.logo_url} />
+        {/* {coin.symbol} */}
+      </Button>
+    </Tooltip>
   );
 };
 
