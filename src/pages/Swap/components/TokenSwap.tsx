@@ -39,6 +39,7 @@ interface IRoutesProps {
   isRefreshing?: boolean;
   refreshButton?: ReactNode;
   simuResults?: Types.UserTransaction[];
+  isFixedOutputMode?: boolean;
 }
 
 interface IRouteRowProps {
@@ -257,7 +258,8 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   isDesktopScreen = false,
   // isRefreshing = false,
   refreshButton,
-  simuResults = []
+  simuResults = [],
+  isFixedOutputMode = false
 }) => {
   const [isMore, setIsMore] = useState(false);
   const rowsWhenLess = 2;
@@ -272,7 +274,10 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   return (
     <div className={className}>
       <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
-        <div>Total {availableRoutesCount} routes available</div>
+        <div>
+          Total {availableRoutesCount} routes available{' '}
+          {isFixedOutputMode && '(Fixed received mode)'}
+        </div>
         <div>{refreshButton}</div>
       </div>
       <VirtualList
@@ -605,7 +610,7 @@ const TokenSwap = () => {
                   routes: apiRoutes
                 };
               } else {
-                const routeAndQuotes = await hippoAgg.getQuotesWithFixedOutput(
+                const routeAndQuote = await hippoAgg.getQuotesWithFixedOutputWithChange(
                   toUiAmt,
                   fromToken,
                   toToken,
@@ -613,13 +618,13 @@ const TokenSwap = () => {
                   false,
                   poolReloadMinInterval
                 );
-                const apiRoutes = routeAndQuotes.map((r) => ({
+                const fixedOutputRoutes = [routeAndQuote].map((r) => ({
                   ...r,
                   route: r.route.toApiTradeRoute()
                 }));
                 return {
-                  allRoutesCount: routeAndQuotes.length,
-                  routes: apiRoutes
+                  allRoutesCount: fixedOutputRoutes.length,
+                  routes: fixedOutputRoutes
                 };
               }
             })();
@@ -983,7 +988,7 @@ const TokenSwap = () => {
               <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
             )}
           </div>
-          <CurrencyInput actionType="currencyTo" isDisableAmountInput={true} />
+          <CurrencyInput actionType="currencyTo" isDisableAmountInput={!hasRoute} />
           {isTablet && isRoutesVisible && (
             <>
               <RoutesAvailable
@@ -994,6 +999,7 @@ const TokenSwap = () => {
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
                 simuResults={simulateResults}
+                isFixedOutputMode={isFixedOutput}
               />
             </>
           )}
@@ -1019,6 +1025,7 @@ const TokenSwap = () => {
                   />
                 }
                 simuResults={simulateResults}
+                isFixedOutputMode={isFixedOutput}
               />
               {routeSelected && (
                 <SwapDetail
