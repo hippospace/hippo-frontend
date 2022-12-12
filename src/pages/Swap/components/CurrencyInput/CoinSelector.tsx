@@ -249,7 +249,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
               <VirtualList
                 data={tokenListBalance || []}
                 height={listHeight}
-                itemHeight={73}
+                itemHeight={69} // minimum height
                 itemKey={(item) => `list-item-${item.token.symbol}`}>
                 {(item) => (
                   <List.Item
