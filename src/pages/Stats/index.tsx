@@ -1,11 +1,13 @@
 import { hippo_aggregator } from '@manahippo/hippo-sdk';
 import { Segmented, Skeleton } from 'antd';
 import classNames from 'classnames';
-import PoolProvider from 'components/PoolProvider';
+import PoolProvider, { poolUrl } from 'components/PoolProvider';
 import { numberGroupFormat, numberOfAbbr } from 'components/PositiveFloatNumInput/numberFormats';
+import TextLink from 'components/TextLink';
 import TradingPair from 'components/TradingPair';
 import useHippoClient from 'hooks/useHippoClient';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { LinkIcon } from 'resources/icons';
 import { addDays } from 'utils/utility';
 import styles from './Stats.module.scss';
 import TopList from './TopList';
@@ -51,7 +53,11 @@ const Stats = () => {
           <span className="body-bold text-grey-700 hidden mobile:block">
             ${numberOfAbbr(pp.amount.toJsNumber() / volumeScale, 1)}
           </span>
-        </>
+        </>,
+        // eslint-disable-next-line react/jsx-key
+        <TextLink href={poolUrl(pp.dex_type.toJsNumber())}>
+          <LinkIcon className="font-icon" />
+        </TextLink>
       ];
     });
   }, [statsPeriod, volume, volumeScale]);
@@ -209,9 +215,9 @@ const Stats = () => {
         <TopList
           className="w-full max-w-[542px]"
           title="Top Pool Providers"
-          cols={['# Pool Provider', `${statsPeriod} Volume`]}
+          cols={['# Pool Provider', `${statsPeriod} Volume`, '']}
           datas={topPoolProviders2}
-          flexs={[2, 1]}
+          flexs={[2, 1, [0, 0, '16px']]}
         />
       </div>
     </div>

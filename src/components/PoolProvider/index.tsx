@@ -1,7 +1,6 @@
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 
-import basiqLogo from 'resources/img/dexes/basiq.jpeg';
 import econiaLogo from 'resources/img/dexes/econia.jpeg';
 import pontemLogo from 'resources/img/dexes/pontem.jpeg';
 import dittoLogo from 'resources/img/dexes/ditto.jpeg';
@@ -14,6 +13,7 @@ import pancakeLogo from 'resources/img/dexes/pancake.jpeg';
 import obricLogo from 'resources/img/dexes/obric.png';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';
+import { DexType } from '@manahippo/hippo-sdk/dist/aggregator/types';
 
 interface IPoolProviderProps {
   dexType: AggregatorTypes.DexType;
@@ -136,9 +136,7 @@ export const PoolIcon: FC<IPoolIconProps> = ({
   onMouseHover = () => {}
 }) => {
   const imgSrc = useMemo(() => {
-    if (dexType === AggregatorTypes.DexType.Basiq) {
-      return basiqLogo;
-    } else if (dexType === AggregatorTypes.DexType.Econia) {
+    if (dexType === AggregatorTypes.DexType.Econia) {
       return econiaLogo;
     } else if (dexType === AggregatorTypes.DexType.Pontem) {
       return pontemLogo;
@@ -191,6 +189,32 @@ const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
       <span className="body-bold text-grey-700 ml-2">{AggregatorTypes.DexType[dexType]}</span>
     </div>
   );
+};
+
+export const poolUrl = (dexType: DexType) => {
+  if (dexType === AggregatorTypes.DexType.Econia) {
+    return 'https://www.econia.dev/';
+  } else if (dexType === AggregatorTypes.DexType.Pontem) {
+    return 'https://pontem.network/';
+  } else if (dexType === AggregatorTypes.DexType.Ditto) {
+    return 'https://www.dittofinance.io/';
+  } else if (dexType === AggregatorTypes.DexType.Tortuga) {
+    return 'https://tortuga.finance/';
+  } else if (dexType === AggregatorTypes.DexType.Aptoswap) {
+    return 'https://aptoswap.net/';
+  } else if (dexType === AggregatorTypes.DexType.Aux) {
+    return 'https://aux.exchange/';
+  } else if (dexType === AggregatorTypes.DexType.AnimeSwap) {
+    return 'https://animeswap.org/';
+  } else if (dexType === AggregatorTypes.DexType.Cetus) {
+    return 'https://www.cetus.zone/';
+  } else if (dexType === AggregatorTypes.DexType.Pancake) {
+    return 'https://pancakeswap.finance/';
+  } else if (dexType === AggregatorTypes.DexType.Obric) {
+    return 'https://obric.xyz/';
+  } else {
+    return undefined;
+  }
 };
 
 export default PoolProvider;
