@@ -1,5 +1,5 @@
 import Button from 'components/Button';
-import CoinIcon from 'components/CoinIcon';
+import CoinIcon from 'components/Coins/CoinIcon';
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 import { Tooltip } from 'antd';
 

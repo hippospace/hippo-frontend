@@ -5,7 +5,7 @@ import cx from 'classnames';
 import styles from './CurrencyInput.module.scss';
 import CoinSelector from './CoinSelector';
 import { useCallback, useRef, useState } from 'react';
-import CoinIcon from 'components/CoinIcon';
+import CoinIcon from 'components/Coins/CoinIcon';
 import { Modal, Drawer } from 'components/Antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useSelector } from 'react-redux';
@@ -19,6 +19,7 @@ import Button from 'components/Button';
 import Skeleton from 'components/Skeleton';
 import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 import { useBreakpoint } from 'hooks/useBreakpoint';
+import CoinLabel from 'components/Coins/CoinLabel';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -51,7 +52,7 @@ const CoinSelectButton = ({
         <>
           <div className="flex gap-2 items-center">
             <CoinIcon logoSrc={token.logo_url} />
-            {token.symbol}
+            <CoinLabel coin={token} />
           </div>
           <CaretIcon className="font-icon text-grey-300" />
         </>

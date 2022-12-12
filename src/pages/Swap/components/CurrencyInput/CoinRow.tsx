@@ -1,6 +1,7 @@
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { Skeleton } from 'antd';
-import CoinIcon from 'components/CoinIcon';
+import CoinIcon from 'components/Coins/CoinIcon';
+import CoinLabel from 'components/Coins/CoinLabel';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { TokenBalance } from 'types/hippo';
 
@@ -13,12 +14,15 @@ const CoinRow: React.FC<TProps> = ({ item }) => {
   const [tokenAmountFormatter] = useTokenAmountFormatter();
   return (
     <div className="flex items-center justify-between gap-2 border-2 border-grey-300 w-full p-2 hover:bg-prime-100 dark:hover:bg-prime-900 rounded-xl">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-grow">
         <CoinIcon logoSrc={item.token.logo_url} />
-        <div className="">
-          <div className="font-bold text-grey-900">{item.token.symbol}</div>
-          <div className="text-grey-500 label-large-bold">{item.token.name}</div>
-        </div>
+        <CoinLabel
+          className="flex-grow"
+          coin={item.token}
+          isShowFullName={true}
+          isShowBridge={false}
+          isShowNonOfficalSymbol={true}
+        />
       </div>
       <div className="text-grey-700 label-large-bold">
         {connected && item.balance < 0 && (

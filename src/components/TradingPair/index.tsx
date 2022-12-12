@@ -1,5 +1,7 @@
-import CoinIcon from 'components/CoinIcon';
+import CoinIcon from 'components/Coins/CoinIcon';
+import CoinLabel from 'components/Coins/CoinLabel';
 import useHippoClient from 'hooks/useHippoClient';
+import { MultiplyIcon } from 'resources/icons';
 
 const TradingPair = ({ base, quote }: { base: string; quote: string }) => {
   const { getTokenInfoByFullName } = useHippoClient();
@@ -11,8 +13,10 @@ const TradingPair = ({ base, quote }: { base: string; quote: string }) => {
         <CoinIcon token={xCoin} />
         <CoinIcon token={yCoin} />
       </div>
-      <div className="items-center body-bold text-grey-700">
-        {xCoin?.symbol || '--'}/{yCoin?.symbol || '--'}
+      <div className="items-center flex">
+        <CoinLabel coin={xCoin} symbolClassName="text-grey-700" />
+        <MultiplyIcon className="font-icon text-grey-500 mx-1" />
+        <CoinLabel coin={yCoin} symbolClassName="text-grey-700" />
       </div>
     </div>
   );
