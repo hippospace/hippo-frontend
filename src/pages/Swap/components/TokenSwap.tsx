@@ -751,7 +751,13 @@ const TokenSwap = () => {
       const results = new Array(simuCount).fill(null);
       routesToSimu.forEach((route, i) => {
         (async () => {
-          const result = await simulateSwapByRoute(route, values.slipTolerance, gasAvailable);
+          const result = await simulateSwapByRoute(
+            route,
+            values.slipTolerance,
+            gasAvailable,
+            undefined,
+            isFixedOutput
+          );
           if (!results[i] && ts === simuTs.current) {
             // debug
             // if (i === 0) result.success = false;

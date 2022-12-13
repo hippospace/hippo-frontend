@@ -7,7 +7,7 @@ import { GeneralRouteAndQuote, TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useDispatch } from 'react-redux';
 import swapAction from 'modules/swap/actions';
-import { AptosClient, HexString, Types } from 'aptos';
+import { AptosClient, HexString, TxnBuilderTypes, Types } from 'aptos';
 import {
   openErrorNotification,
   openTxErrorNotification,
@@ -18,6 +18,7 @@ import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
 import { OptionTransaction, simulatePayloadTxAndLog, SimulationKeys } from '@manahippo/move-to-ts';
 import { UserTransaction } from 'aptos/src/generated';
 import { debounce } from 'lodash';
+import { ApiTradeRoute } from '@manahippo/hippo-sdk/dist/aggregator/types';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -27,13 +28,15 @@ interface HippoClientContextType {
   requestSwapByRoute: (
     routeAndQuote: GeneralRouteAndQuote,
     slipTolerance: number,
-    options?: Partial<Types.SubmitTransactionRequest>
+    options?: Partial<Types.SubmitTransactionRequest>,
+    isFixedOutput?: boolean
   ) => Promise<boolean>;
   simulateSwapByRoute: (
     routeAndQuote: GeneralRouteAndQuote,
     slipTolerance: number,
     gasAvailable: number,
-    options?: OptionTransaction
+    options?: OptionTransaction,
+    isFixedOutput?: boolean
   ) => Promise<Types.UserTransaction>;
   transaction?: TTransaction;
   setTransaction: (trans?: TTransaction) => void;
@@ -203,16 +206,34 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   const requestSwapByRoute = useCallback(
-    async (routeAndQuote: GeneralRouteAndQuote, slipTolerance: number, options = {}) => {
+    async (
+      routeAndQuote: GeneralRouteAndQuote,
+      slipTolerance: number,
+      options = {},
+      isFixedOutput = false
+    ) => {
       let success = false;
+      let payload:
+        | TxnBuilderTypes.TransactionPayloadEntryFunction
+        | Types.TransactionPayload_EntryFunctionPayload;
       try {
         if (!activeWallet) throw new Error('Please connect wallet first');
-        const input = routeAndQuote.quote.inputUiAmt;
-        const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
-        if (input <= 0) {
-          throw new Error('Input amount needs to be greater than 0');
+        if (!isFixedOutput) {
+          const input = routeAndQuote.quote.inputUiAmt;
+          const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
+          if (input <= 0) {
+            throw new Error('Input amount needs to be greater than 0');
+          }
+          payload = routeAndQuote.route.makeSwapPayload(input, minOut, true);
+        } else {
+          const outputAmt = routeAndQuote.quote.outputUiAmt;
+          const maxInputAmt = routeAndQuote.quote.inputUiAmt;
+          payload = (routeAndQuote.route as ApiTradeRoute).makeFixedOutputWithChangePayload(
+            outputAmt,
+            maxInputAmt,
+            true
+          );
         }
-        const payload = routeAndQuote.route.makeSwapPayload(input, minOut, true);
         const result = await signAndSubmitTransaction(
           payload as Types.TransactionPayload_EntryFunctionPayload,
           options
@@ -227,7 +248,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           if (txnResult.success) {
             openTxSuccessNotification(
               result.hash,
-              `Swapped ${input} ${routeAndQuote.quote.inputSymbol} for ${routeAndQuote.quote.outputUiAmt} ${routeAndQuote.quote.outputSymbol}`
+              `Swapped ${routeAndQuote.quote.inputUiAmt} ${routeAndQuote.quote.inputSymbol} for ${routeAndQuote.quote.outputUiAmt} ${routeAndQuote.quote.outputSymbol}`
             );
           } else {
             openTxErrorNotification(
@@ -257,15 +278,29 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       routeAndQuote: GeneralRouteAndQuote,
       slipTolerance: number,
       gasAvailable: number,
-      options?: OptionTransaction
+      options?: OptionTransaction,
+      isFixedOutput = false
     ) => {
+      let payload:
+        | TxnBuilderTypes.TransactionPayloadEntryFunction
+        | Types.TransactionPayload_EntryFunctionPayload;
       try {
-        const input = routeAndQuote.quote.inputUiAmt;
-        const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
-        if (input <= 0) {
-          return;
+        if (!isFixedOutput) {
+          const input = routeAndQuote.quote.inputUiAmt;
+          const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
+          if (input <= 0) {
+            return;
+          }
+          payload = routeAndQuote.route.makeSwapPayload(input, minOut, false);
+        } else {
+          const outputAmt = routeAndQuote.quote.outputUiAmt;
+          const maxInputAmt = routeAndQuote.quote.inputUiAmt;
+          payload = (routeAndQuote.route as ApiTradeRoute).makeFixedOutputWithChangePayload(
+            outputAmt,
+            maxInputAmt,
+            true
+          );
         }
-        const payload = routeAndQuote.route.makeSwapPayload(input, minOut, false);
         const publicKey = wallet?.adapter.publicAccount?.publicKey.toString();
         const address = wallet?.adapter.publicAccount?.address.toString();
         if (!publicKey || !address) {

@@ -43,7 +43,12 @@ const Swap: React.FC = () => {
             '' + (Math.floor(Date.now() / 1000) + values.trasactionDeadline),
           max_gas_amount: '' + values.maxGasFee
         };
-        const result = await requestSwapByRoute(quote, values.slipTolerance, options);
+        const result = await requestSwapByRoute(
+          quote,
+          values.slipTolerance,
+          options,
+          values.isFixedOutput
+        );
         if (result) {
           formikHelper.setFieldValue('currencyFrom', {
             ...values.currencyFrom,
