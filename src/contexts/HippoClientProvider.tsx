@@ -32,6 +32,7 @@ interface HippoClientContextType {
   simulateSwapByRoute: (
     routeAndQuote: GeneralRouteAndQuote,
     slipTolerance: number,
+    gasAvailable: number,
     options?: OptionTransaction
   ) => Promise<Types.UserTransaction>;
   transaction?: TTransaction;
@@ -255,6 +256,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     async (
       routeAndQuote: GeneralRouteAndQuote,
       slipTolerance: number,
+      gasAvailable: number,
       options?: OptionTransaction
     ) => {
       try {
@@ -274,7 +276,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           address: new HexString(address)
         };
         options = {
-          maxGasAmount: 40_000,
+          maxGasAmount: gasAvailable,
           expireTimestamp: Math.floor(Date.now() / 1000) + 60,
           ...(options || {})
         };

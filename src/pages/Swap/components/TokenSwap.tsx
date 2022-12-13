@@ -29,6 +29,8 @@ import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import SwapRoute from './SwapRoute';
 
+const gasPriceOfRawApt = 100; // 100 raw apt per gas
+
 interface IRoutesProps {
   className?: string;
   availableRoutesCount: number;
@@ -225,12 +227,15 @@ const RouteRow: React.FC<IRouteRowProps> = ({
                     className={classNames({
                       'text-error-500': customMaxGasAmount < parseFloat(simuResult.gas_used)
                     })}>
-                    {((parseFloat(simuResult.gas_used) * 100) / 100000000).toFixed(6)} APT Gas
+                    {((parseFloat(simuResult.gas_used) * gasPriceOfRawApt) / 100000000).toFixed(6)}{' '}
+                    APT Gas
                   </div>
                 </Tooltip>
               )}
               {simuResult && !simuResult.success && (
-                <div className={'text-error-500'}>Simulation failed</div>
+                <Tooltip title={simuResult.vm_status}>
+                  <div className={'text-error-500'}>Simulation failed</div>
+                </Tooltip>
               )}
               <div className="hidden">${outputValue}</div>
             </div>
@@ -718,12 +723,23 @@ const TokenSwap = () => {
   );
   const [baseBalance] = useTokenBalane(fromToken);
 
+  const gasAvailable = useMemo(() => {
+    let aptAvailable = 0;
+    if (fromToken?.symbol !== 'APT' && isReady) {
+      aptAvailable = aptBalance;
+    } else if (fromToken?.symbol === 'APT' && isReady) {
+      aptAvailable = aptBalance - (fromUiAmt || 0);
+    }
+    aptAvailable = Math.min(aptAvailable, 0.25);
+    return Math.floor((aptAvailable * 100_000_000) / gasPriceOfRawApt);
+  }, [aptBalance, fromToken?.symbol, fromUiAmt, isReady]);
+
+  const simuCount = 4;
   useEffect(() => {
     const ts = Date.now();
     simuTs.current = ts;
     setSimulateResults([]);
     if (allRoutes.length > 0 && isReady && aptBalance >= 0.02 && baseBalance >= fromUiAmt) {
-      const simuCount = 4;
       /* fix: this would shortcut user inputs
       if ((ts - simuTs.current) / 1000 < REFRESH_INTERVAL - 1) {
         // for the case useEffect runs twice when in React strict and debug mode
@@ -735,8 +751,10 @@ const TokenSwap = () => {
       const results = new Array(simuCount).fill(null);
       routesToSimu.forEach((route, i) => {
         (async () => {
-          const result = await simulateSwapByRoute(route, values.slipTolerance);
+          const result = await simulateSwapByRoute(route, values.slipTolerance, gasAvailable);
           if (!results[i] && ts === simuTs.current) {
+            // debug
+            // if (i === 0) result.success = false;
             results[i] = result;
             setSimulateResults([...results]);
           }
@@ -753,6 +771,34 @@ const TokenSwap = () => {
     values.maxGasFee,
     values.slipTolerance
   ]);
+
+  const routesSortedBySimResults = useMemo(() => {
+    if (
+      simulateResults.every((s) => !!s) &&
+      simulateResults.some((s) => s.success) &&
+      !simulateResults[0].success
+    ) {
+      const routesSim = allRoutes.map((r, i) => ({
+        route: r,
+        simRes: simulateResults[i]
+      }));
+      const successIndex = routesSim.findIndex((rs) => rs.simRes.success);
+      if (successIndex > 0) {
+        const [successRouteSim] = routesSim.splice(successIndex, 1);
+        routesSim.unshift(successRouteSim);
+        setSelectedRouteFromRoutes(routesSim.map((rs) => rs.route));
+      }
+      return {
+        routes: routesSim.map((rs) => rs.route),
+        simulateResults: routesSim.slice(0, simuCount).map((rs) => rs.simRes)
+      };
+    } else {
+      return {
+        routes: allRoutes,
+        simulateResults
+      };
+    }
+  }, [allRoutes, setSelectedRouteFromRoutes, simulateResults]);
 
   useTimeout(
     () => {
@@ -994,11 +1040,11 @@ const TokenSwap = () => {
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
                 availableRoutesCount={availableRoutesCount}
-                routes={allRoutes}
+                routes={routesSortedBySimResults.routes}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
-                simuResults={simulateResults}
+                simuResults={routesSortedBySimResults.simulateResults}
                 isFixedOutputMode={isFixedOutput}
               />
             </>
@@ -1012,7 +1058,7 @@ const TokenSwap = () => {
               <RoutesAvailable
                 availableRoutesCount={availableRoutesCount}
                 isDesktopScreen={true}
-                routes={allRoutes}
+                routes={routesSortedBySimResults.routes}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
@@ -1024,7 +1070,7 @@ const TokenSwap = () => {
                     timePassedAfterRefresh={timePassedAfterRefresh}
                   />
                 }
-                simuResults={simulateResults}
+                simuResults={routesSortedBySimResults.simulateResults}
                 isFixedOutputMode={isFixedOutput}
               />
               {routeSelected && (
