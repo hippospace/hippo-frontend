@@ -1,5 +1,5 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import { HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
+import { AggregatorTypes, HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk';
 import { CoinListClient, RawCoinInfo as CoinInfo, NetworkType } from '@manahippo/coin-list';
 import useAptosWallet from 'hooks/useAptosWallet';
@@ -18,7 +18,6 @@ import useNetworkConfiguration from 'hooks/useNetworkConfiguration';
 import { OptionTransaction, simulatePayloadTxAndLog, SimulationKeys } from '@manahippo/move-to-ts';
 import { UserTransaction } from 'aptos/src/generated';
 import { debounce } from 'lodash';
-import { ApiTradeRoute } from '@manahippo/hippo-sdk/dist/aggregator/types';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
@@ -224,15 +223,17 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           if (input <= 0) {
             throw new Error('Input amount needs to be greater than 0');
           }
-          payload = routeAndQuote.route.makeSwapPayload(input, minOut, true);
+          if (routeAndQuote.route instanceof AggregatorTypes.ApiTradeRoute) {
+            payload = routeAndQuote.route.makePayload(input, minOut, true);
+          } else {
+            payload = routeAndQuote.route.makeSwapPayload(input, minOut, true);
+          }
         } else {
           const outputAmt = routeAndQuote.quote.outputUiAmt;
           const maxInputAmt = routeAndQuote.quote.inputUiAmt;
-          payload = (routeAndQuote.route as ApiTradeRoute).makeFixedOutputWithChangePayload(
-            outputAmt,
-            maxInputAmt,
-            true
-          );
+          payload = (
+            routeAndQuote.route as AggregatorTypes.ApiTradeRoute
+          ).makeFixedOutputWithChangePayload(outputAmt, maxInputAmt, true);
         }
         const result = await signAndSubmitTransaction(
           payload as Types.TransactionPayload_EntryFunctionPayload,
@@ -291,15 +292,17 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           if (input <= 0) {
             return;
           }
-          payload = routeAndQuote.route.makeSwapPayload(input, minOut, false);
+          if (routeAndQuote.route instanceof AggregatorTypes.ApiTradeRoute) {
+            payload = routeAndQuote.route.makePayload(input, minOut, false);
+          } else {
+            payload = routeAndQuote.route.makeSwapPayload(input, minOut, false);
+          }
         } else {
           const outputAmt = routeAndQuote.quote.outputUiAmt;
           const maxInputAmt = routeAndQuote.quote.inputUiAmt;
-          payload = (routeAndQuote.route as ApiTradeRoute).makeFixedOutputWithChangePayload(
-            outputAmt,
-            maxInputAmt,
-            true
-          );
+          payload = (
+            routeAndQuote.route as AggregatorTypes.ApiTradeRoute
+          ).makeFixedOutputWithChangePayload(outputAmt, maxInputAmt, false);
         }
         const publicKey = wallet?.adapter.publicAccount?.publicKey.toString();
         const address = wallet?.adapter.publicAccount?.address.toString();
