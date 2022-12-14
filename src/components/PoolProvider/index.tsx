@@ -25,6 +25,8 @@ interface IPoolIconProps extends IPoolProviderProps {
   isTitleEnabled?: boolean;
   style?: CSSProperties;
   onMouseHover?: (h: boolean) => void;
+  tooltipMouseEnterDelay?: number;
+  tooltipMouseLeaveDelay?: number;
 }
 
 export const PoolStack = ({
@@ -120,6 +122,8 @@ export const PoolStack = ({
                 setHoverIndex(i);
               }
             }}
+            tooltipMouseEnterDelay={0.16} // to avoid tooltips position jitter
+            tooltipMouseLeaveDelay={0}
           />
         );
       })}
@@ -133,7 +137,9 @@ export const PoolIcon: FC<IPoolIconProps> = ({
   title,
   isTitleEnabled = true,
   style,
-  onMouseHover = () => {}
+  onMouseHover = () => {},
+  tooltipMouseEnterDelay = 0.1,
+  tooltipMouseLeaveDelay = 0.1
 }) => {
   const imgSrc = useMemo(() => {
     if (dexType === AggregatorTypes.DexType.Econia) {
@@ -169,7 +175,11 @@ export const PoolIcon: FC<IPoolIconProps> = ({
   }, [isHover]);
 
   return (
-    <Tooltip placement="top" title={isTitleEnabled ? title ?? name : ''}>
+    <Tooltip
+      placement="top"
+      title={isTitleEnabled ? title ?? name : ''}
+      mouseEnterDelay={tooltipMouseEnterDelay}
+      mouseLeaveDelay={tooltipMouseLeaveDelay}>
       <img
         src={imgSrc}
         alt={name}
