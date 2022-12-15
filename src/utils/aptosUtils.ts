@@ -33,3 +33,10 @@ export function getLocalStorageNetworkState(): AptosNetwork | null {
   // Get network from local storage by key
   return window.localStorage.getItem(WALLET_STATE_NETWORK_LOCAL_STORAGE_KEY) as AptosNetwork | null;
 }
+
+const GAS_PRICE_OF_RAW_APT = 100; // 100 raw apt per gas
+const APT_DECIMALS = 10 ** 8;
+export const gasToApt = (gas: number | string) =>
+  (parseFloat('' + gas) * GAS_PRICE_OF_RAW_APT) / APT_DECIMALS;
+export const aptToGas = (apt: number | string) =>
+  (parseFloat('' + apt) * APT_DECIMALS) / GAS_PRICE_OF_RAW_APT;

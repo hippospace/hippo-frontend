@@ -21,15 +21,14 @@ import { openErrorNotification } from 'utils/notifications';
 import { Types, ApiError } from 'aptos';
 import { RPCType, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
-import { useCoingeckoValue } from 'hooks/useCoingecko';
+import { useCoingeckoValue, useCoingeckoPrice } from 'hooks/useCoingecko';
 import { useParams } from 'react-router-dom';
 import { GeneralRouteAndQuote } from 'types/hippo';
 import { ApiTradeStep } from '@manahippo/hippo-sdk/dist/aggregator/types/step/ApiTradeStep';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import SwapRoute from './SwapRoute';
-
-const gasPriceOfRawApt = 100; // 100 raw apt per gas
+import { aptToGas, gasToApt } from 'utils/aptosUtils';
 
 interface IRoutesProps {
   className?: string;
@@ -227,8 +226,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
                     className={classNames({
                       'text-error-500': customMaxGasAmount < parseFloat(simuResult.gas_used)
                     })}>
-                    {((parseFloat(simuResult.gas_used) * gasPriceOfRawApt) / 100000000).toFixed(6)}{' '}
-                    APT Gas
+                    {gasToApt(simuResult.gas_used).toFixed(6)} APT Gas
                   </div>
                 </Tooltip>
               )}
@@ -731,7 +729,7 @@ const TokenSwap = () => {
       aptAvailable = aptBalance - (fromUiAmt || 0);
     }
     aptAvailable = Math.min(aptAvailable, 0.25);
-    return Math.floor((aptAvailable * 100_000_000) / gasPriceOfRawApt);
+    return Math.floor(aptToGas(aptAvailable));
   }, [aptBalance, fromToken?.symbol, fromUiAmt, isReady]);
 
   const simuCount = 4;
@@ -778,24 +776,34 @@ const TokenSwap = () => {
     values.slipTolerance
   ]);
 
+  const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
+  const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
+  const [toTokenPrice] = useCoingeckoPrice(toToken);
+  const [aptPrice] = useCoingeckoPrice(hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]);
+
   const routesSortedBySimResults = useMemo(() => {
-    if (
-      simulateResults.every((s) => !!s) &&
-      simulateResults.some((s) => s.success) &&
-      !simulateResults[0].success
-    ) {
+    if (simulateResults.every((s) => !!s)) {
       const routesSim = allRoutes.map((r, i) => ({
         route: r,
-        simRes: simulateResults[i]
+        simRes: simulateResults[i],
+        compVal:
+          simulateResults[i]?.success && toTokenPrice && aptPrice
+            ? r.quote.outputUiAmt * toTokenPrice - gasToApt(simulateResults[i].gas_used) * aptPrice
+            : 0
       }));
-      const successIndex = routesSim.findIndex((rs) => rs.simRes.success);
-      if (successIndex > 0) {
-        const [successRouteSim] = routesSim.splice(successIndex, 1);
-        routesSim.unshift(successRouteSim);
-        setSelectedRouteFromRoutes(routesSim.map((rs) => rs.route));
-      }
+      routesSim.sort((rsa, rsb) => rsb.compVal - rsa.compVal);
+      /*
+      console.log(
+        `simu res: ${routesSim
+          .slice(0, 4)
+          .map((rs) => rs.compVal)
+          .join(' ,')}. ${aptPrice} ${toTokenPrice}`
+      );
+      */
+      const routes = routesSim.map((rs) => rs.route);
+      setSelectedRouteFromRoutes(routes);
       return {
-        routes: routesSim.map((rs) => rs.route),
+        routes,
         simulateResults: routesSim.slice(0, simuCount).map((rs) => rs.simRes)
       };
     } else {
@@ -804,7 +812,7 @@ const TokenSwap = () => {
         simulateResults
       };
     }
-  }, [allRoutes, setSelectedRouteFromRoutes, simulateResults]);
+  }, [allRoutes, aptPrice, setSelectedRouteFromRoutes, simulateResults, toTokenPrice]);
 
   useTimeout(
     () => {
@@ -973,9 +981,6 @@ const TokenSwap = () => {
   const onSwap = useCallback(async () => {
     await submitForm();
   }, [submitForm]);
-
-  const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
-  const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
 
   const isPriceImpactEnabled = payValue && payValue >= 50;
 

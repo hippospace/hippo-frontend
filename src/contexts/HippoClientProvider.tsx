@@ -318,6 +318,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           expireTimestamp: Math.floor(Date.now() / 1000) + 60,
           ...(options || {})
         };
+        // console.log(`simulate gas availabel: ${gasAvailable}`);
         const result = await simulatePayloadTxAndLog(aptosClient, simkeys, payload, options, false);
         console.log('simulate swap', result);
         return result;
