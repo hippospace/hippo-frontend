@@ -91,7 +91,7 @@ const PositiveFloatNumInput = forwardRef<
 
     useEffect(() => {
       const textLengthChange = displayText.length - (prevoiusDisplayText.current?.length ?? 0);
-      if (!isDisabled) {
+      if (!isDisabled && inputRef.current === document.activeElement) {
         if (Math.abs(textLengthChange) > 0) {
           const fixedCursorPos = Math.min(
             displayText.length,
