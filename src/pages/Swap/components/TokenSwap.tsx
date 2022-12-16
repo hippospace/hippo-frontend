@@ -209,7 +209,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
         )}>
         <div
           className={classNames('w-full h-full px-2 pt-2 pb-[6px] rounded-lg space-y-1', {
-            'bg-prime-100 dark:bg-prime-900': isSelected,
+            'bg-prime-100/90 dark:bg-prime-900/70': isSelected,
             'bg-field': !isSelected
           })}>
           <div className="flex justify-between items-center body-bold text-grey-700">

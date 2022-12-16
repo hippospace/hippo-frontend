@@ -38,6 +38,9 @@
     &:hover, &:global(.hip-btn-selected) {
       @apply bg-prime-700 text-prime-100;
     }
+    &:active {
+      @apply bg-prime-900 border-prime-900 text-prime-100;
+    }
     &:disabled {
       @apply opacity-40;
     }
@@ -68,9 +71,12 @@
 :global(.dark) {
   .button {
     &.outlined {
-      @apply border-prime-400 text-prime-400; 
+      @apply border-prime-400 text-prime-400 border; 
       &:hover, &:global(.hip-btn-selected) {
-        @apply bg-prime-100 text-prime-500 border-prime-100;
+        @apply bg-prime-400 text-grey-900 border-prime-500;
+      }
+      &:active {
+        @apply bg-prime-500 border-prime-500 text-purple-100;
       }
     }
     &.plain {
