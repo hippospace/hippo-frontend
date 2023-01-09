@@ -53,11 +53,13 @@ module.exports = {
       primeDark: '#111111',
       surface: 'var(--hip-bg-color-surface)',
       field: 'var(--hip-bg-color-field)',
+      label: 'var(--hip-bg-label)',
       transparent: 'transparent',
     }),
     boxShadow: {
       none: 'none',
       main: '0px 4px 35px rgba(0, 0, 0, 0.05)',
+      subTitle: '0px 4px 35px rgba(0, 0, 0, 0.1)',
       home: 'var(--hip-shadow-home)'
     },
     borderRadius: {

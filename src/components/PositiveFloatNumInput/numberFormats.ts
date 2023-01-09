@@ -23,13 +23,13 @@ export const numToGrouped = (num: string) => {
 };
 
 export const avoidScientificNotation = (x: number) => {
-  invariant(x >= 0 && x <= Number.MAX_SAFE_INTEGER, 'Invalid number range');
+  invariant(Math.abs(x) < Number.MAX_SAFE_INTEGER, 'Invalid number range');
   let res = x.toString();
   if (Math.abs(x) < 1.0) {
     const e = parseInt(x.toString().split('e-')[1]);
     if (e) {
-      x *= Math.pow(10, e - 1);
-      res = '0.' + new Array(e).join('0') + x.toString().substring(2);
+      const y = Math.abs(x) * Math.pow(10, e - 1);
+      res = (x > 0 ? '0.' : '-0.') + new Array(e).join('0') + y.toString().substring(2);
     }
   }
   // Note we don't consider the case x >= 1e21 which would also be converted to scientific notation by js
@@ -69,5 +69,14 @@ export const numberOfAbbr = (amount: number, decimals = 0) => {
       return cutDecimals(avoidScientificNotation(amount / 10 ** g.dec), decimals) + g.abbr;
     }
   }
-  return '' + amount;
+  return cutDecimals(avoidScientificNotation(amount), decimals);
+};
+
+export const percent = (v: number, maxDecimals: number | undefined = 2, hasSign = false) => {
+  const limitValue = 1 / 10 ** (maxDecimals + 2); // Do use 1 / 10^n rather than 1 / 10^-n
+  if (maxDecimals && Math.abs(v) > 0 && Math.abs(v) < limitValue)
+    return `${v < 0 ? '> -' : '< '}${percent(limitValue, maxDecimals)}`;
+  return (
+    (hasSign && v > 0 ? '+' : '') + cutDecimals(avoidScientificNotation(v * 100), maxDecimals) + '%'
+  );
 };

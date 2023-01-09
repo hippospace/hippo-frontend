@@ -1,0 +1,21 @@
+:global {
+  :local(.segmented).ant-segmented {
+    @apply bg-field #{!important};
+    &:hover {
+      @apply bg-field #{!important};
+    }
+    .ant-segmented-item .ant-segmented-item-label {
+      @apply label-small-bold #{!important};
+    }
+  }
+}
+.priceChart {
+  :global {
+    .recharts-cartesian-axis-tick tspan {
+      @apply label-large-bold text-grey-500 fill-grey-500;
+    }
+    .recharts-yAxis .recharts-cartesian-axis-ticks .recharts-cartesian-axis-tick:first-child tspan {
+      @apply hidden;
+    }
+  }
+}

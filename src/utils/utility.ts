@@ -28,3 +28,14 @@ export const isValidUrl = (value: string) => {
 
 export const txExplorerUrl = (txHash: MaybeHexString) =>
   `https://tracemove.io/transaction/${txHash}`;
+
+export const dateFormat = (date: Date) => {
+  return `${date.toLocaleString('en-US', { month: 'short' })} ${date.toLocaleString('en-US', {
+    day: 'numeric'
+  })} ${date.toLocaleString('en-US', {
+    year: 'numeric'
+  })}, ${date.getHours().toString().padStart(2, '0')}:${date
+    .getMinutes()
+    .toString()
+    .padStart(2, '0')}`;
+};

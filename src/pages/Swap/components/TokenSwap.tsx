@@ -8,7 +8,7 @@ import SwapDetail from './SwapDetail';
 import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import classNames from 'classnames';
-import { Drawer, Tooltip } from 'antd';
+import { Drawer, Tooltip, Modal } from 'antd';
 import VirtualList from 'rc-virtual-list';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
@@ -29,6 +29,10 @@ import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import SwapRoute from './SwapRoute';
 import { aptToGas, gasToApt } from 'utils/aptosUtils';
+import PriceSwitch from './PriceSwitch';
+import PriceChart from './PriceChart';
+import { CSSTransition } from 'react-transition-group';
+import './TokenSwap.scss';
 
 interface IRoutesProps {
   className?: string;
@@ -132,13 +136,28 @@ const RefreshButton = ({
   );
 };
 
-const CardHeader = ({ className = '', right }: { className?: string; right?: ReactNode }) => {
+const CardHeader = ({
+  className = '',
+  right,
+  fromToken,
+  toToken
+}: {
+  className?: string;
+  right?: ReactNode;
+  fromToken: RawCoinInfo;
+  toToken: RawCoinInfo;
+}) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   const { isTablet } = useBreakpoint('tablet');
+  const [isPriceChartOpen, setIsPriceChartOpen] = useState(false);
+
+  const nodeRef = useRef(null);
+
   return (
     <div className={classNames('w-full flex h-8 items-center mb-1 body-medium', className)}>
-      <Card className="mr-auto h-full relative w-fit">
+      <PriceSwitch onUpdate={setIsPriceChartOpen} isStateOn={isPriceChartOpen} />
+      <Card className="mr-auto h-full relative w-fit ml-[10px] shadow-subTitle">
         {!isTablet && (
           <SettingsButton
             className="tablet:hidden"
@@ -151,17 +170,48 @@ const CardHeader = ({ className = '', right }: { className?: string; right?: Rea
             onClick={() => setIsMobileTxSettingsOpen(true)}
           />
         )}
-        {!isTablet && (
-          <Card
-            className={classNames(
-              'absolute top-9 w-[400px] -left-[420px] px-8 laptop:w-[368px] laptop:-left-[calc(368px+20px)] py-8 laptop:px-4 tablet:hidden scale-[50%] origin-top-right opacity-0 transition-all transform-gpu will-change-transform',
-              { '!opacity-100 !scale-100': isSettingsOpen }
-            )}>
-            <SwapSetting onClose={() => setIsSettingsOpen(false)} />
-          </Card>
-        )}
       </Card>
       {right}
+      {/* Seems Transition rather than CSSTransition has a bug of unmountOnExit true */}
+      {!isTablet && (
+        <CSSTransition
+          nodeRef={nodeRef}
+          in={isPriceChartOpen}
+          timeout={150}
+          mountOnEnter={true}
+          unmountOnExit={true}
+          classNames="swap-price-chart-trans">
+          <div
+            ref={nodeRef}
+            className="absolute top-9 -left-[420px] laptop:-left-[calc(368px+20px)] tablet:hidden origin-top-right">
+            <Card className="w-[400px] h-[456px] laptop:w-[368px] py-8 px-4">
+              {fromToken && toToken && <PriceChart baseToken={fromToken} quoteToken={toToken} />}
+            </Card>
+          </div>
+        </CSSTransition>
+      )}
+      {isTablet && (
+        <Drawer
+          height={'auto'}
+          closable={false}
+          placement={'bottom'}
+          onClose={() => setIsPriceChartOpen(false)}
+          visible={isPriceChartOpen}>
+          {fromToken && toToken && <PriceChart baseToken={fromToken} quoteToken={toToken} />}
+        </Drawer>
+      )}
+      {!isTablet && (
+        <Modal
+          visible={isSettingsOpen}
+          footer={null}
+          closable={false}
+          maskClosable={true}
+          centered
+          width={500}
+          onCancel={() => setIsSettingsOpen(false)}>
+          <SwapSetting onClose={() => setIsSettingsOpen(false)} />
+        </Modal>
+      )}
       {isTablet && (
         <Drawer
           height={'auto'}
@@ -1020,6 +1070,8 @@ const TokenSwap = () => {
             />
           )
         }
+        fromToken={fromToken}
+        toToken={toToken}
       />
       <Card className="w-full min-h-[430px] flex flex-col py-8 relative pointer-events-auto">
         <div

@@ -1,0 +1,19 @@
+$transDuration: 150ms;
+.swap-price-chart-trans-enter {
+  opacity: 0;
+  transform: scale3d(0.5, 0.5, 1);
+}
+.swap-price-chart-trans-enter-active {
+  opacity: 1;
+  transform: scale3d(1, 1, 1);
+  transition: opacity $transDuration, transform $transDuration;
+}
+.swap-price-chart-trans-exit {
+  opacity: 1;
+  transform: scale3d(1, 1, 1);
+}
+.swap-price-chart-trans-exit-active {
+  opacity: 0;  
+  transform: scale3d(0.5, 0.5, 1);
+  transition: opacity $transDuration, transform $transDuration;
+}
