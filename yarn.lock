@@ -1879,10 +1879,10 @@
   resolved "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@manahippo/aptos-wallet-adapter@1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-1.0.7.tgz#457cb23c91a07da0d8eb0768154b2ca89f17c237"
-  integrity sha512-D0r5a9akD9Uk82s3iKCIIrUIWJj8xz2bCM9dsIy64lvZjd0S3Lx7fn415QkYuuFxzily+AbgBIrzG/C2Wu9UZw==
+"@manahippo/aptos-wallet-adapter@1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@manahippo/aptos-wallet-adapter/-/aptos-wallet-adapter-1.0.8.tgz#23ebe2b9e36a11ba654e474612d4d03c7ce28c8c"
+  integrity sha512-Icde7sZia0wT1B0iNVNk4jvpUWv7LRO1T42NahjkS37grlrCy1NroKSAy3mYqn6I1pEiuxNMfYsYQwgVYCAw4g==
   dependencies:
     "@blocto/sdk" "^0.3.1"
     "@fewcha/web3" "0.1.32"

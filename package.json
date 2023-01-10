@@ -6,7 +6,7 @@
     "@ant-design/icons": "^4.7.0",
     "@craco/craco": "^6.4.3",
     "@ethersproject/providers": "^5.6.6",
-    "@manahippo/aptos-wallet-adapter": "1.0.7",
+    "@manahippo/aptos-wallet-adapter": "1.0.8",
     "@manahippo/coin-list": "2.3.3",
     "@manahippo/hippo-sdk": "3.3.10",
     "@manahippo/move-to-ts": "0.5.0",
