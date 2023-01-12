@@ -225,9 +225,9 @@ const PriceChart = ({
                       }}
                       tickFormatter={(v) => {
                         return typeof v === 'number'
-                          ? v >= 0.01
+                          ? v >= 0.1
                             ? numberOfAbbr(v, 1)
-                            : v.toExponential()
+                            : v.toExponential(1)
                           : v;
                       }}
                     />
