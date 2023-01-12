@@ -48,6 +48,9 @@ const BridgesMenu = () => {
       <DropDownLink href="https://www.portalbridge.com/#/transfer">
         Wormhole <LinkIcon className="font-icon" />
       </DropDownLink>
+      <DropDownLink href="https://cbridge.celer.network/1/12360001/USDC">
+        cBridge <LinkIcon className="font-icon" />
+      </DropDownLink>
     </div>
   );
 };
