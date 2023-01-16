@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { ExchangeIcon } from 'resources/icons';
 import { ISwapSettings } from '../types';
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
-import useCoingeckoRate from 'hooks/useCoingecko';
 import TextLink from 'components/TextLink';
 import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 import { useBinanceRate } from 'hooks/useBinance';
@@ -57,16 +56,19 @@ const SwapDetail = ({
   routeAndQuote,
   fromToken,
   toToken,
+  coingeckoRate,
+  coingeckoApi,
   className = '',
   isPriceImpactEnabled = true
 }: {
   routeAndQuote: GeneralRouteAndQuote | null | undefined;
   fromToken: CoinInfo;
   toToken: CoinInfo;
+  coingeckoRate: number | undefined;
+  coingeckoApi: string;
   className?: string;
   isPriceImpactEnabled?: boolean;
 }) => {
-  const [coingeckoRate, coingeckoApi] = useCoingeckoRate(fromToken, toToken);
   const [binanceRate, binanceApi] = useBinanceRate(fromToken, toToken);
 
   const { values: swapSettings } = useFormikContext<ISwapSettings>();

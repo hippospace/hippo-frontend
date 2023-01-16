@@ -1,11 +1,10 @@
 import { RawCoinInfo } from '@manahippo/coin-list';
-import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 import PromiseThrottle from 'promise-throttle';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
 const promiseThrottle = new PromiseThrottle({
-  requestsPerSecond: 1,
+  requestsPerSecond: Infinity,
   promiseImplementation: Promise
 });
 
@@ -21,53 +20,36 @@ const onErrorRetry = (error, key, config, revalidate, { retryCount }) => {
   }
 };
 
-const useCoingeckoRate = (fromToken: RawCoinInfo, toToken: RawCoinInfo) => {
-  let rate: number | undefined = undefined;
+export const useCoingeckoPrice = (
+  token: RawCoinInfo | RawCoinInfo[]
+): [number | number[] | undefined, any, string] => {
+  const tokens = useMemo(() => {
+    if (Array.isArray(token)) return token;
+    else return [token];
+  }, [token]);
   const key = useMemo(() => {
-    if (!(fromToken?.coingecko_id && toToken?.coingecko_id)) return null;
-    const ids = [fromToken, toToken].map((t) => t.coingecko_id).sort();
+    if (!tokens.every((t) => !!t?.coingecko_id)) return null;
     return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
-      ids.join(',')
+      tokens
+        .map((t) => t.coingecko_id)
+        .sort()
+        .join(',')
     )}&vs_currencies=usd`;
-  }, [fromToken, toToken]);
+  }, [tokens]);
 
-  const { data, error, isLoading } = useSWR(key, fetcher, {
+  const { data, error } = useSWR(key, fetcher, {
     refreshInterval: 2 * 60_000,
     onErrorRetry
   });
+  const api = key || '';
   if (data) {
-    rate = data[toToken.coingecko_id].usd / data[fromToken.coingecko_id].usd;
+    if (!Array.isArray(token)) {
+      return [data[tokens[0].coingecko_id].usd, error, api];
+    } else if (tokens.length >= 1) {
+      return [tokens.map((t) => data[t.coingecko_id].usd), error, api];
+    }
   }
-
-  return [rate, key, error, isLoading];
-};
-
-export const useCoingeckoPrice = (token: RawCoinInfo) => {
-  const key = useMemo(() => {
-    if (!token?.coingecko_id) return null;
-    return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
-      token.coingecko_id
-    )}&vs_currencies=usd`;
-  }, [token]);
-
-  const { data, error } = useSWR(key, fetcher, {
-    refreshInterval: 2.5 * 60_000,
-    onErrorRetry
-  });
-  let price: number | undefined = undefined;
-  if (data) {
-    price = data[token.coingecko_id].usd;
-  }
-  return [price, error];
-};
-
-export const useCoingeckoValue = (token: RawCoinInfo, amount: number) => {
-  const [price, error] = useCoingeckoPrice(token);
-  let value: string | undefined = undefined;
-  if (typeof price === 'number') {
-    value = cutDecimals('' + price * amount, 2);
-  }
-  return [value, error];
+  return [undefined, error, api];
 };
 
 export type CoingeckoMarketChartPrice = [number, number];
@@ -144,5 +126,3 @@ export const useCoingeckoRateHistory = (
 
   return [rateHistory, error || error2, isLoading || isLoading2, hasNoData1 || hasNoData2];
 };
-
-export default useCoingeckoRate;

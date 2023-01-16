@@ -21,7 +21,7 @@ import { openErrorNotification } from 'utils/notifications';
 import { Types, ApiError } from 'aptos';
 import { RPCType, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
-import { useCoingeckoValue, useCoingeckoPrice } from 'hooks/useCoingecko';
+import { useCoingeckoPrice } from 'hooks/useCoingecko';
 import { useParams } from 'react-router-dom';
 import { GeneralRouteAndQuote } from 'types/hippo';
 import { ApiTradeStep } from '@manahippo/hippo-sdk/dist/aggregator/types/step/ApiTradeStep';
@@ -33,6 +33,7 @@ import PriceSwitch from './PriceSwitch';
 import PriceChart from './PriceChart';
 import { CSSTransition } from 'react-transition-group';
 import './TokenSwap.scss';
+import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 
 interface IRoutesProps {
   className?: string;
@@ -826,10 +827,32 @@ const TokenSwap = () => {
     values.slipTolerance
   ]);
 
-  const [payValue] = useCoingeckoValue(fromToken, fromUiAmt);
-  const [toValue] = useCoingeckoValue(toToken, values.currencyTo?.amount || 0);
-  const [toTokenPrice] = useCoingeckoPrice(toToken);
-  const [aptPrice] = useCoingeckoPrice(hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]);
+  // Reduce Coingecko Api requests as much as we can
+  const [prices, , coingeckoApi] = useCoingeckoPrice([
+    fromToken,
+    toToken,
+    hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]
+  ]);
+
+  const [fromPrice, toTokenPrice, aptPrice] = (prices as number[]) || [];
+
+  const payValue = useMemo(() => {
+    if (typeof fromPrice === 'number') {
+      return cutDecimals('' + fromPrice * fromUiAmt, 2);
+    }
+    return undefined;
+  }, [fromPrice, fromUiAmt]);
+  const toValue = useMemo(() => {
+    if (typeof toTokenPrice === 'number') {
+      return cutDecimals('' + toTokenPrice * (values.currencyTo?.amount || 0), 2);
+    }
+    return undefined;
+  }, [toTokenPrice, values.currencyTo?.amount]);
+
+  const coingeckoRate = useMemo(
+    () => (fromPrice && toTokenPrice ? toTokenPrice / fromPrice : undefined),
+    [fromPrice, toTokenPrice]
+  );
 
   const routesSortedBySimResults = useMemo(() => {
     if (simulateResults.every((s) => !!s)) {
@@ -1032,7 +1055,7 @@ const TokenSwap = () => {
     await submitForm();
   }, [submitForm]);
 
-  const isPriceImpactEnabled = payValue && payValue >= 50;
+  const isPriceImpactEnabled = payValue && parseFloat(payValue) >= 50;
 
   const priceImpact = useMemo(
     () => Math.abs(routeSelected?.quote.priceImpact || 0),
@@ -1141,6 +1164,8 @@ const TokenSwap = () => {
                   routeAndQuote={routeSelected}
                   fromToken={fromToken}
                   toToken={toToken}
+                  coingeckoRate={coingeckoRate}
+                  coingeckoApi={coingeckoApi}
                   isPriceImpactEnabled={isPriceImpactEnabled}
                 />
               )}
@@ -1160,6 +1185,8 @@ const TokenSwap = () => {
               routeAndQuote={routeSelected}
               fromToken={fromToken}
               toToken={toToken}
+              coingeckoRate={coingeckoRate}
+              coingeckoApi={coingeckoApi}
               isPriceImpactEnabled={isPriceImpactEnabled}
             />
           )}
