@@ -162,6 +162,8 @@ export const PoolIcon: FC<IPoolIconProps> = ({
       return pancakeLogo;
     } else if (dexType === AggregatorTypes.DexType.Obric) {
       return obricLogo;
+    } else if (dexType === AggregatorTypes.DexType.CetusV2) {
+      return cetusLogo;
     } else {
       return undefined;
     }
