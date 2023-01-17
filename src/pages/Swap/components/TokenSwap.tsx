@@ -718,7 +718,8 @@ const TokenSwap = () => {
                   restartTimer();
                 }
               } else {
-                resetAllRoutes();
+                // resetAllRoutes();
+                throw new Error('No routes found at the moment');
               }
               if (isReloadInternal) {
                 setIsPeriodicRefreshPaused(false);
