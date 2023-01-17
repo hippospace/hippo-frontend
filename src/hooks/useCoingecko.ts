@@ -21,14 +21,14 @@ const onErrorRetry = (error, key, config, revalidate, { retryCount }) => {
 };
 
 export const useCoingeckoPrice = (
-  token: RawCoinInfo | RawCoinInfo[]
+  token: RawCoinInfo | RawCoinInfo[] | undefined
 ): [number | number[] | undefined, any, string] => {
   const tokens = useMemo(() => {
     if (Array.isArray(token)) return token;
     else return [token];
   }, [token]);
   const key = useMemo(() => {
-    if (!tokens.every((t) => !!t?.coingecko_id)) return null;
+    if (!tokens?.every((t) => !!t?.coingecko_id)) return null;
     return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
       tokens
         .map((t) => t.coingecko_id)

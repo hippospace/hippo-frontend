@@ -828,11 +828,11 @@ const TokenSwap = () => {
   ]);
 
   // Reduce Coingecko Api requests as much as we can
-  const [prices, , coingeckoApi] = useCoingeckoPrice([
-    fromToken,
-    toToken,
-    hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]
-  ]);
+  const [prices, , coingeckoApi] = useCoingeckoPrice(
+    fromUiAmt > 0
+      ? [fromToken, toToken, hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]]
+      : undefined
+  );
 
   const [fromPrice, toTokenPrice, aptPrice] = (prices as number[]) || [];
 
