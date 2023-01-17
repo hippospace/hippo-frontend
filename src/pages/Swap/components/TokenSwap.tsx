@@ -8,7 +8,7 @@ import SwapDetail from './SwapDetail';
 import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import classNames from 'classnames';
-import { Drawer, Tooltip, Modal } from 'antd';
+import { Drawer, Tooltip, Modal, Skeleton } from 'antd';
 import VirtualList from 'rc-virtual-list';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
@@ -315,43 +315,68 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   simuResults = [],
   isFixedOutputMode = false
 }) => {
+  const isEmpty = !(routes?.length > 0);
+
   const [isMore, setIsMore] = useState(false);
   const rowsWhenLess = 2;
   const rowsWhenMore = 4;
   const rowsOnDesktop = 4;
+
   const height = isDesktopScreen
-    ? Math.min(rowsOnDesktop, routes.length) * routeRowMinHeight
+    ? isEmpty
+      ? rowsOnDesktop * routeRowMinHeight
+      : Math.min(rowsOnDesktop, routes.length) * routeRowMinHeight
+    : isEmpty
+    ? rowsWhenLess * routeRowMinHeight
     : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowMinHeight;
 
-  // const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
+  const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
 
   return (
     <div className={className}>
       <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
-        <div>
-          Total {availableRoutesCount} routes available{' '}
-          {isFixedOutputMode && '(Fixed received mode)'}
-        </div>
-        <div>{refreshButton}</div>
-      </div>
-      <VirtualList
-        className="pr-1 scrollbar"
-        height={height}
-        itemHeight={routeRowMinHeight}
-        data={routes}
-        itemKey={(item) => serializeRouteQuote(item)}>
-        {(ro, index) => (
-          <div onClick={() => onRouteSelected(ro, index)}>
-            <RouteRow
-              route={ro}
-              isSelected={ro === routeSelected}
-              isBestPrice={index === 0}
-              simuResult={simuResults[index]}
-            />
-          </div>
+        {isEmpty ? (
+          <div>Loading routes...</div>
+        ) : (
+          <>
+            <div>
+              Total {availableRoutesCount} routes available{' '}
+              {isFixedOutputMode && '(Fixed receive mode)'}
+            </div>
+            <div>{refreshButton}</div>
+          </>
         )}
-      </VirtualList>
-      {!isDesktopScreen && routes.length > rowsWhenLess && (
+      </div>
+      <div
+        style={{ height }}
+        className={classNames({ 'pointer-events-none': !isDesktopScreen && !isMore })}>
+        {isEmpty ? (
+          <div className="h-full flex flex-col justify-evenly">
+            {new Array(rows).fill(0).map((r, index) => (
+              <Skeleton key={index} title={false} paragraph={true} active />
+            ))}
+          </div>
+        ) : (
+          <VirtualList
+            className="pr-1 scrollbar"
+            height={height}
+            itemHeight={routeRowMinHeight}
+            data={routes}
+            itemKey={(item) => serializeRouteQuote(item)}>
+            {(ro, index) => (
+              <div onClick={() => onRouteSelected(ro, index)}>
+                <RouteRow
+                  route={ro}
+                  isSelected={ro === routeSelected}
+                  isBestPrice={index === 0}
+                  simuResult={simuResults[index]}
+                />
+              </div>
+            )}
+          </VirtualList>
+        )}
+      </div>
+      {!isDesktopScreen && !isEmpty && routes.length > rowsWhenLess && (
         <div className="flex label-small-bold text-grey-500 mt-2 justify-between">
           <div
             className="ml-auto cursor-pointer hover:opacity-50"
@@ -1073,9 +1098,11 @@ const TokenSwap = () => {
   const { isTablet } = useBreakpoint('tablet');
 
   const isRoutesVisible =
-    allRoutes.length > 0 &&
-    routeSelected &&
-    ((!isFixedOutput && fromUiAmt > 0) || (isFixedOutput && toUiAmt > 0));
+    // allRoutes.length > 0 &&
+    // routeSelected &&
+    (!isFixedOutput && fromUiAmt > 0) || (isFixedOutput && toUiAmt > 0);
+
+  const routesDivRef = useRef<HTMLDivElement>(null);
 
   const cardXPadding = '32px';
   return (
@@ -1136,40 +1163,50 @@ const TokenSwap = () => {
             </>
           )}
           {!isTablet && (
-            <Card
-              className={classNames(
-                'tablet:hidden absolute top-0 w-[420px] right-[-440px] px-4 laptop:w-[368px] laptop:right-[-388px] py-8 laptop:px-4 transition-[opacity,transform] opacity-0 -translate-x-[30%] -z-10 transform-gpu will-change-transform',
-                { 'opacity-100 !translate-x-0': isRoutesVisible }
-              )}>
-              <RoutesAvailable
-                availableRoutesCount={availableRoutesCount}
-                isDesktopScreen={true}
-                routes={routesSortedBySimResults.routes}
-                routeSelected={routeSelected}
-                onRouteSelected={onUserSelectRoute}
-                isRefreshing={isRefreshingRoutes}
-                refreshButton={
-                  <RefreshButton
-                    isDisabled={!refreshRoutesTimerTick}
+            <CSSTransition
+              nodeRef={routesDivRef}
+              in={isRoutesVisible}
+              // timeout={500}
+              addEndListener={(done) => {
+                // Use the css transitionend event to mark the finish of a transition
+                routesDivRef.current.addEventListener('transitionend', done, false);
+              }}
+              mountOnEnter={false}
+              unmountOnExit={false}
+              classNames="swap-routes-list-trans">
+              <div
+                ref={routesDivRef}
+                className="tablet:hidden absolute top-0 w-[420px] right-[-440px] laptop:w-[368px] laptop:right-[-388px] -z-10 opacity-0">
+                <Card className={classNames('px-4 py-8 laptop:px-4')}>
+                  <RoutesAvailable
+                    availableRoutesCount={availableRoutesCount}
+                    isDesktopScreen={true}
+                    routes={routesSortedBySimResults.routes}
+                    routeSelected={routeSelected}
+                    onRouteSelected={onUserSelectRoute}
                     isRefreshing={isRefreshingRoutes}
-                    onRefreshClicked={() => fetchSwapRoutes(true)}
-                    timePassedAfterRefresh={timePassedAfterRefresh}
+                    refreshButton={
+                      <RefreshButton
+                        isDisabled={!refreshRoutesTimerTick}
+                        isRefreshing={isRefreshingRoutes}
+                        onRefreshClicked={() => fetchSwapRoutes(true)}
+                        timePassedAfterRefresh={timePassedAfterRefresh}
+                      />
+                    }
+                    simuResults={routesSortedBySimResults.simulateResults}
+                    isFixedOutputMode={isFixedOutput}
                   />
-                }
-                simuResults={routesSortedBySimResults.simulateResults}
-                isFixedOutputMode={isFixedOutput}
-              />
-              {routeSelected && (
-                <SwapDetail
-                  routeAndQuote={routeSelected}
-                  fromToken={fromToken}
-                  toToken={toToken}
-                  coingeckoRate={coingeckoRate}
-                  coingeckoApi={coingeckoApi}
-                  isPriceImpactEnabled={isPriceImpactEnabled}
-                />
-              )}
-            </Card>
+                  <SwapDetail
+                    routeAndQuote={routeSelected}
+                    fromToken={fromToken}
+                    toToken={toToken}
+                    coingeckoRate={coingeckoRate}
+                    coingeckoApi={coingeckoApi}
+                    isPriceImpactEnabled={isPriceImpactEnabled}
+                  />
+                </Card>
+              </div>
+            </CSSTransition>
           )}
           <Button
             isLoading={isSubmitting}

@@ -17,3 +17,32 @@ $transDuration: 150ms;
   transform: scale3d(0.5, 0.5, 1);
   transition: opacity $transDuration, transform $transDuration;
 }
+
+$enterDelay: 30ms;
+$translateX: -20%;
+.swap-routes-list-trans-enter {
+  opacity: 0 !important;
+  transform: translate3d($translateX, 0, 0) !important;
+}
+.swap-routes-list-trans-enter-active {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition: opacity $transDuration $enterDelay, transform $transDuration $enterDelay;
+}
+.swap-routes-list-trans-enter-done {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+.swap-routes-list-trans-exit {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+.swap-routes-list-trans-exit-active {
+  opacity: 0 !important;
+  transform: translate3d($translateX, 0, 0) !important;
+  transition: opacity $transDuration, transform $transDuration;
+}
+.swap-routes-list-trans-exit-done {
+  opacity: 0 !important;
+  transform: translate3d($translateX, 0, 0) !important;
+}

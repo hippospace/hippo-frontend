@@ -177,7 +177,7 @@ const PriceChart = ({
                 </div>
               </div>
             ) : (
-              <Skeleton paragraph={{ rows: 1 }} active />
+              <Skeleton title={false} paragraph={true} active />
             )}
             <div className="w-full h-[227px] mt-auto" onMouseLeave={onMouseLeaveChart}>
               {!!data && data.length > 0 ? (
