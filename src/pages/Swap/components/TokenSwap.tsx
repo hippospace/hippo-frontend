@@ -586,6 +586,7 @@ const TokenSwap = () => {
   );
 
   const resetAllRoutes = useCallback(() => {
+    console.log('Reset all routes');
     setAllRoutes([]);
     setRoute(null);
     setAvailableRoutesCount(0);
@@ -741,7 +742,9 @@ const TokenSwap = () => {
                 poolReloadMinInterval
               );
             }
-            resetAllRoutes();
+            if (now === lastFetchTs.current) {
+              resetAllRoutes();
+            }
             // stopTimer();
             if (isReloadInternal) {
               restartTimer();
