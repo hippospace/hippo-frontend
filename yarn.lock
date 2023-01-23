@@ -1899,40 +1899,52 @@
     js-sha3 "^0.8.0"
     msafe-wallet "~2.1.3"
 
-"@manahippo/coin-list@2.3.3":
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-2.3.3.tgz#f0ee54a7c21dc112e84d01bcf9be649459bc7953"
-  integrity sha512-3W8EH0CsMD356GVwoXo20uNQq5vnbP8graE5g8fCEScgT6WZd1m6TzJ/T8p/6diaXtXRHJk523RxANUJWG/k6w==
+"@manahippo/coin-list@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-2.4.0.tgz#0c4387e7fdc94e9c6cc03085cd9a9a63b4f9cef4"
+  integrity sha512-cqFvM48d1C/EcRRZGq4qg550hQ0SJoXAf+d52lD2xb4tHblyoegedR0AwdHNtf5S3YYPXiZSFlXhz0cy1r3GEg==
   dependencies:
-    "@manahippo/move-to-ts" "0.5.0"
-    aptos "1.3.15"
+    "@manahippo/move-to-ts" "0.6.1"
+    aptos "1.3.17"
     big-integer "^1.6.51"
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/hippo-sdk@3.3.13":
-  version "3.3.13"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-3.3.13.tgz#f0d9944e8002ab2715e545d54d43903220896234"
-  integrity sha512-rN2EW9R1k/FUfIW3rqVdL9hXmmwFMGzwdGellE0sLIOuQd52EjJ0i9rEoSEt5UFEr3bhdMkIBDIbKcNhTatFcA==
+"@manahippo/hippo-sdk@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-3.4.0.tgz#9536910e43c27b34e7cb18c3e5c56765513d7aa0"
+  integrity sha512-61PFrOkSqPO0CCCde1OKP27e/QyiFeBqHPIhwShpE/2jv4Rfufwex7vEtpb9QSejNatToXdzbCzc2z1FjI24tA==
   dependencies:
-    "@manahippo/coin-list" "2.3.3"
-    "@manahippo/move-to-ts" "0.5.0"
+    "@manahippo/coin-list" "2.4.0"
+    "@manahippo/move-to-ts" "0.6.0"
     "@rollup/plugin-commonjs" "^24.0.0"
     "@rollup/plugin-node-resolve" "^15.0.1"
     "@vividnetwork/swap-sdk" "^0.2.2"
-    aptos "1.3.15"
+    aptos "1.3.17"
     bn.js "^5.2.1"
     commander "^9.3.0"
     decimal.js "^10.4.0"
     promise-throttle "1.1.2"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.5.0.tgz#1cfb572a61bac3466bc0e0d69e8dd3aad6ea8777"
-  integrity sha512-RxP+9/NXRk5zO6pLj1WsDviILffG4SGV2a6KF5D6le+D9VBlVDZblAR23+xqIYE1ym5IoCUT1kStaUbKmBxo1A==
+"@manahippo/move-to-ts@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.6.0.tgz#f5a097ed20c816abda33ae4d066fc5aaf4d0d3ed"
+  integrity sha512-cw0YXnFhKiq4F7+zUJxwAVZR6/KWNzYpqlRmMNoYn5/x2Yxb7m++PPmlPI9qp4JMhLlkxXVmIfAWlv5u+Ri/Vg==
   dependencies:
-    aptos "1.3.15"
+    aptos "1.3.17"
+    big-integer "^1.6.51"
+    elliptic "^6.5.4"
+    json-stable-stringify "^1.0.1"
+    sha.js "^2.4.11"
+    sha3 "^2.1.4"
+
+"@manahippo/move-to-ts@0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-0.6.1.tgz#a7319cbd325523fa260fcfc67d4dadfd02f540d1"
+  integrity sha512-EkgtHQ7x8f6GwAwgvPhJ1Eoo419XnFYBLv9v/WCP7WPA86E8FhUkgSUIJImI91SOlA1cXK4vq2rL9wciBKG0SQ==
+  dependencies:
+    aptos "1.3.17"
     big-integer "^1.6.51"
     elliptic "^6.5.4"
     json-stable-stringify "^1.0.1"
@@ -3437,10 +3449,10 @@ aptos@1.3.15:
     form-data "4.0.0"
     tweetnacl "1.0.3"
 
-aptos@^1.3.14:
-  version "1.3.16"
-  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.16.tgz#fb4d072c4975beece9c0ee4104ff2dd069fcc1ec"
-  integrity sha512-LxI4XctQ5VeL+HokjwuGPwsb1fcydLIn4agFXyhn7hSYosTLNRxQ3UIixyP4Fmv6qPBjQVu8hELVSlThQk/EjA==
+aptos@1.3.17, aptos@^1.3.16:
+  version "1.3.17"
+  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.17.tgz#bdfb8ab9790b52abbeefd862721007b4d13c9302"
+  integrity sha512-SPgWR9D0nHwLNpvxH943T9ieA2/Q0AVVsvT/qTUuWQSImxkxMVkb++XyWhiFyQpnZDqo6o2o0/fZakeUkqrc8w==
   dependencies:
     "@noble/hashes" "1.1.3"
     "@scure/bip39" "1.1.0"
@@ -3448,10 +3460,10 @@ aptos@^1.3.14:
     form-data "4.0.0"
     tweetnacl "1.0.3"
 
-aptos@^1.3.16:
-  version "1.3.17"
-  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.17.tgz#bdfb8ab9790b52abbeefd862721007b4d13c9302"
-  integrity sha512-SPgWR9D0nHwLNpvxH943T9ieA2/Q0AVVsvT/qTUuWQSImxkxMVkb++XyWhiFyQpnZDqo6o2o0/fZakeUkqrc8w==
+aptos@^1.3.14:
+  version "1.3.16"
+  resolved "https://registry.yarnpkg.com/aptos/-/aptos-1.3.16.tgz#fb4d072c4975beece9c0ee4104ff2dd069fcc1ec"
+  integrity sha512-LxI4XctQ5VeL+HokjwuGPwsb1fcydLIn4agFXyhn7hSYosTLNRxQ3UIixyP4Fmv6qPBjQVu8hELVSlThQk/EjA==
   dependencies:
     "@noble/hashes" "1.1.3"
     "@scure/bip39" "1.1.0"
