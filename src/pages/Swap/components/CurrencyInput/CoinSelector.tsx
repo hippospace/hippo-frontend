@@ -57,7 +57,7 @@ const useCoinSelectorStore = create<ICoinSelectorState>()(
           set((state) => {
             if (
               state.recentSelectedTokens.includes(fullName) ||
-              preSetTokens.includes(coinListCli.getCoinInfoByFullName(fullName).symbol)
+              preSetTokens.includes(coinListCli.getCoinInfoByFullName(fullName)?.symbol!)
             )
               return state;
             return {
@@ -97,11 +97,11 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const commonCoins = useMemo(
     () =>
       preSetTokens
-        .map((s) => hippoAgg.coinListClient.getCoinInfoBySymbol(s)[0])
+        .map((s) => hippoAgg?.coinListClient.getCoinInfoBySymbol(s)[0])
         .concat(
-          ...recentSelectedTokens.map((f) => hippoAgg.coinListClient.getCoinInfoByFullName(f))
+          ...recentSelectedTokens.map((f) => hippoAgg?.coinListClient.getCoinInfoByFullName(f))
         ),
-    [hippoAgg.coinListClient, recentSelectedTokens]
+    [hippoAgg?.coinListClient, recentSelectedTokens]
   );
 
   // const [searchPattern, setSearchPattern] = useState<string>('');
@@ -130,17 +130,10 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         ...values[actionType],
         token
       });
-      addRecentSelectedToken(token.token_type.type, hippoAgg.coinListClient);
+      if (hippoAgg) addRecentSelectedToken(token.token_type.type, hippoAgg.coinListClient);
       dismissiModal();
     },
-    [
-      actionType,
-      values,
-      setFieldValue,
-      addRecentSelectedToken,
-      hippoAgg.coinListClient,
-      dismissiModal
-    ]
+    [actionType, addRecentSelectedToken, dismissiModal, hippoAgg, setFieldValue, values]
   );
 
   const getFilteredTokenListWithBalance = useCallback(() => {
@@ -180,13 +173,16 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     return (
       <div className="flex flex-col gap-y-1">
         <div className="flex gap-2 mb-1">
-          {commonCoins.map((coin) => (
-            <CommonCoinButton
-              coin={coin}
-              key={`common-coin-${coin.symbol}`}
-              onClickToken={() => onSelectToken(coin)}
-            />
-          ))}
+          {commonCoins.map(
+            (coin) =>
+              coin && (
+                <CommonCoinButton
+                  coin={coin}
+                  key={`common-coin-${coin.symbol}`}
+                  onClickToken={() => onSelectToken(coin)}
+                />
+              )
+          )}
         </div>
         <div className="flex items-center bg-field p-4 rounded-xl">
           <input

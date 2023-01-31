@@ -139,7 +139,7 @@ const Settings = () => {
     [setRpcEndpoint]
   );
   const switchCustomRPC = useCallback(() => {
-    if (!isValidUrl(customRPC)) {
+    if (!customRPC || !isValidUrl(customRPC)) {
       openErrorNotification({ detail: 'Invalid RPC URL' });
       return;
     }

@@ -76,7 +76,7 @@ export const PoolStack = ({
       {dexes.map((d, i) => {
         const left =
           -iconSize *
-          visibleRatios
+          visibleRatios!
             .map((v) => 1 - v)
             .slice(0, i + 1)
             .reduce((p, c) => p + c);

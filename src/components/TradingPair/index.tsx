@@ -25,9 +25,17 @@ const TradingPair = ({
         <CoinIcon token={yCoin} />
       </div>
       <div className="items-center flex">
-        <CoinLabel coin={xCoin} isShowBridge={isShowBridge} symbolClassName="text-grey-700" />
+        {xCoin ? (
+          <CoinLabel coin={xCoin} isShowBridge={isShowBridge} symbolClassName="text-grey-700" />
+        ) : (
+          <>404</>
+        )}
         {seperator ?? <MultiplyIcon className="font-icon text-grey-500 mx-1" />}
-        <CoinLabel coin={yCoin} isShowBridge={isShowBridge} symbolClassName="text-grey-700" />
+        {yCoin ? (
+          <CoinLabel coin={yCoin} isShowBridge={isShowBridge} symbolClassName="text-grey-700" />
+        ) : (
+          <>404</>
+        )}
       </div>
     </div>
   );

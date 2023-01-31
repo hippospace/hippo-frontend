@@ -15,8 +15,8 @@ interface TProps {
 const CoinIcon: React.FC<TProps> = ({ logoSrc, size = 24, className, token }) => {
   const { getTokenInfoByFullName } = useHippoClient();
   const [isLoaded, setIsLoaded] = useState(false);
-  if (!logoSrc) {
-    if (token) logoSrc = getTokenInfoByFullName(token.token_type.type).logo_url;
+  if (!logoSrc && token) {
+    logoSrc = getTokenInfoByFullName(token.token_type.type)?.logo_url;
   }
   const onImgError = () => {
     setIsLoaded(false);

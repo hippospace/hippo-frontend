@@ -36,7 +36,7 @@ interface HippoClientContextType {
     gasAvailable: number,
     options?: OptionTransaction,
     isFixedOutput?: boolean
-  ) => Promise<Types.UserTransaction>;
+  ) => Promise<Types.UserTransaction | undefined>;
   transaction?: TTransaction;
   setTransaction: (trans?: TTransaction) => void;
   requestFaucet: (symbol: string) => Promise<boolean>;
@@ -66,7 +66,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   // const [coinListCli, setCoinListCli] = useState<CoinListClient>();
   // const [hippoAgg, setHippoAgg] = useState<TradeAggregator>();
   const [refreshWalletClient, setRefreshWalletClient] = useState(false);
-  const [lastUpdateVersion, setLastUpdateVersion] = useState(undefined);
+  const [lastUpdateVersion, setLastUpdateVersion] = useState<bigint | undefined>(undefined);
   const [transaction, setTransaction] = useState<TTransaction>();
   const dispatch = useDispatch();
 
@@ -120,7 +120,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           setHippoWallet(undefined);
         }
       } catch (err) {
-        if (err.errorCode === 'account_not_found') {
+        if ((err as { errorCode: string }).errorCode === 'account_not_found') {
           openErrorNotification({
             detail: "Cann't find your account. Please fund your account first."
           });
@@ -286,6 +286,11 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         | TxnBuilderTypes.TransactionPayloadEntryFunction
         | Types.TransactionPayload_EntryFunctionPayload;
       try {
+        const publicKey = wallet?.adapter.publicAccount.publicKey?.toString();
+        const address = wallet?.adapter.publicAccount.address?.toString();
+        if (!publicKey || !address) {
+          return;
+        }
         if (!isFixedOutput) {
           const input = routeAndQuote.quote.inputUiAmt;
           const minOut = routeAndQuote.quote.outputUiAmt * (1 - slipTolerance / 100);
@@ -303,11 +308,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
           payload = (
             routeAndQuote.route as AggregatorTypes.ApiTradeRoute
           ).makeFixedOutputWithChangePayload(outputAmt, maxInputAmt, false);
-        }
-        const publicKey = wallet?.adapter.publicAccount?.publicKey.toString();
-        const address = wallet?.adapter.publicAccount?.address.toString();
-        if (!publicKey || !address) {
-          return;
         }
         const simkeys: SimulationKeys = {
           pubkey: new HexString(publicKey),

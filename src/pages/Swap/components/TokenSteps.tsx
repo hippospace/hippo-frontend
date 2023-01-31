@@ -9,7 +9,7 @@ const TokenSteps = ({ tokens, className = '' }: { tokens: CoinInfo[]; className?
   const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
-    setIsCompact(ref.current.clientWidth < ref.current.scrollWidth);
+    setIsCompact((ref.current?.clientWidth || 0) < (ref.current?.scrollWidth || 0));
   }, []);
 
   const abbr = tokens.map((t) => t.symbol).join('->');

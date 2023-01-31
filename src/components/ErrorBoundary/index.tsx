@@ -23,7 +23,7 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="w-1/2 mx-auto mt-4 p-4 font-bold text-center text-grey-900 border border-solid border-grey-700">
           <span className="block py-2 font-bold ">Sorry, there was an unexpected issue !</span>
-          <span className="block py-2 font-bold ">Our team has been notified !</span>
+          <span className="block py-2 font-bold ">Please feedback this issue in our Discord.</span>
         </div>
       );
     }

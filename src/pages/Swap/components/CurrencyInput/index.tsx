@@ -167,13 +167,15 @@ const CurrencyInput: React.FC<TProps> = ({
               onClick={() => {
                 if (actionType === 'currencyFrom' && !isDisableAmountInput) {
                   let amount = uiBalance;
-                  if (selectedCurrency.token.symbol === 'APT') {
-                    amount -= 0.05;
+                  if (typeof amount === 'number') {
+                    if (selectedCurrency?.token?.symbol === 'APT') {
+                      amount = Math.max(amount - 0.05, 0);
+                    }
+                    setFieldValue(actionType, {
+                      ...selectedCurrency,
+                      amount
+                    });
                   }
-                  setFieldValue(actionType, {
-                    ...selectedCurrency,
-                    amount
-                  });
                 }
               }}>
               {tokenAmountFormatter(uiBalance, selectedToken)}

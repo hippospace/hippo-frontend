@@ -12,7 +12,7 @@ const fetcher = (apiURL: string) =>
   promiseThrottle.add(() => fetch(apiURL).then((res) => res.json()));
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const onErrorRetry = (error, key, config, revalidate, { retryCount }) => {
+const onErrorRetry = (error: any /*, key, config, revalidate, { retryCount } */) => {
   // Coingecko rate limit error
   if (error.status === 429) {
     // Retry after specific time
@@ -21,17 +21,17 @@ const onErrorRetry = (error, key, config, revalidate, { retryCount }) => {
 };
 
 export const useCoingeckoPrice = (
-  token: RawCoinInfo | RawCoinInfo[] | undefined
+  token: RawCoinInfo | (RawCoinInfo | undefined)[] | undefined
 ): [number | number[] | undefined, any, string] => {
   const tokens = useMemo(() => {
     if (Array.isArray(token)) return token;
     else return [token];
   }, [token]);
   const key = useMemo(() => {
-    if (!tokens?.every((t) => !!t?.coingecko_id)) return null;
+    if (!tokens.every((t) => t?.coingecko_id)) return null;
     return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
       tokens
-        .map((t) => t.coingecko_id)
+        .map((t) => t!.coingecko_id)
         .sort()
         .join(',')
     )}&vs_currencies=usd`;
@@ -43,10 +43,10 @@ export const useCoingeckoPrice = (
   });
   const api = key || '';
   if (data) {
-    if (!Array.isArray(token)) {
+    if (!Array.isArray(token) && tokens[0]) {
       return [data[tokens[0].coingecko_id].usd, error, api];
     } else if (tokens.length >= 1) {
-      return [tokens.map((t) => data[t.coingecko_id].usd), error, api];
+      return [tokens.map((t) => t && data[t.coingecko_id].usd), error, api];
     }
   }
   return [undefined, error, api];
@@ -67,9 +67,9 @@ const isValidData = (data: ICoingeckoMarketChartData) => {
 };
 
 export const useCoingeckoMarketChart = (
-  token: RawCoinInfo,
+  token: RawCoinInfo | undefined,
   days: number
-): [ICoingeckoMarketChartData, any, boolean, boolean] => {
+): [ICoingeckoMarketChartData | undefined, any, boolean, boolean] => {
   const key = useMemo(() => {
     if (!token?.coingecko_id) return null;
     const intervalQuery = days === 30 ? '&interval=daily' : '';
@@ -95,14 +95,14 @@ export const useCoingeckoMarketChart = (
 };
 
 export const useCoingeckoRateHistory = (
-  fromToken: RawCoinInfo,
-  toToken: RawCoinInfo,
+  fromToken: RawCoinInfo | undefined,
+  toToken: RawCoinInfo | undefined,
   days: number
-): [ICoingeckoMarketChartData, any, boolean, boolean] => {
+): [ICoingeckoMarketChartData | undefined, any, boolean, boolean] => {
   const [fromTokenData, error, isLoading, hasNoData1] = useCoingeckoMarketChart(fromToken, days);
   const [toTokenData, error2, isLoading2, hasNoData2] = useCoingeckoMarketChart(toToken, days);
 
-  let rateHistory: ICoingeckoMarketChartData;
+  let rateHistory: ICoingeckoMarketChartData | undefined = undefined;
   if (fromTokenData?.prices && toTokenData?.prices) {
     // align timestamp
     let lastFindIndex = -1;

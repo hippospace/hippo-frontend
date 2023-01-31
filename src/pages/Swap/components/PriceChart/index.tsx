@@ -19,7 +19,7 @@ type Period = typeof Periods[number];
 
 interface IChartState {
   currentData: ITokenNativePrice | undefined;
-  setCurrentData: (p: ITokenNativePrice) => void;
+  setCurrentData: (p: ITokenNativePrice | undefined) => void;
 }
 
 const useChartStore = create<IChartState>()(
@@ -29,7 +29,7 @@ const useChartStore = create<IChartState>()(
   }))
 );
 
-const CustomActiveDot = (props) => {
+const CustomActiveDot = (props: any) => {
   const setCurrentData = useChartStore((state) => state.setCurrentData);
   const { cx, cy, payload } = props;
   // console.log(`active dot: ${value}`, payload);
@@ -78,6 +78,7 @@ const daysOfPeriod = (p: Period) => {
   if (p === '1W') return 7;
   if (p === '1M') return 30;
   if (p === '1Y') return 365;
+  return 1;
 };
 
 const PriceChart = ({
@@ -113,7 +114,7 @@ const PriceChart = ({
   const startData = data && data[0];
   const lastData = data && data.slice(-1)[0];
 
-  const onSegmentedChange = useCallback((v: string) => {
+  const onSegmentedChange = useCallback((v: string | number) => {
     setChartPeriod(v as Period);
   }, []);
 

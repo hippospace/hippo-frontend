@@ -72,7 +72,11 @@ export const numberOfAbbr = (amount: number, decimals = 0) => {
   return cutDecimals(avoidScientificNotation(amount), decimals);
 };
 
-export const percent = (v: number, maxDecimals: number | undefined = 2, hasSign = false) => {
+export const percent = (
+  v: number,
+  maxDecimals: number | undefined = 2,
+  hasSign = false
+): string => {
   const limitValue = 1 / 10 ** (maxDecimals + 2); // Do use 1 / 10^n rather than 1 / 10^-n
   if (maxDecimals && Math.abs(v) > 0 && Math.abs(v) < limitValue)
     return `${v < 0 ? '> -' : '< '}${percent(limitValue, maxDecimals)}`;

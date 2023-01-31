@@ -65,7 +65,7 @@ const serializeRouteQuote = (rq: GeneralRouteAndQuote) => {
       | AggregatorTypes.ApiTradeRoute
       | AggregatorTypes.SplitSingleRoute
       | AggregatorTypes.SplitMultiRoute
-  ) => {
+  ): string | string[] => {
     if (r instanceof AggregatorTypes.ApiTradeRoute) {
       return r.steps.map((s) => stepStr(s)).join('x') + `:${tokensStr(r.tokens)}`;
     } else if (r instanceof AggregatorTypes.SplitSingleRoute) {
@@ -145,8 +145,8 @@ const CardHeader = ({
 }: {
   className?: string;
   right?: ReactNode;
-  fromToken: RawCoinInfo;
-  toToken: RawCoinInfo;
+  fromToken: RawCoinInfo | undefined;
+  toToken: RawCoinInfo | undefined;
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
@@ -470,30 +470,30 @@ const TokenSwap = () => {
     return !!(
       fromToken &&
       toToken &&
-      hippoAgg.getAllRoutes(fromToken, toToken, false, 3, false).length > 0
+      hippoAgg?.getAllRoutes(fromToken, toToken, false, 3, false).length
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, hippoAgg, hippoAgg.allPools, toToken]);
+  }, [fromToken, hippoAgg, hippoAgg?.allPools, toToken]);
 
   useEffect(() => {
     if (hippoAgg) {
       if (!values.currencyFrom?.token) {
-        const initialFromToken =
-          (intialFromish?.includes('::')
+        const initialFromToken = intialFromish
+          ? intialFromish.includes('::')
             ? hippoAgg.coinListClient.getCoinInfoByFullName(intialFromish)
-            : hippoAgg.coinListClient.getCoinInfoBySymbol(intialFromish)[0]) ||
-          hippoAgg.coinListClient.getCoinInfoBySymbol('USDC')[0];
+            : hippoAgg.coinListClient.getCoinInfoBySymbol(intialFromish)[0]
+          : hippoAgg.coinListClient.getCoinInfoBySymbol('USDC')[0];
         setFieldValue('currencyFrom', {
           ...values.currencyFrom,
           token: initialFromToken
         });
       }
       if (!values.currencyTo?.token) {
-        const initailToToken =
-          (initialToish?.includes('::')
+        const initailToToken = initialToish
+          ? initialToish.includes('::')
             ? hippoAgg.coinListClient.getCoinInfoByFullName(initialToish)
-            : hippoAgg.coinListClient.getCoinInfoBySymbol(initialToish)[0]) ||
-          hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0];
+            : hippoAgg.coinListClient.getCoinInfoBySymbol(initialToish)[0]
+          : hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0];
         setFieldValue('currencyTo', {
           ...values.currencyTo,
           token: initailToToken
@@ -527,11 +527,11 @@ const TokenSwap = () => {
   ]);
 
   useEffect(() => {
-    if (window.history.replaceState && fromToken && toToken) {
-      // Prevents browser from storing history with each change
+    if (fromToken && toToken) {
+      // Prevents browser from storing history of every change
       window.history.replaceState(
         {},
-        null,
+        '',
         location.origin +
           `/swap/from/${fromToken.symbol}${
             !isFixedOutput && fromUiAmt ? `/amt/${fromUiAmt}` : ''
@@ -574,7 +574,7 @@ const TokenSwap = () => {
 
   const setSelectedRouteFromRoutes = useCallback(
     (routes: GeneralRouteAndQuote[]) => {
-      let manuallySelectedRoute: GeneralRouteAndQuote;
+      let manuallySelectedRoute: GeneralRouteAndQuote | undefined = undefined;
       if (routeSelectedSerialized) {
         manuallySelectedRoute = routes.find(
           (r) => serializeRouteQuote(r) === routeSelectedSerialized
@@ -652,7 +652,7 @@ const TokenSwap = () => {
             setIsRefreshingRoutes(isReloadInternal);
 
             const { routes, allRoutesCount } = await (async () => {
-              if (!isFixedOutput) {
+              if (!isFixedOutput && fromUiAmt) {
                 console.time('GetQuotes');
                 const [routeAndQuotes, splitSingle, splitMulti] = await hippoAgg.getQuotesV1V2V3(
                   fromUiAmt,
@@ -689,7 +689,7 @@ const TokenSwap = () => {
                   allRoutesCount: routeAndQuotes.length,
                   routes: apiRoutes
                 };
-              } else {
+              } else if (isFixedOutput && toUiAmt) {
                 const routeAndQuote = await hippoAgg.getQuotesWithFixedOutputWithChange(
                   toUiAmt,
                   fromToken,
@@ -698,14 +698,18 @@ const TokenSwap = () => {
                   false,
                   poolReloadMinInterval
                 );
-                const fixedOutputRoutes = [routeAndQuote].map((r) => ({
-                  ...r,
-                  route: r.route.toApiTradeRoute()
-                }));
+                const fixedOutputRoutes = routeAndQuote
+                  ? [routeAndQuote].map((r) => ({
+                      ...r,
+                      route: r.route.toApiTradeRoute()
+                    }))
+                  : [];
                 return {
                   allRoutesCount: fixedOutputRoutes.length,
                   routes: fixedOutputRoutes
                 };
+              } else {
+                throw new Error('Unreachable branch');
               }
             })();
 
@@ -729,8 +733,7 @@ const TokenSwap = () => {
           } else {
             const isReloadInternal =
               isReload ??
-              ((!isFixedOutput && !(previousFromUiAmt > 0)) ||
-                (isFixedOutput && !(previousToUiAmt > 0)));
+              ((!isFixedOutput && !previousFromUiAmt) || (isFixedOutput && !previousToUiAmt));
             if (isReloadInternal) {
               await hippoAgg.reloadPools(
                 fromToken,
@@ -765,7 +768,7 @@ const TokenSwap = () => {
           if (fromUiAmt) openErrorNotification({ detail, title: 'Fetch API error' });
         } else {
           openErrorNotification({
-            detail: error?.message || JSON.stringify(error),
+            detail: (error as { message: string }).message || JSON.stringify(error),
             title: 'Fetch swap routes error'
           });
         }
@@ -794,18 +797,18 @@ const TokenSwap = () => {
     ]
   );
 
-  const [simulateResults, setSimulateResults] = useState<(Types.UserTransaction | null)[]>([]);
+  const [simulateResults, setSimulateResults] = useState<Types.UserTransaction[]>([]);
   const simuTs = useRef(0);
   const [aptBalance, isReady] = useTokenBalane(
-    hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]
+    hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]
   );
   const [baseBalance] = useTokenBalane(fromToken);
 
   const gasAvailable = useMemo(() => {
     let aptAvailable = 0;
-    if (fromToken?.symbol !== 'APT' && isReady) {
+    if (fromToken?.symbol !== 'APT' && isReady && aptBalance) {
       aptAvailable = aptBalance;
-    } else if (fromToken?.symbol === 'APT' && isReady) {
+    } else if (fromToken?.symbol === 'APT' && isReady && aptBalance) {
       aptAvailable = aptBalance - (fromUiAmt || 0);
     }
     aptAvailable = Math.min(aptAvailable, 0.25);
@@ -817,7 +820,15 @@ const TokenSwap = () => {
     const ts = Date.now();
     simuTs.current = ts;
     setSimulateResults([]);
-    if (allRoutes.length > 0 && isReady && aptBalance >= 0.02 && baseBalance >= fromUiAmt) {
+    if (
+      allRoutes.length > 0 &&
+      isReady &&
+      aptBalance &&
+      baseBalance &&
+      fromUiAmt &&
+      aptBalance >= 0.02 &&
+      baseBalance >= fromUiAmt
+    ) {
       /* fix: this would shortcut user inputs
       if ((ts - simuTs.current) / 1000 < REFRESH_INTERVAL - 1) {
         // for the case useEffect runs twice when in React strict and debug mode
@@ -858,8 +869,8 @@ const TokenSwap = () => {
 
   // Reduce Coingecko Api requests as much as we can
   const [prices, , coingeckoApi] = useCoingeckoPrice(
-    fromUiAmt > 0
-      ? [fromToken, toToken, hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0]]
+    fromUiAmt
+      ? [fromToken, toToken, hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]]
       : undefined
   );
 
@@ -867,7 +878,7 @@ const TokenSwap = () => {
 
   const payValue = useMemo(() => {
     if (typeof fromPrice === 'number') {
-      return cutDecimals('' + fromPrice * fromUiAmt, 2);
+      return cutDecimals('' + fromPrice * (fromUiAmt || 0), 2);
     }
     return undefined;
   }, [fromPrice, fromUiAmt]);
@@ -992,7 +1003,11 @@ const TokenSwap = () => {
       return 'Enter an Amount';
     } else if (isRefreshingRoutes) {
       return 'Loading Routes...';
-    } else if (isCurrentBalanceReady && fromUiAmt > fromCurrentBalance) {
+    } else if (
+      isCurrentBalanceReady &&
+      typeof fromCurrentBalance === 'number' &&
+      fromUiAmt > fromCurrentBalance
+    ) {
       return 'Insufficient Balance';
     }
     return 'SWAP';
@@ -1084,7 +1099,7 @@ const TokenSwap = () => {
     await submitForm();
   }, [submitForm]);
 
-  const isPriceImpactEnabled = payValue && parseFloat(payValue) >= 50;
+  const isPriceImpactEnabled = !!payValue && parseFloat(payValue) >= 50;
 
   const priceImpact = useMemo(
     () => Math.abs(routeSelected?.quote.priceImpact || 0),
@@ -1104,7 +1119,7 @@ const TokenSwap = () => {
   const isRoutesVisible =
     // allRoutes.length > 0 &&
     // routeSelected &&
-    (!isFixedOutput && fromUiAmt > 0) || (isFixedOutput && toUiAmt > 0);
+    (!isFixedOutput && !!fromUiAmt) || (isFixedOutput && !!toUiAmt);
 
   const routesDivRef = useRef<HTMLDivElement>(null);
 
@@ -1133,7 +1148,7 @@ const TokenSwap = () => {
           style={{ paddingLeft: cardXPadding, paddingRight: cardXPadding }}>
           <div className="body-bold mb-2 flex items-end">
             <div className="mr-auto">Pay</div>
-            {payValue && fromUiAmt > 0 && (
+            {!!(payValue && fromUiAmt) && (
               <div className="label-large-bold text-grey-500 leading-none">${payValue}</div>
             )}
           </div>
@@ -1147,7 +1162,7 @@ const TokenSwap = () => {
           </Button>
           <div className="body-bold mb-2 flex items-end">
             <div className="mr-auto">Receive</div>
-            {toValue && fromUiAmt > 0 && (
+            {!!(toValue && fromUiAmt) && (
               <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
             )}
           </div>
@@ -1173,7 +1188,7 @@ const TokenSwap = () => {
               // timeout={500}
               addEndListener={(done) => {
                 // Use the css transitionend event to mark the finish of a transition
-                routesDivRef.current.addEventListener('transitionend', done, false);
+                routesDivRef.current?.addEventListener('transitionend', done, false);
               }}
               mountOnEnter={false}
               unmountOnExit={false}
@@ -1243,7 +1258,7 @@ const TokenSwap = () => {
           )}
           {isRateChangeAfterSubmitTooBig && (
             <ErrorBody
-              title={`The ${toToken.symbol} rate has changed ${(
+              title={`The ${toToken?.symbol} rate has changed ${(
                 rateChangeBeforeSubmit * 100
               ).toFixed(2)}%`}
               detail={

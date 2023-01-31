@@ -62,8 +62,8 @@ const SwapDetail = ({
   isPriceImpactEnabled = true
 }: {
   routeAndQuote: GeneralRouteAndQuote | null | undefined;
-  fromToken: CoinInfo;
-  toToken: CoinInfo;
+  fromToken: CoinInfo | undefined;
+  toToken: CoinInfo | undefined;
   coingeckoRate: number | undefined;
   coingeckoApi: string;
   className?: string;
@@ -122,8 +122,8 @@ const SwapDetail = ({
           {coingeckoRate &&
             toTokenRate &&
             // for cases when switching tokens
-            fromToken.token_type.type === routeAndQuote.route.xCoinInfo.token_type.type &&
-            toToken.token_type.type === routeAndQuote.route.yCoinInfo.token_type.type && (
+            fromToken?.token_type.type === routeAndQuote?.route.xCoinInfo.token_type.type &&
+            toToken?.token_type.type === routeAndQuote?.route.yCoinInfo.token_type.type && (
               <RateCompare
                 rate={toTokenRate}
                 rateReferrence={coingeckoRate}
@@ -134,8 +134,8 @@ const SwapDetail = ({
           {binanceRate &&
             toTokenRate &&
             // for cases when switching tokens
-            fromToken.token_type.type === routeAndQuote.route.xCoinInfo.token_type.type &&
-            toToken.token_type.type === routeAndQuote.route.yCoinInfo.token_type.type && (
+            fromToken?.token_type.type === routeAndQuote?.route.xCoinInfo.token_type.type &&
+            toToken?.token_type.type === routeAndQuote?.route.yCoinInfo.token_type.type && (
               <RateCompare
                 rate={toTokenRate}
                 rateReferrence={binanceRate}

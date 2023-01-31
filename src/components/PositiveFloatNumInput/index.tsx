@@ -23,10 +23,7 @@ const MAX_DEFAULT = Number.MAX_SAFE_INTEGER;
 const MAX_DECIMALS_DEFAULT = 9;
 
 // eslint-disable-next-line react/display-name
-const PositiveFloatNumInput = forwardRef<
-  HTMLInputElement,
-  PositiveFloatNumInputProps & { ref: React.Ref<HTMLButtonElement> }
->(
+const PositiveFloatNumInput = forwardRef<HTMLInputElement, PositiveFloatNumInputProps>(
   (
     {
       inputAmount,
@@ -52,7 +49,7 @@ const PositiveFloatNumInput = forwardRef<
     );
 
     const inputRef = useRef<HTMLInputElement>(null);
-    useImperativeHandle(ref, () => inputRef.current);
+    useImperativeHandle(ref, () => inputRef.current!);
 
     const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
       if (event.key === 'Enter') {
@@ -98,9 +95,9 @@ const PositiveFloatNumInput = forwardRef<
             Math.max(0, previousSelectionStart.current + textLengthChange)
           );
           previousSelectionStart.current = fixedCursorPos;
-          inputRef.current.setSelectionRange(fixedCursorPos, fixedCursorPos);
+          inputRef.current?.setSelectionRange(fixedCursorPos, fixedCursorPos);
         } else {
-          previousSelectionStart.current = selectionStart;
+          previousSelectionStart.current = selectionStart ?? 0;
         }
         prevoiusDisplayText.current = displayText;
       }
@@ -110,7 +107,7 @@ const PositiveFloatNumInput = forwardRef<
     const [isCommaDeleted, setIsCommaDeleted] = useState(false);
     useEffect(() => {
       if (!isDisabled && isCommaDeleted) {
-        inputRef.current.setSelectionRange(selectionStart, selectionStart);
+        inputRef.current?.setSelectionRange(selectionStart ?? 0, selectionStart ?? 0);
         setIsCommaDeleted(false);
       }
     }, [isCommaDeleted, isDisabled, selectionStart]);

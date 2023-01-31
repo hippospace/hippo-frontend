@@ -21,11 +21,11 @@ const isDataValidate = (data: unknown) => {
 const NATIVE_REFRESH_INTERVAL = 60_000;
 
 const useTokenPriceNativeHistoryInUsdc = (
-  token: RawCoinInfo,
+  token: RawCoinInfo | undefined,
   fromTs: number,
   toTs: number,
   timeInterval: number
-): [TokenNativePriceData, any, boolean] => {
+): [TokenNativePriceData | undefined, any, boolean] => {
   const key = useMemo(() => {
     if (!token?.token_type.type || token.official_symbol === 'USDC') return null;
     return `https://api.hippo.space/v1/price/coin/${encodeURIComponent(
@@ -54,12 +54,12 @@ const useTokenPriceNativeHistoryInUsdc = (
 };
 
 const useTokenNativePriceHistory = (
-  fromToken: RawCoinInfo,
-  toToken: RawCoinInfo,
+  fromToken: RawCoinInfo | undefined,
+  toToken: RawCoinInfo | undefined,
   fromTs: number,
   toTs: number,
   timeInterval: number
-): [TokenNativePriceData, any, boolean] => {
+): [TokenNativePriceData | undefined, any, boolean] => {
   let [fromTokenData, error1, isLoading1] = useTokenPriceNativeHistoryInUsdc(
     fromToken,
     fromTs,
@@ -86,15 +86,17 @@ const useTokenNativePriceHistory = (
     }));
   }
 
-  let data: TokenNativePriceData;
+  let data: TokenNativePriceData | undefined = undefined;
   if (
     fromTokenData &&
     toTokenData &&
-    fromTokenData.map((p) => p.time_stamp).every((ts, i) => ts === toTokenData[i]?.time_stamp)
+    fromTokenData
+      .map((p) => p.time_stamp)
+      .every((ts, i) => ts === (toTokenData && toTokenData[i]?.time_stamp))
   ) {
     data = toTokenData.map((v, i) => ({
       time_stamp: v.time_stamp,
-      price: fromTokenData[i]?.price ? v.price / fromTokenData[i].price : 0
+      price: fromTokenData && fromTokenData[i]?.price ? v.price / fromTokenData[i].price : 0
     }));
   }
 

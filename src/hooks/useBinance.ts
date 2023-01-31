@@ -5,10 +5,10 @@ import invariant from 'tiny-invariant';
 
 const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 
-const tokenToBinanceSymbol = (t: RawCoinInfo): string => {
+const tokenToBinanceSymbol = (t: RawCoinInfo | undefined): string | undefined => {
   const s = t?.symbol;
   // https://www.binance.com/en/support/announcement/binance-to-auto-convert-usdc-usdp-tusd-to-busd-binance-usd-e62f703604a94538a1f1bc803b2d579f
-  const mappings = {
+  const mappings: Record<string, string> = {
     WETH: 'ETH',
     USDC: 'BUSD',
     USDCso: 'BUSD',
@@ -19,7 +19,7 @@ const tokenToBinanceSymbol = (t: RawCoinInfo): string => {
     TUSD: 'BUSD',
     USDTbs: 'USDT'
   };
-  return mappings[s] ?? s;
+  return (s && mappings[s]) ?? s;
 };
 
 interface IBinanceSymbol {
@@ -56,7 +56,10 @@ export const useBinanceSymbols = (): [IBinanceSymbol[] | undefined, any] => {
   return [symbols, error];
 };
 
-export const useBinanceSymbolPair = (fromToken: RawCoinInfo, toToken: RawCoinInfo) => {
+export const useBinanceSymbolPair = (
+  fromToken: RawCoinInfo | undefined,
+  toToken: RawCoinInfo | undefined
+) => {
   const fromSymbol = tokenToBinanceSymbol(fromToken);
   const toSymbol = tokenToBinanceSymbol(toToken);
   const medianSymbol = 'BUSD';
@@ -86,7 +89,10 @@ export const useBinanceSymbolPair = (fromToken: RawCoinInfo, toToken: RawCoinInf
   return [[], error];
 };
 
-export const useBinanceRate = (fromToken: RawCoinInfo, toToken: RawCoinInfo) => {
+export const useBinanceRate = (
+  fromToken: RawCoinInfo | undefined,
+  toToken: RawCoinInfo | undefined
+) => {
   const [pairs, error] = useBinanceSymbolPair(fromToken, toToken);
 
   const key = useMemo(() => {
