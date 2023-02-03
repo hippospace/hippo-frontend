@@ -1184,6 +1184,7 @@ const TokenSwap = () => {
           {!isTablet && (
             <CSSTransition
               nodeRef={routesDivRef}
+              appear={!isTablet}
               in={isRoutesVisible}
               // timeout={500}
               addEndListener={(done) => {

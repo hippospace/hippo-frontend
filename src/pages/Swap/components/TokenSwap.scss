@@ -46,3 +46,14 @@ $translateX: -20%;
   opacity: 0 !important;
   transform: translate3d($translateX, 0, 0) !important;
 }
+.swap-routes-list-trans-appear {
+  opacity: 0 !important;
+}
+.swap-routes-list-trans-appear-active {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+.swap-routes-list-trans-appear-done {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
