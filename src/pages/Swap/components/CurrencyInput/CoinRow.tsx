@@ -3,10 +3,10 @@ import { Skeleton } from 'antd';
 import CoinIcon from 'components/Coins/CoinIcon';
 import CoinLabel from 'components/Coins/CoinLabel';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
-import { TokenBalance } from 'types/hippo';
+import { ITokenBalance } from 'types/hippo';
 
 interface TProps {
-  item: TokenBalance;
+  item: ITokenBalance;
 }
 
 const CoinRow: React.FC<TProps> = ({ item }) => {

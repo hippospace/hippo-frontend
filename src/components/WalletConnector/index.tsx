@@ -50,9 +50,9 @@ const WalletConnector: React.FC = () => {
             destroyTooltipOnHide
             placement="bottomLeft">
             <Button
-              variant="secondary"
+              variant="plain"
               size="small"
-              className="min-w-[156px] h-10 font-bold"
+              className="min-w-[156px] h-10 font-bold text-prime-700"
               onClick={!activeWallet ? () => openModal() : undefined}>
               {activeWallet ? (
                 <>

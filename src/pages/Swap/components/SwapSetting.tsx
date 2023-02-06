@@ -89,7 +89,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
               isConfine={true}
               placeholder="Custom"
               className={classNames(
-                'h6 rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 body-bold px-4'
+                'h6 rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 body-bold !px-4'
               )}
               onAmountChange={(v) => setFieldValue('slipTolerance', v)}
             />
@@ -106,7 +106,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
         <SubTitle>Transaction Deadline</SubTitle>
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="grow rounded-full bg-field px-4 w-[180px] h-[40px] h6 text-grey-700"
+            className="grow rounded-full bg-field !px-4 w-[180px] h-[40px] h6 text-grey-700"
             inputAmount={values.trasactionDeadline}
             isConfine={true}
             placeholder="0"
@@ -121,7 +121,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
         <SubTitle>Max Gas Fee</SubTitle>
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="grow rounded-full bg-field px-4 w-[180px] h-[40px] h6 text-grey-700"
+            className="grow rounded-full bg-field !px-4 w-[180px] h-[40px] h6 text-grey-700"
             inputAmount={values.maxGasFee}
             isConfine={true}
             placeholder="0"

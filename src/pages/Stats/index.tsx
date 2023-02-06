@@ -1,14 +1,14 @@
 import { hippo_aggregator } from '@manahippo/hippo-sdk';
 import { Segmented, Skeleton } from 'antd';
 import classNames from 'classnames';
-import PoolProvider, { poolUrl } from 'components/PoolProvider';
+import PoolProvider from 'components/PoolProvider';
 import { numberGroupFormat, numberOfAbbr } from 'components/PositiveFloatNumInput/numberFormats';
 import TradingPair from 'components/TradingPair';
 import useHippoClient from 'hooks/useHippoClient';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { addDays } from 'utils/utility';
 import styles from './Stats.module.scss';
-import TopList from './TopList';
+import TopList from '../../components/TopList';
 import VolumeChart from './VolumeChart';
 
 const Periods = ['24H', '1 Week'] as const;
@@ -41,11 +41,7 @@ const Stats = () => {
         // eslint-disable-next-line react/jsx-key
         <div className="flex h-[65px] items-center">
           <span className="w-5 body-bold text-grey-700">{index + 1}</span>
-          <div
-            className="cursor-pointer"
-            onClick={() => window.open(poolUrl(pp.dex_type.toJsNumber()), '_blank')}>
-            <PoolProvider dexType={pp.dex_type.toJsNumber()} />
-          </div>
+          <PoolProvider dexType={pp.dex_type.toJsNumber()} />
         </div>,
         // eslint-disable-next-line react/jsx-key
         <>

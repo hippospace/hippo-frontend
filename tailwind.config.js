@@ -33,7 +33,9 @@ module.exports = {
         },
         warn: {
           500: '#FFA24E'
-        }
+        },
+        up: '#29C995',
+        down: '#E96A5C'
       },
       backgroundImage: {
         primeLight: 'linear-gradient(0deg, #F7F5FD 0%, #FDFDFF 100%)',

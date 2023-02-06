@@ -23,7 +23,7 @@ export const numToGrouped = (num: string) => {
 };
 
 export const avoidScientificNotation = (x: number) => {
-  invariant(Math.abs(x) < Number.MAX_SAFE_INTEGER, 'Invalid number range');
+  invariant(Math.abs(x) < Number.MAX_SAFE_INTEGER, 'Invalid number range of ' + x);
   let res = x.toString();
   if (Math.abs(x) < 1.0) {
     const e = parseInt(x.toString().split('e-')[1]);
@@ -73,14 +73,29 @@ export const numberOfAbbr = (amount: number, decimals = 0) => {
 };
 
 export const percent = (
-  v: number,
+  v: number | string,
   maxDecimals: number | undefined = 2,
   hasSign = false
 ): string => {
+  if (typeof v === 'string') {
+    const n = parseFloat(v);
+    if (isNaN(n)) {
+      return v;
+    }
+    v = n;
+  }
   const limitValue = 1 / 10 ** (maxDecimals + 2); // Do use 1 / 10^n rather than 1 / 10^-n
   if (maxDecimals && Math.abs(v) > 0 && Math.abs(v) < limitValue)
     return `${v < 0 ? '> -' : '< '}${percent(limitValue, maxDecimals)}`;
   return (
     (hasSign && v > 0 ? '+' : '') + cutDecimals(avoidScientificNotation(v * 100), maxDecimals) + '%'
   );
+};
+
+export const numberGroupedOrExpontial = (num: number, decimals: number, threshold = 0.01) => {
+  if (num < threshold) {
+    return num.toExponential(decimals);
+  } else {
+    return numberGroupFormat(num, decimals);
+  }
 };

@@ -19,6 +19,9 @@ import { DexType } from '@manahippo/hippo-sdk/dist/aggregator/types';
 interface IPoolProviderProps {
   dexType: AggregatorTypes.DexType;
   className?: string;
+  isTitleEnabled?: boolean;
+  isNameInvisible?: boolean;
+  isClickable?: boolean;
 }
 
 interface IPoolIconProps extends IPoolProviderProps {
@@ -197,11 +200,25 @@ export const PoolIcon: FC<IPoolIconProps> = ({
   );
 };
 
-const PoolProvider: FC<IPoolProviderProps> = ({ dexType, className = '' }) => {
+const PoolProvider: FC<IPoolProviderProps> = ({
+  dexType,
+  className = '',
+  isTitleEnabled = false,
+  isNameInvisible = false,
+  isClickable = true
+}) => {
   return (
-    <div className={classNames('flex items-center h-full', className)}>
-      <PoolIcon dexType={dexType} isTitleEnabled={false} />
-      <span className="body-bold text-grey-700 ml-2">{AggregatorTypes.DexType[dexType]}</span>
+    <div
+      className={classNames(
+        'flex items-center h-full',
+        { 'cursor-pointer': isClickable },
+        className
+      )}
+      onClick={() => isClickable && window.open(poolUrl(dexType), '_blank')}>
+      <PoolIcon dexType={dexType} isTitleEnabled={isTitleEnabled} />
+      {!isNameInvisible && (
+        <span className="body-bold text-grey-700 ml-2">{AggregatorTypes.DexType[dexType]}</span>
+      )}
     </div>
   );
 };

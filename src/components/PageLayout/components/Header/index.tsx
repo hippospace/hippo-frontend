@@ -77,6 +77,12 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
   return (
     <div className="h-full flex flex-col">
       <div className="w-full space-y-4">
+        <Button
+          className={classNames('w-full', { 'hip-btn-selected': currentPageName === 'Home' })}
+          variant={'outlined'}
+          onClick={() => onRoute('/home')}>
+          Home
+        </Button>
         {routes
           .filter((r) => r.path !== '*' && !r.hidden)
           .map(({ name, path }, index) => {
@@ -162,7 +168,7 @@ const PageHeader: React.FC = () => {
             'h-full absolute left-0 top-0 tablet:left-1/2 tablet:-translate-x-1/2'
           )}>
           <Link
-            to="/"
+            to="/home"
             className={classNames('h-full flex items-center justify-center', {
               'tablet:hidden': currentPageName !== 'Home'
             })}>
