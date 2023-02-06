@@ -13,7 +13,7 @@ export type TTransaction = {
   // transactionInfo: Record<string, string | number>;
 };
 
-export interface TokenBalance {
+export interface ITokenBalance {
   token: CoinInfo;
   balance: number;
 }
@@ -22,3 +22,15 @@ export type GeneralRouteAndQuote =
   | IApiRouteAndQuote
   | SplitSingleRouteAndQuote
   | SplitMultiRouteAndQuote;
+
+export enum LpPriceChangePeriod {
+  '6H' = '6H',
+  '1D' = '1D',
+  '7D' = '7D'
+}
+export interface ILpPriceChange {
+  lp: string;
+  dex: string;
+  poolType: number;
+  priceChanges: Record<LpPriceChangePeriod, string>;
+}

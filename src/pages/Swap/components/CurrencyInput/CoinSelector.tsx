@@ -10,7 +10,7 @@ import CoinRow from './CoinRow';
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
 import { CoinListClient, RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
-import { TokenBalance } from 'types/hippo';
+import { ITokenBalance } from 'types/hippo';
 import classNames from 'classnames';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
@@ -109,7 +109,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const setSearchPattern = useCoinSelectorStore((state) => state.setSearchPattern);
 
   const { hippoWallet } = useHippoClient();
-  const [tokenListBalance, setTokenListBalance] = useState<TokenBalance[]>();
+  const [tokenListBalance, setTokenListBalance] = useState<ITokenBalance[]>();
 
   const filterTitles: Filter[] = useMemo(
     () => ['All', 'Native', 'LayerZero', 'Wormhole', 'Celer'],

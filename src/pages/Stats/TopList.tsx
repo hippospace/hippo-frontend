@@ -8,7 +8,7 @@ type Flex = number | string | (number | string)[];
 interface ITopListProps {
   className?: string;
   title: string;
-  cols: string[];
+  cols: string[] | ReactNode[];
   flexs: Flex[];
   datas: ReactNode[][];
 }
@@ -30,7 +30,7 @@ const TopList: FC<ITopListProps> = ({ className, title, cols, flexs, datas }) =>
       <div className="h5">{title}</div>
       <div className="mt-14">
         <div className="flex mb-4 px-4">
-          {cols.map((c: string, i: number) => (
+          {cols.map((c: string | ReactNode, i: number) => (
             <div className="body-bold text-grey-500" key={`col-${i}`} style={{ flex: flex(i) }}>
               {c}
             </div>

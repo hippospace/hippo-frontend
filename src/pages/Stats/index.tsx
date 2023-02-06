@@ -1,8 +1,12 @@
-import { hippo_aggregator } from '@manahippo/hippo-sdk';
+import { AggregatorTypes, hippo_aggregator } from '@manahippo/hippo-sdk';
 import { Segmented, Skeleton } from 'antd';
 import classNames from 'classnames';
 import PoolProvider, { poolUrl } from 'components/PoolProvider';
-import { numberGroupFormat, numberOfAbbr } from 'components/PositiveFloatNumInput/numberFormats';
+import {
+  numberGroupFormat,
+  numberOfAbbr,
+  percent
+} from 'components/PositiveFloatNumInput/numberFormats';
 import TradingPair from 'components/TradingPair';
 import useHippoClient from 'hooks/useHippoClient';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -10,6 +14,8 @@ import { addDays } from 'utils/utility';
 import styles from './Stats.module.scss';
 import TopList from './TopList';
 import VolumeChart from './VolumeChart';
+import useSWR from 'swr';
+import { ILpPriceChange, LpPriceChangePeriod } from 'types/hippo';
 
 const Periods = ['24H', '1 Week'] as const;
 type Peroid = typeof Periods[number];
@@ -22,6 +28,64 @@ const utcDate = (date: Date) => {
 const utcTime = (date: Date) => {
   const dateString = date.toUTCString();
   return dateString.substring(0, dateString.length - 7);
+};
+
+const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
+
+const TopLpPriceChanges = () => {
+  const { hippoAgg } = useHippoClient();
+  const [peroidSelected, setPeriodSelected] = useState(LpPriceChangePeriod['6H']);
+  const key = `https://api.hippo.space/v1/lptracking/all/price/changes/order/by/${peroidSelected}?limit=10`;
+  const { data } = useSWR<ILpPriceChange[]>(key, fetcher);
+  const data2 =
+    data?.map((d, i) => {
+      const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]?.token_type
+        .type;
+      const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]?.token_type
+        .type;
+      return [
+        <PoolProvider
+          className={'h-[65px]'}
+          key={i}
+          dexType={AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType]}
+        />,
+        <>{base && quote && <TradingPair key={i} base={base} quote={quote} seperator={' - '} />}</>,
+        <span key={i} className="body-bold text-grey-700">
+          {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
+        </span>,
+        <span key={i} className="body-bold text-grey-700">
+          {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
+        </span>,
+        <span key={i} className="body-bold text-grey-700">
+          {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
+        </span>
+      ];
+    }) || [];
+
+  const cols = [
+    [LpPriceChangePeriod['6H'], '6H Change (%)', true],
+    [LpPriceChangePeriod['1D'], '1D Change (%)', true],
+    [LpPriceChangePeriod['7D'], '7D Change (%)', false]
+  ].map((a, i) => (
+    <span
+      className={classNames('cursor-pointer', {
+        'text-prime-500': peroidSelected === a[0],
+        'pointer-events-none': !a[2]
+      })}
+      key={i}
+      onClick={() => setPeriodSelected(a[0] as LpPriceChangePeriod)}>
+      {a[1]}
+    </span>
+  ));
+  return (
+    <div className="">
+      <TopList
+        title="Top Lp Prices Change"
+        cols={['Dex', 'LP', ...cols]}
+        flexs={[3, 4, 2, 2, 2]}
+        datas={data2}></TopList>
+    </div>
+  );
 };
 
 const Stats = () => {
@@ -218,6 +282,7 @@ const Stats = () => {
           flexs={[2, 1]}
         />
       </div>
+      <TopLpPriceChanges />
     </div>
   );
 };
