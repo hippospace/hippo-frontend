@@ -2,8 +2,7 @@ import { RawCoinInfo } from '@manahippo/coin-list';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 import invariant from 'tiny-invariant';
-
-const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
+import { fetcher } from 'utils/utility';
 
 const tokenToBinanceSymbol = (t: RawCoinInfo | undefined): string | undefined => {
   const s = t?.symbol;

@@ -2,10 +2,9 @@ import { RawCoinInfo } from '@manahippo/coin-list';
 import { useMemo, useRef } from 'react';
 import useSWRImmutable from 'swr/immutable';
 import { tokensHavingHippoNativePriceHistory } from 'utils/hippo';
+import { fetcher } from 'utils/utility';
 import { useCoingeckoRateHistory } from './useCoingecko';
 import usePrevious from './usePrevious';
-
-const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 
 export interface ITokenNativePrice {
   time_stamp: number;

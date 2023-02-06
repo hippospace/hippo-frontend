@@ -1,13 +1,13 @@
 .checkbox {
   :global {
-    .ant-checkbox-checked {
-      .ant-checkbox-inner {
-        @apply bg-grey-900;
-      }
-    }
     .ant-checkbox {
+      &.ant-checkbox-checked {
+        .ant-checkbox-inner {
+          @apply bg-prime-500 border-prime-500;
+        }
+      }
       .ant-checkbox-inner {
-        @apply border-grey-700;
+        @apply rounded-lg border border-grey-300 w-5 h-5;
       }
     }
   }

@@ -1,0 +1,274 @@
+import { AggregatorTypes } from '@manahippo/hippo-sdk';
+import { Segmented, Spin } from 'antd';
+import Card from 'components/Card';
+import PoolProvider from 'components/PoolProvider';
+import { percent } from 'components/PositiveFloatNumInput/numberFormats';
+import useHippoClient from 'hooks/useHippoClient';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  TooltipProps,
+  XAxis,
+  YAxis
+} from 'recharts';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
+import useSWR from 'swr';
+import { multipleFetcher } from 'utils/utility';
+import TradingPair from 'components/TradingPair';
+import { useIsDarkMode } from 'components/Settings';
+import { openHttpErrorNotification } from 'utils/notifications';
+import CoinIcon from 'components/Coins/CoinIcon';
+import CoinLabel from 'components/Coins/CoinLabel';
+import classNames from 'classnames';
+
+const Periods = ['1 Day', '7 Days', '30 Days'] as const;
+type Period = typeof Periods[number];
+interface IPrice {
+  price: string;
+  ts: string;
+}
+
+const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload }) => {
+  const { hippoAgg } = useHippoClient();
+  if (active && payload && payload.length) {
+    return (
+      <Card className="p-4 z-100 dark:bg-field">
+        <p className="body-medium text-grey-500">{`${payload[0].payload.tsInTooltip}`}</p>
+        {payload
+          .sort((a, b) => (b.value as number) - (a.value as number))
+          .map((p, index) => {
+            if ((p.name as string).includes(':')) {
+              const [dex, lp] = (p.name as string).split(':');
+              const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(lp.split('-')[0])[0]
+                ?.token_type.type;
+              const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(lp.split('-')[1])[0]
+                ?.token_type.type;
+              const dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
+              return (
+                <p key={index} className="flex justify-between items-center py-2">
+                  <PoolProvider
+                    className={'mr-1'}
+                    dexType={dexType}
+                    isNameInvisible={true}
+                    isTitleEnabled={false}
+                  />
+                  {base && quote && (
+                    <div className="mr-2">
+                      <TradingPair base={base} quote={quote} isIconsInvisible={true} isLp={true} />
+                    </div>
+                  )}
+                  <span style={{ color: p.color }} className="ml-auto">
+                    {percent(p.value as unknown as number, 2, true)}
+                  </span>
+                </p>
+              );
+            } else {
+              const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(p.name as string)[0];
+              return (
+                <p key={index} className="flex justify-between items-center py-2">
+                  <CoinIcon className="mr-1" token={coin} />
+                  {coin && <CoinLabel className="mr-2" coin={coin} />}
+                  <span className="mr-2">${p.payload.prices[p.name as string]}</span>
+                  <span style={{ color: p.color }} className="ml-auto">
+                    {percent(p.value as unknown as number, 2, true)}
+                  </span>
+                </p>
+              );
+            }
+          })}
+      </Card>
+    );
+  }
+  return null;
+};
+
+const daysOfPeriod = (p: Period) => {
+  if (p === '1 Day') return 1;
+  if (p === '7 Days') return 7;
+  if (p === '30 Days') return 30;
+};
+
+const YieldChangeChart = ({ coins }: { coins: string[] }) => {
+  const [chartPeriod, setChartPeriod] = useState<Period>('30 Days');
+
+  const keyCoins = useMemo(() => {
+    if (coins.length === 0) return null;
+    return coins.map(
+      (c) =>
+        `https://api.hippo.space/v1/lptracking/${
+          c.includes(':') ? 'lp' : 'coin'
+        }/${encodeURIComponent(c)}/price/change/of/${daysOfPeriod(chartPeriod)}`
+    );
+  }, [chartPeriod, coins]);
+
+  const {
+    data: dataCoins0,
+    error: errorCoins,
+    isLoading
+  } = useSWR<IPrice[][]>(keyCoins, multipleFetcher, {
+    keepPreviousData: true,
+    refreshInterval: 3600_000
+  });
+  useEffect(() => {
+    if (errorCoins) {
+      openHttpErrorNotification(errorCoins);
+    }
+  }, [errorCoins]);
+  const data = dataCoins0?.reduce((pre, cur, index) => {
+    pre[coins[index]] = cur;
+    return pre;
+  }, {} as Record<string, IPrice[]>);
+
+  const dataForChart = useMemo(() => {
+    if (!data) return [];
+    // respond immediately when keys deleted
+    const dataKeys = Object.keys(data).filter((k) => [...coins].includes(k));
+    Object.keys(data).forEach((k) => {
+      if (!dataKeys.includes(k)) {
+        delete data[k];
+      }
+    });
+    const maxLength = Math.max(...Object.values(data).map((d) => d.length), 0);
+    const tses = (() => {
+      for (const value of Object.values(data)) {
+        if (value.length === maxLength) {
+          return value.map((v) => v.ts);
+        }
+      }
+      return [];
+    })();
+    const lps2 = Object.keys(data);
+    const data2: Map<string, ({ percent: number; price: string } | null)[]> = new Map();
+    for (const lp of lps2) {
+      const prices = data[lp];
+      data2.set(lp, [
+        ...new Array(maxLength - prices.length).fill(null),
+        ...prices.map((p) => ({
+          percent: parseFloat(prices[0].price)
+            ? (parseFloat(p.price) - parseFloat(prices[0].price)) / parseFloat(prices[0].price)
+            : 0,
+          price: p.price
+        }))
+      ]);
+    }
+
+    return new Array(maxLength).fill('').map((_, index) => {
+      const p = Array.from(data2.keys()).reduce((pre, cur) => {
+        const prices = data2.get(cur);
+        pre[cur] = (prices && prices[index]?.percent) ?? 0;
+        return pre;
+      }, {} as Record<string, number | null>);
+      const date: Date = new Date(tses[index]);
+      const monthDay = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
+        .getDate()
+        .toString()
+        .padStart(2, '0')}`;
+      const p2 = Object.assign({}, p, {
+        geniueTs: tses[index],
+        ts: monthDay,
+        tsInTooltip: `${monthDay} ${date.getHours().toString().padStart(2, '0')}:${date
+          .getMinutes()
+          .toString()
+          .padStart(2, '0')}`,
+        prices: Array.from(data2.keys()).reduce((pre, cur) => {
+          const prices = data2.get(cur);
+          pre[cur] = (prices && prices[index]?.price) ?? '';
+          return pre;
+        }, {} as Record<string, string>)
+      });
+      return p2;
+    });
+  }, [coins, data]);
+
+  const onSegmentedChange = useCallback((v: string | number) => {
+    setChartPeriod(v as Period);
+  }, []);
+
+  const isDark = useIsDarkMode();
+
+  return (
+    <div className="">
+      <div className="w-full flex justify-end py-8">
+        <Segmented
+          options={Periods as unknown as string[]}
+          value={chartPeriod}
+          size={'middle'}
+          onChange={onSegmentedChange}
+        />
+      </div>
+      <div className="w-full h-[360px] relative">
+        <div
+          className={classNames(
+            'absolute w-full h-full top-0 left-0 flex items-center justify-center bg-grey-100/50 z-20 pointer-events-none',
+            { invisible: !isLoading }
+          )}>
+          <Spin size="large" />
+        </div>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={dataForChart}
+            margin={{
+              top: 0,
+              right: 0,
+              left: 0,
+              bottom: 0
+            }}>
+            <Tooltip
+              cursor={{
+                stroke: isDark ? '#F8F8F8' : '#2D2D2D',
+                strokeDasharray: '2 10',
+                strokeWidth: 2,
+                strokeLinecap: 'round'
+              }}
+              content={<CustomTooltip />}
+            />
+            <XAxis
+              dataKey="ts"
+              axisLine={false}
+              tickLine={false}
+              stroke={'#959595'}
+              minTickGap={40}
+              tickMargin={10}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              stroke={'#959595'}
+              tickFormatter={(v: number) => (v * 100).toFixed(0) + '%'}
+            />
+            {data &&
+              Object.keys(data)
+                .sort(
+                  (a, b) =>
+                    (dataForChart.slice(-1)[0][b] ?? 0) - (dataForChart.slice(-1)[0][a] ?? 0)
+                )
+                .map((lp, index) => {
+                  return (
+                    <Line
+                      key={index}
+                      strokeWidth={index === 0 ? 4 : 2}
+                      type="monotone"
+                      dataKey={lp}
+                      stroke={index % 2 ? '#FE8D88' : '#8D78F7'}
+                      dot={false}
+                      activeDot={{ r: 8, strokeWidth: 0 }}
+                    />
+                  );
+                })}
+            <CartesianGrid
+              strokeDasharray="2 10"
+              vertical={false}
+              stroke="#959595"
+              strokeLinecap="round"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+export default YieldChangeChart;

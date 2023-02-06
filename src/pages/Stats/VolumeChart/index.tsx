@@ -71,7 +71,7 @@ const VolumeChart = ({ data = [] }: { data: VolumeData[] }) => {
           margin={{
             top: 10,
             right: 0,
-            left: 0,
+            left: 10,
             bottom: 40
           }}>
           <CartesianGrid strokeDasharray="2 10" vertical={false} />

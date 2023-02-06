@@ -6,9 +6,10 @@ import Home from 'pages/Home';
 import { useSelector } from 'react-redux';
 import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Stats from 'pages/Stats';
+import YieldPage from 'pages/Yield';
 
 export type TRoute = RouteObject & {
-  name: 'Home' | 'Swap' | '404' | 'Faucet' | 'Stats' | 'Bridge';
+  name: 'Home' | 'Swap' | '404' | 'Faucet' | 'Stats' | 'Bridge' | 'Yield';
   hidden?: boolean; //to hide the visibility in header menu
   type?: 'Page' | 'Button';
 };
@@ -17,6 +18,7 @@ export const routes: TRoute[] = [
   {
     path: 'home',
     name: 'Home',
+    hidden: true,
     element: <Home />
   },
   {
@@ -47,6 +49,11 @@ export const routes: TRoute[] = [
     name: 'Faucet',
     hidden: true,
     element: <Faucet />
+  },
+  {
+    path: 'yield',
+    name: 'Yield',
+    element: <YieldPage />
   },
   {
     path: 'stats',

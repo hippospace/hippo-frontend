@@ -36,3 +36,5 @@ export { ReactComponent as WarningIcon } from './warning.svg';
 export { ReactComponent as LinkIcon } from './link.svg';
 export { ReactComponent as MultiplyIcon } from './multiply.svg';
 export { ReactComponent as PriceChartIcon } from './priceChart.svg';
+export { ReactComponent as GoUp } from './goUp.svg';
+export { ReactComponent as GoDown } from './goDown.svg';

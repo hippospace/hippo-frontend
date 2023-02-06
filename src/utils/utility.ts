@@ -1,4 +1,5 @@
 import { MaybeHexString } from 'aptos';
+import { HttpError } from 'types/hippo';
 
 /** Convert string to hex-encoded utf-8 bytes. */
 export const stringToHex = (text: string) => {
@@ -46,4 +47,23 @@ export const dateFormat = (date: Date) => {
     .padStart(2, '0')}`;
 };
 
-export const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
+export const fetcher = async (url: string | null) => {
+  if (!url) return null;
+  const res = await fetch(url);
+
+  // If the status code is not in the range 200-299,
+  // we still try to parse and throw it.
+  if (!res.ok) {
+    const error = new HttpError('An error occurred while fetching the data.');
+    // Attach extra info to the error object.
+    error.info = await res.json();
+    error.status = res.status;
+    throw error;
+  }
+
+  return res.json();
+};
+
+export const multipleFetcher = (urls: (string | null)[]) => {
+  return Promise.all(urls.map((url) => fetcher(url)));
+};

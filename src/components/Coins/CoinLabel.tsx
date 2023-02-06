@@ -1,6 +1,7 @@
 import { RawCoinInfo } from '@manahippo/coin-list';
 import Tooltip from 'antd/es/tooltip';
 import classNames from 'classnames';
+import { coinBridge } from 'utils/hippo';
 
 const CoinLabel = ({
   coin,
@@ -21,8 +22,7 @@ const CoinLabel = ({
   isShowFullName?: boolean;
   isShowBridge?: boolean;
 }) => {
-  const bridgeArray = coin.extensions.data.find((a) => a[0] === 'bridge');
-  const bridge = (bridgeArray && bridgeArray[1]) ?? '';
+  const bridge = coinBridge(coin);
   return (
     <div className={classNames(className)}>
       <div className="flex w-full items-center">
