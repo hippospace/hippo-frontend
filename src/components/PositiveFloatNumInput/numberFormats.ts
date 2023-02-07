@@ -23,7 +23,7 @@ export const numToGrouped = (num: string) => {
 };
 
 export const avoidScientificNotation = (x: number) => {
-  invariant(Math.abs(x) < Number.MAX_SAFE_INTEGER, 'Invalid number range');
+  invariant(Math.abs(x) < Number.MAX_SAFE_INTEGER, 'Invalid number range of ' + x);
   let res = x.toString();
   if (Math.abs(x) < 1.0) {
     const e = parseInt(x.toString().split('e-')[1]);

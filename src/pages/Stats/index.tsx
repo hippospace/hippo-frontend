@@ -16,6 +16,7 @@ import TopList from './TopList';
 import VolumeChart from './VolumeChart';
 import useSWR from 'swr';
 import { ILpPriceChange, LpPriceChangePeriod } from 'types/hippo';
+import { CaretIcon } from 'resources/icons';
 
 const Periods = ['24H', '1 Week'] as const;
 type Peroid = typeof Periods[number];
@@ -35,7 +36,11 @@ const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 const TopLpPriceChanges = () => {
   const { hippoAgg } = useHippoClient();
   const [peroidSelected, setPeriodSelected] = useState(LpPriceChangePeriod['6H']);
-  const key = `https://api.hippo.space/v1/lptracking/all/price/changes/order/by/${peroidSelected}?limit=10000`;
+  const specifiedDexes = 'Obric,Pontem,Pancake,Aux';
+  const specifiedLps = 'APT-zUSDC,APT-USDC,APT-ceUSDC';
+  const key = `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes/order/by/${peroidSelected}?dexes=${encodeURIComponent(
+    specifiedDexes
+  )}&lps=${encodeURIComponent(specifiedLps)}`;
   const { data } = useSWR<ILpPriceChange[]>(key, fetcher);
   const data2 =
     data
@@ -62,6 +67,9 @@ const TopLpPriceChanges = () => {
             {base && quote && <TradingPair key={i} base={base} quote={quote} seperator={' - '} />}
           </>,
           <span key={i} className="body-bold text-grey-700">
+            {numberGroupFormat(parseFloat(d.latestLpPrice))}
+          </span>,
+          <span key={i} className="body-bold text-grey-700">
             {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
           </span>,
           <span key={i} className="body-bold text-grey-700">
@@ -80,20 +88,22 @@ const TopLpPriceChanges = () => {
   ].map((a, i) => (
     <span
       className={classNames('cursor-pointer', {
-        'text-prime-500': peroidSelected === a[0],
         'pointer-events-none': !a[2]
       })}
       key={i}
       onClick={() => setPeriodSelected(a[0] as LpPriceChangePeriod)}>
-      {a[1]}
+      {a[1]}{' '}
+      <CaretIcon
+        className={classNames('font-icon', { 'text-prime-500': peroidSelected === a[0] })}
+      />
     </span>
   ));
   return (
     <div className="">
       <TopList
         title="Top Lp Prices Change"
-        cols={['Dex', 'LP', ...cols]}
-        flexs={[3, 4, 2, 2, 2]}
+        cols={['Dex', 'LP Name', 'LP Value', ...cols]}
+        flexs={[3, 4, 2, 2, 2, 2]}
         datas={data2}></TopList>
     </div>
   );

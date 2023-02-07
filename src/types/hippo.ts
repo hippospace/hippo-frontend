@@ -32,5 +32,6 @@ export interface ILpPriceChange {
   lp: string;
   dex: string;
   poolType: number;
+  latestLpPrice: string;
   priceChanges: Record<LpPriceChangePeriod, string>;
 }
