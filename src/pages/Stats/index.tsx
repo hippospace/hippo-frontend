@@ -35,32 +35,36 @@ const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 const TopLpPriceChanges = () => {
   const { hippoAgg } = useHippoClient();
   const [peroidSelected, setPeriodSelected] = useState(LpPriceChangePeriod['6H']);
-  const key = `https://api.hippo.space/v1/lptracking/all/price/changes/order/by/${peroidSelected}?limit=10`;
+  const key = `https://api.hippo.space/v1/lptracking/all/price/changes/order/by/${peroidSelected}?limit=10000`;
   const { data } = useSWR<ILpPriceChange[]>(key, fetcher);
   const data2 =
-    data?.map((d, i) => {
-      const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]?.token_type
-        .type;
-      const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]?.token_type
-        .type;
-      return [
-        <PoolProvider
-          className={'h-[65px]'}
-          key={i}
-          dexType={AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType]}
-        />,
-        <>{base && quote && <TradingPair key={i} base={base} quote={quote} seperator={' - '} />}</>,
-        <span key={i} className="body-bold text-grey-700">
-          {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
-        </span>,
-        <span key={i} className="body-bold text-grey-700">
-          {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
-        </span>,
-        <span key={i} className="body-bold text-grey-700">
-          {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
-        </span>
-      ];
-    }) || [];
+    data
+      ?.filter((d) => d.lp.includes('APT') && d.lp.includes('USDC'))
+      ?.map((d, i) => {
+        const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]?.token_type
+          .type;
+        const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]
+          ?.token_type.type;
+        return [
+          <PoolProvider
+            className={'h-[65px]'}
+            key={i}
+            dexType={AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType]}
+          />,
+          <>
+            {base && quote && <TradingPair key={i} base={base} quote={quote} seperator={' - '} />}
+          </>,
+          <span key={i} className="body-bold text-grey-700">
+            {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
+          </span>,
+          <span key={i} className="body-bold text-grey-700">
+            {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
+          </span>,
+          <span key={i} className="body-bold text-grey-700">
+            {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
+          </span>
+        ];
+      }) || [];
 
   const cols = [
     [LpPriceChangePeriod['6H'], '6H Change (%)', true],
