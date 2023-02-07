@@ -38,48 +38,54 @@ const TopLpPriceChanges = () => {
   const [peroidSelected, setPeriodSelected] = useState(LpPriceChangePeriod['6H']);
   const specifiedDexes = 'Obric,Pontem,Pancake,Aux';
   const specifiedLps = 'APT-zUSDC,APT-USDC,APT-ceUSDC';
-  const key = `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes/order/by/${peroidSelected}?dexes=${encodeURIComponent(
+  const key = `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes?dexes=${encodeURIComponent(
     specifiedDexes
   )}&lps=${encodeURIComponent(specifiedLps)}`;
-  const { data } = useSWR<ILpPriceChange[]>(key, fetcher);
-  const data2 =
-    data
-      ?.filter((d) => {
-        const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0];
-        const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0];
-        return (
-          (base?.symbol === 'APT' && quote?.symbol.includes('USDC')) ||
-          (base?.symbol.includes('USDC') && quote?.symbol === 'APT')
-        );
-      })
-      ?.map((d, i) => {
-        const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]?.token_type
-          .type;
-        const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]
-          ?.token_type.type;
-        return [
-          <PoolProvider
-            className={'h-[65px]'}
-            key={i}
-            dexType={AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType]}
-          />,
-          <>
-            {base && quote && <TradingPair key={i} base={base} quote={quote} seperator={' - '} />}
-          </>,
-          <span key={i} className="body-bold text-grey-700">
-            {numberGroupFormat(parseFloat(d.latestLpPrice))}
-          </span>,
-          <span key={i} className="body-bold text-grey-700">
-            {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
-          </span>,
-          <span key={i} className="body-bold text-grey-700">
-            {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
-          </span>,
-          <span key={i} className="body-bold text-grey-700">
-            {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
-          </span>
-        ];
-      }) || [];
+  const { data, error } = useSWR<ILpPriceChange[]>(key, fetcher);
+  const data2 = error
+    ? []
+    : data
+        ?.sort(
+          (a, b) =>
+            parseFloat(b.priceChanges[peroidSelected] ?? '-Infinity') -
+            parseFloat(a.priceChanges[peroidSelected] ?? '-Infinity')
+        )
+        ?.filter((d) => {
+          const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0];
+          const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0];
+          return (
+            (base?.symbol === 'APT' && quote?.symbol.includes('USDC')) ||
+            (base?.symbol.includes('USDC') && quote?.symbol === 'APT')
+          );
+        })
+        ?.map((d, i) => {
+          const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]
+            ?.token_type.type;
+          const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]
+            ?.token_type.type;
+          return [
+            <PoolProvider
+              className={'h-[65px]'}
+              key={i}
+              dexType={AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType]}
+            />,
+            <>
+              {base && quote && <TradingPair key={i} base={base} quote={quote} seperator={' - '} />}
+            </>,
+            <span key={i} className="body-bold text-grey-700">
+              {numberGroupFormat(parseFloat(d.latestLpPrice))}
+            </span>,
+            <span key={i} className="body-bold text-grey-700">
+              {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
+            </span>,
+            <span key={i} className="body-bold text-grey-700">
+              {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
+            </span>,
+            <span key={i} className="body-bold text-grey-700">
+              {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
+            </span>
+          ];
+        }) || [];
 
   const cols = [
     [LpPriceChangePeriod['6H'], '6H Change (%)', true],
