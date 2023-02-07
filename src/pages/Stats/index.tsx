@@ -39,7 +39,14 @@ const TopLpPriceChanges = () => {
   const { data } = useSWR<ILpPriceChange[]>(key, fetcher);
   const data2 =
     data
-      ?.filter((d) => d.lp.includes('APT') && d.lp.includes('USDC'))
+      ?.filter((d) => {
+        const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0];
+        const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0];
+        return (
+          (base?.symbol === 'APT' && quote?.symbol.includes('USDC')) ||
+          (base?.symbol.includes('USDC') && quote?.symbol === 'APT')
+        );
+      })
       ?.map((d, i) => {
         const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]?.token_type
           .type;
