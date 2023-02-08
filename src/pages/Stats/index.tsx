@@ -36,7 +36,7 @@ const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 const TopLpPriceChanges = () => {
   const { hippoAgg } = useHippoClient();
   const [peroidSelected, setPeriodSelected] = useState(LpPriceChangePeriod['6H']);
-  const specifiedDexes = 'Obric,Pontem,Pancake,Aux';
+  const specifiedDexes = 'Obric,Pontem,Pancake,Aux,AnimeSwap,Cetus';
   const specifiedLps = 'APT-zUSDC,APT-USDC,APT-ceUSDC';
   const key = `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes?dexes=${encodeURIComponent(
     specifiedDexes
@@ -88,9 +88,9 @@ const TopLpPriceChanges = () => {
         }) || [];
 
   const cols = [
-    [LpPriceChangePeriod['6H'], '6H Change (%)', true],
-    [LpPriceChangePeriod['1D'], '1D Change (%)', true],
-    [LpPriceChangePeriod['7D'], '7D Change (%)', false]
+    [LpPriceChangePeriod['6H'], '6H Change(%)', true],
+    [LpPriceChangePeriod['1D'], '1D Change(%)', true],
+    [LpPriceChangePeriod['7D'], '7D Change(%)', false]
   ].map((a, i) => (
     <span
       className={classNames('cursor-pointer', {
@@ -108,8 +108,8 @@ const TopLpPriceChanges = () => {
     <div className="">
       <TopList
         title="Top Lp Prices Change"
-        cols={['Dex', 'LP Name', 'LP Value', ...cols]}
-        flexs={[3, 4, 2, 2, 2, 2]}
+        cols={['Dex', 'LP Name', 'LP Value($)', ...cols]}
+        flexs={[2, 3, 2, 2, 2, 2]}
         datas={data2}></TopList>
     </div>
   );
