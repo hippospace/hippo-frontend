@@ -8,22 +8,26 @@ const TradingPair = ({
   base,
   quote,
   isShowBridge = true,
-  seperator
+  seperator,
+  isIconsInvisible = false
 }: {
   base: string;
   quote: string;
   isShowBridge?: boolean;
   seperator?: ReactNode;
+  isIconsInvisible?: boolean;
 }) => {
   const { getTokenInfoByFullName } = useHippoClient();
   const xCoin = getTokenInfoByFullName(base);
   const yCoin = getTokenInfoByFullName(quote);
   return (
     <div className="flex items-center gap-x-2">
-      <div className="flex gap-x-1">
-        <CoinIcon token={xCoin} />
-        <CoinIcon token={yCoin} />
-      </div>
+      {!isIconsInvisible && (
+        <div className="flex gap-x-1">
+          <CoinIcon token={xCoin} />
+          <CoinIcon token={yCoin} />
+        </div>
+      )}
       <div className="items-center flex">
         {xCoin ? (
           <CoinLabel coin={xCoin} isShowBridge={isShowBridge} symbolClassName="text-grey-700" />

@@ -17,6 +17,7 @@ import VolumeChart from './VolumeChart';
 import useSWR from 'swr';
 import { ILpPriceChange, LpPriceChangePeriod } from 'types/hippo';
 import { CaretIcon } from 'resources/icons';
+import { useBreakpoint } from 'hooks/useBreakpoint';
 
 const Periods = ['24H', '1 Week'] as const;
 type Peroid = typeof Periods[number];
@@ -35,82 +36,111 @@ const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 
 const TopLpPriceChanges = () => {
   const { hippoAgg } = useHippoClient();
+  const { isTablet } = useBreakpoint('tablet');
+  const { isMobile } = useBreakpoint('mobile');
   const [peroidSelected, setPeriodSelected] = useState(LpPriceChangePeriod['6H']);
-  const specifiedDexes = 'Obric,Pontem,Pancake,Aux,AnimeSwap,Cetus';
+  const specifiedDexes = 'Obric,Pontem,Pancake,Aux,AnimeSwap,Cetus,Aptoswap';
   const specifiedLps = 'APT-zUSDC,APT-USDC,APT-ceUSDC';
   const key = `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes?dexes=${encodeURIComponent(
     specifiedDexes
   )}&lps=${encodeURIComponent(specifiedLps)}`;
   const { data, error } = useSWR<ILpPriceChange[]>(key, fetcher);
-  const data2 = error
-    ? []
-    : data
-        ?.sort(
-          (a, b) =>
-            parseFloat(b.priceChanges[peroidSelected] ?? '-Infinity') -
-            parseFloat(a.priceChanges[peroidSelected] ?? '-Infinity')
-        )
-        ?.filter((d) => {
-          const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0];
-          const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0];
-          return (
-            (base?.symbol === 'APT' && quote?.symbol.includes('USDC')) ||
-            (base?.symbol.includes('USDC') && quote?.symbol === 'APT')
-          );
-        })
-        ?.map((d, i) => {
-          const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]
-            ?.token_type.type;
-          const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]
-            ?.token_type.type;
-          return [
-            <PoolProvider
-              className={'h-[65px]'}
-              key={i}
-              dexType={AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType]}
-            />,
-            <>
-              {base && quote && <TradingPair key={i} base={base} quote={quote} seperator={' - '} />}
-            </>,
-            <span key={i} className="body-bold text-grey-700">
-              {numberGroupFormat(parseFloat(d.latestLpPrice))}
-            </span>,
-            <span key={i} className="body-bold text-grey-700">
-              {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
-            </span>,
-            <span key={i} className="body-bold text-grey-700">
-              {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
-            </span>,
-            <span key={i} className="body-bold text-grey-700">
-              {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
-            </span>
-          ];
-        }) || [];
+  const data2 = useMemo(
+    () =>
+      error
+        ? []
+        : data
+            ?.sort(
+              (a, b) =>
+                parseFloat(b.priceChanges[peroidSelected] ?? '-Infinity') -
+                parseFloat(a.priceChanges[peroidSelected] ?? '-Infinity')
+            )
+            ?.map((d, i) => {
+              const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]
+                ?.token_type.type;
+              const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]
+                ?.token_type.type;
+              const dexType =
+                AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType];
+              return [
+                <PoolProvider
+                  className={'h-[65px]'}
+                  key={i}
+                  dexType={dexType}
+                  isNameInvisible={isMobile}
+                  isTitleEnabled={isMobile}
+                />,
+                <>
+                  {base && quote && (
+                    <TradingPair
+                      key={i}
+                      base={base}
+                      quote={quote}
+                      seperator={' - '}
+                      isIconsInvisible={isMobile}
+                    />
+                  )}
+                </>,
+                ...(!isTablet
+                  ? [
+                      <span key={i} className="body-bold text-grey-700">
+                        {numberGroupFormat(parseFloat(d.latestLpPrice))}
+                      </span>,
+                      <span key={i} className="body-bold text-grey-700">
+                        {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
+                      </span>
+                    ]
+                  : []),
+                <span key={i} className="body-bold text-grey-700">
+                  {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
+                </span>,
+                <span key={i} className="body-bold text-grey-700">
+                  {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
+                </span>
+              ];
+            }) || [],
+    [data, error, hippoAgg?.coinListClient, isMobile, isTablet, peroidSelected]
+  );
 
-  const cols = [
-    [LpPriceChangePeriod['6H'], '6H Change(%)', true],
-    [LpPriceChangePeriod['1D'], '1D Change(%)', true],
-    [LpPriceChangePeriod['7D'], '7D Change(%)', false]
-  ].map((a, i) => (
-    <span
-      className={classNames('cursor-pointer', {
-        'pointer-events-none': !a[2]
-      })}
-      key={i}
-      onClick={() => setPeriodSelected(a[0] as LpPriceChangePeriod)}>
-      {a[1]}{' '}
-      <CaretIcon
-        className={classNames('font-icon', { 'text-prime-500': peroidSelected === a[0] })}
-      />
-    </span>
-  ));
+  const cols = useMemo(
+    () =>
+      [
+        'Dex',
+        'LP Name',
+        !isTablet ? 'LP Value($)' : undefined,
+        ...[
+          ...(!isTablet ? [[LpPriceChangePeriod['6H'], '6H Change(%)', true]] : []),
+          [LpPriceChangePeriod['1D'], isMobile ? '1D(%)' : '1D Change(%)', true],
+          [LpPriceChangePeriod['7D'], isMobile ? '7D(%)' : '7D Change(%)', false]
+        ].map((a, i) => (
+          <span
+            className={classNames('cursor-pointer', {
+              'pointer-events-none': !a[2]
+            })}
+            key={i}
+            onClick={() => setPeriodSelected(a[0] as LpPriceChangePeriod)}>
+            {a[1]}{' '}
+            <CaretIcon
+              className={classNames('font-icon', { 'text-prime-500': peroidSelected === a[0] })}
+            />
+          </span>
+        ))
+      ].filter((c) => !!c),
+    [isMobile, isTablet, peroidSelected]
+  );
+  const flexs = !isTablet ? [2, 3, 2, 2, 2, 2] : !isMobile ? [2, 3, 2, 2] : [1, 3, 1.5, 1.5];
+
+  useEffect(() => {
+    if (isTablet) {
+      setPeriodSelected(LpPriceChangePeriod['1D']);
+    } else {
+      setPeriodSelected(LpPriceChangePeriod['6H']);
+    }
+  }, [isTablet]);
+
   return (
     <div className="">
-      <TopList
-        title="Top Lp Prices Change"
-        cols={['Dex', 'LP Name', 'LP Value($)', ...cols]}
-        flexs={[2, 3, 2, 2, 2, 2]}
-        datas={data2}></TopList>
+      <TopList title="Top Lp Prices Change" cols={cols} flexs={flexs} datas={data2}></TopList>
     </div>
   );
 };
