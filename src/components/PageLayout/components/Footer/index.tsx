@@ -18,37 +18,37 @@ const Link = ({ href, children }: { href: string; children: any }) => {
       target="_blank"
       rel="noreferrer"
       href={href}
-      className="flex items-center h6 text-grey-900 opacity-50 gap-2 hover:text-grey-900 hover:opacity-100">
+      className="flex items-center h6 text-grey-900 opacity-50 gap-1 hover:text-grey-900 hover:opacity-100">
       {children}
     </a>
   );
 };
 
 const Label = ({ children }: { children: any }) => {
-  return <span className="mobile:hidden">{children}</span>;
+  return <span className="body-bold mobile:hidden">{children}</span>;
 };
 
 const PageFooter: React.FC = () => {
   return (
     <Footer className="flex gap-8 items-center justify-center py-16 bg-transparent z-10">
       <Link href={URLs.discord}>
-        <DiscordIcon className="fill-grey-900" />
+        <DiscordIcon className="scale-[83.33%] origin-center fill-grey-900" />
         <Label>Discord</Label>
       </Link>
       <Link href={URLs.medium}>
-        <MediumIcon className="fill-grey-900" />
+        <MediumIcon className="scale-[83.33%] origin-center fill-grey-900" />
         <Label>Medium</Label>
       </Link>
       <Link href={URLs.twitter}>
-        <TwitterIcon className="fill-grey-900" />
+        <TwitterIcon className="scale-[83.33%] origin-center fill-grey-900" />
         <Label>Twitter</Label>
       </Link>
       <Link href={URLs.github}>
-        <GithubIcon className="fill-grey-900" />
+        <GithubIcon className="scale-[83.33%] origin-center fill-grey-900" />
         <Label>Github</Label>
       </Link>
       <Link href={URLs.docs}>
-        <DocsIcon className="fill-grey-900" />
+        <DocsIcon className="scale-[83.33%] origin-center fill-grey-900" />
         <Label>Docs</Label>
       </Link>
     </Footer>
