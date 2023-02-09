@@ -91,3 +91,11 @@ export const percent = (
     (hasSign && v > 0 ? '+' : '') + cutDecimals(avoidScientificNotation(v * 100), maxDecimals) + '%'
   );
 };
+
+export const numberGroupedOrExpontial = (num: number, decimals: number, threshold = 0.01) => {
+  if (num < threshold) {
+    return num.toExponential(decimals);
+  } else {
+    return numberGroupFormat(num, decimals);
+  }
+};

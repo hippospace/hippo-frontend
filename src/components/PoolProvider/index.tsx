@@ -20,6 +20,7 @@ interface IPoolProviderProps {
   className?: string;
   isTitleEnabled?: boolean;
   isNameInvisible?: boolean;
+  isClickable?: boolean;
 }
 
 interface IPoolIconProps extends IPoolProviderProps {
@@ -200,10 +201,17 @@ const PoolProvider: FC<IPoolProviderProps> = ({
   dexType,
   className = '',
   isTitleEnabled = false,
-  isNameInvisible = false
+  isNameInvisible = false,
+  isClickable = true
 }) => {
   return (
-    <div className={classNames('flex items-center h-full', className)}>
+    <div
+      className={classNames(
+        'flex items-center h-full',
+        { 'cursor-pointer': isClickable },
+        className
+      )}
+      onClick={() => isClickable && window.open(poolUrl(dexType), '_blank')}>
       <PoolIcon dexType={dexType} isTitleEnabled={isTitleEnabled} />
       {!isNameInvisible && (
         <span className="body-bold text-grey-700 ml-2">{AggregatorTypes.DexType[dexType]}</span>

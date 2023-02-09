@@ -1,8 +1,9 @@
 import { AggregatorTypes, hippo_aggregator } from '@manahippo/hippo-sdk';
 import { Segmented, Skeleton } from 'antd';
 import classNames from 'classnames';
-import PoolProvider, { poolUrl } from 'components/PoolProvider';
+import PoolProvider from 'components/PoolProvider';
 import {
+  numberGroupedOrExpontial,
   numberGroupFormat,
   numberOfAbbr,
   percent
@@ -84,7 +85,7 @@ const TopLpPriceChanges = () => {
                 ...(!isTablet
                   ? [
                       <span key={i} className="body-bold text-grey-700">
-                        {numberGroupFormat(parseFloat(d.latestLpPrice))}
+                        {numberGroupedOrExpontial(parseFloat(d.latestLpPrice), 2)}
                       </span>,
                       <span key={i} className="body-bold text-grey-700">
                         {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
@@ -162,11 +163,7 @@ const Stats = () => {
         // eslint-disable-next-line react/jsx-key
         <div className="flex h-[65px] items-center">
           <span className="w-5 body-bold text-grey-700">{index + 1}</span>
-          <div
-            className="cursor-pointer"
-            onClick={() => window.open(poolUrl(pp.dex_type.toJsNumber()), '_blank')}>
-            <PoolProvider dexType={pp.dex_type.toJsNumber()} />
-          </div>
+          <PoolProvider dexType={pp.dex_type.toJsNumber()} />
         </div>,
         // eslint-disable-next-line react/jsx-key
         <>
