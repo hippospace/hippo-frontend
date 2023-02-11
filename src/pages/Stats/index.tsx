@@ -1,7 +1,7 @@
 import { AggregatorTypes, hippo_aggregator } from '@manahippo/hippo-sdk';
 import { Segmented, Skeleton } from 'antd';
 import classNames from 'classnames';
-import PoolProvider from 'components/PoolProvider';
+import PoolProvider, { PoolIcon } from 'components/PoolProvider';
 import {
   numberGroupedOrExpontial,
   numberGroupFormat,
@@ -19,6 +19,9 @@ import useSWR from 'swr';
 import { ILpPriceChange, LpPriceChangePeriod } from 'types/hippo';
 import { CaretIcon } from 'resources/icons';
 import { useBreakpoint } from 'hooks/useBreakpoint';
+import FilterComp from 'components/FilterComp';
+import CoinLabel from 'components/Coins/CoinLabel';
+import CoinIcon from 'components/Coins/CoinIcon';
 
 const Periods = ['24H', '1 Week'] as const;
 type Peroid = typeof Periods[number];
@@ -35,20 +38,119 @@ const utcTime = (date: Date) => {
 
 const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 
+const LpPriceChangesFilter = ({
+  onSelectedUpdate
+}: {
+  onSelectedUpdate: (
+    dexSelected: string[],
+    leftSelected: string[],
+    rightSelected: string[]
+  ) => void;
+}) => {
+  const dexFilterOptions = [
+    AggregatorTypes.DexType.Pancake,
+    AggregatorTypes.DexType.Obric,
+    AggregatorTypes.DexType.Cetus,
+    AggregatorTypes.DexType.Pontem,
+    AggregatorTypes.DexType.Aux,
+    AggregatorTypes.DexType.AnimeSwap,
+    AggregatorTypes.DexType.Aptoswap
+  ]
+    .map((d) => ({
+      key: AggregatorTypes.DEX_TYPE_NAME[d],
+      name: AggregatorTypes.DEX_TYPE_NAME[d],
+      icon: <PoolIcon className="!w-full !h-full" isTitleEnabled={true} dexType={d} />
+    }))
+    .sort((a, b) => (a.name < b.name ? -1 : 1));
+
+  const { hippoAgg } = useHippoClient();
+  const coinOptions = hippoAgg?.coinListClient
+    .getCoinInfoList()
+    .sort((a, b) =>
+      b.official_symbol > a.official_symbol
+        ? -1
+        : b.official_symbol < a.official_symbol
+        ? 1
+        : b.symbol > a.symbol
+        ? -1
+        : 1
+    )
+    .map((c) => ({
+      key: c.symbol,
+      icon: <CoinIcon token={c} isShowSymbol={true} />,
+      name: <CoinLabel coin={c} isShowBridge={true} isShowNonOfficalSymbol={false} />
+    }));
+
+  const [dexesSelected, setDexesSelected] = useState<string[]>([]);
+  const [lpLeftSelected, setLpLeftSelected] = useState<string[]>([]);
+  const [lpRightSelected, setLpRightSelected] = useState<string[]>([]);
+
+  useEffect(() => {
+    onSelectedUpdate(dexesSelected, lpLeftSelected, lpRightSelected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dexesSelected, lpLeftSelected, lpRightSelected]);
+
+  return coinOptions ? (
+    <div className="flex items-center gap-x-4 w-full mt-10">
+      <FilterComp
+        className="flex-1"
+        title="Dex"
+        options={dexFilterOptions}
+        defaultSelected={[
+          'Obric',
+          'Pontem',
+          'Pancake',
+          'Aux',
+          'AnimeSwap',
+          'Cetus',
+          'Aptoswap'
+        ].sort()}
+        onSelectedUpdate={(dexes) => setDexesSelected(dexes)}
+      />
+      <FilterComp
+        className="flex-1"
+        title="LP Left"
+        options={coinOptions}
+        isAllOptionEnabled={true}
+        defaultSelected={['APT']}
+        onSelectedUpdate={(s) => setLpLeftSelected(s)}
+      />
+      <FilterComp
+        className="flex-1"
+        title="LP Right"
+        options={coinOptions}
+        isAllOptionEnabled={true}
+        defaultSelected={['zUSDC', 'USDC', 'ceUSDC']}
+        onSelectedUpdate={(s) => setLpRightSelected(s)}
+      />
+    </div>
+  ) : (
+    <></>
+  );
+};
+
 const TopLpPriceChanges = () => {
   const { hippoAgg } = useHippoClient();
   const { isTablet } = useBreakpoint('tablet');
   const { isMobile } = useBreakpoint('mobile');
   const [peroidSelected, setPeriodSelected] = useState(LpPriceChangePeriod['6H']);
-  const specifiedDexes = 'Obric,Pontem,Pancake,Aux,AnimeSwap,Cetus,Aptoswap';
-  const specifiedLps = 'APT-zUSDC,APT-USDC,APT-ceUSDC';
-  const key = `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes?dexes=${encodeURIComponent(
-    specifiedDexes
-  )}&lps=${encodeURIComponent(specifiedLps)}`;
-  const { data, error } = useSWR<ILpPriceChange[]>(key, fetcher);
+  const [dexes, setDexes] = useState<string[]>([]);
+  const [lpLefts, setLpLefts] = useState<string[]>([]);
+  const [lpRights, setLpRights] = useState<string[]>([]);
+  const key =
+    lpLefts.length && lpRights.length && dexes.length
+      ? `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes?dexes=${encodeURIComponent(
+          dexes.join(',')
+        )}&lpLefts=${encodeURIComponent(lpLefts.join(','))}&lpRights=${encodeURIComponent(
+          lpRights.join(',')
+        )}`
+      : null;
+  const { data, error } = useSWR<ILpPriceChange[]>(key, fetcher, {
+    keepPreviousData: true
+  });
   const data2 = useMemo(
     () =>
-      error
+      error || !key
         ? []
         : data
             ?.sort(
@@ -100,13 +202,13 @@ const TopLpPriceChanges = () => {
                 </span>
               ];
             }) || [],
-    [data, error, hippoAgg?.coinListClient, isMobile, isTablet, peroidSelected]
+    [data, error, hippoAgg?.coinListClient, isMobile, isTablet, key, peroidSelected]
   );
 
   const cols = useMemo(
     () =>
       [
-        'Dex',
+        '# Dex',
         'LP Name',
         !isTablet ? 'LP Value($)' : undefined,
         ...[
@@ -140,9 +242,20 @@ const TopLpPriceChanges = () => {
   }, [isTablet]);
 
   return (
-    <div className="">
-      <TopList title="Top Lp Prices Change" cols={cols} flexs={flexs} datas={data2}></TopList>
-    </div>
+    <TopList
+      title="Top Lp Prices Change"
+      cols={cols}
+      flexs={flexs}
+      datas={data2}
+      subTitle={
+        <LpPriceChangesFilter
+          onSelectedUpdate={(dexesSelected, lpL, lpR) => {
+            setDexes(dexesSelected);
+            setLpLefts(lpL);
+            setLpRights(lpR);
+          }}
+        />
+      }></TopList>
   );
 };
 
@@ -336,7 +449,10 @@ const Stats = () => {
           flexs={[2, 1]}
         />
       </div>
-      <TopLpPriceChanges />
+      {/* min h is for filter popups */}
+      <div className="min-h-[400px]">
+        <TopLpPriceChanges />
+      </div>
     </div>
   );
 };

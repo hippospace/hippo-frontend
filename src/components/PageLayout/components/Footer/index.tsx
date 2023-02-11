@@ -30,7 +30,7 @@ const Label = ({ children }: { children: any }) => {
 
 const PageFooter: React.FC = () => {
   return (
-    <Footer className="flex gap-8 items-center justify-center py-16 bg-transparent z-10">
+    <Footer className="flex gap-8 items-center justify-center py-16 bg-transparent z-1">
       <Link href={URLs.discord}>
         <DiscordIcon className="fill-grey-900" />
         <Label>Discord</Label>

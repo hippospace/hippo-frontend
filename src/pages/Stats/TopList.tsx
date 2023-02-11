@@ -11,9 +11,10 @@ interface ITopListProps {
   cols: string[] | ReactNode[];
   flexs: Flex[];
   datas: ReactNode[][];
+  subTitle?: ReactNode;
 }
 
-const TopList: FC<ITopListProps> = ({ className, title, cols, flexs, datas }) => {
+const TopList: FC<ITopListProps> = ({ className, title, cols, flexs, datas, subTitle }) => {
   const flex = useCallback(
     (i: number) => {
       if (!Array.isArray(flexs[i])) {
@@ -28,6 +29,7 @@ const TopList: FC<ITopListProps> = ({ className, title, cols, flexs, datas }) =>
   return (
     <div className={classNames(className)}>
       <div className="h5">{title}</div>
+      {subTitle}
       <div className="mt-14">
         <div className="flex mb-4 px-4">
           {cols.map((c: string | ReactNode, i: number) => (
@@ -36,22 +38,28 @@ const TopList: FC<ITopListProps> = ({ className, title, cols, flexs, datas }) =>
             </div>
           ))}
         </div>
-        {datas.length > 0 ? (
-          <div className="space-y-2">
-            {datas.map((dr, index: number) => {
-              return (
-                <Card className="flex items-center px-4" key={`row-${index}`}>
-                  {dr.map((c, i) => {
-                    return (
-                      <div style={{ flex: flex(i) }} key={`item-${i}`}>
-                        {c}
-                      </div>
-                    );
-                  })}
-                </Card>
-              );
-            })}
-          </div>
+        {datas ? (
+          datas.length > 0 ? (
+            <div className="space-y-2">
+              {datas.map((dr, index: number) => {
+                return (
+                  <Card className="flex items-center px-4" key={`row-${index}`}>
+                    {dr.map((c, i) => {
+                      return (
+                        <div style={{ flex: flex(i) }} key={`item-${i}`}>
+                          {c}
+                        </div>
+                      );
+                    })}
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="w-full h-[200px] h5 flex items-center justify-center text-grey-500">
+              No data
+            </div>
+          )
         ) : (
           <Skeleton active />
         )}
