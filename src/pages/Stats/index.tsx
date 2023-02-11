@@ -22,6 +22,7 @@ import { useBreakpoint } from 'hooks/useBreakpoint';
 import FilterComp from 'components/FilterComp';
 import CoinLabel from 'components/Coins/CoinLabel';
 import CoinIcon from 'components/Coins/CoinIcon';
+import useDebounceValue from 'hooks/useDebounceValue';
 
 const Periods = ['24H', '1 Week'] as const;
 type Peroid = typeof Periods[number];
@@ -91,9 +92,9 @@ const LpPriceChangesFilter = ({
   }, [dexesSelected, lpLeftSelected, lpRightSelected]);
 
   return coinOptions ? (
-    <div className="flex items-center gap-x-4 w-full mt-10">
+    <div className="w-full flex tablet:flex-col tablet:gap-y-4 items-center gap-x-4 mt-10">
       <FilterComp
-        className="flex-1"
+        className="w-full flex-1"
         title="Dex"
         options={dexFilterOptions}
         defaultSelected={[
@@ -108,7 +109,7 @@ const LpPriceChangesFilter = ({
         onSelectedUpdate={(dexes) => setDexesSelected(dexes)}
       />
       <FilterComp
-        className="flex-1"
+        className="w-full flex-1"
         title="LP Left"
         options={coinOptions}
         isAllOptionEnabled={true}
@@ -116,7 +117,7 @@ const LpPriceChangesFilter = ({
         onSelectedUpdate={(s) => setLpLeftSelected(s)}
       />
       <FilterComp
-        className="flex-1"
+        className="w-full flex-1"
         title="LP Right"
         options={coinOptions}
         isAllOptionEnabled={true}
@@ -137,14 +138,17 @@ const TopLpPriceChanges = () => {
   const [dexes, setDexes] = useState<string[]>([]);
   const [lpLefts, setLpLefts] = useState<string[]>([]);
   const [lpRights, setLpRights] = useState<string[]>([]);
-  const key =
-    lpLefts.length && lpRights.length && dexes.length
-      ? `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes?dexes=${encodeURIComponent(
-          dexes.join(',')
-        )}&lpLefts=${encodeURIComponent(lpLefts.join(','))}&lpRights=${encodeURIComponent(
-          lpRights.join(',')
-        )}`
-      : null;
+  const debouncedValue = useDebounceValue(
+    [dexes.join(','), lpLefts.join(','), lpRights.join(',')],
+    1000
+  );
+  const key = debouncedValue.every((v: string) => !!v)
+    ? `https://api.hippo.space/v1/lptracking/lp/filtered/price/changes?dexes=${encodeURIComponent(
+        debouncedValue[0]
+      )}&lpLefts=${encodeURIComponent(debouncedValue[1])}&lpRights=${encodeURIComponent(
+        debouncedValue[2]
+      )}`
+    : null;
   const { data, error } = useSWR<ILpPriceChange[]>(key, fetcher, {
     keepPreviousData: true
   });
