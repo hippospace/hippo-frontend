@@ -11,7 +11,7 @@ import {
 import TradingPair from 'components/TradingPair';
 import useHippoClient from 'hooks/useHippoClient';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { addDays } from 'utils/utility';
+import { addDays, fetcher } from 'utils/utility';
 import styles from './Stats.module.scss';
 import TopList from './TopList';
 import VolumeChart from './VolumeChart';
@@ -36,8 +36,6 @@ const utcTime = (date: Date) => {
   const dateString = date.toUTCString();
   return dateString.substring(0, dateString.length - 7);
 };
-
-const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());
 
 const LpPriceChangesFilter = ({
   onSelectedUpdate
@@ -149,64 +147,61 @@ const TopLpPriceChanges = () => {
         debouncedValue[2]
       )}`
     : null;
-  const { data, error } = useSWR<ILpPriceChange[]>(key, fetcher, {
+  const { data } = useSWR<ILpPriceChange[]>(key, fetcher, {
     keepPreviousData: true
   });
   const data2 = useMemo(
     () =>
-      error || !key
-        ? []
-        : data
-            ?.sort(
-              (a, b) =>
-                parseFloat(b.priceChanges[peroidSelected] ?? '-Infinity') -
-                parseFloat(a.priceChanges[peroidSelected] ?? '-Infinity')
-            )
-            ?.map((d, i) => {
-              const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]
-                ?.token_type.type;
-              const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]
-                ?.token_type.type;
-              const dexType =
-                AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType];
-              return [
-                <PoolProvider
-                  className={'h-[65px]'}
+      data
+        ?.sort(
+          (a, b) =>
+            parseFloat(b.priceChanges[peroidSelected] ?? '-Infinity') -
+            parseFloat(a.priceChanges[peroidSelected] ?? '-Infinity')
+        )
+        ?.map((d, i) => {
+          const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[0])[0]
+            ?.token_type.type;
+          const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.lp.split('-')[1])[0]
+            ?.token_type.type;
+          const dexType = AggregatorTypes.DexType[d.dex as keyof typeof AggregatorTypes.DexType];
+          return [
+            <PoolProvider
+              className={'h-[65px]'}
+              key={i}
+              dexType={dexType}
+              isNameInvisible={isMobile}
+              isTitleEnabled={isMobile}
+            />,
+            <>
+              {base && quote && (
+                <TradingPair
                   key={i}
-                  dexType={dexType}
-                  isNameInvisible={isMobile}
-                  isTitleEnabled={isMobile}
-                />,
-                <>
-                  {base && quote && (
-                    <TradingPair
-                      key={i}
-                      base={base}
-                      quote={quote}
-                      seperator={' - '}
-                      isIconsInvisible={isMobile}
-                    />
-                  )}
-                </>,
-                ...(!isTablet
-                  ? [
-                      <span key={i} className="body-bold text-grey-700">
-                        {numberGroupedOrExpontial(parseFloat(d.latestLpPrice), 2)}
-                      </span>,
-                      <span key={i} className="body-bold text-grey-700">
-                        {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
-                      </span>
-                    ]
-                  : []),
-                <span key={i} className="body-bold text-grey-700">
-                  {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
-                </span>,
-                <span key={i} className="body-bold text-grey-700">
-                  {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
-                </span>
-              ];
-            }) || [],
-    [data, error, hippoAgg?.coinListClient, isMobile, isTablet, key, peroidSelected]
+                  base={base}
+                  quote={quote}
+                  seperator={' - '}
+                  isIconsInvisible={isMobile}
+                />
+              )}
+            </>,
+            ...(!isTablet
+              ? [
+                  <span key={i} className="body-bold text-grey-700">
+                    {numberGroupedOrExpontial(parseFloat(d.latestLpPrice), 2)}
+                  </span>,
+                  <span key={i} className="body-bold text-grey-700">
+                    {percent(d.priceChanges[LpPriceChangePeriod['6H']] ?? '-')}
+                  </span>
+                ]
+              : []),
+            <span key={i} className="body-bold text-grey-700">
+              {percent(d.priceChanges[LpPriceChangePeriod['1D']] ?? '-')}
+            </span>,
+            <span key={i} className="body-bold text-grey-700">
+              {percent(d.priceChanges[LpPriceChangePeriod['7D']] ?? '-')}
+            </span>
+          ];
+        }),
+    [data, hippoAgg?.coinListClient, isMobile, isTablet, peroidSelected]
   );
 
   const cols = useMemo(

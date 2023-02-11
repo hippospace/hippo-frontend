@@ -10,7 +10,7 @@ interface ITopListProps {
   title: string;
   cols: string[] | ReactNode[];
   flexs: Flex[];
-  datas: ReactNode[][];
+  datas: ReactNode[][] | undefined;
   subTitle?: ReactNode;
 }
 

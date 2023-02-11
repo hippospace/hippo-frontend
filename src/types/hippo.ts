@@ -35,3 +35,9 @@ export interface ILpPriceChange {
   latestLpPrice: string;
   priceChanges: Record<LpPriceChangePeriod, string>;
 }
+
+export class HttpError extends Error {
+  status: number | undefined;
+
+  info: any | undefined;
+}

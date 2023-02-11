@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import Card from 'components/Card';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Transition } from 'react-transition-group';
 import { CaretIcon, CheckIcon } from 'resources/icons';
 
 export interface IFilterOption {
@@ -121,11 +122,26 @@ export const IconMultipleSelector = ({
   }
 
   const { isTablet } = useBreakpoint('tablet');
+  const nodeRef = useRef(null);
+
+  const duration = 30;
+  const defaultStyle = {
+    transition: `opacity ${duration}ms ease-in-out`,
+    opacity: 0
+  };
+
+  const transitionStyles = {
+    entering: { opacity: 1 },
+    entered: { opacity: 1 },
+    exiting: { opacity: 0 },
+    exited: { opacity: 0 },
+    unmounted: {}
+  };
 
   return (
     <div
       className={classNames(
-        'bg-surface rounded-full relative body-bold text-grey-700 shadow-main cursor-pointer',
+        'bg-surface rounded-full relative body-bold text-grey-700 shadow-main cursor-pointer z-10',
         className
       )}>
       <div
@@ -155,13 +171,35 @@ export const IconMultipleSelector = ({
           <CaretIcon className="font-icon text-grey-300 label-small-thin" />
         </span>
       </div>
-      {!isTablet && isPopupVisible && (
+      {!isTablet && (
+        <Transition
+          nodeRef={nodeRef}
+          in={isPopupVisible}
+          timeout={duration}
+          mountOnEnter
+          unmountOnExit>
+          {(state) => (
+            <div
+              className="top-[52px] left-0 absolute"
+              ref={nodeRef}
+              style={{
+                ...defaultStyle,
+                ...transitionStyles[state]
+              }}>
+              <Card className="hip-filter-popup shadow-subTitle max-h-[400px] overflow-auto scrollbar">
+                {content}
+              </Card>
+            </div>
+          )}
+        </Transition>
+      )}
+      {/* !isTablet && isPopupVisible && (
         <div onClick={() => (isCardClicked.current = true)}>
           <Card className="hip-filter-popup absolute z-50 top-[52px] left-0 shadow-subTitle max-h-[400px] overflow-auto scrollbar">
             {content}
           </Card>
         </div>
-      )}
+      ) */}
       {isTablet && (
         <Drawer
           closable={false}

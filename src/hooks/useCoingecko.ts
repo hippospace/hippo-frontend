@@ -1,15 +1,7 @@
 import { RawCoinInfo } from '@manahippo/coin-list';
-import PromiseThrottle from 'promise-throttle';
 import { useMemo } from 'react';
 import useSWR from 'swr';
-
-const promiseThrottle = new PromiseThrottle({
-  requestsPerSecond: Infinity,
-  promiseImplementation: Promise
-});
-
-const fetcher = (apiURL: string) =>
-  promiseThrottle.add(() => fetch(apiURL).then((res) => res.json()));
+import { fetcher } from 'utils/utility';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onErrorRetry = (error: any /*, key, config, revalidate, { retryCount } */) => {
