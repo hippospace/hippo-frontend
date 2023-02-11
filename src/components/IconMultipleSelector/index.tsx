@@ -108,10 +108,18 @@ export const IconMultipleSelector = ({
 
   const selectedContainerRef = useRef<HTMLDivElement>(null);
   const [iconsPositions, setIconsPositions] = useState(Infinity);
-  useEffect(() => {
+  const setIconsPositionsCallback = useCallback(() => {
     if (selectedContainerRef.current && selectedContainerRef.current.offsetWidth) {
       setIconsPositions(Math.floor((selectedContainerRef.current.offsetWidth + 8) / 32));
     }
+  }, []);
+  useEffect(() => {
+    setIconsPositionsCallback();
+    window.addEventListener('resize', setIconsPositionsCallback);
+    return () => {
+      window.removeEventListener('resize', setIconsPositionsCallback);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   let selectedArray = Array.from(selected);
