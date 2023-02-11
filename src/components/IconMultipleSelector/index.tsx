@@ -1,5 +1,7 @@
+import { Drawer } from 'antd';
 import classNames from 'classnames';
 import Card from 'components/Card';
+import { useBreakpoint } from 'hooks/useBreakpoint';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CaretIcon, CheckIcon } from 'resources/icons';
 
@@ -9,7 +11,7 @@ export interface IFilterOption {
   key: string;
 }
 
-export const FilterComp = ({
+export const IconMultipleSelector = ({
   title,
   className,
   options,
@@ -67,7 +69,7 @@ export const FilterComp = ({
 
   const content = useMemo(() => {
     return (
-      <div className="p-2 w-64 space-y-1 rounded-xxl">
+      <div className="p-2 w-64 tablet:w-full space-y-1 rounded-xxl">
         {isAllOptionEnabled && (
           <div
             onClick={onAllClicked}
@@ -88,7 +90,7 @@ export const FilterComp = ({
               key={i}
               onClick={() => onOptionClicked(o.key)}
               className={classNames(
-                'flex items-center rounded-xxl py-1 px-2 cursor-pointer hover:bg-prime-100',
+                'flex w-full items-center rounded-xxl py-1 px-2 cursor-pointer hover:bg-prime-100',
                 {
                   'bg-prime-100': isSelected
                 }
@@ -117,6 +119,8 @@ export const FilterComp = ({
     moreIcons = selectedArray.length - iconsPositions + 1;
     selectedArray = selectedArray.slice(0, iconsPositions - 1);
   }
+
+  const { isTablet } = useBreakpoint('tablet');
 
   return (
     <div
@@ -151,15 +155,26 @@ export const FilterComp = ({
           <CaretIcon className="font-icon text-grey-300 label-small-thin" />
         </span>
       </div>
-      {isPopupVisible && (
+      {!isTablet && isPopupVisible && (
         <div onClick={() => (isCardClicked.current = true)}>
           <Card className="hip-filter-popup absolute z-50 top-[52px] left-0 shadow-subTitle max-h-[400px] overflow-auto scrollbar">
             {content}
           </Card>
         </div>
       )}
+      {isTablet && (
+        <Drawer
+          closable={false}
+          title={`Select ${title}`}
+          height={'80vh'}
+          placement={'bottom'}
+          onClose={() => setIsPopupVisible(false)}
+          visible={isPopupVisible}>
+          <div onClick={() => (isCardClicked.current = true)}>{content}</div>
+        </Drawer>
+      )}
     </div>
   );
 };
 
-export default FilterComp;
+export default IconMultipleSelector;

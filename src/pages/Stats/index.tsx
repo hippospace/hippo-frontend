@@ -19,7 +19,7 @@ import useSWR from 'swr';
 import { ILpPriceChange, LpPriceChangePeriod } from 'types/hippo';
 import { CaretIcon } from 'resources/icons';
 import { useBreakpoint } from 'hooks/useBreakpoint';
-import FilterComp from 'components/FilterComp';
+import IconMultipleSelector from 'components/IconMultipleSelector';
 import CoinLabel from 'components/Coins/CoinLabel';
 import CoinIcon from 'components/Coins/CoinIcon';
 import useDebounceValue from 'hooks/useDebounceValue';
@@ -93,7 +93,7 @@ const LpPriceChangesFilter = ({
 
   return coinOptions ? (
     <div className="w-full flex tablet:flex-col tablet:gap-y-4 items-center gap-x-4 mt-10">
-      <FilterComp
+      <IconMultipleSelector
         className="w-full flex-1"
         title="Dex"
         options={dexFilterOptions}
@@ -108,7 +108,7 @@ const LpPriceChangesFilter = ({
         ].sort()}
         onSelectedUpdate={(dexes) => setDexesSelected(dexes)}
       />
-      <FilterComp
+      <IconMultipleSelector
         className="w-full flex-1"
         title="LP Left"
         options={coinOptions}
@@ -116,7 +116,7 @@ const LpPriceChangesFilter = ({
         defaultSelected={['APT']}
         onSelectedUpdate={(s) => setLpLeftSelected(s)}
       />
-      <FilterComp
+      <IconMultipleSelector
         className="w-full flex-1"
         title="LP Right"
         options={coinOptions}
