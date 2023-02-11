@@ -189,6 +189,7 @@ export const IconMultipleSelector = ({
           {(state) => (
             <div
               className="top-[52px] left-0 absolute"
+              onClick={() => (isCardClicked.current = true)}
               ref={nodeRef}
               style={{
                 ...defaultStyle,
