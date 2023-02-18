@@ -34,6 +34,8 @@ import PriceChart from './PriceChart';
 import { CSSTransition } from 'react-transition-group';
 import './TokenSwap.scss';
 import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
+import swapAction from 'modules/swap/actions';
+import { useDispatch } from 'react-redux';
 
 interface IRoutesProps {
   className?: string;
@@ -432,6 +434,12 @@ const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
   const { hippoAgg, simulateSwapByRoute } = useHippoClient();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(swapAction.SET_SWAP_SETTING(values));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values]);
 
   const fromToken = values.currencyFrom?.token;
   const toToken = values.currencyTo?.token;

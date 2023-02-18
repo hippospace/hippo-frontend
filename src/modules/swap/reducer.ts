@@ -18,9 +18,10 @@ export const initState: SwapState = {
   error: null,
   tokenList: [],
   swapSettings: {
-    slipTolerance: 1,
+    slipTolerance: 0.5,
     trasactionDeadline: 60,
     maxGasFee: 20000,
+    quoteChosen: undefined,
     currencyFrom: {
       token: undefined,
       amount: undefined,

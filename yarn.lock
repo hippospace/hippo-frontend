@@ -2220,6 +2220,16 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@strikeentco/get@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@strikeentco/get/-/get-1.0.1.tgz#2188a0b00c0e2cb3bb6bdf25c400134c98619057"
+  integrity sha512-qPnoWkt7xxcOaUJhMveDHmj6INVKHXUEsPTGz3g4HC5XNnqRd1dDEFxL1KpG+vZ2VxmRK42EjBt5vUDr4uLzQQ==
+
+"@strikeentco/set@^1.0.0":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@strikeentco/set/-/set-1.0.2.tgz#cd657290ab86d4d7fd9b7c09b19c5eb4680954f0"
+  integrity sha512-jP/wGhBi70RoD2Ww2bd3Ay4nzKfyWSPL/sDgFaq2e/FXNC9a04R0M7fuDVHG/dG+WWNVj2pmE9exXn20a0AjGg==
+
 "@surma/rollup-plugin-off-main-thread@^2.2.3":
   version "2.2.3"
   resolved "https://registry.npmjs.org/@surma/rollup-plugin-off-main-thread/-/rollup-plugin-off-main-thread-2.2.3.tgz"
@@ -2718,6 +2728,11 @@
   integrity sha512-Cf63Rv7jCQ0LaL8tNXmEyqTHuIJxRdlS5vMh1mj5voN4+QFhVZnlZruezqpWYDiJ8UTzhP0VmeLXCmBk66YrMQ==
   dependencies:
     "@types/node" "*"
+
+"@types/pick-deep@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/pick-deep/-/pick-deep-1.0.0.tgz#a45dc74aeb0d6d4ad2d1924ca8eb81f9fc370dcc"
+  integrity sha512-GvTYFJzma8jLSPYwB76wS45fZpxuIdXmAZgrMTQhg0fFXskaAz6ZshS1r/RBdjVHj37T+sWPjpDuD6fJYkDVoQ==
 
 "@types/prettier@^2.1.5":
   version "2.7.0"
@@ -9014,6 +9029,14 @@ performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/performance-now/-/performance-now-2.1.0.tgz"
   integrity sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==
+
+pick-deep@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/pick-deep/-/pick-deep-1.0.0.tgz#fdacd465d0ddfa23e10366f4afa61c3aa1d1d74e"
+  integrity sha512-Uy0VUtabou1sPl/vVClBFrWi4Ae/D3Vqu44FJawmm4lnduu5E16ykw8kh15fiUeLQ6lbmXQ0EMr3YIsqpLZl+A==
+  dependencies:
+    "@strikeentco/get" "^1.0.0"
+    "@strikeentco/set" "^1.0.0"
 
 picocolors@^0.2.1:
   version "0.2.1"

@@ -21,11 +21,34 @@ import {
 } from '@manahippo/aptos-wallet-adapter';
 import { useMemo } from 'react';
 import { openErrorNotification } from 'utils/notifications';
+import pickDeep from 'pick-deep';
+import debounce from 'lodash/debounce';
 
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
 
+const REDUX_PERSIST_KEY = 'redux-state';
+const loadReduxSavedState = () => {
+  try {
+    const item = localStorage.getItem(REDUX_PERSIST_KEY);
+    if (!item) return undefined;
+    return JSON.parse(item);
+  } catch {
+    return undefined;
+  }
+};
+const saveReduxState = debounce(<T extends object>(state: T, paths: string[]) => {
+  try {
+    const stateToSave = pickDeep(state, paths);
+    console.log('Saving redux...');
+    localStorage.setItem(REDUX_PERSIST_KEY, JSON.stringify(stateToSave));
+  } catch {
+    // do nothing
+  }
+}, 2000);
+
 export const store = configureStore({
   reducer,
+  preloadedState: loadReduxSavedState(),
   devTools: isDevelopmentMode,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -34,6 +57,14 @@ export const store = configureStore({
         ignoredPaths: ['connection']
       }
     }).concat(isDevelopmentMode ? [logger] : [])
+});
+
+store.subscribe(() => {
+  saveReduxState(store.getState(), [
+    'swap.swapSettings.slipTolerance',
+    'swap.swapSettings.trasactionDeadline',
+    'swap.swapSettings.maxGasFee'
+  ]);
 });
 
 type TProps = {

@@ -47,6 +47,7 @@
     "no-unused-vars": ["error", { "vars": "all", "args": "none", "ignoreRestSiblings": true }],
     "@typescript-eslint/comma-dangle": 0,
     "@typescript-eslint/no-use-before-define": 0,
-    "@typescript-eslint/indent": 0
+    "@typescript-eslint/indent": 0,
+    "@typescript-eslint/quotes": 0
   }
 }
