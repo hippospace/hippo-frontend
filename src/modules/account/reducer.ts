@@ -6,7 +6,7 @@ interface AccountState {
   selectedAccount: null | { address: string };
 }
 
-const initState: AccountState = {
+export const initState: AccountState = {
   selectedAccount: null
 };
 

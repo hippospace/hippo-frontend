@@ -2,7 +2,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { logger } from 'redux-logger';
 import { ErrorBoundary } from 'components';
-import reducer from 'modules/rootReducer';
+import reducer, { initRootState } from 'modules/rootReducer';
 import { AptosWalletProvider } from 'contexts/AptosWalletProvider';
 import { HippoClientProvider } from 'contexts/HippoClientProvider';
 import {
@@ -23,6 +23,7 @@ import { useMemo } from 'react';
 import { openErrorNotification } from 'utils/notifications';
 import pickDeep from 'pick-deep';
 import debounce from 'lodash/debounce';
+import merge from 'lodash/merge';
 
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
 
@@ -39,16 +40,19 @@ const loadReduxSavedState = () => {
 const saveReduxState = debounce(<T extends object>(state: T, paths: string[]) => {
   try {
     const stateToSave = pickDeep(state, paths);
-    console.log('Saving redux...');
+    // console.log('Saving redux...');
     localStorage.setItem(REDUX_PERSIST_KEY, JSON.stringify(stateToSave));
   } catch {
     // do nothing
   }
-}, 2000);
+}, 1000);
+
+// fix: saved state without merging initial state would break formik without errors thrown
+const preloadedState = merge({}, initRootState, loadReduxSavedState());
 
 export const store = configureStore({
   reducer,
-  preloadedState: loadReduxSavedState(),
+  preloadedState,
   devTools: isDevelopmentMode,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

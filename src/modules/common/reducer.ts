@@ -8,7 +8,7 @@ interface CommonState {
   isResourcesNotFound: boolean;
 }
 
-const initState: CommonState = {
+export const initState: CommonState = {
   layoutHeight: 0,
   showWalletConnector: false,
   isResourcesNotFound: false

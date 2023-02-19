@@ -2,8 +2,6 @@ import { useFormikContext } from 'formik';
 import { ISwapSettings } from 'pages/Swap/types';
 import Button from 'components/Button';
 import { ReactNode, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import swapAction from 'modules/swap/actions';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import classNames from 'classnames';
 import { initState as swapInitState } from 'modules/swap/reducer';
@@ -47,13 +45,11 @@ const Selectable = ({
 const SwapSetting: React.FC<TProps> = ({ onClose }) => {
   const slippageOptions = [0.5, 1, 2];
 
-  const dispatch = useDispatch();
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
 
   const onConfirm = useCallback(() => {
-    dispatch(swapAction.SET_SWAP_SETTING(values));
     onClose();
-  }, [onClose, values, dispatch]);
+  }, [onClose]);
 
   const onResetSwapSetting = useCallback(() => {
     setFieldValue('slipTolerance', swapInitState.swapSettings.slipTolerance);

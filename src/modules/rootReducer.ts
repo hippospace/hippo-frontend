@@ -10,3 +10,9 @@ const rootReducer = combineReducers({
 });
 export default rootReducer;
 export type RootState = ReturnType<typeof rootReducer>;
+
+export const initRootState = {
+  account: account.initState,
+  swap: swap.initState,
+  common: common.initState
+};

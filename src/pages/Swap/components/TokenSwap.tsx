@@ -154,8 +154,19 @@ const CardHeader = ({
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   const { isTablet } = useBreakpoint('tablet');
   const [isPriceChartOpen, setIsPriceChartOpen] = useState(false);
+  const { values } = useFormikContext<ISwapSettings>();
+  const dispatch = useDispatch();
 
   const nodeRef = useRef(null);
+
+  const onSwapSettingsClose = useCallback(() => {
+    if (!isTablet) {
+      setIsSettingsOpen(false);
+    } else {
+      setIsMobileTxSettingsOpen(false);
+    }
+    dispatch(swapAction.SET_SWAP_SETTING(values));
+  }, [dispatch, isTablet, values]);
 
   return (
     <div className={classNames('w-full flex h-8 items-center mb-1 body-medium', className)}>
@@ -211,8 +222,8 @@ const CardHeader = ({
           maskClosable={true}
           centered
           width={500}
-          onCancel={() => setIsSettingsOpen(false)}>
-          <SwapSetting onClose={() => setIsSettingsOpen(false)} />
+          onCancel={onSwapSettingsClose}>
+          <SwapSetting onClose={onSwapSettingsClose} />
         </Modal>
       )}
       {isTablet && (
@@ -221,9 +232,9 @@ const CardHeader = ({
           closable={false}
           title={<div className="body-bold text-grey-900">Transaction Settings</div>}
           placement={'bottom'}
-          onClose={() => setIsMobileTxSettingsOpen(false)}
+          onClose={onSwapSettingsClose}
           visible={isMobileTxSettingsOpen}>
-          <SwapSetting onClose={() => setIsMobileTxSettingsOpen(false)} />
+          <SwapSetting onClose={onSwapSettingsClose} />
         </Drawer>
       )}
     </div>
@@ -434,12 +445,6 @@ const TokenSwap = () => {
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
   const { hippoAgg, simulateSwapByRoute } = useHippoClient();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(swapAction.SET_SWAP_SETTING(values));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values]);
 
   const fromToken = values.currencyFrom?.token;
   const toToken = values.currencyTo?.token;
