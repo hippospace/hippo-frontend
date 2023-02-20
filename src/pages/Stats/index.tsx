@@ -216,7 +216,7 @@ const TopLpPriceChanges = () => {
         ...[
           ...(!isTablet ? [[LpPriceChangePeriod['6H'], '6H Change(%)', true]] : []),
           [LpPriceChangePeriod['1D'], isMobile ? '1D(%)' : '1D Change(%)', true],
-          [LpPriceChangePeriod['7D'], isMobile ? '7D(%)' : '7D Change(%)', false]
+          [LpPriceChangePeriod['7D'], isMobile ? '7D(%)' : '7D Change(%)', true]
         ].map((a, i) => (
           <span
             className={classNames('cursor-pointer', {
