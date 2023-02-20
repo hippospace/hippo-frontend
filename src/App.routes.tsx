@@ -43,10 +43,6 @@ export const routes: TRoute[] = [
     element: <Swap />
   },
   {
-    name: 'Bridge',
-    type: 'Button'
-  },
-  {
     path: 'faucet',
     name: 'Faucet',
     hidden: true,

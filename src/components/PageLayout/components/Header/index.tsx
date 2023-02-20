@@ -6,14 +6,18 @@ import cx from 'classnames';
 import styles from './Header.module.scss';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
-import { CloseIcon, LinkIcon, MenuIcon, SettingIcon } from 'resources/icons';
+import { CloseIcon, MenuIcon, SettingIcon } from 'resources/icons';
 import { Drawer, Popover } from 'antd';
-import { ReactNode, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Button from 'components/Button';
 import { useSelector } from 'react-redux';
 import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Settings from 'components/Settings';
-import TextLink from 'components/TextLink';
+import BridgeIcon from 'resources/img/bridges/bridge-3x.png';
+import AptosBridgeIcon from 'resources/img/bridges/AptosBridge-3x.png';
+import CBridgeIcon from 'resources/img/bridges/CBridge-3x.png';
+import PortalBridgeIcon from 'resources/img/bridges/PortalBridge-3x.png';
+import BridgesMenu, { IBridgeItemProps } from 'components/BridgesMenu';
 
 const { Header } = Antd.Layout;
 /*
@@ -31,29 +35,23 @@ interface ISideMenuProps {
   onRouteSelected: () => void;
 }
 
-const DropDownLink = ({ children, href }: { children: ReactNode; href: string }) => {
-  return (
-    <TextLink href={href} className="block body-bold no-underline !text-grey-700">
-      {children}
-    </TextLink>
-  );
-};
-
-const BridgesMenu = () => {
-  return (
-    <div className="flex flex-col gap-y-3 px-1">
-      <DropDownLink href="https://theaptosbridge.com/bridge">
-        LayerZero <LinkIcon className="font-icon" />
-      </DropDownLink>
-      <DropDownLink href="https://www.portalbridge.com/#/transfer">
-        Wormhole <LinkIcon className="font-icon" />
-      </DropDownLink>
-      <DropDownLink href="https://cbridge.celer.network/1/12360001/USDC">
-        cBridge <LinkIcon className="font-icon" />
-      </DropDownLink>
-    </div>
-  );
-};
+const bridges: IBridgeItemProps[] = [
+  {
+    name: 'Aptos Bridge',
+    iconSrc: AptosBridgeIcon,
+    url: 'https://theaptosbridge.com/bridge'
+  },
+  {
+    name: 'C Bridge',
+    iconSrc: CBridgeIcon,
+    url: 'https://cbridge.celer.network/1/12360001/USDC'
+  },
+  {
+    name: 'Portal Bridge',
+    iconSrc: PortalBridgeIcon,
+    url: 'https://www.portalbridge.com/#/transfer'
+  }
+];
 
 const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
   const navigate = useNavigate();
@@ -81,22 +79,26 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
       <div className="w-full space-y-4">
         {routes
           .filter((r) => r.path !== '*' && !r.hidden)
-          .map(({ name, path, type }, index) => {
+          .map(({ name, path }, index) => {
             const isCurrent = currentPageName === name;
             return (
               <Button
                 key={`${name}-${index}-${isCurrent}`}
                 className={classNames('w-full', { 'hip-btn-selected': isCurrent })}
                 variant={'outlined'}
-                onClick={() =>
-                  type === 'Button' && name === 'Bridge' ? openBridges() : onRoute(path)
-                }>
+                onClick={() => onRoute(path)}>
                 {name}
               </Button>
             );
           })}
       </div>
       <div className="mt-auto body-bold w-full">
+        <Button className="w-full" variant="plain" size="medium" onClick={openBridges}>
+          <img src={BridgeIcon} className="w-6 h-6 mr-2" />
+          Bridge
+        </Button>
+      </div>
+      <div className="mt-4 body-bold w-full">
         <Button className="w-full" variant="plain" size="medium" onClick={openSettings}>
           <SettingIcon className="font-icon mr-2" />
           Settings
@@ -119,7 +121,7 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
         placement={'left'}
         visible={isBridgesVisible}
         onClose={() => setIsBridgesVisible(false)}>
-        <BridgesMenu />
+        <BridgesMenu bridges={bridges} />
       </Drawer>
     </div>
   );
@@ -130,23 +132,11 @@ const PageHeader: React.FC = () => {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const isResourcesNotFound = useSelector(getIsResourcesNotFound);
 
-  const [isBridegMenuOpen, setIsBridgeMenuOpen] = useState(false);
-
   const renderNavItems = useCallback(() => {
     return routes.map(({ name, path, hidden, type }) => {
       if (path === '*' || hidden) return null;
       return (
         <Antd.Menu.Item key={name}>
-          {type === 'Button' && (
-            <Popover
-              trigger="click"
-              visible={isBridegMenuOpen}
-              onVisibleChange={(visible) => setIsBridgeMenuOpen(visible)}
-              content={<BridgesMenu />}
-              placement="bottom">
-              <a className="h6 text-grey-500 font-bold">{name}</a>
-            </Popover>
-          )}
           {(type === 'Page' || !type) && (
             <Link to={path || '/'} className="h6 font-bold">
               {name}
@@ -155,7 +145,7 @@ const PageHeader: React.FC = () => {
         </Antd.Menu.Item>
       );
     });
-  }, [isBridegMenuOpen]);
+  }, []);
 
   return (
     <Header
@@ -164,27 +154,23 @@ const PageHeader: React.FC = () => {
       )}>
       <div className="mx-auto h-full top-0 left-0 flex items-center relative">
         <MenuIcon
-          className="!hidden font-icon h5 text-grey-900 mr-4 mobile:!inline-block"
+          className="!hidden font-icon h5 text-grey-900 mr-4 tablet:!inline-block"
           onClick={() => setIsSideMenuOpen(true)}
         />
         <div
           className={classNames(
-            'h-full absolute left-0 top-0 mobile:left-1/2 mobile:-translate-x-1/2'
+            'h-full absolute left-0 top-0 tablet:left-1/2 tablet:-translate-x-1/2'
           )}>
           <Link
             to="/"
             className={classNames('h-full flex items-center justify-center', {
-              'mobile:hidden': currentPageName !== 'Home'
+              'tablet:hidden': currentPageName !== 'Home'
             })}>
-            <LogoIcon className="w-auto h-[48px] mobile:h-full tablet:hidden mobile:block" />
-            <LogoIcon
-              className="w-auto h-[48px] mobile:h-full hidden tablet:block mobile:hidden"
-              hasLabel={false}
-            />
+            <LogoIcon className="w-auto h-[48px] mobile:h-full tablet:block" />
           </Link>
           <div
             className={classNames('hidden h6 h-full text-grey-900', {
-              'mobile:flex mobile:items-center': currentPageName !== 'Home'
+              'tablet:flex tablet:items-center': currentPageName !== 'Home'
             })}>
             {currentPageName}
           </div>
@@ -195,25 +181,39 @@ const PageHeader: React.FC = () => {
             theme="dark"
             className={cx(
               styles.menu,
-              'flex justify-center h-full min-w-[200px] w-full !bg-transparent mobile:hidden'
+              'flex justify-center h-full min-w-[200px] w-full !bg-transparent tablet:hidden'
             )}
             selectedKeys={[currentPageName]}>
             {!isResourcesNotFound && renderNavItems()}
           </Antd.Menu>
         </div>
-        <div className="absolute right-0 top-0 h-full w-fit flex items-center">
+        <div className="absolute right-0 top-0 h-full w-fit flex items-center gap-x-2">
           {currentPageName !== 'Home' && (
-            <Popover
-              className="mobile:!hidden"
-              content={<Settings />}
-              placement="bottomRight"
-              trigger="click">
-              <Button size="small" variant="plain" className="!p-3 mr-1">
-                <SettingIcon className="font-icon h6 text-grey-900" />
-              </Button>
-            </Popover>
+            <>
+              <Popover
+                className="tablet:hidden"
+                content={<BridgesMenu bridges={bridges} />}
+                placement="bottomRight"
+                trigger="click">
+                <Button size="small" variant="plain" className="!p-3 w-[144px]">
+                  <div className="text-prime-700 dark:text-prime-400 body-bold flex items-center">
+                    <img src={BridgeIcon} className="w-6 h-6 mr-1" />
+                    Bridge
+                  </div>
+                </Button>
+              </Popover>
+              <Popover
+                className="tablet:hidden"
+                content={<Settings />}
+                placement="bottomRight"
+                trigger="click">
+                <Button size="small" variant="plain" className="!p-3">
+                  <SettingIcon className="font-icon h6 text-grey-900" />
+                </Button>
+              </Popover>
+              <WalletConnector />
+            </>
           )}
-          {currentPageName !== 'Home' && <WalletConnector />}
           {/* currentPageName === 'Home' && <SiteBadge /> */}
         </div>
       </div>
