@@ -16,7 +16,7 @@ import Settings from 'components/Settings';
 import BridgeIcon from 'resources/img/bridges/bridge-3x.png';
 import AptosBridgeIcon from 'resources/img/bridges/AptosBridge-3x.png';
 import CBridgeIcon from 'resources/img/bridges/CBridge-3x.png';
-import PortalBridgeIcon from 'resources/img/bridges/PortalBridge-3x.png';
+import PortalBridgeIcon from 'resources/img/bridges/PortalBridge.jpeg';
 import BridgesMenu, { IBridgeItemProps } from 'components/BridgesMenu';
 
 const { Header } = Antd.Layout;

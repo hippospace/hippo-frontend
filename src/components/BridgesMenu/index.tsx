@@ -9,7 +9,7 @@ const BridgeItem = ({ name, iconSrc, url }: IBridgeItemProps) => {
     <div
       className="flex items-center w-[176px] h-9 rounded-full px-2 cursor-pointer gap-x-2 hover:bg-prime-100 text-grey-700 dark:hover:bg-prime-400 dark:hover:text-grey-900"
       onClick={() => window.open(url, '_blank')}>
-      <img src={iconSrc} className="w-6 h-6" />
+      <img src={iconSrc} className="w-6 h-6 rounded-full" />
       <div className="text-grey-700 body-bold">{name}</div>
     </div>
   );
