@@ -9,6 +9,7 @@ interface SwapState {
   isFetched: boolean;
   error: any;
   tokenList: RawCoinInfo[];
+  isPriceChartOpen: boolean;
   swapSettings: ISwapSettings;
 }
 
@@ -17,6 +18,7 @@ export const initState: SwapState = {
   isFetched: false,
   error: null,
   tokenList: [],
+  isPriceChartOpen: false,
   swapSettings: {
     slipTolerance: 0.5,
     trasactionDeadline: 60,
@@ -53,6 +55,9 @@ export default createReducer(initState, (builder) => {
     })
     .addCase(actions.RESET, (state) => {
       state.swapSettings = initState.swapSettings;
+    })
+    .addCase(actions.SET_IS_PRICE_CHART_OPEN, (state, { payload }) => {
+      state.isPriceChartOpen = payload;
     });
 });
 
@@ -60,3 +65,4 @@ export const getIsFetchingTokenList = (state: RootState) => state.swap.isFetchin
 export const getIsFetchedTokenList = (state: RootState) => state.swap.isFetched;
 export const getTokenList = (state: RootState) => state.swap.tokenList;
 export const getSwapSettings = (state: RootState) => state.swap.swapSettings;
+export const getIsPriceChartOpen = (state: RootState) => state.swap.isPriceChartOpen;

@@ -36,6 +36,8 @@ import './TokenSwap.scss';
 import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 import swapAction from 'modules/swap/actions';
 import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { getIsPriceChartOpen } from 'modules/swap/reducer';
 
 interface IRoutesProps {
   className?: string;
@@ -153,7 +155,8 @@ const CardHeader = ({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   const { isTablet } = useBreakpoint('tablet');
-  const [isPriceChartOpen, setIsPriceChartOpen] = useState(false);
+  const isPriceChartOpen = useSelector(getIsPriceChartOpen);
+  const setIsPriceChartOpen = (is: boolean) => dispatch(swapAction.SET_IS_PRICE_CHART_OPEN(is));
   const { values } = useFormikContext<ISwapSettings>();
   const dispatch = useDispatch();
 

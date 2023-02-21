@@ -67,7 +67,8 @@ store.subscribe(() => {
   saveReduxState(store.getState(), [
     'swap.swapSettings.slipTolerance',
     'swap.swapSettings.trasactionDeadline',
-    'swap.swapSettings.maxGasFee'
+    'swap.swapSettings.maxGasFee',
+    'swap.isPriceChartOpen'
   ]);
 });
 
