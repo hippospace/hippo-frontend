@@ -56,13 +56,13 @@ code {
 }
 
 :root {
-  --hip-text-grey-100: #F8F8F8;
-  --hip-text-grey-300: #D5D5D5;
-  --hip-text-grey-500: #959595;
-  --hip-text-grey-700: #575757;
-  --hip-text-grey-900: #2D2D2D;
+  --hip-text-grey-100: 248 248 248;
+  --hip-text-grey-300: 213 213 213;
+  --hip-text-grey-500: 149 149 149;
+  --hip-text-grey-700: 87 87 87;
+  --hip-text-grey-900: 45 45 45;
 
-  --hip-bg-color-surface: #FFF;
+  --hip-bg-color-surface: 255 255 255;
   --hip-bg-color-field: var(--hip-text-grey-100);
   --hip-bg-btn-gradient: linear-gradient(268.82deg, #CF9AFA -26.18%, #A192F3 3.15%, #7486F1 83.6%);
   --hip-bg-home-card: linear-gradient(90deg, #F8F7FF 26.08%, #F7F5FE 98.41%);
@@ -72,14 +72,14 @@ code {
   --hip-shadow-home: -4px 8px 32px rgba(211, 207, 230, 0.4);
 
   &.dark {
-    --hip-text-grey-900: #F8F8F8;
-    --hip-text-grey-700: #D5D5D5;
-    --hip-text-grey-500: #959595;
-    --hip-text-grey-300: #575757;
-    --hip-text-grey-100: #2D2D2D;
+    --hip-text-grey-900: 248 248 248;
+    --hip-text-grey-700: 213 213 213;
+    --hip-text-grey-500: 149 149 149;
+    --hip-text-grey-300: 87 87 87;
+    --hip-text-grey-100: 45 45 45;
 
-    --hip-bg-color-surface: #2C2D3C;
-    --hip-bg-color-field: #383a48;
+    --hip-bg-color-surface: 44 45 60;
+    --hip-bg-color-field: 56 58 72;
     --hip-bg-btn-gradient: linear-gradient(90.74deg, #4393F1 -31.76%, #651BDA 136.23%);
     --hip-bg-home-card: linear-gradient(90.32deg, rgba(243, 241, 255, 0.03) 0.16%, rgba(241, 239, 254, 0.0255) 96.9%);
     --hip-bg-select-border: linear-gradient(268.82deg, rgba(207, 154, 250, 0.8) -26.18%, rgba(161, 146, 243, 0.8) 3.15%, rgba(116, 134, 241, 0.8) 83.6%);

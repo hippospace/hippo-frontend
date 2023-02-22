@@ -7,11 +7,11 @@ module.exports = {
     extend: {
       colors: {
         grey: {
-          100: 'var(--hip-text-grey-100)',
-          300: 'var(--hip-text-grey-300)',
-          500: 'var(--hip-text-grey-500)',
-          700: 'var(--hip-text-grey-700)',
-          900: 'var(--hip-text-grey-900)'
+          100: 'rgb(var(--hip-text-grey-100) / <alpha-value>)',
+          300: 'rgb(var(--hip-text-grey-300) / <alpha-value>)',
+          500: 'rgb(var(--hip-text-grey-500) / <alpha-value>)',
+          700: 'rgb(var(--hip-text-grey-700) / <alpha-value>)',
+          900: 'rgb(var(--hip-text-grey-900) / <alpha-value>)'
         },
         prime: {
           100: '#EAE6FF',
@@ -51,8 +51,8 @@ module.exports = {
     backgroundColor: theme => ({
       ...theme('colors'),
       primeDark: '#111111',
-      surface: 'var(--hip-bg-color-surface)',
-      field: 'var(--hip-bg-color-field)',
+      surface: 'rgb(var(--hip-bg-color-surface) / <alpha-value>)',
+      field: 'rgb(var(--hip-bg-color-field) / <alpha-value>)',
       label: 'var(--hip-bg-label)',
       transparent: 'transparent',
     }),

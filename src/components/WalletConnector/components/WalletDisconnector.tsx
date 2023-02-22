@@ -3,7 +3,7 @@ import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { walletAddressEllipsis } from 'utils/utility';
 import useAptosWallet from 'hooks/useAptosWallet';
 
-const WalletMenu = ({ onDisconnected }: { onDisconnected: () => any }) => {
+const WalletDisconnector = ({ onDisconnected }: { onDisconnected: () => any }) => {
   const { disconnect } = useWallet();
   const { activeWallet } = useAptosWallet();
   return (
@@ -24,4 +24,4 @@ const WalletMenu = ({ onDisconnected }: { onDisconnected: () => any }) => {
   );
 };
 
-export default WalletMenu;
+export default WalletDisconnector;

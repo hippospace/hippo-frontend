@@ -225,6 +225,7 @@ const CardHeader = ({
           maskClosable={true}
           centered
           width={500}
+          destroyOnClose={true}
           onCancel={onSwapSettingsClose}>
           <SwapSetting onClose={onSwapSettingsClose} />
         </Modal>

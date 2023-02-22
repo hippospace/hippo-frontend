@@ -1,36 +1,13 @@
 import Button from 'components/Button';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { walletAddressEllipsis } from 'utils/utility';
-import { Drawer, Popover } from 'components/Antd';
+import { Drawer, Modal, Popover } from 'components/Antd';
 import styles from './WalletConnector.module.scss';
-import WalletSelector from './components/WalletSelector';
-import WalletMenu from './components/WalletMenu';
+import WalletDisconnector from './components/WalletDisconnector';
 import { WalletConnectedIcon, WalletNotConnectedIcon } from 'resources/icons';
-import classNames from 'classnames';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useBreakpoint } from 'hooks/useBreakpoint';
-
-const WalletModal = ({ className = '' }: { className?: string }) => {
-  const { activeWallet, closeModal } = useAptosWallet();
-
-  return (
-    <div className={className}>
-      {activeWallet ? (
-        <WalletMenu
-          onDisconnected={() => {
-            closeModal();
-          }}
-        />
-      ) : (
-        <WalletSelector
-          onConnected={() => {
-            closeModal();
-          }}
-        />
-      )}
-    </div>
-  );
-};
+import WalletSelector from './components/WalletSelector';
 
 const WalletConnector: React.FC = () => {
   const { wallet } = useWallet();
@@ -40,22 +17,26 @@ const WalletConnector: React.FC = () => {
   return (
     <>
       {!isMobile && (
-        <Popover
-          className="mobile:hidden"
-          overlayClassName={classNames(styles.popover)}
-          trigger="click"
-          visible={open}
-          onVisibleChange={(visible) => (visible ? openModal() : closeModal())}
-          content={<WalletModal className="mobile:hidden" />}
-          destroyTooltipOnHide
-          placement="bottomLeft">
-          <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center">
+          <Popover
+            overlayClassName={styles.popover}
+            trigger="click"
+            visible={open && !!activeWallet}
+            onVisibleChange={(visible) => (visible ? openModal() : closeModal())}
+            content={
+              <WalletDisconnector
+                onDisconnected={() => {
+                  closeModal();
+                }}
+              />
+            }
+            destroyTooltipOnHide
+            placement="bottomLeft">
             <Button
               variant="secondary"
               size="small"
               className="min-w-[156px] h-10 font-bold"
-              // onClick={!address ? toggleConnectModal : undefined}
-            >
+              onClick={!activeWallet ? () => openModal() : undefined}>
               {activeWallet ? (
                 <>
                   <img src={wallet?.adapter.icon} className="w-6 h-6 mr-2" />{' '}
@@ -65,8 +46,22 @@ const WalletConnector: React.FC = () => {
                 'Connect To Wallet'
               )}
             </Button>
-          </div>
-        </Popover>
+          </Popover>
+          {!isMobile && (
+            <Modal
+              width={'456px'}
+              bodyStyle={{ padding: 0 }}
+              visible={open && !activeWallet}
+              footer={null}
+              closable={false}
+              maskClosable={true}
+              centered
+              destroyOnClose={true}
+              onCancel={closeModal}>
+              <WalletSelector onConnected={closeModal} onCancel={closeModal} />
+            </Modal>
+          )}
+        </div>
       )}
       {isMobile && (
         <>
@@ -79,19 +74,21 @@ const WalletConnector: React.FC = () => {
           </div>
           <Drawer
             className="hidden mobile:block"
+            bodyStyle={{ padding: 0 }}
             closable={false}
-            title={
-              !activeWallet ? (
-                <div className="h6 font-bold text-grey-900">Connect your wallet</div>
-              ) : (
-                ''
-              )
-            }
             height={'auto'}
             placement={'bottom'}
             onClose={() => closeModal()}
             visible={open}>
-            <WalletModal className="hidden mobile:block" />
+            {activeWallet ? (
+              <WalletDisconnector
+                onDisconnected={() => {
+                  closeModal();
+                }}
+              />
+            ) : (
+              <WalletSelector onConnected={closeModal} onCancel={closeModal} />
+            )}
           </Drawer>
         </>
       )}
