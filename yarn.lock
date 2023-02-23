@@ -1910,13 +1910,13 @@
     commander "^9.3.0"
     yaml "^2.1.1"
 
-"@manahippo/hippo-sdk@4.0.5":
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-4.0.5.tgz#639cc28dde8926f6e82ff722b7a6f9854ba52ca7"
-  integrity sha512-PJz1/zwcL+EbqlQWDTVIMI96febjNkaDLdsVpKYnEov1ScOvX9dsPEx1JHWUZD1wz9yHM9gdgS1JrO57zQ3b1w==
+"@manahippo/hippo-sdk@4.1.4":
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-4.1.4.tgz#2ced2c60105566b6a5ef448b112a45f24500a726"
+  integrity sha512-J9doSG6wJH1Mz1IoObeiftqlfcoKCJJpcYD2PKg8wrpw2WY5X6pPqYnFaLYY/ECB6S4nsvM2Urt7jmTI/jsDlg==
   dependencies:
     "@manahippo/coin-list" "3.0.0"
-    "@manahippo/move-to-ts" "1.0.1"
+    "@manahippo/move-to-ts" "1.0.2"
     "@vividnetwork/swap-sdk" "^0.2.2"
     aptos "1.6.0"
     bn.js "^5.2.1"
@@ -1929,6 +1929,18 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-1.0.1.tgz#081597275eff44d0496089fd0c4e3f48c4c71fc9"
   integrity sha512-3P1C47eMOT/ehLxBBvNz4mxSRm2Ab/XS3DJEAkIq2jMc/FpH18iAcqB6+OlzDKsBUf/CstTLIwcAUQW7Muj8Lw==
+  dependencies:
+    aptos "1.6.0"
+    big-integer "^1.6.51"
+    elliptic "^6.5.4"
+    json-stable-stringify "^1.0.1"
+    sha.js "^2.4.11"
+    sha3 "^2.1.4"
+
+"@manahippo/move-to-ts@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-1.0.2.tgz#50d14595f42a232ef6e00f2247dce028a2ccf49b"
+  integrity sha512-SdsP1YhwZKw0KsBRogVkhJPtNVkmkkv5KmmtfpoKOEgMJu7wHNqcxrSremKsxOgadjpCTGqpfwkM5wTRn9U6bw==
   dependencies:
     aptos "1.6.0"
     big-integer "^1.6.51"
