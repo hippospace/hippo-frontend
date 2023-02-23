@@ -469,6 +469,32 @@ const TokenSwap = () => {
 
   const rpcEndpoint = useRpcEndpoint();
 
+  // Reduce Coingecko Api requests as much as we can
+  const [prices, , coingeckoApi] = useCoingeckoPrice(
+    fromUiAmt
+      ? [fromToken, toToken, hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]]
+      : undefined
+  );
+
+  const [fromPrice, toTokenPrice, aptPrice] = (prices as number[]) || [];
+  const payValue = useMemo(() => {
+    if (typeof fromPrice === 'number') {
+      return cutDecimals('' + fromPrice * (fromUiAmt || 0), 2);
+    }
+    return undefined;
+  }, [fromPrice, fromUiAmt]);
+  const toValue = useMemo(() => {
+    if (typeof toTokenPrice === 'number') {
+      return cutDecimals('' + toTokenPrice * (values.currencyTo?.amount || 0), 2);
+    }
+    return undefined;
+  }, [toTokenPrice, values.currencyTo?.amount]);
+
+  const isAllowHighGas = useMemo(
+    () => !!payValue && !!toValue && (parseFloat(payValue) > 100 || parseFloat(toValue) > 100),
+    [payValue, toValue]
+  );
+
   let refreshInterval = 20; // seconds
   let isInputAmtTriggerReload = false;
   let inputTriggerReloadThreshold = 20;
@@ -678,7 +704,8 @@ const TokenSwap = () => {
                   maxSteps,
                   isReloadInternal,
                   false,
-                  poolReloadMinInterval
+                  poolReloadMinInterval,
+                  isAllowHighGas
                 );
                 console.timeEnd('GetQuotes');
                 const apiRoutes: GeneralRouteAndQuote[] = routeAndQuotes.map((r) => ({
@@ -713,7 +740,8 @@ const TokenSwap = () => {
                   toToken,
                   isReloadInternal,
                   false,
-                  poolReloadMinInterval
+                  poolReloadMinInterval,
+                  isAllowHighGas
                 );
                 const fixedOutputRoutes = routeAndQuote
                   ? [routeAndQuote].map((r) => ({
@@ -810,7 +838,8 @@ const TokenSwap = () => {
       restartTimer,
       setSelectedRouteFromRoutes,
       toToken,
-      toUiAmt
+      toUiAmt,
+      isAllowHighGas
     ]
   );
 
@@ -883,28 +912,6 @@ const TokenSwap = () => {
     values.maxGasFee,
     values.slipTolerance
   ]);
-
-  // Reduce Coingecko Api requests as much as we can
-  const [prices, , coingeckoApi] = useCoingeckoPrice(
-    fromUiAmt
-      ? [fromToken, toToken, hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]]
-      : undefined
-  );
-
-  const [fromPrice, toTokenPrice, aptPrice] = (prices as number[]) || [];
-
-  const payValue = useMemo(() => {
-    if (typeof fromPrice === 'number') {
-      return cutDecimals('' + fromPrice * (fromUiAmt || 0), 2);
-    }
-    return undefined;
-  }, [fromPrice, fromUiAmt]);
-  const toValue = useMemo(() => {
-    if (typeof toTokenPrice === 'number') {
-      return cutDecimals('' + toTokenPrice * (values.currencyTo?.amount || 0), 2);
-    }
-    return undefined;
-  }, [toTokenPrice, values.currencyTo?.amount]);
 
   const coingeckoRate = useMemo(
     () => (fromPrice && toTokenPrice ? toTokenPrice / fromPrice : undefined),
