@@ -37,17 +37,17 @@ interface ISideMenuProps {
 
 const bridges: IBridgeItemProps[] = [
   {
-    name: 'Aptos Bridge',
+    name: 'LayerZero',
     iconSrc: AptosBridgeIcon,
     url: 'https://theaptosbridge.com/bridge'
   },
   {
-    name: 'C Bridge',
+    name: 'Celer',
     iconSrc: CBridgeIcon,
     url: 'https://cbridge.celer.network/1/12360001/USDC'
   },
   {
-    name: 'Portal Bridge',
+    name: 'Wormhole',
     iconSrc: PortalBridgeIcon,
     url: 'https://www.portalbridge.com/#/transfer'
   }
