@@ -38,17 +38,25 @@ import swapAction from 'modules/swap/actions';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { getIsPriceChartOpen } from 'modules/swap/reducer';
+import invariant from 'tiny-invariant';
+
+type RoutesSimulateResults = Map<string, Types.UserTransaction | undefined>;
+
+interface IRoutesGroupedByDex {
+  dex: AggregatorTypes.DexType;
+  routes: GeneralRouteAndQuote[];
+}
 
 interface IRoutesProps {
   className?: string;
   availableRoutesCount: number;
-  routes: GeneralRouteAndQuote[];
+  routes: IRoutesGroupedByDex[];
   routeSelected: GeneralRouteAndQuote | null;
   onRouteSelected: (route: GeneralRouteAndQuote, index: number) => void;
   isDesktopScreen?: boolean;
   isRefreshing?: boolean;
   refreshButton?: ReactNode;
-  simuResults?: Types.UserTransaction[];
+  simuResults?: RoutesSimulateResults;
   isFixedOutputMode?: boolean;
 }
 
@@ -322,6 +330,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
 
 const RoutesAvailable: React.FC<IRoutesProps> = ({
   routes,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   availableRoutesCount,
   onRouteSelected,
   routeSelected,
@@ -329,7 +338,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   isDesktopScreen = false,
   // isRefreshing = false,
   refreshButton,
-  simuResults = [],
+  simuResults = new Map(),
   isFixedOutputMode = false
 }) => {
   const isEmpty = !(routes?.length > 0);
@@ -356,10 +365,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
           <div>Loading routes...</div>
         ) : (
           <>
-            <div>
-              Total {availableRoutesCount} routes available{' '}
-              {isFixedOutputMode && '(Fixed receive mode)'}
-            </div>
+            <div>Hippo & other same-dex routes {isFixedOutputMode && '(Fixed receive mode)'}</div>
             <div>{refreshButton}</div>
           </>
         )}
@@ -379,14 +385,14 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
             height={height}
             itemHeight={routeRowMinHeight}
             data={routes}
-            itemKey={(item) => serializeRouteQuote(item)}>
+            itemKey={(item) => serializeRouteQuote(item.routes[0])}>
             {(ro, index) => (
-              <div onClick={() => onRouteSelected(ro, index)}>
+              <div onClick={() => onRouteSelected(ro.routes[0], index)}>
                 <RouteRow
-                  route={ro}
-                  isSelected={ro === routeSelected}
+                  route={ro.routes[0]}
+                  isSelected={ro.routes[0] === routeSelected}
                   isBestPrice={index === 0}
-                  simuResult={simuResults[index]}
+                  simuResult={simuResults.get(serializeRouteQuote(ro.routes[0]))}
                 />
               </div>
             )}
@@ -582,30 +588,6 @@ const TokenSwap = () => {
       );
     }
   }, [fromToken, toToken, fromUiAmt, isFixedOutput, toUiAmt]);
-
-  /*
-  const latestInputParams = useRef({
-    fromSymbol,
-    toSymbol,
-    fromUiAmt
-  });
-  latestInputParams.current = {
-    fromSymbol,
-    toSymbol,
-    fromUiAmt
-  };
-
-  const ifInputParametersDifferentWithLatest = useCallback(
-    (fromSymbolLocal: string, toSymbolLocal: string, fromUiAmtLocal: number) => {
-      return !(
-        fromSymbolLocal === latestInputParams.current.fromSymbol &&
-        toSymbolLocal === latestInputParams.current.toSymbol &&
-        fromUiAmtLocal === latestInputParams.current.fromUiAmt
-      );
-    },
-    []
-  );
-  */
 
   const setRoute = useCallback(
     (ro: GeneralRouteAndQuote | null) => {
@@ -843,7 +825,9 @@ const TokenSwap = () => {
     ]
   );
 
-  const [simulateResults, setSimulateResults] = useState<Types.UserTransaction[]>([]);
+  const [routesSimulatedResults, setRoutesSimulatedResults] = useState<RoutesSimulateResults>(
+    new Map()
+  );
   const simuTs = useRef(0);
   const [aptBalance, isReady] = useTokenBalane(
     hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]
@@ -861,13 +845,67 @@ const TokenSwap = () => {
     return Math.floor(aptToGas(aptAvailable));
   }, [aptBalance, fromToken?.symbol, fromUiAmt, isReady]);
 
-  const simuCount = 4;
+  // merge dexes by Hippo or same dex
+  const mergedRoutes: IRoutesGroupedByDex[] = useMemo(() => {
+    const mRoutes: Map<AggregatorTypes.DexType, GeneralRouteAndQuote[]> = new Map();
+
+    allRoutes.forEach((r) => {
+      let dex: AggregatorTypes.DexType | undefined = undefined;
+      if (r.route instanceof AggregatorTypes.ApiTradeRoute) {
+        const dexes = r.route.steps.map((s) => s.dexType);
+        if (dexes.every((d) => d === dexes[0])) {
+          dex = dexes[0];
+        }
+      } else if (r.route instanceof AggregatorTypes.SplitSingleRoute) {
+        // do nothing
+      } else if (r.route instanceof AggregatorTypes.SplitMultiRoute) {
+        const unitRoutes = r.route.units.map((u) => u.route);
+        const dexes = unitRoutes.flatMap((ur) =>
+          ur.splitSteps.flatMap((ss) => ss.units.map((u) => u.step.pool.dexType))
+        );
+        if (dexes.every((d) => d === dexes[0])) {
+          dex = dexes[0];
+        }
+      } else {
+        throw new Error('Invalid route type for mergedRoutes');
+      }
+
+      if (dex === undefined) {
+        if (!mRoutes.has(AggregatorTypes.DexType.Hippo)) {
+          mRoutes.set(AggregatorTypes.DexType.Hippo, []);
+        }
+        mRoutes.get(AggregatorTypes.DexType.Hippo)?.push(r);
+      } else {
+        if (!mRoutes.has(dex)) {
+          mRoutes.set(dex, []);
+        }
+        mRoutes.get(dex)?.push(r);
+      }
+    });
+    const mRoutesValues = Array.from(mRoutes.values());
+    invariant(
+      mRoutesValues.length === 0 || mRoutesValues.every((routes) => routes.length > 0),
+      'Make sure routes in mRoutes is not empty'
+    );
+    const mRoutesArr = [];
+    for (const [key, value] of mRoutes) {
+      mRoutesArr.push({
+        dex: key,
+        routes: value
+      });
+    }
+    mRoutesArr.sort((a, b) => b.routes[0].quote.outputUiAmt - a.routes[0].quote.outputUiAmt);
+    return mRoutesArr;
+  }, [allRoutes]);
+
   useEffect(() => {
     const ts = Date.now();
     simuTs.current = ts;
-    setSimulateResults([]);
+    const simuResults = new Map();
+    setRoutesSimulatedResults(simuResults);
+
     if (
-      allRoutes.length > 0 &&
+      mergedRoutes.flatMap((mr) => mr.routes).length > 0 &&
       isReady &&
       aptBalance &&
       baseBalance &&
@@ -875,16 +913,16 @@ const TokenSwap = () => {
       aptBalance >= 0.02 &&
       baseBalance >= fromUiAmt
     ) {
-      /* fix: this would shortcut user inputs
-      if ((ts - simuTs.current) / 1000 < REFRESH_INTERVAL - 1) {
-        // for the case useEffect runs twice when in React strict and debug mode
-        return;
-      }
-      */
-      let routesToSimu = allRoutes.slice(0, simuCount);
+      const routesToSimulate = [
+        ...(mergedRoutes.find((m) => m.dex === AggregatorTypes.DexType.Hippo)?.routes.slice(0, 3) ??
+          []),
+        ...mergedRoutes
+          .filter((m) => m.dex !== AggregatorTypes.DexType.Hippo)
+          .slice(0, 2)
+          .map((mr) => mr.routes[0])
+      ];
 
-      const results = new Array(simuCount).fill(null);
-      routesToSimu.forEach((route, i) => {
+      routesToSimulate.forEach((route) => {
         (async () => {
           const result = await simulateSwapByRoute(
             route,
@@ -893,11 +931,29 @@ const TokenSwap = () => {
             undefined,
             isFixedOutput
           );
-          if (!results[i] && ts === simuTs.current) {
-            // debug
-            // if (i === 0) result.success = false;
-            results[i] = result;
-            setSimulateResults([...results]);
+          if (ts === simuTs.current) {
+            simuResults.set(serializeRouteQuote(route), result);
+            setRoutesSimulatedResults(simuResults);
+            if (simuResults.keys.length === routesToSimulate.length) {
+              const hippoRoutes = mergedRoutes.find(
+                (mr) => mr.dex === AggregatorTypes.DexType.Hippo
+              )?.routes;
+
+              const routeCompareVal = (r: GeneralRouteAndQuote) => {
+                const key = serializeRouteQuote(r);
+                const simResult = routesSimulatedResults.get(key);
+                return simResult?.success && toTokenPrice && aptPrice
+                  ? r.quote.outputUiAmt * toTokenPrice - gasToApt(simResult.gas_used) * aptPrice
+                  : 0;
+              };
+
+              hippoRoutes?.sort((a, b) => routeCompareVal(b) - routeCompareVal(a));
+              mergedRoutes.sort(
+                (a, b) => routeCompareVal(b.routes[0]) - routeCompareVal(a.routes[0])
+              );
+
+              setSelectedRouteFromRoutes(mergedRoutes.flatMap((mr) => mr.routes));
+            }
           }
         })();
       });
@@ -917,39 +973,6 @@ const TokenSwap = () => {
     () => (fromPrice && toTokenPrice ? toTokenPrice / fromPrice : undefined),
     [fromPrice, toTokenPrice]
   );
-
-  const routesSortedBySimResults = useMemo(() => {
-    if (simulateResults.every((s) => !!s)) {
-      const routesSim = allRoutes.map((r, i) => ({
-        route: r,
-        simRes: simulateResults[i],
-        compVal:
-          simulateResults[i]?.success && toTokenPrice && aptPrice
-            ? r.quote.outputUiAmt * toTokenPrice - gasToApt(simulateResults[i].gas_used) * aptPrice
-            : 0
-      }));
-      routesSim.sort((rsa, rsb) => rsb.compVal - rsa.compVal);
-      /*
-      console.log(
-        `simu res: ${routesSim
-          .slice(0, 4)
-          .map((rs) => rs.compVal)
-          .join(' ,')}. ${aptPrice} ${toTokenPrice}`
-      );
-      */
-      const routes = routesSim.map((rs) => rs.route);
-      setSelectedRouteFromRoutes(routes);
-      return {
-        routes,
-        simulateResults: routesSim.slice(0, simuCount).map((rs) => rs.simRes)
-      };
-    } else {
-      return {
-        routes: allRoutes,
-        simulateResults
-      };
-    }
-  }, [allRoutes, aptPrice, setSelectedRouteFromRoutes, simulateResults, toTokenPrice]);
 
   useTimeout(
     () => {
@@ -1196,11 +1219,11 @@ const TokenSwap = () => {
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
                 availableRoutesCount={availableRoutesCount}
-                routes={routesSortedBySimResults.routes}
+                routes={mergedRoutes}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
-                simuResults={routesSortedBySimResults.simulateResults}
+                simuResults={routesSimulatedResults}
                 isFixedOutputMode={isFixedOutput}
               />
             </>
@@ -1225,7 +1248,7 @@ const TokenSwap = () => {
                   <RoutesAvailable
                     availableRoutesCount={availableRoutesCount}
                     isDesktopScreen={true}
-                    routes={routesSortedBySimResults.routes}
+                    routes={mergedRoutes}
                     routeSelected={routeSelected}
                     onRouteSelected={onUserSelectRoute}
                     isRefreshing={isRefreshingRoutes}
@@ -1237,7 +1260,7 @@ const TokenSwap = () => {
                         timePassedAfterRefresh={timePassedAfterRefresh}
                       />
                     }
-                    simuResults={routesSortedBySimResults.simulateResults}
+                    simuResults={routesSimulatedResults}
                     isFixedOutputMode={isFixedOutput}
                   />
                   <SwapDetail
