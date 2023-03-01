@@ -11,6 +11,7 @@ import animeSwapLogo from 'resources/img/dexes/animeswap.png';
 import cetusLogo from 'resources/img/dexes/cetus.png';
 import pancakeLogo from 'resources/img/dexes/pancake.jpeg';
 import obricLogo from 'resources/img/dexes/obric.png';
+import hippoLogo from 'resources/img/hippo-icon.svg';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';
 import { DexType } from '@manahippo/hippo-sdk/dist/aggregator/types';
@@ -142,7 +143,9 @@ export const PoolIcon: FC<IPoolIconProps> = ({
   tooltipMouseLeaveDelay = 0.1
 }) => {
   const imgSrc = useMemo(() => {
-    if (dexType === AggregatorTypes.DexType.Econia) {
+    if (dexType === AggregatorTypes.DexType.Hippo) {
+      return hippoLogo;
+    } else if (dexType === AggregatorTypes.DexType.Econia) {
       return econiaLogo;
     } else if (dexType === AggregatorTypes.DexType.Pontem) {
       return pontemLogo;

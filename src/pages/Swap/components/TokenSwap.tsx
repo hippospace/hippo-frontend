@@ -274,8 +274,16 @@ const RouteRow: React.FC<IRouteRowProps> = ({
     rowH += (routesCount - 1) * 24;
   }
 
+  const [isShowDetails, setIsShowDetails] = useState(false);
+
   return (
-    <div className={classNames('pt-2')} style={{ height: `${rowH}px` }}>
+    <div
+      className={classNames('pt-2')}
+      style={{ height: `${rowH}px` }}
+      onTouchStart={() => setIsShowDetails(true)}
+      onTouchEnd={() => setIsShowDetails(false)}
+      onMouseEnter={() => setIsShowDetails(true)}
+      onMouseLeave={() => setIsShowDetails(false)}>
       <div
         className={classNames(
           'relative h-full flex flex-col justify-center bg-clip-border rounded-lg border-2 cursor-pointer bg-field border-transparent',
@@ -315,7 +323,7 @@ const RouteRow: React.FC<IRouteRowProps> = ({
             </div>
           </div>
           <div className="text-grey-500 label-small-bold">
-            <SwapRoute r={route} />
+            <SwapRoute r={route} isShowDetails={isShowDetails} />
           </div>
         </div>
         {isBestPrice && (
