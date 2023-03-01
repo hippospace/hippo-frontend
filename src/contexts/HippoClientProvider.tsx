@@ -81,7 +81,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [networkCfg.fullNodeUrl]
   );
 
-  const coinListCli = useMemo(() => new CoinListClient(false), [networkCfg.name]);
+  const coinListCli = useMemo(() => new CoinListClient(false), []);
 
   const updateCoinlist = useCallback(() => {
     const tradableCoins = coinListCli?.getCoinInfoList();
