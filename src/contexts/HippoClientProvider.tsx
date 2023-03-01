@@ -1,7 +1,7 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { AggregatorTypes, HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk';
-import { CoinListClient, RawCoinInfo as CoinInfo, NetworkType } from '@manahippo/coin-list';
+import { CoinListClient, RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { GeneralRouteAndQuote, TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
@@ -81,10 +81,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [networkCfg.fullNodeUrl]
   );
 
-  const coinListCli = useMemo(
-    () => new CoinListClient(networkCfg.name as NetworkType),
-    [networkCfg.name]
-  );
+  const coinListCli = useMemo(() => new CoinListClient(false), [networkCfg.name]);
 
   const updateCoinlist = useCallback(() => {
     const tradableCoins = coinListCli?.getCoinInfoList();
@@ -97,10 +94,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     (async () => {
       try {
         // Important: load full coin list
-        await coinListCli.update(aptosClient, undefined, {
-          maxGasAmount: 40_000,
-          expireTimestamp: Math.floor(Date.now() / 1000) + 60
-        });
+        await coinListCli.update();
         updateCoinlist();
       } catch (err) {
         console.log('Update coin list client failed', err);
