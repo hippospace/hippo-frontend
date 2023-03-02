@@ -1,6 +1,6 @@
 import Button from 'components/Button';
 import useAptosWallet from 'hooks/useAptosWallet';
-import { walletAddressEllipsis } from 'utils/utility';
+import { fetcher, walletAddressEllipsis } from 'utils/utility';
 import { Drawer, Modal, Popover } from 'components/Antd';
 import styles from './WalletConnector.module.scss';
 import WalletDisconnector from './components/WalletDisconnector';
@@ -8,11 +8,26 @@ import { WalletConnectedIcon, WalletNotConnectedIcon } from 'resources/icons';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import WalletSelector from './components/WalletSelector';
+import { useMemo } from 'react';
+import useSWR from 'swr';
+
+interface IAptosNameData {
+  name: string;
+}
 
 const WalletConnector: React.FC = () => {
   const { wallet } = useWallet();
   const { activeWallet, openModal, open, closeModal } = useAptosWallet();
   const { isMobile } = useBreakpoint('mobile');
+
+  const key = useMemo(
+    () =>
+      activeWallet
+        ? `https://www.aptosnames.com/api/mainnet/v1/primary-name/${activeWallet.toShortString()}`
+        : null,
+    [activeWallet]
+  );
+  const { data } = useSWR<IAptosNameData>(key, fetcher);
 
   return (
     <>
@@ -25,6 +40,7 @@ const WalletConnector: React.FC = () => {
             onVisibleChange={(visible) => (visible ? openModal() : closeModal())}
             content={
               <WalletDisconnector
+                aptosName={data?.name}
                 onDisconnected={() => {
                   closeModal();
                 }}
@@ -40,7 +56,7 @@ const WalletConnector: React.FC = () => {
               {activeWallet ? (
                 <>
                   <img src={wallet?.adapter.icon} className="w-6 h-6 mr-2" />{' '}
-                  {walletAddressEllipsis(activeWallet?.toString())}
+                  {data?.name ?? walletAddressEllipsis(activeWallet?.toString())}
                 </>
               ) : (
                 'Connect To Wallet'
@@ -82,6 +98,7 @@ const WalletConnector: React.FC = () => {
             visible={open}>
             {activeWallet ? (
               <WalletDisconnector
+                aptosName={data?.name}
                 onDisconnected={() => {
                   closeModal();
                 }}

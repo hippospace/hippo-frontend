@@ -39,3 +39,5 @@ export const dateFormat = (date: Date) => {
     .toString()
     .padStart(2, '0')}`;
 };
+
+export const fetcher = (apiURL: string) => fetch(apiURL).then((res) => res.json());

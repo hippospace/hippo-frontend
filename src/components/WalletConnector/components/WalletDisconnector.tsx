@@ -3,14 +3,20 @@ import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { walletAddressEllipsis } from 'utils/utility';
 import useAptosWallet from 'hooks/useAptosWallet';
 
-const WalletDisconnector = ({ onDisconnected }: { onDisconnected: () => any }) => {
+const WalletDisconnector = ({
+  onDisconnected,
+  aptosName
+}: {
+  onDisconnected: () => any;
+  aptosName: string | undefined;
+}) => {
   const { disconnect } = useWallet();
   const { activeWallet } = useAptosWallet();
   return (
     <div className="flex flex-col w-full p-2">
       <div className="hidden mobile:block space-y-2 mb-6 text-center">
         <div className="h6 text-gradient-primary">Wallet connected</div>
-        <div className="h5">{walletAddressEllipsis(activeWallet?.toString())}</div>
+        <div className="h5">{aptosName ?? walletAddressEllipsis(activeWallet?.toString())}</div>
       </div>
       <Button
         onClick={async () => {
