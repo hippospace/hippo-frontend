@@ -1,6 +1,6 @@
 import Button from 'components/Button';
 import useAptosWallet from 'hooks/useAptosWallet';
-import { fetcher, walletAddressEllipsis } from 'utils/utility';
+import { ellipsisInMiddle, fetcher, walletAddressEllipsis } from 'utils/utility';
 import { Drawer, Modal, Popover } from 'components/Antd';
 import styles from './WalletConnector.module.scss';
 import WalletDisconnector from './components/WalletDisconnector';
@@ -28,6 +28,7 @@ const WalletConnector: React.FC = () => {
     [activeWallet]
   );
   const { data } = useSWR<IAptosNameData>(key, fetcher);
+  const aptosName = ellipsisInMiddle(data?.name);
 
   return (
     <>
@@ -40,7 +41,7 @@ const WalletConnector: React.FC = () => {
             onVisibleChange={(visible) => (visible ? openModal() : closeModal())}
             content={
               <WalletDisconnector
-                aptosName={data?.name}
+                aptosName={aptosName}
                 onDisconnected={() => {
                   closeModal();
                 }}
@@ -56,7 +57,7 @@ const WalletConnector: React.FC = () => {
               {activeWallet ? (
                 <>
                   <img src={wallet?.adapter.icon} className="w-6 h-6 mr-2" />{' '}
-                  {data?.name ?? walletAddressEllipsis(activeWallet?.toString())}
+                  {aptosName ?? walletAddressEllipsis(activeWallet?.toString())}
                 </>
               ) : (
                 'Connect To Wallet'
@@ -98,7 +99,7 @@ const WalletConnector: React.FC = () => {
             visible={open}>
             {activeWallet ? (
               <WalletDisconnector
-                aptosName={data?.name}
+                aptosName={aptosName}
                 onDisconnected={() => {
                   closeModal();
                 }}

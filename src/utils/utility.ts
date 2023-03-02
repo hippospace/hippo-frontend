@@ -14,6 +14,12 @@ export const walletAddressEllipsis = (address: string | undefined) => {
   return address.slice(0, 4) + '...' + address.slice(-6);
 };
 
+export const ellipsisInMiddle = (text: string | undefined, prefix = 6, suffix = 4) => {
+  if (text === undefined) return undefined;
+  if (prefix + suffix >= text.length) return text;
+  return `${text.slice(0, prefix)}...${text.slice(text.length - suffix, text.length)}`;
+};
+
 export const addDays = (date: Date, days: number) => {
   var result = new Date(date);
   result.setDate(result.getDate() + days);
