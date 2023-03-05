@@ -1899,21 +1899,21 @@
     js-sha3 "^0.8.0"
     msafe-wallet "~2.1.3"
 
-"@manahippo/coin-list@^4.1.2":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-4.1.2.tgz#138e2f7e264438da2972b7b55893242d36aef737"
-  integrity sha512-A6Q1N6tWH6G6qSar4bZVefaH3hhmqHeeUE63z+VhV4L2sEvYXc8bdxpo4kjqgc7pS91Q3nuYbaX6/xGVHG2Mfg==
+"@manahippo/coin-list@^4.1.6":
+  version "4.1.7"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-4.1.7.tgz#90633e54c6d8c1568591d2c907bffa2603eeac9a"
+  integrity sha512-XyTbvcN663HCSRIhutfXh/b2gnY3WMYDugtBqAgOGD+xvcZcPivplWDj+svnFYPb9EsYIkpayEwOVAgJ65FPng==
   dependencies:
     commander "^9.3.0"
     cross-fetch "^3.1.5"
 
-"@manahippo/hippo-sdk@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-4.2.3.tgz#4389a79babcdcf7ecf92ea01637126c857f16670"
-  integrity sha512-lM2sBDzOnH8B/qVoRpP636RuNfJcE90w52jkQgv5suefdTT0l5F8c6J+9hfK+3bTZZDkjA7EcgFPWHPgU1mQEw==
+"@manahippo/hippo-sdk@^4.2.6":
+  version "4.2.6"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-4.2.6.tgz#755ac5e17fc29b3dcc2cb2e18fbf5c3ed15d38ec"
+  integrity sha512-8Y1C9AIo9DOS4U281GEqCt11dUnIeruQEhSl+p5kqfdvdwoTcuf3ICbtTDXCyQSsJ95e7ix4JSa05yPOgPukEg==
   dependencies:
-    "@manahippo/coin-list" "^4.1.2"
-    "@manahippo/move-to-ts" "^2.0.0"
+    "@manahippo/coin-list" "^4.1.6"
+    "@manahippo/move-to-ts" "^2.0.1"
     "@vividnetwork/swap-sdk" "^0.2.2"
     aptos "^1.6.0"
     bn.js "^5.2.1"
@@ -1934,10 +1934,10 @@
     sha.js "^2.4.11"
     sha3 "^2.1.4"
 
-"@manahippo/move-to-ts@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-2.0.0.tgz#645e05a5a310b1e5479e9b05f10cdb86ec6d6707"
-  integrity sha512-z7UyujMzT2/b6WGJy4zSybMLuUrD/u2m53+PvsxJw8SG6IXrWQQlX6wNJKCA9i/H5qF3Hj5i9K2Dgzp60x5jfw==
+"@manahippo/move-to-ts@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-2.0.1.tgz#225c4c37ebe2da7f7bf2f0c3be6a1ca8f1945f25"
+  integrity sha512-QMoHihUnz5QkFxqaQGb7QkhklpPLDUUgwi4nLdp+rtmrums9lI688RNks2ocFyRp3vC0tFu+E80XtLcRYG4mWA==
   dependencies:
     aptos "1.6.0"
     big-integer "^1.6.51"
