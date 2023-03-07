@@ -128,15 +128,16 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   const hippoAgg = useMemo(
-    () => new TradeAggregator(aptosClient, networkCfg, coinListCli, 400),
+    () => new TradeAggregator(aptosClient, networkCfg, coinListCli, 400, undefined, false, false),
     [aptosClient, coinListCli, networkCfg]
   );
   useEffect(() => {
     (async () => {
       try {
         // Important: load full pool list
-        // await hippoAgg.updatePoolLists();
+        await hippoAgg.updatePoolLists();
       } catch (err) {
+        hippoAgg.buildDefaultPoolList();
         console.log('Update Hippo trade aggregator failed', err);
         errorHandler(err);
       }
