@@ -62,3 +62,7 @@ export const fetcher = async (url: string) => {
 
   return res.json();
 };
+
+export const multipleFetcher = (urls: string[]) => {
+  return Promise.all(urls.map((url) => fetcher(url)));
+};

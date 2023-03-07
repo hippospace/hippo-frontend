@@ -17,7 +17,7 @@ import {
 } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import useSWR from 'swr';
-import { fetcher } from 'utils/utility';
+import { multipleFetcher } from 'utils/utility';
 import TradingPair from 'components/TradingPair';
 import useDebounceValue from 'hooks/useDebounceValue';
 import { useIsDarkMode } from 'components/Settings';
@@ -78,15 +78,22 @@ const daysOfPeriod = (p: Period) => {
 const YieldChangeChart = ({ lps }: { lps: string[] }) => {
   const [chartPeriod, setChartPeriod] = useState<Period>('30 Days');
   const debouncedValue = useDebounceValue(lps, 300);
-  const key = useMemo(() => {
+  // Using multiple requests to take advantage of the server caching
+  const keys = useMemo(() => {
     if (debouncedValue.length === 0) return null;
-    return `https://api.hippo.space/v1/lptracking/price/change/of/lp?days=${daysOfPeriod(
-      chartPeriod
-    )}&lps=${debouncedValue.join(',')}`;
+    return debouncedValue.map((lp) => {
+      return `https://api.hippo.space/v1/lptracking/price/change/of/lp?days=${daysOfPeriod(
+        chartPeriod
+      )}&lps=${lp}`;
+    });
   }, [debouncedValue, chartPeriod]);
-  const { data } = useSWR<Record<string, ILpPrice[]>>(key, fetcher, {
+  const { data: data0 } = useSWR<Record<string, ILpPrice[]>[]>(keys, multipleFetcher, {
     keepPreviousData: true
   });
+  const data = data0?.reduce((pre, cur) => {
+    const res = Object.assign(pre, cur);
+    return res;
+  }, {});
 
   const dataForChart = useMemo(() => {
     if (!data) return [];
