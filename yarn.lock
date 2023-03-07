@@ -1899,25 +1899,26 @@
     js-sha3 "^0.8.0"
     msafe-wallet "~2.1.3"
 
-"@manahippo/coin-list@^4.1.6":
-  version "4.1.7"
-  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-4.1.7.tgz#90633e54c6d8c1568591d2c907bffa2603eeac9a"
-  integrity sha512-XyTbvcN663HCSRIhutfXh/b2gnY3WMYDugtBqAgOGD+xvcZcPivplWDj+svnFYPb9EsYIkpayEwOVAgJ65FPng==
+"@manahippo/coin-list@4.1.8", "@manahippo/coin-list@^4.1.8":
+  version "4.1.8"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-4.1.8.tgz#03b6a0ec4a1526b3a525b80154f8bf4bc9eedfb1"
+  integrity sha512-8YoGfYDu+1of0rqZsgkiHnfyQgS4/75kInV4KxqTzujUgqrEYtzb9XiCVC30lnzBinitDYyhjWV19V2USCvdbQ==
   dependencies:
     commander "^9.3.0"
     cross-fetch "^3.1.5"
 
-"@manahippo/hippo-sdk@^4.2.6":
-  version "4.2.6"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-4.2.6.tgz#755ac5e17fc29b3dcc2cb2e18fbf5c3ed15d38ec"
-  integrity sha512-8Y1C9AIo9DOS4U281GEqCt11dUnIeruQEhSl+p5kqfdvdwoTcuf3ICbtTDXCyQSsJ95e7ix4JSa05yPOgPukEg==
+"@manahippo/hippo-sdk@^4.2.8":
+  version "4.2.8"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-4.2.8.tgz#5dcb864f259a54f6ae6faf222d350df62e7a7176"
+  integrity sha512-EmJsh1qPEOCZT5k4X+QoklI5A/cMauAw8w+0e39k1DVeOSRhkf1BYuPbeaQcfr/dCtjOZzfAWPHoYsQ7KU+vuQ==
   dependencies:
-    "@manahippo/coin-list" "^4.1.6"
+    "@manahippo/coin-list" "4.1.8"
     "@manahippo/move-to-ts" "^2.0.1"
     "@vividnetwork/swap-sdk" "^0.2.2"
-    aptos "^1.6.0"
+    aptos "1.6.0"
     bn.js "^5.2.1"
     commander "^9.3.0"
+    cross-fetch "^3.1.5"
     decimal.js "^10.4.0"
     promise-throttle "1.1.2"
     yaml "^2.1.1"
