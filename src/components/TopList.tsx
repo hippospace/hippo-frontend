@@ -110,7 +110,10 @@ const TopList: FC<ITopListProps> = ({
             </div>
           )
         ) : (
-          <Skeleton active />
+          <div className="space-y-10 pt-8">
+            <Skeleton active />
+            <Skeleton active />
+          </div>
         )}
       </div>
     </div>
