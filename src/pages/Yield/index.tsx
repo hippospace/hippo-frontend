@@ -37,21 +37,23 @@ interface IYieldState {
 }
 
 export const useYieldStore = create<IYieldState>()(
-  persist(
-    devtools((set) => ({
-      selectedLps: [],
-      setSelectedLps: (v) => set((state) => ({ ...state, selectedLps: v })),
+  devtools(
+    persist(
+      (set) => ({
+        selectedLps: [],
+        setSelectedLps: (v) => set((state) => ({ ...state, selectedLps: v })),
 
-      dexSelected: [],
-      setDexSelected: (v) => set((state) => ({ ...state, dexSelected: v })),
+        dexSelected: ['Obric', 'Pontem', 'Pancake', 'Aux', 'AnimeSwap', 'Cetus', 'Aptoswap'].sort(),
+        setDexSelected: (v) => set((state) => ({ ...state, dexSelected: v })),
 
-      leftSelected: [],
-      setLeftSelected: (v) => set((state) => ({ ...state, leftSelected: v })),
+        leftSelected: ['APT'],
+        setLeftSelected: (v) => set((state) => ({ ...state, leftSelected: v })),
 
-      rightSelected: [],
-      setRightSelected: (v) => set((state) => ({ ...state, rightSelected: v }))
-    })),
-    { name: 'hippo-yield-store' }
+        rightSelected: ['zUSDC', 'USDC', 'ceUSDC'],
+        setRightSelected: (v) => set((state) => ({ ...state, rightSelected: v }))
+      }),
+      { name: 'hippo-yield-store' }
+    )
   )
 );
 
@@ -93,6 +95,9 @@ const LpPriceChangesFilter = () => {
   const setDexesSelected = useYieldStore((state) => state.setDexSelected);
   const setLpLeftSelected = useYieldStore((state) => state.setLeftSelected);
   const setLpRightSelected = useYieldStore((state) => state.setRightSelected);
+  const dexesSelected = useYieldStore((state) => state.dexSelected);
+  const leftSelected = useYieldStore((state) => state.leftSelected);
+  const rightSelected = useYieldStore((state) => state.rightSelected);
 
   return coinOptions ? (
     <div className="w-full flex tablet:flex-col tablet:gap-y-4 items-center gap-x-4">
@@ -100,15 +105,7 @@ const LpPriceChangesFilter = () => {
         className="w-full flex-1"
         title="Dex"
         options={dexFilterOptions}
-        defaultSelected={[
-          'Obric',
-          'Pontem',
-          'Pancake',
-          'Aux',
-          'AnimeSwap',
-          'Cetus',
-          'Aptoswap'
-        ].sort()}
+        defaultSelected={dexesSelected}
         onSelectedUpdate={(dexes) => setDexesSelected(dexes)}
       />
       <IconMultipleSelector
@@ -116,7 +113,7 @@ const LpPriceChangesFilter = () => {
         title="LP Left"
         options={coinOptions}
         isAllOptionEnabled={true}
-        defaultSelected={['APT']}
+        defaultSelected={leftSelected}
         onSelectedUpdate={(s) => setLpLeftSelected(s)}
       />
       <IconMultipleSelector
@@ -124,7 +121,7 @@ const LpPriceChangesFilter = () => {
         title="LP Right"
         options={coinOptions}
         isAllOptionEnabled={true}
-        defaultSelected={['zUSDC', 'USDC', 'ceUSDC']}
+        defaultSelected={rightSelected}
         onSelectedUpdate={(s) => setLpRightSelected(s)}
       />
     </div>
@@ -260,13 +257,11 @@ const TopLpPriceChanges = () => {
             }),
     [data, hippoAgg?.coinListClient, isMobile, isTablet, key, peroidSelected]
   );
-  const [isSelectedLpsInited, setIsSelectedLpsInited] = useState(false);
   useEffect(() => {
-    if (data && !isSelectedLpsInited) {
+    if (data && selectedLps.length === 0) {
       setSelectedLps(data.slice(0, 5).map((d) => uniqueLpStr(d)));
-      setIsSelectedLpsInited(true);
     }
-  }, [data, isSelectedLpsInited, setSelectedLps]);
+  }, [data, selectedLps.length, setSelectedLps]);
   useEffect(() => {
     if (data) {
       const allLps = data.map((d) => uniqueLpStr(d));

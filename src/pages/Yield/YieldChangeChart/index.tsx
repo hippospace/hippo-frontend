@@ -131,7 +131,6 @@ const YieldChangeChart = ({ lps }: { lps: string[] }) => {
             : 0
         )
       ]);
-      console.log('data2', lp, data2.get(lp));
     }
 
     return new Array(maxLength).fill('').map((_, index) => {
