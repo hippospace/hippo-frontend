@@ -3,6 +3,7 @@ import { notification } from 'components/Antd';
 import TextLink from 'components/TextLink';
 import { ReactNode } from 'react';
 import { CloseIcon, NotiErrorIcon, NotiInfoIcon, NotiSuccessIcon } from 'resources/icons';
+import { HttpError } from 'types/hippo';
 import { txExplorerUrl } from './utility';
 
 type NotificationType = 'success' | 'error' | 'info' | 'warn';
@@ -43,6 +44,14 @@ const openNotification = ({
     duration,
     maxCount: 5
   });
+};
+
+export const openHttpErrorNotification = (error: unknown) => {
+  if (error instanceof HttpError) {
+    openErrorNotification({ detail: `${error.status} ${error.info.error ?? error.info.message}` });
+  } else {
+    openErrorNotification({ detail: 'Unknown error' });
+  }
 };
 
 export const openErrorNotification = (args: INotificationArgs) =>

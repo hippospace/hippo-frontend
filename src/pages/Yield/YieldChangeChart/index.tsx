@@ -21,6 +21,7 @@ import { multipleFetcher } from 'utils/utility';
 import TradingPair from 'components/TradingPair';
 import useDebounceValue from 'hooks/useDebounceValue';
 import { useIsDarkMode } from 'components/Settings';
+import { openHttpErrorNotification } from 'utils/notifications';
 
 const Periods = ['1 Day', '7 Days', '30 Days'] as const;
 type Period = typeof Periods[number];
@@ -87,9 +88,13 @@ const YieldChangeChart = ({ lps }: { lps: string[] }) => {
       )}&lps=${lp}`;
     });
   }, [debouncedValue, chartPeriod]);
-  const { data: data0 } = useSWR<Record<string, ILpPrice[]>[]>(keys, multipleFetcher, {
-    keepPreviousData: true
+  const { data: data0, error } = useSWR<Record<string, ILpPrice[]>[]>(keys, multipleFetcher, {
+    keepPreviousData: true,
+    refreshInterval: 3600_000
   });
+  if (error) {
+    openHttpErrorNotification(error);
+  }
   const data = data0?.reduce((pre, cur) => {
     const res = Object.assign(pre, cur);
     return res;

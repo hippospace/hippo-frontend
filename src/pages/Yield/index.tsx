@@ -19,11 +19,12 @@ import { fetcher } from 'utils/utility';
 // import CheckboxInput from 'components/CheckboxInput';
 import YieldChangeChart from './YieldChangeChart';
 import create from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
+import { openHttpErrorNotification } from 'utils/notifications';
 
 interface IYieldState {
-  selectedLps: Set<string>;
-  setSelectedLps: (v: Set<string>) => void;
+  selectedLps: Array<string>;
+  setSelectedLps: (v: Array<string>) => void;
 
   dexSelected: string[];
   setDexSelected: (v: string[]) => void;
@@ -36,19 +37,22 @@ interface IYieldState {
 }
 
 export const useYieldStore = create<IYieldState>()(
-  devtools((set) => ({
-    selectedLps: new Set(),
-    setSelectedLps: (v) => set((state) => ({ ...state, selectedLps: v })),
+  persist(
+    devtools((set) => ({
+      selectedLps: [],
+      setSelectedLps: (v) => set((state) => ({ ...state, selectedLps: v })),
 
-    dexSelected: [],
-    setDexSelected: (v) => set((state) => ({ ...state, dexSelected: v })),
+      dexSelected: [],
+      setDexSelected: (v) => set((state) => ({ ...state, dexSelected: v })),
 
-    leftSelected: [],
-    setLeftSelected: (v) => set((state) => ({ ...state, leftSelected: v })),
+      leftSelected: [],
+      setLeftSelected: (v) => set((state) => ({ ...state, leftSelected: v })),
 
-    rightSelected: [],
-    setRightSelected: (v) => set((state) => ({ ...state, rightSelected: v }))
-  }))
+      rightSelected: [],
+      setRightSelected: (v) => set((state) => ({ ...state, rightSelected: v }))
+    })),
+    { name: 'hippo-yield-store' }
+  )
 );
 
 const LpPriceChangesFilter = () => {
@@ -156,7 +160,7 @@ const ChangeLabel = ({
 };
 
 const uniqueLpStr = (d: ILpPriceChange) => [d.dex, d.lp, d.poolType].join(':');
-
+const MAX_LP_SELECTED_COUNT = 8;
 const TopLpPriceChanges = () => {
   const { hippoAgg } = useHippoClient();
   const { isTablet } = useBreakpoint('tablet');
@@ -173,10 +177,14 @@ const TopLpPriceChanges = () => {
 
   const onCheck = useCallback(
     (d: ILpPriceChange, isChecked: boolean) => {
-      if (isChecked) setSelectedLps(new Set(selectedLps.add(uniqueLpStr(d))));
-      else {
-        selectedLps.delete(uniqueLpStr(d));
-        setSelectedLps(new Set(selectedLps));
+      if (isChecked && selectedLps.length < MAX_LP_SELECTED_COUNT) {
+        selectedLps.push(uniqueLpStr(d));
+        const selectedLpsSet = new Set(selectedLps);
+        setSelectedLps(Array.from(selectedLpsSet));
+      } else if (!isChecked) {
+        const selectedLpsSet = new Set(selectedLps);
+        selectedLpsSet.delete(uniqueLpStr(d));
+        setSelectedLps(Array.from(selectedLpsSet));
       }
     },
     [selectedLps, setSelectedLps]
@@ -193,9 +201,13 @@ const TopLpPriceChanges = () => {
         debouncedValue[2]
       )}`
     : null;
-  const { data } = useSWR<ILpPriceChange[]>(key, fetcher, {
-    keepPreviousData: false
+  const { data, error } = useSWR<ILpPriceChange[]>(key, fetcher, {
+    keepPreviousData: false,
+    refreshInterval: 3600_000
   });
+  if (error) {
+    openHttpErrorNotification(error);
+  }
   const data2 = useMemo(
     () =>
       !key
@@ -251,7 +263,7 @@ const TopLpPriceChanges = () => {
   const [isSelectedLpsInited, setIsSelectedLpsInited] = useState(false);
   useEffect(() => {
     if (data && !isSelectedLpsInited) {
-      setSelectedLps(new Set(data.slice(0, 5).map((d) => uniqueLpStr(d))));
+      setSelectedLps(data.slice(0, 5).map((d) => uniqueLpStr(d)));
       setIsSelectedLpsInited(true);
     }
   }, [data, isSelectedLpsInited, setSelectedLps]);
@@ -259,11 +271,11 @@ const TopLpPriceChanges = () => {
     if (data) {
       const allLps = data.map((d) => uniqueLpStr(d));
       const intersect = Array.from(selectedLps).filter((lp) => allLps.includes(lp));
-      if (intersect.length < selectedLps.size) {
-        setSelectedLps(new Set(intersect));
+      if (intersect.length < selectedLps.length) {
+        setSelectedLps(intersect);
       }
-      if (!key && selectedLps.size > 0) {
-        setSelectedLps(new Set());
+      if (!key && selectedLps.length > 0) {
+        setSelectedLps([]);
       }
     }
   }, [data, key, selectedLps, setSelectedLps]);
@@ -299,7 +311,7 @@ const TopLpPriceChanges = () => {
     (r: number) => {
       if (data) {
         const d = data[r];
-        onCheck(d, !selectedLps.has(uniqueLpStr(d)));
+        onCheck(d, !selectedLps.includes(uniqueLpStr(d)));
       }
     },
     [data, onCheck, selectedLps]
@@ -341,7 +353,7 @@ const YieldPage = () => {
             <LpPriceChangesFilter />
           </div>
           <div>
-            <YieldChangeChart lps={Array.from(selectedLps)} />
+            <YieldChangeChart lps={selectedLps} />
           </div>
           <div>
             <TopLpPriceChanges />
