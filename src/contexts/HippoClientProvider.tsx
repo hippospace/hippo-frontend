@@ -128,7 +128,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   );
 
   const hippoAgg = useMemo(
-    () => new TradeAggregator(aptosClient, networkCfg, coinListCli, 400, undefined, false, false),
+    () => new TradeAggregator(aptosClient, networkCfg, coinListCli, 400, undefined, false, true),
     [aptosClient, coinListCli, networkCfg]
   );
   useEffect(() => {
