@@ -108,9 +108,9 @@ export const useCoingeckoRateHistory = (
     let lastFindIndex = -1;
     const prices = toTokenData.prices.reduce((pre, cur) => {
       const currentTs = cur[0];
-      lastFindIndex = fromTokenData.prices
-        .slice(lastFindIndex + 1)
-        .findIndex((v) => Math.abs(v[0] - currentTs) < 2 * 60 * 1000);
+      lastFindIndex = fromTokenData.prices.findIndex(
+        (v) => Math.abs(v[0] - currentTs) < 1 * 60 * 1000
+      );
       if (lastFindIndex >= 0) {
         const fromPrice = fromTokenData.prices[lastFindIndex];
         const rate = cur[1] / fromPrice[1];
