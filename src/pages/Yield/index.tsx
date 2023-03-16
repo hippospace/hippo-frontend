@@ -21,7 +21,7 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { openHttpErrorNotification } from 'utils/notifications';
 import { RawCoinInfo } from '@manahippo/coin-list';
-import { coinBridge, coinPriority } from 'utils/hippo';
+import { coinBridge, coinPriority, daysOfPeriod } from 'utils/hippo';
 
 export const searchTabs = ['All', 'Single Coin', 'LP', 'Farm', 'Lending'] as const;
 export type YieldTokenType = Exclude<typeof searchTabs[number], 'All'>;
@@ -40,6 +40,9 @@ interface IYieldState {
 
   periodSelected: PriceChangePeriod;
   setPeriodSelected: (p: PriceChangePeriod) => void;
+
+  chartPeriod: PriceChangePeriod;
+  setChartPeriod: (p: PriceChangePeriod) => void;
 }
 
 export const useYieldStore = create<IYieldState>()(
@@ -53,9 +56,12 @@ export const useYieldStore = create<IYieldState>()(
         setCoinsFilter: (v) => set((state) => ({ ...state, coinsFilter: v })),
 
         periodSelected: PriceChangePeriod['30D'],
-        setPeriodSelected: (p) => set((state) => ({ ...state, periodSelected: p }))
+        setPeriodSelected: (p) => set((state) => ({ ...state, periodSelected: p })),
+
+        chartPeriod: PriceChangePeriod['30D'],
+        setChartPeriod: (p) => set((state) => ({ ...state, chartPeriod: p }))
       }),
-      { name: 'hippo-yield-store-03161522' }
+      { name: 'hippo-yield-store-03162002' }
     )
   )
 );
@@ -325,6 +331,7 @@ const TopLpPriceChanges = () => {
     return lpsFilter.length > 0 || specifiedLps.length > 0
       ? `https://api.hippo.space/v1/lptracking/lps/prices/changes?` +
           [
+            `tvlThreshold=50`,
             allDexes.length ? `dexFilter=${encodeURIComponent(allDexes.join(','))}` : undefined,
             lpsFilter.length ? `lpFilter=${encodeURIComponent(lpsFilter.join(','))}` : undefined,
             specifiedLps.length
@@ -529,7 +536,7 @@ const TopLpPriceChanges = () => {
 
 const YieldPage = () => {
   const selectedCoins = useYieldStore((state) => state.selectedLps);
-  const periodSelected = useYieldStore((state) => state.periodSelected);
+  const chartPeriod = useYieldStore((state) => state.chartPeriod);
   return (
     <div className="max-w-[1321px] mx-auto mt-[106px] tablet:mt-[64px] mobile:mt-[32px]">
       <div>
@@ -537,7 +544,7 @@ const YieldPage = () => {
           <div className="h4">Tracking ROI over time</div>
           <div className="mt-1 large-label-regular">
             The graph below shows your ROI of selected coins over a time period of{' '}
-            {parseInt(periodSelected)} days
+            {daysOfPeriod(chartPeriod)} days
           </div>
         </div>
         <Card className="px-8 pb-11 tablet:px-2 mobile:px-1">

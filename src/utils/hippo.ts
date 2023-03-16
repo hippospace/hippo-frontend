@@ -1,4 +1,5 @@
 import { RawCoinInfo } from '@manahippo/coin-list';
+import { PriceChangePeriod } from 'types/hippo';
 
 export const tokensHavingHippoNativePriceHistory = [
   '0x1::aptos_coin::AptosCoin',
@@ -37,4 +38,10 @@ export const coinBridge = (coin: RawCoinInfo) => {
   const bridgeArray = coin.extensions.data.find((a) => a[0] === 'bridge');
   const bridge = (bridgeArray && bridgeArray[1]) ?? '';
   return bridge;
+};
+
+export const daysOfPeriod = (p: PriceChangePeriod) => {
+  if (p === PriceChangePeriod['1D']) return 1;
+  if (p === PriceChangePeriod['7D']) return 7;
+  if (p === PriceChangePeriod['30D']) return 30;
 };

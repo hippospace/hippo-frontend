@@ -4,7 +4,7 @@ import Card from 'components/Card';
 import PoolProvider from 'components/PoolProvider';
 import { percent } from 'components/PositiveFloatNumInput/numberFormats';
 import useHippoClient from 'hooks/useHippoClient';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -24,9 +24,10 @@ import { openHttpErrorNotification } from 'utils/notifications';
 import CoinIcon from 'components/Coins/CoinIcon';
 import CoinLabel from 'components/Coins/CoinLabel';
 import classNames from 'classnames';
+import { useYieldStore } from '..';
+import { daysOfPeriod } from 'utils/hippo';
+import { PriceChangePeriod } from 'types/hippo';
 
-const Periods = ['1 Day', '7 Days', '30 Days'] as const;
-type Period = typeof Periods[number];
 interface IPrice {
   price: string;
   ts: string;
@@ -86,14 +87,9 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
   return null;
 };
 
-const daysOfPeriod = (p: Period) => {
-  if (p === '1 Day') return 1;
-  if (p === '7 Days') return 7;
-  if (p === '30 Days') return 30;
-};
-
 const YieldChangeChart = ({ coins }: { coins: string[] }) => {
-  const [chartPeriod, setChartPeriod] = useState<Period>('30 Days');
+  const chartPeriod = useYieldStore((state) => state.chartPeriod);
+  const setChartPeriod = useYieldStore((state) => state.setChartPeriod);
 
   const keyCoins = useMemo(() => {
     if (coins.length === 0) return null;
@@ -184,9 +180,12 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
     });
   }, [coins, data]);
 
-  const onSegmentedChange = useCallback((v: string | number) => {
-    setChartPeriod(v as Period);
-  }, []);
+  const onSegmentedChange = useCallback(
+    (v: string | number) => {
+      setChartPeriod(v as PriceChangePeriod);
+    },
+    [setChartPeriod]
+  );
 
   const isDark = useIsDarkMode();
 
@@ -194,7 +193,7 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
     <div className="">
       <div className="w-full flex justify-end py-8">
         <Segmented
-          options={Periods as unknown as string[]}
+          options={[PriceChangePeriod['1D'], PriceChangePeriod['7D'], PriceChangePeriod['30D']]}
           value={chartPeriod}
           size={'middle'}
           onChange={onSegmentedChange}
