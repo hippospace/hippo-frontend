@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import Card from 'components/Card';
 import CoinIcon from 'components/Coins/CoinIcon';
 import CoinLabel from 'components/Coins/CoinLabel';
-import IconMultipleSelector from 'pages/Yield/IconMultipleSelector';
+import IconMultipleSelector, { IYieldTokenSelectorOption } from 'pages/Yield/IconMultipleSelector';
 import PoolProvider from 'components/PoolProvider';
 import { percent } from 'components/PositiveFloatNumInput/numberFormats';
 import TradingPair from 'components/TradingPair';
@@ -22,6 +22,9 @@ import { devtools, persist } from 'zustand/middleware';
 import openNotification, { openHttpErrorNotification } from 'utils/notifications';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import { coinBridge, coinPriority } from 'utils/hippo';
+
+export const searchTabs = ['All', 'Single Coin', 'LP', 'Farm', 'Lending'] as const;
+export type YieldTokenType = Exclude<typeof searchTabs[number], 'All'>;
 
 interface IDistinctTokens {
   coins: string[];
@@ -83,8 +86,9 @@ const TokenSelector = ({ className }: { className?: string }) => {
       .filter((c) => c && !c?.symbol.startsWith('dev') && !!c?.coingecko_id) as RawCoinInfo[]) ??
     [];
 
-  const coinOptions = coins.map((c) => {
+  const coinOptions: IYieldTokenSelectorOption[] = coins.map((c) => {
     return {
+      type: 'Single Coin',
       key: c.symbol,
       sortKey: tokenSortKey(c),
       icon: (
@@ -137,7 +141,7 @@ const TokenSelector = ({ className }: { className?: string }) => {
       }, [] as { fullName: string; lp: string }[])
       .map((o) => o.fullName) ?? [];
 
-  const lpOptions =
+  const lpOptions: IYieldTokenSelectorOption[] =
     lps
       .filter((lp) => lp.startsWith('*'))
       .map((_lp) => {
@@ -158,6 +162,7 @@ const TokenSelector = ({ className }: { className?: string }) => {
         */
         return {
           key: _lp,
+          type: 'LP',
           sortKey: [
             `${tokenSortKey(baseToken)}-${tokenSortKey(quoteToken)}`,
             poolType,
@@ -166,7 +171,7 @@ const TokenSelector = ({ className }: { className?: string }) => {
           icon: (
             <div className="flex items-center w-full">
               {base && quote && (
-                <TradingPair base={base} quote={quote} isLp={true} isIconsInvisible={false} />
+                <TradingPair base={base} quote={quote} isLp={true} isIconsInvisible={true} />
               )}
               {/*
               {dexType !== undefined ? (
@@ -394,40 +399,47 @@ const TopLpPriceChanges = () => {
           const dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
 
           nodes.push(
-            <div key={i} className="flex items-center gap-x-3 tablet:gap-x-2">
-              <PoolProvider
-                className={'h-[65px]'}
-                dexType={dexType}
-                isNameInvisible={true}
-                isTitleEnabled={true}
-                isClickable={false}
-              />
-              {base && quote && (
-                <TradingPair
-                  key={i}
-                  base={base}
-                  quote={quote}
-                  isLp={true}
-                  isIconsInvisible={isMobile}
+            ...[
+              <div key={i} className="flex items-center gap-x-3 tablet:gap-x-2">
+                {base && quote && (
+                  <TradingPair
+                    key={i}
+                    base={base}
+                    quote={quote}
+                    isLp={true}
+                    isIconsInvisible={isMobile}
+                  />
+                )}
+              </div>,
+              <span key={i} className="body-bold text-grey-700 flex items-center gap-x-1">
+                <PoolProvider
+                  className={'h-[65px]'}
+                  dexType={dexType}
+                  isNameInvisible={true}
+                  isTitleEnabled={true}
+                  isClickable={false}
                 />
-              )}
-            </div>
+                LP
+              </span>
+            ]
           );
         } else {
           const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.coin)[0];
           nodes.push(
-            <div key={i} className="min-h-[65px] flex items-center gap-x-2">
-              <CoinIcon token={coin} />
-              {coin && <CoinLabel coin={coin} />}
-            </div>
+            ...[
+              <div key={i} className="min-h-[65px] flex items-center gap-x-2">
+                <CoinIcon token={coin} />
+                {coin && <CoinLabel coin={coin} />}
+              </div>,
+              <span key={i} className="body-bold text-grey-700">
+                Coin
+              </span>
+            ]
           );
         }
 
         nodes.push(
           ...[
-            <span key={i} className="body-bold text-grey-700">
-              {d.type === 'lp' ? 'LP' : 'Coin'}
-            </span>,
             ...(!isTablet ? [<ChangeLabel key={i} v={d.changes[PriceChangePeriod['1D']]} />] : []),
             <ChangeLabel key={i} v={d.changes[PriceChangePeriod['7D']]} />,
             <ChangeLabel key={i} v={d.changes[PriceChangePeriod['30D']]} />
@@ -477,7 +489,7 @@ const TopLpPriceChanges = () => {
       ].filter((c) => !!c),
     [isMobile, isTablet, peroidSelected, setPeriodSelected]
   );
-  const flexs = !isTablet ? [3, 1, 2, 2, 3] : !isMobile ? [3, 1, 2, 3] : [3, 1, 1.5, 1.5];
+  const flexs = !isTablet ? [3, 1.5, 2, 2, 3] : !isMobile ? [3, 1.5, 2, 3] : [3, 1.5, 2, 2];
 
   const onClickRow = useCallback(
     (r: number) => {

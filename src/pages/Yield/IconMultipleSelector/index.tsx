@@ -6,8 +6,10 @@ import { useBreakpoint } from 'hooks/useBreakpoint';
 import { Fragment, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Transition } from 'react-transition-group';
 import { CaretIcon, CheckIcon, CloseCircleIcon } from 'resources/icons';
+import { searchTabs, YieldTokenType } from '..';
 
-export interface IFilterOption {
+export interface IYieldTokenSelectorOption {
+  type: YieldTokenType;
   icon: ReactNode;
   name: ReactNode;
   key: string;
@@ -25,7 +27,7 @@ export const IconMultipleSelector = ({
 }: {
   title: string;
   className?: string;
-  options: IFilterOption[];
+  options: IYieldTokenSelectorOption[];
   defaultSelected?: string[];
   isAllOptionEnabled?: boolean;
   onSelectedUpdate: (selected: string[]) => void;
@@ -82,11 +84,12 @@ export const IconMultipleSelector = ({
   }, [isPopupVisible]);
 
   const sortValue = useCallback(
-    (a: IFilterOption) => (selectedSnap.has(a.key) ? 0 : 1),
+    (a: IYieldTokenSelectorOption) => (selectedSnap.has(a.key) ? 0 : 1),
     [selectedSnap]
   );
 
   const [searchPattern, setSearchPattern] = useState('');
+  const [selectedSearchTab, setSelectedSearchTab] = useState<typeof searchTabs[number]>('All');
 
   const content = useMemo(() => {
     return (
@@ -104,7 +107,21 @@ export const IconMultipleSelector = ({
             </Button>
           )}
         </div>
-        <div className="overflow-auto scrollbar max-h-[calc(100%-36px)] pt-2">
+        <div className="flex items-center justify-between body-bold my-2 text-grey-500">
+          {searchTabs.map((s, i) => {
+            return (
+              <div
+                key={i}
+                onClick={() => setSelectedSearchTab(s)}
+                className={classNames('rounded-xl py-1 px-2 hover:text-grey-700', {
+                  'bg-field text-grey-700': selectedSearchTab === s
+                })}>
+                {s}
+              </div>
+            );
+          })}
+        </div>
+        <div className="overflow-auto scrollbar max-h-[calc(100%-80px)] h-full relative">
           <div className="space-y-1 ">
             {isAllOptionEnabled && (
               <div
@@ -132,6 +149,7 @@ export const IconMultipleSelector = ({
                   return 0;
                 }
               })
+              .filter((o) => selectedSearchTab === 'All' || o.type === selectedSearchTab)
               .filter(
                 (o) =>
                   !searchPattern ||
@@ -160,6 +178,11 @@ export const IconMultipleSelector = ({
                 );
               })}
           </div>
+          {['Lending', 'Farm'].includes(selectedSearchTab) && (
+            <div className="absolute w-full h-full left-0 right-0 flex items-center justify-center bg-surface text-grey-500">
+              Coming soon...
+            </div>
+          )}
         </div>
       </div>
     );
@@ -171,6 +194,7 @@ export const IconMultipleSelector = ({
     options,
     searchPattern,
     selected,
+    selectedSearchTab,
     selectedSnap,
     sortValue
   ]);
@@ -232,7 +256,9 @@ export const IconMultipleSelector = ({
           unmountOnExit={false}>
           {(state) => (
             <div
-              className="top-[100%] left-0 absolute z-50"
+              className={classNames('top-[100%] left-0 absolute z-50', {
+                'pointer-events-none': !isPopupVisible // not interfere charts
+              })}
               onClick={() => (isCardClicked.current = true)}
               ref={nodeRef}
               style={{
