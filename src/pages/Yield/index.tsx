@@ -10,7 +10,7 @@ import TradingPair from 'components/TradingPair';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import useHippoClient from 'hooks/useHippoClient';
 import TopList from 'components/TopList';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CaretIcon } from 'resources/icons';
 import useSWR from 'swr';
 import { ICoinPriceChange, ILpPriceChange, PriceChangePeriod } from 'types/hippo';
@@ -43,6 +43,9 @@ interface IYieldState {
 
   chartPeriod: PriceChangePeriod;
   setChartPeriod: (p: PriceChangePeriod) => void;
+
+  hoveringToken: string | undefined;
+  setHoveringToken: (v: string | undefined) => void;
 }
 
 export const useYieldStore = create<IYieldState>()(
@@ -59,7 +62,10 @@ export const useYieldStore = create<IYieldState>()(
         setPeriodSelected: (p) => set((state) => ({ ...state, periodSelected: p })),
 
         chartPeriod: PriceChangePeriod['30D'],
-        setChartPeriod: (p) => set((state) => ({ ...state, chartPeriod: p }))
+        setChartPeriod: (p) => set((state) => ({ ...state, chartPeriod: p })),
+
+        hoveringToken: undefined,
+        setHoveringToken: (v) => set((state) => ({ ...state, hoveringToken: v }))
       }),
       { name: 'hippo-yield-store-03162002' }
     )
@@ -476,7 +482,7 @@ const TopLpPriceChanges = () => {
   const cols = useMemo(
     () =>
       [
-        '# Coin',
+        `# Coin`,
         'Type',
         ...[
           ...(!isTablet ? [[PriceChangePeriod['1D'], '1D Change(%)', true]] : []),
@@ -514,23 +520,40 @@ const TopLpPriceChanges = () => {
     return selectedLps.map((lp) => mergedData.map((d) => d.coin).findIndex((s) => s === lp));
   }, [mergedData, selectedLps]);
 
+  const [hoveringRow, setHoveringRow] = useState<number>();
+  const setHoveringToken = useYieldStore((state) => state.setHoveringToken);
+
+  useEffect(() => {
+    const token = hoveringRow !== undefined ? mergedData[hoveringRow].coin : undefined;
+    if (token === undefined || selectedLps.includes(token)) setHoveringToken(token);
+  }, [hoveringRow, mergedData, selectedLps, setHoveringToken]);
+
   return (
-    <TopList
-      className=""
-      title=""
-      isLoading={isLoading}
-      cols={cols}
-      flexs={flexs}
-      datas={data2}
-      RowComp={'div'}
-      rowClassName={(i) =>
-        classNames(`cursor-pointer hover:bg-prime-400/10 rounded-lg mobile:px-2`, {
-          'bg-prime-400/20': selectedRows.includes(i)
-        })
-      }
-      onClickRow={onClickRow}
-      maxColumns={6}
-    />
+    <>
+      <TopList
+        className=""
+        title=""
+        isLoading={isLoading}
+        cols={cols}
+        flexs={flexs}
+        datas={data2}
+        RowComp={'div'}
+        rowClassName={(i) =>
+          classNames(`cursor-pointer hover:bg-prime-400/10 rounded-lg mobile:px-2`, {
+            'bg-prime-400/20': selectedRows.includes(i)
+          })
+        }
+        onClickRow={onClickRow}
+        onMouseEnterRow={(i) => setHoveringRow(i)}
+        onMouseLeaveRow={(i) => {
+          if (i === hoveringRow) setHoveringRow(undefined);
+        }}
+        maxColumns={6}
+      />
+      {areThereLpsTVLTooLow && (
+        <div className="label-small-thin italic">* LPs with TVL too low are not displayed</div>
+      )}
+    </>
   );
 };
 

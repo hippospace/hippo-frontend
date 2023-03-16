@@ -189,6 +189,8 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
 
   const isDark = useIsDarkMode();
 
+  const hoveringToken = useYieldStore((state) => state.hoveringToken);
+
   return (
     <div className="">
       <div className="w-full flex justify-end py-8">
@@ -247,13 +249,14 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
                     (dataForChart.slice(-1)[0][b] ?? 0) - (dataForChart.slice(-1)[0][a] ?? 0)
                 )
                 .map((lp, index) => {
+                  const isHover = lp === hoveringToken;
                   return (
                     <Line
                       key={index}
-                      strokeWidth={index === 0 ? 4 : 2}
+                      strokeWidth={isHover ? 4 : index === 0 ? 4 : 2}
                       type="monotone"
                       dataKey={lp}
-                      stroke={index % 2 ? '#FE8D88' : '#8D78F7'}
+                      stroke={isHover ? '#29C995' : index % 2 ? `#FE8D88` : `#8D78F7`}
                       dot={false}
                       activeDot={{ r: 8, strokeWidth: 0 }}
                     />

@@ -16,6 +16,8 @@ interface ITopListProps {
   maxColumns?: number;
   RowComp?: ((props: any) => JSX.Element) | ElementType;
   onClickRow?: (row: number) => void;
+  onMouseEnterRow?: (row: number) => void;
+  onMouseLeaveRow?: (row: number) => void;
   isLoading?: boolean;
 }
 
@@ -29,6 +31,8 @@ const TopList: FC<ITopListProps> = ({
   maxColumns,
   RowComp = Card,
   onClickRow = () => {},
+  onMouseEnterRow = () => {},
+  onMouseLeaveRow = () => {},
   isLoading = false
 }) => {
   const flex = useCallback(
@@ -73,6 +77,8 @@ const TopList: FC<ITopListProps> = ({
                   <RowComp
                     className={classNames('flex items-center px-4', rowClassName(index))}
                     key={`row-${index}`}
+                    onMouseEnter={() => onMouseEnterRow(index)}
+                    onMouseLeave={() => onMouseLeaveRow(index)}
                     onClick={() => onClickRow(index)}>
                     {dr.map((c, i) => {
                       return (
