@@ -193,6 +193,7 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
     <div className="">
       <div className="w-full flex justify-end py-8">
         <Segmented
+          className="!bg-field"
           options={[PriceChangePeriod['1D'], PriceChangePeriod['7D'], PriceChangePeriod['30D']]}
           value={chartPeriod}
           size={'middle'}

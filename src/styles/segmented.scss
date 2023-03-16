@@ -2,9 +2,6 @@
   @apply p-1 #{!important};
   @apply text-grey-700;
   @apply rounded-full #{!important};
-  &:hover {
-    @apply bg-surface #{!important};
-  }
   .ant-segmented-item {
     @apply duration-[0s];
     &:hover, &:active {

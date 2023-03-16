@@ -1,9 +1,6 @@
 :global {
   :local(.segmented).ant-segmented {
     @apply bg-field #{!important};
-    &:hover {
-      @apply bg-field #{!important};
-    }
     .ant-segmented-item .ant-segmented-item-label {
       @apply label-small-bold #{!important};
     }
