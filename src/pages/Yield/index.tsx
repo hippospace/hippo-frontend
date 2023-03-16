@@ -19,7 +19,7 @@ import { fetcher, multipleFetcher } from 'utils/utility';
 import YieldChangeChart from './YieldChangeChart';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import openNotification, { openHttpErrorNotification } from 'utils/notifications';
+import { openHttpErrorNotification } from 'utils/notifications';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import { coinBridge, coinPriority } from 'utils/hippo';
 
@@ -356,11 +356,13 @@ const TopLpPriceChanges = () => {
 
   useEffect(() => {
     if (areThereLpsTVLTooLow) {
+      /*
       openNotification({
         type: 'info',
         title: 'Note',
         detail: 'LPs with too low TVL not displayed'
       });
+      */
     }
   }, [areThereLpsTVLTooLow, lpsData]);
 
@@ -527,12 +529,16 @@ const TopLpPriceChanges = () => {
 
 const YieldPage = () => {
   const selectedCoins = useYieldStore((state) => state.selectedLps);
+  const periodSelected = useYieldStore((state) => state.periodSelected);
   return (
     <div className="max-w-[1321px] mx-auto mt-[106px] tablet:mt-[64px] mobile:mt-[32px]">
       <div>
         <div className="mb-10 text-grey-900">
           <div className="h4">Tracking ROI over time</div>
-          <div className="mt-1 large-label-regular">The graph below shows your ROI over time</div>
+          <div className="mt-1 large-label-regular">
+            The graph below shows your ROI of selected coins over a time period of{' '}
+            {parseInt(periodSelected)} days
+          </div>
         </div>
         <Card className="px-8 pb-11 tablet:px-2 mobile:px-1">
           <div className="pt-4 flex items-center">
