@@ -87,6 +87,8 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
   return null;
 };
 
+const LINE_COLORS = ['#8D78F7', '#FF8479', '#FFCB60', '#0086FB', '#7DD70B', '#21D4A5'];
+
 const YieldChangeChart = ({ coins }: { coins: string[] }) => {
   const chartPeriod = useYieldStore((state) => state.chartPeriod);
   const setChartPeriod = useYieldStore((state) => state.setChartPeriod);
@@ -253,10 +255,10 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
                   return (
                     <Line
                       key={index}
-                      strokeWidth={isHover ? 4 : index === 0 ? 4 : 2}
+                      strokeWidth={isHover ? 3.5 : 2}
                       type="monotone"
                       dataKey={lp}
-                      stroke={isHover ? '#29C995' : index % 2 ? `#FE8D88` : `#8D78F7`}
+                      stroke={`${LINE_COLORS[index]}${isHover ? '88' : 'FF'}`}
                       dot={false}
                       activeDot={{ r: 8, strokeWidth: 0 }}
                     />

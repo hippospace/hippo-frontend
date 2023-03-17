@@ -32,11 +32,11 @@ interface IDistinctTokens {
 }
 
 interface IYieldState {
-  selectedLps: Array<string>;
-  setSelectedLps: (v: Array<string>) => void;
+  selectedTokens: Array<string>;
+  setSelectedTokens: (v: Array<string>) => void;
 
-  coinsFilter: string[];
-  setCoinsFilter: (v: string[]) => void;
+  tokensFilter: string[];
+  setTokensFilter: (v: string[]) => void;
 
   periodSelected: PriceChangePeriod;
   setPeriodSelected: (p: PriceChangePeriod) => void;
@@ -52,11 +52,11 @@ export const useYieldStore = create<IYieldState>()(
   devtools(
     persist(
       (set) => ({
-        selectedLps: [],
-        setSelectedLps: (v) => set((state) => ({ ...state, selectedLps: v })),
+        selectedTokens: [],
+        setSelectedTokens: (v) => set((state) => ({ ...state, selectedTokens: v })),
 
-        coinsFilter: ['APT', '*:APT-USDC:*', '*:APT-zUSDC:*', '*:APT-ceUSDC:*'],
-        setCoinsFilter: (v) => set((state) => ({ ...state, coinsFilter: v })),
+        tokensFilter: ['APT', '*:APT-USDC:*'],
+        setTokensFilter: (v) => set((state) => ({ ...state, tokensFilter: v })),
 
         periodSelected: PriceChangePeriod['30D'],
         setPeriodSelected: (p) => set((state) => ({ ...state, periodSelected: p })),
@@ -67,15 +67,13 @@ export const useYieldStore = create<IYieldState>()(
         hoveringToken: undefined,
         setHoveringToken: (v) => set((state) => ({ ...state, hoveringToken: v }))
       }),
-      { name: 'hippo-yield-store-03162002' }
+      { name: 'hippo-yield-store-03171536' }
     )
   )
 );
 
 const tokenSortKey = (t: RawCoinInfo | undefined) =>
   t ? `${t.official_symbol}${coinBridge(t)}${t.symbol}` : '';
-
-const ALL_SWAPS = 'All Swaps';
 
 const TokenSelector = ({ className }: { className?: string }) => {
   const { data, error } = useSWR<IDistinctTokens>(
@@ -119,73 +117,64 @@ const TokenSelector = ({ className }: { className?: string }) => {
     };
   });
 
-  let sameLpCount = 1;
-  const lps =
-    data?.lps
-      .map((l) => {
-        const [, lp] = l.split(':');
-        let [left, right] = lp.split('-');
-        if (coinPriority(left) < coinPriority(right)) {
-          [left, right] = [right, left];
-        }
-        return {
-          fullName: l,
-          lp: [left, right].join('-')
-        };
-      })
-      .sort((a, b) => (a.lp <= b.lp ? -1 : 1))
-      .reduce((pre, cur) => {
-        if (cur.lp === pre.slice(-1)[0]?.lp) {
-          sameLpCount += 1;
-        } else {
-          // if (sameLpCount > 1) {
-          if (sameLpCount >= 1 && pre.length > 0) {
-            const [, lp] = pre.slice(-1)[0].fullName.split(':');
+  const lpPatterns = useMemo(() => {
+    return (
+      data?.lps
+        .map((l) => {
+          const [, lp] = l.split(':');
+          let [left, right] = lp.split('-');
+          if (coinPriority(left) < coinPriority(right)) {
+            [left, right] = [right, left];
+          }
+          const leftToken = hippoAgg?.coinListClient.getCoinInfoBySymbol(left)[0];
+          const rightToken = hippoAgg?.coinListClient.getCoinInfoBySymbol(right)[0];
+          return {
+            fullName: l,
+            lp: [leftToken?.official_symbol, rightToken?.official_symbol].join('-'),
+            tokens: [leftToken, rightToken]
+          };
+        })
+        .sort((a, b) => (a.lp <= b.lp ? -1 : 1))
+        .reduce((pre, cur) => {
+          if (pre.length === 0 || cur.lp !== pre.slice(-1)[0]?.lp) {
             pre.push({
-              fullName: ['*', lp, '*'].join(':'),
-              lp
+              fullName: ['*', cur.lp, '*'].join(':'),
+              lp: cur.lp,
+              tokens: cur.tokens
             });
           }
-          sameLpCount = 1;
-        }
-        pre.push(cur);
-        return pre;
-      }, [] as { fullName: string; lp: string }[])
-      .map((o) => o.fullName) ?? [];
+          return pre;
+        }, [] as { fullName: string; lp: string; tokens: (RawCoinInfo | undefined)[] }[]) ?? []
+    );
+  }, [data?.lps, hippoAgg?.coinListClient]);
 
   const lpOptions: IYieldTokenSelectorOption[] =
-    lps
-      .filter((lp) => lp.startsWith('*'))
-      .map((_lp) => {
-        const [dex, lp, poolType] = _lp.split(':');
-        let [left, right] = lp.split('-');
-        if (coinPriority(left) < coinPriority(right)) {
-          [left, right] = [right, left];
-        }
-        const baseToken = hippoAgg?.coinListClient.getCoinInfoBySymbol(left)[0];
-        const quoteToken = hippoAgg?.coinListClient.getCoinInfoBySymbol(right)[0];
-        const base = baseToken?.token_type.type;
-        const quote = quoteToken?.token_type.type;
-        /*
+    lpPatterns.map((_lp) => {
+      const [baseToken, quoteToken] = _lp.tokens;
+      const base = baseToken?.token_type.type;
+      const quote = quoteToken?.token_type.type;
+      /*
         const dexType =
           dex !== '*'
             ? AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType]
             : undefined;
         */
-        return {
-          key: _lp,
-          type: 'LP',
-          sortKey: [
-            `${tokenSortKey(baseToken)}-${tokenSortKey(quoteToken)}`,
-            poolType,
-            dex === '*' ? ALL_SWAPS : dex
-          ].join(''),
-          icon: (
-            <div className="flex items-center w-full">
-              {base && quote && (
-                <TradingPair base={base} quote={quote} isLp={true} isIconsInvisible={true} />
-              )}
-              {/*
+      return {
+        key: _lp.fullName,
+        type: 'LP',
+        sortKey: `${tokenSortKey(baseToken)}-${tokenSortKey(quoteToken)}`,
+        icon: (
+          <div className="flex items-center w-full">
+            {base && quote && (
+              <TradingPair
+                base={base}
+                quote={quote}
+                isLp={true}
+                isIconsInvisible={true}
+                isShowBridge={false}
+              />
+            )}
+            {/*
               {dexType !== undefined ? (
                 <PoolProvider
                   className="ml-auto"
@@ -200,15 +189,21 @@ const TokenSelector = ({ className }: { className?: string }) => {
                 </span>
               )}
               */}
-            </div>
-          ),
-          name: false,
-          abbr: (
-            <div className="h-10 flex items-center shrink-0 bg-prime-400/20 p-1 rounded-full px-2">
-              {base && quote && (
-                <TradingPair base={base} quote={quote} isLp={true} isIconsInvisible={false} />
-              )}
-              {/*
+          </div>
+        ),
+        name: false,
+        abbr: (
+          <div className="h-10 flex items-center shrink-0 bg-prime-400/20 p-1 rounded-full px-2">
+            {base && quote && (
+              <TradingPair
+                base={base}
+                quote={quote}
+                isLp={true}
+                isIconsInvisible={false}
+                isShowBridge={false}
+              />
+            )}
+            {/*
               <span className="mx-1">@</span>
               {dexType !== undefined ? (
                 <>
@@ -226,15 +221,15 @@ const TokenSelector = ({ className }: { className?: string }) => {
                 </span>
               )}
               */}
-            </div>
-          )
-        };
-      }) ?? [];
+          </div>
+        )
+      };
+    }) ?? [];
 
   const options = [...coinOptions, ...lpOptions].sort((a, b) => (a.sortKey <= b.sortKey ? -1 : 1));
 
-  const coinsFilter = useYieldStore((state) => state.coinsFilter);
-  const setCoinsFilter = useYieldStore((state) => state.setCoinsFilter);
+  const coinsFilter = useYieldStore((state) => state.tokensFilter);
+  const setCoinsFilter = useYieldStore((state) => state.setTokensFilter);
 
   return (
     <IconMultipleSelector
@@ -275,7 +270,7 @@ const ChangeLabel = ({
 };
 
 const uniqueLpStr = (d: ILpPriceChange) => [d.dex, d.lp, d.poolType].join(':');
-const MAX_LP_SELECTED_COUNT = 8;
+const MAX_TOKENS_SELECTED_COUNT = 6;
 
 const TopLpPriceChanges = () => {
   const { hippoAgg } = useHippoClient();
@@ -283,11 +278,11 @@ const TopLpPriceChanges = () => {
   const { isMobile } = useBreakpoint('mobile');
   const peroidSelected = useYieldStore((state) => state.periodSelected);
 
-  const selectedLps = useYieldStore((state) => state.selectedLps);
-  const setSelectedLps = useYieldStore((state) => state.setSelectedLps);
+  const selectedLps = useYieldStore((state) => state.selectedTokens);
+  const setSelectedLps = useYieldStore((state) => state.setSelectedTokens);
   const setPeriodSelected = useYieldStore((state) => state.setPeriodSelected);
 
-  const coinsFilter = useYieldStore((state) => state.coinsFilter);
+  const coinsFilter = useYieldStore((state) => state.tokensFilter);
   const specifiedLps = useMemo(() => {
     return coinsFilter.filter((c) => c.includes(':') && !c.includes('*'));
   }, [coinsFilter]);
@@ -315,7 +310,7 @@ const TopLpPriceChanges = () => {
 
   const onCheck = useCallback(
     (d: ICoinPriceChange, isChecked: boolean) => {
-      if (isChecked && selectedLps.length < MAX_LP_SELECTED_COUNT) {
+      if (isChecked && selectedLps.length < MAX_TOKENS_SELECTED_COUNT) {
         selectedLps.push(d.coin);
         const selectedLpsSet = new Set(selectedLps);
         setSelectedLps(Array.from(selectedLpsSet));
@@ -339,7 +334,9 @@ const TopLpPriceChanges = () => {
           [
             `tvlThreshold=50`,
             allDexes.length ? `dexFilter=${encodeURIComponent(allDexes.join(','))}` : undefined,
-            lpsFilter.length ? `lpFilter=${encodeURIComponent(lpsFilter.join(','))}` : undefined,
+            lpsFilter.length
+              ? `officalLpFilter=${encodeURIComponent(lpsFilter.join(','))}`
+              : undefined,
             specifiedLps.length
               ? `specifiedLps=${encodeURIComponent(specifiedLps.join(','))}`
               : undefined
@@ -558,7 +555,7 @@ const TopLpPriceChanges = () => {
 };
 
 const YieldPage = () => {
-  const selectedCoins = useYieldStore((state) => state.selectedLps);
+  const selectedCoins = useYieldStore((state) => state.selectedTokens);
   const chartPeriod = useYieldStore((state) => state.chartPeriod);
   return (
     <div className="max-w-[1321px] mx-auto mt-[106px] tablet:mt-[64px] mobile:mt-[32px]">
