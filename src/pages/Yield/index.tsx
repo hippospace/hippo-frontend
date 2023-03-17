@@ -545,7 +545,7 @@ const TopLpPriceChanges = () => {
         RowComp={'div'}
         rowClassName={(i) =>
           classNames(`cursor-pointer rounded-lg mobile:px-2`, {
-            'bg-prime-400/20': selectedRows.includes(i),
+            'bg-prime-400/20 hover:bg-prime-400/30': selectedRows.includes(i),
             'hover:bg-grey-300/10': !selectedRows.includes(i)
           })
         }
