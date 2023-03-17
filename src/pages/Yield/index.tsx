@@ -19,7 +19,7 @@ import { fetcher, multipleFetcher } from 'utils/utility';
 import YieldChangeChart from './YieldChangeChart';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { openHttpErrorNotification } from 'utils/notifications';
+import openNotification, { openHttpErrorNotification } from 'utils/notifications';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import { coinBridge, coinPriority, daysOfPeriod } from 'utils/hippo';
 
@@ -310,7 +310,15 @@ const TopLpPriceChanges = () => {
 
   const onCheck = useCallback(
     (d: ICoinPriceChange, isChecked: boolean) => {
-      if (isChecked && selectedLps.length < MAX_TOKENS_SELECTED_COUNT) {
+      if (isChecked) {
+        if (selectedLps.length >= MAX_TOKENS_SELECTED_COUNT) {
+          openNotification({
+            type: 'info',
+            title: 'Note',
+            detail: 'You can choose up to 6 tokens'
+          });
+          return;
+        }
         selectedLps.push(d.coin);
         const selectedLpsSet = new Set(selectedLps);
         setSelectedLps(Array.from(selectedLpsSet));
@@ -536,8 +544,9 @@ const TopLpPriceChanges = () => {
         datas={data2}
         RowComp={'div'}
         rowClassName={(i) =>
-          classNames(`cursor-pointer hover:bg-prime-400/10 rounded-lg mobile:px-2`, {
-            'bg-prime-400/20': selectedRows.includes(i)
+          classNames(`cursor-pointer rounded-lg mobile:px-2`, {
+            'bg-prime-400/20': selectedRows.includes(i),
+            'hover:bg-grey-300/10': !selectedRows.includes(i)
           })
         }
         onClickRow={onClickRow}

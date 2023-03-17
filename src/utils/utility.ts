@@ -67,3 +67,11 @@ export const fetcher = async (url: string | null) => {
 export const multipleFetcher = (urls: (string | null)[]) => {
   return Promise.all(urls.map((url) => fetcher(url)));
 };
+
+export function getPositiveHash(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i); // hash * 31 which is prime
+  }
+  return Math.abs(hash);
+}
