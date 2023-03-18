@@ -171,10 +171,6 @@ const SwapDetail = ({
     {
       label: 'Slippage Tolerance',
       value: `${swapSettings.slipTolerance} %`
-    },
-    {
-      label: 'Max Gas Fee',
-      value: `${swapSettings.maxGasFee} Gas Units`
     }
   ];
 

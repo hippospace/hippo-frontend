@@ -373,7 +373,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
           <div>Loading routes...</div>
         ) : (
           <>
-            <div>Hippo & other same-dex routes {isFixedOutputMode && '(Fixed receive mode)'}</div>
+            <div> Routes from all DEXes {isFixedOutputMode && '(Exact-output mode)'}</div>
             <div>{refreshButton}</div>
           </>
         )}
