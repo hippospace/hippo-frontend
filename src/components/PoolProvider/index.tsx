@@ -184,7 +184,7 @@ export const ProtocolIcon: FC<IProtocolIconProps> = ({
       return undefined;
     }
   }, [dexType, protocolId]);
-  const name = dexType && AggregatorTypes.DexType[dexType];
+  const name = dexType ? AggregatorTypes.DexType[dexType] : protocolId;
   const [isHover, setIsHover] = useState(false);
 
   useEffect(() => {
