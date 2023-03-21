@@ -57,7 +57,9 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
                   />
                   <CoinIcon className="mr-1" token={coin} />
                   {coin && <CoinLabel className="mr-2" coin={coin} />}
+                  {/*
                   <span className="mr-2 rounded-lg text-prime-400 label-small-bold">Lending</span>
+                  */}
                   <span style={{ color: p.color }} className="ml-auto">
                     {percent(p.value as unknown as number, 2, true)}
                   </span>
