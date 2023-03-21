@@ -1,7 +1,7 @@
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { Segmented, Spin } from 'antd';
 import Card from 'components/Card';
-import PoolProvider from 'components/PoolProvider';
+import ProtocolProvider, { ProtocolId } from 'components/PoolProvider';
 import { percent } from 'components/PositiveFloatNumInput/numberFormats';
 import useHippoClient from 'hooks/useHippoClient';
 import { FC, useCallback, useEffect, useMemo } from 'react';
@@ -24,7 +24,7 @@ import { openHttpErrorNotification } from 'utils/notifications';
 import CoinIcon from 'components/Coins/CoinIcon';
 import CoinLabel from 'components/Coins/CoinLabel';
 import classNames from 'classnames';
-import { useYieldStore } from '..';
+import { CTOKEN_PREFIX, useYieldStore } from '..';
 import { daysOfPeriod } from 'utils/hippo';
 import { PriceChangePeriod } from 'types/hippo';
 
@@ -42,7 +42,28 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
         {payload
           .sort((a, b) => (b.value as number) - (a.value as number))
           .map((p, index) => {
-            if ((p.name as string).includes(':')) {
+            if ((p.name as string).startsWith(CTOKEN_PREFIX)) {
+              const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(
+                (p.name as string).split(':')[2]
+              )[0];
+              return (
+                <p key={index} className="flex justify-between items-center py-2">
+                  <ProtocolProvider
+                    className={'mr-1'}
+                    protocolId={(p.name as string).split(':')[1] as ProtocolId}
+                    isNameInvisible={true}
+                    isTitleEnabled={true}
+                    isClickable={false}
+                  />
+                  <CoinIcon className="mr-1" token={coin} />
+                  {coin && <CoinLabel className="mr-2" coin={coin} />}
+                  <span className="mr-2 rounded-lg text-prime-400 label-small-bold">Lending</span>
+                  <span style={{ color: p.color }} className="ml-auto">
+                    {percent(p.value as unknown as number, 2, true)}
+                  </span>
+                </p>
+              );
+            } else if ((p.name as string).includes(':')) {
               const [dex, lp] = (p.name as string).split(':');
               const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(lp.split('-')[0])[0]
                 ?.token_type.type;
@@ -51,7 +72,7 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
               const dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
               return (
                 <p key={index} className="flex justify-between items-center py-2">
-                  <PoolProvider
+                  <ProtocolProvider
                     className={'mr-1'}
                     dexType={dexType}
                     isNameInvisible={true}
@@ -98,8 +119,10 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
     return coins.map(
       (c) =>
         `https://api.hippo.space/v1/lptracking/${
-          c.includes(':') ? 'lp' : 'coin'
-        }/${encodeURIComponent(c)}/price/change/of/${daysOfPeriod(chartPeriod)}`
+          c.startsWith(CTOKEN_PREFIX) ? 'cToken' : c.includes(':') ? 'lp' : 'coin'
+        }/${encodeURIComponent(c.replace('ctoken:', 'cToken:'))}/price/change/of/${daysOfPeriod(
+          chartPeriod
+        )}`
     );
   }, [chartPeriod, coins]);
 
