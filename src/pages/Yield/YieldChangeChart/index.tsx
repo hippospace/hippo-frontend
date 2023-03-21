@@ -4,7 +4,7 @@ import Card from 'components/Card';
 import ProtocolProvider, { ProtocolId } from 'components/PoolProvider';
 import { percent } from 'components/PositiveFloatNumInput/numberFormats';
 import useHippoClient from 'hooks/useHippoClient';
-import { FC, useCallback, useEffect, useMemo } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CartesianGrid,
   Line,
@@ -111,8 +111,7 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
 const LINE_COLORS = ['#8D78F7', '#FF8479', '#FFCB60', '#0086FB', '#7DD70B', '#21D4A5'];
 
 const YieldChangeChart = ({ coins }: { coins: string[] }) => {
-  const chartPeriod = useYieldStore((state) => state.chartPeriod);
-  const setChartPeriod = useYieldStore((state) => state.setChartPeriod);
+  const [chartPeriod, setChartPeriod] = useState<PriceChangePeriod>(PriceChangePeriod['30D']);
 
   const keyCoins = useMemo(() => {
     if (coins.length === 0) return null;

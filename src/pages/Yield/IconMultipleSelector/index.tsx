@@ -20,6 +20,7 @@ export interface IYieldTokenSelectorOption {
 export const IconMultipleSelector = ({
   title,
   className,
+  yieldTypes,
   options,
   isAllOptionEnabled = true,
   defaultSelected = [],
@@ -27,6 +28,7 @@ export const IconMultipleSelector = ({
 }: {
   title: string;
   className?: string;
+  yieldTypes: YieldTokenType[];
   options: IYieldTokenSelectorOption[];
   defaultSelected?: string[];
   isAllOptionEnabled?: boolean;
@@ -89,7 +91,9 @@ export const IconMultipleSelector = ({
   );
 
   const [searchPattern, setSearchPattern] = useState('');
-  const [selectedSearchTab, setSelectedSearchTab] = useState<typeof searchTabs[number]>('All');
+  const [selectedSearchTab, setSelectedSearchTab] = useState<typeof searchTabs[number]>(
+    yieldTypes.length > 1 ? 'All' : yieldTypes[0]
+  );
 
   const content = useMemo(() => {
     return (
@@ -99,7 +103,7 @@ export const IconMultipleSelector = ({
             className="bg-transparent flex-grow min-w-0 body-bold text-grey-900 focus:outline-none border-none"
             value={searchPattern}
             onChange={(e) => setSearchPattern(e.target.value.toLowerCase())}
-            placeholder="Search: Coin, Lp, Bridge..."
+            placeholder="Search: Coin..."
           />
           {searchPattern && (
             <Button variant="icon" onClick={() => setSearchPattern('')}>
@@ -108,18 +112,19 @@ export const IconMultipleSelector = ({
           )}
         </div>
         <div className="flex items-center justify-between body-bold my-2 text-grey-500">
-          {searchTabs.map((s, i) => {
-            return (
-              <div
-                key={i}
-                onClick={() => setSelectedSearchTab(s)}
-                className={classNames('rounded-xl py-1 px-2 hover:text-grey-700', {
-                  'bg-field text-grey-700': selectedSearchTab === s
-                })}>
-                {s}
-              </div>
-            );
-          })}
+          {yieldTypes.length > 1 &&
+            ['All' as const, ...yieldTypes].map((s, i) => {
+              return (
+                <div
+                  key={i}
+                  onClick={() => setSelectedSearchTab(s)}
+                  className={classNames('rounded-xl py-1 px-2 hover:text-grey-700', {
+                    'bg-field text-grey-700': selectedSearchTab === s
+                  })}>
+                  {s}
+                </div>
+              );
+            })}
         </div>
         <div className="overflow-auto scrollbar max-h-[calc(100%-80px)] h-full relative">
           <div className="space-y-1 ">
@@ -196,7 +201,8 @@ export const IconMultipleSelector = ({
     selected,
     selectedSearchTab,
     selectedSnap,
-    sortValue
+    sortValue,
+    yieldTypes
   ]);
 
   const selectedContainerRef = useRef<HTMLDivElement>(null);
