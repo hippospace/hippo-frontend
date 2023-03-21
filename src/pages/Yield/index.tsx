@@ -21,7 +21,7 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import openNotification, { openHttpErrorNotification } from 'utils/notifications';
 import { RawCoinInfo } from '@manahippo/coin-list';
-import { coinBridge, coinPriority, daysOfPeriod } from 'utils/hippo';
+import { coinBridge, coinPriority } from 'utils/hippo';
 
 export const CTOKEN_FILTER_PREFIX = 'cTokenFilter:';
 export const CTOKEN_PREFIX = 'cToken:';
@@ -38,14 +38,14 @@ interface IYieldState {
   selectedTokens: Array<string>;
   setSelectedTokens: (v: Array<string>) => void;
 
+  selectedCTokens: Array<string>;
+  setSelectedCTokens: (v: Array<string>) => void;
+
   tokensFilter: string[];
   setTokensFilter: (v: string[]) => void;
 
-  periodSelected: PriceChangePeriod;
-  setPeriodSelected: (p: PriceChangePeriod) => void;
-
-  chartPeriod: PriceChangePeriod;
-  setChartPeriod: (p: PriceChangePeriod) => void;
+  cTokensFilter: string[];
+  setCTokensFilter: (v: string[]) => void;
 
   hoveringToken: string | undefined;
   setHoveringToken: (v: string | undefined) => void;
@@ -58,19 +58,19 @@ export const useYieldStore = create<IYieldState>()(
         selectedTokens: [],
         setSelectedTokens: (v) => set((state) => ({ ...state, selectedTokens: v })),
 
-        tokensFilter: ['APT', '*:APT-USDC:*', `${CTOKEN_FILTER_PREFIX}USDC`],
+        selectedCTokens: [],
+        setSelectedCTokens: (v) => set((state) => ({ ...state, selectedCTokens: v })),
+
+        tokensFilter: ['APT', '*:APT-USDC:*'],
         setTokensFilter: (v) => set((state) => ({ ...state, tokensFilter: v })),
 
-        periodSelected: PriceChangePeriod['30D'],
-        setPeriodSelected: (p) => set((state) => ({ ...state, periodSelected: p })),
-
-        chartPeriod: PriceChangePeriod['30D'],
-        setChartPeriod: (p) => set((state) => ({ ...state, chartPeriod: p })),
+        cTokensFilter: [`${CTOKEN_FILTER_PREFIX}USDC`],
+        setCTokensFilter: (v) => set((state) => ({ ...state, cTokensFilter: v })),
 
         hoveringToken: undefined,
         setHoveringToken: (v) => set((state) => ({ ...state, hoveringToken: v }))
       }),
-      { name: 'hippo-yield-store-03171536' }
+      { name: 'hippo-yield-store-03212303' }
     )
   )
 );
@@ -78,7 +78,17 @@ export const useYieldStore = create<IYieldState>()(
 const tokenSortKey = (t: RawCoinInfo | undefined) =>
   t ? `${t.official_symbol}${coinBridge(t)}${t.symbol}` : '';
 
-const TokenSelector = ({ className }: { className?: string }) => {
+const TokenSelector = ({
+  className,
+  yieldTypes,
+  selected,
+  onSelected
+}: {
+  className?: string;
+  yieldTypes: YieldTokenType[];
+  selected: string[];
+  onSelected: (v: string[]) => void;
+}) => {
   const { data, error } = useSWR<IDistinctTokens>(
     'https://api.hippo.space/v1/lptracking/distinct/tokens',
     fetcher,
@@ -133,7 +143,9 @@ const TokenSelector = ({ className }: { className?: string }) => {
         <div className="flex items-center w-full gap-x-2">
           <CoinIcon token={c} isShowSymbol={false} />
           <CoinLabel coin={c} isShowBridge={true} isShowNonOfficalSymbol={true} />
+          {/*
           <div className="px-1 rounded-lg border-prime-500 text-prime-500 border">Lending</div>
+          */}
         </div>
       ),
       name: false,
@@ -141,9 +153,11 @@ const TokenSelector = ({ className }: { className?: string }) => {
         <div className="h-10 flex items-center gap-x-1 bg-prime-400/20 p-1 rounded-full px-2">
           <CoinIcon token={c} />
           <CoinLabel coin={c} />
+          {/*
           <div className="px-1 rounded-lg border-prime-500 text-prime-500 label-small-bold">
             Lending
           </div>
+          */}
         </div>
       )
     };
@@ -258,21 +272,21 @@ const TokenSelector = ({ className }: { className?: string }) => {
       };
     }) ?? [];
 
-  const options = [...coinOptions, ...lpOptions, ...cTokenOptions].sort((a, b) =>
-    a.sortKey <= b.sortKey ? -1 : 1
-  );
-
-  const coinsFilter = useYieldStore((state) => state.tokensFilter);
-  const setCoinsFilter = useYieldStore((state) => state.setTokensFilter);
+  const options = [
+    ...(yieldTypes.includes('Single Coin') ? coinOptions : []),
+    ...(yieldTypes.includes('LP') ? lpOptions : []),
+    ...(yieldTypes.includes('Lending') ? cTokenOptions : [])
+  ].sort((a, b) => (a.sortKey <= b.sortKey ? -1 : 1));
 
   return (
     <IconMultipleSelector
       className={classNames('w-full flex-1', className)}
       title=""
+      yieldTypes={yieldTypes}
       options={options}
       isAllOptionEnabled={false}
-      defaultSelected={coinsFilter}
-      onSelectedUpdate={(s) => setCoinsFilter(s)}
+      defaultSelected={selected}
+      onSelectedUpdate={onSelected}
     />
   );
 };
@@ -306,20 +320,24 @@ const ChangeLabel = ({
 const uniqueLpStr = (d: ILpPriceChange) => [d.dex, d.lp, d.poolType].join(':');
 const MAX_TOKENS_SELECTED_COUNT = 6;
 
-const TopLpPriceChanges = () => {
+const TopLpPriceChanges = ({
+  tokenFilters,
+  selectedTokens,
+  setSelectedTokens
+}: {
+  tokenFilters: string[];
+  selectedTokens: string[];
+  setSelectedTokens: (v: string[]) => void;
+}) => {
   const { hippoAgg } = useHippoClient();
   const { isTablet } = useBreakpoint('tablet');
   const { isMobile } = useBreakpoint('mobile');
-  const peroidSelected = useYieldStore((state) => state.periodSelected);
 
-  const selectedLps = useYieldStore((state) => state.selectedTokens);
-  const setSelectedLps = useYieldStore((state) => state.setSelectedTokens);
-  const setPeriodSelected = useYieldStore((state) => state.setPeriodSelected);
+  const [periodSelected, setPeriodSelected] = useState<PriceChangePeriod>(PriceChangePeriod['30D']);
 
-  const coinsFilter = useYieldStore((state) => state.tokensFilter);
   const [cTokenFilter, specifiedLps, lpsFilter, singleCoins] = useMemo(() => {
     const result = [[], [], [], []] as string[][];
-    for (const c of coinsFilter) {
+    for (const c of tokenFilters) {
       if (c.startsWith(CTOKEN_FILTER_PREFIX)) {
         result[0].push(c);
       } else if (c.includes(':') && !c.includes('*')) {
@@ -334,9 +352,7 @@ const TopLpPriceChanges = () => {
       }
     }
     return result;
-  }, [coinsFilter]);
-
-  console.log(`cTokenFilter`, cTokenFilter, singleCoins, lpsFilter, specifiedLps);
+  }, [tokenFilters]);
 
   const allDexes = useMemo(
     () =>
@@ -355,7 +371,7 @@ const TopLpPriceChanges = () => {
   const onCheck = useCallback(
     (d: ICoinPriceChange, isChecked: boolean) => {
       if (isChecked) {
-        if (selectedLps.length >= MAX_TOKENS_SELECTED_COUNT) {
+        if (selectedTokens.length >= MAX_TOKENS_SELECTED_COUNT) {
           openNotification({
             type: 'info',
             title: 'Note',
@@ -363,16 +379,16 @@ const TopLpPriceChanges = () => {
           });
           return;
         }
-        selectedLps.push(d.coin);
-        const selectedLpsSet = new Set(selectedLps);
-        setSelectedLps(Array.from(selectedLpsSet));
+        selectedTokens.push(d.coin);
+        const selectedLpsSet = new Set(selectedTokens);
+        setSelectedTokens(Array.from(selectedLpsSet));
       } else if (!isChecked) {
-        const selectedLpsSet = new Set(selectedLps);
+        const selectedLpsSet = new Set(selectedTokens);
         selectedLpsSet.delete(d.coin);
-        setSelectedLps(Array.from(selectedLpsSet));
+        setSelectedTokens(Array.from(selectedLpsSet));
       }
     },
-    [selectedLps, setSelectedLps]
+    [selectedTokens, setSelectedTokens]
   );
 
   const coinsKey = useMemo(() => {
@@ -388,6 +404,14 @@ const TopLpPriceChanges = () => {
             .join('&')
       : null;
   }, [cTokenFilter, singleCoins]);
+  const cTokensKey = useMemo(() => {
+    return cTokenFilter.length > 0
+      ? `https://api.hippo.space/v1/lptracking/ctokens/prices/changes?` +
+          [`cTokenFilters=${cTokenFilter.map((c) => c.split(':')[1]).join(',')}`]
+            .filter((s) => !!s)
+            .join('&')
+      : null;
+  }, [cTokenFilter]);
   const lpsKey = useMemo(() => {
     return lpsFilter.length > 0 || specifiedLps.length > 0
       ? `https://api.hippo.space/v1/lptracking/lps/prices/changes?` +
@@ -406,7 +430,10 @@ const TopLpPriceChanges = () => {
       : null;
   }, [allDexes, lpsFilter, specifiedLps]);
 
-  const keys = useMemo(() => [coinsKey, lpsKey], [coinsKey, lpsKey]);
+  const keys = useMemo(() => {
+    return [coinsKey, cTokensKey, lpsKey];
+  }, [coinsKey, cTokensKey, lpsKey]);
+
   const { data, error, isLoading } = useSWR(keys, multipleFetcher, {
     keepPreviousData: true,
     refreshInterval: 3600_000
@@ -417,8 +444,13 @@ const TopLpPriceChanges = () => {
     }
   }, [error]);
 
-  const [coinsData, lpsData] = useMemo(
-    () => (data ?? []) as [ICoinPriceChange[] | undefined, ILpPriceChange[] | undefined],
+  const [coinsData, cTokensData, lpsData] = useMemo(
+    () =>
+      (data ?? []) as [
+        ICoinPriceChange[] | undefined,
+        ICoinPriceChange[] | undefined,
+        ILpPriceChange[] | undefined
+      ],
     [data]
   );
 
@@ -440,7 +472,11 @@ const TopLpPriceChanges = () => {
     return [
       ...(coinsData ?? []).map((d) => ({
         ...d,
-        type: d.coin.startsWith(CTOKEN_PREFIX) ? ('cToken' as const) : ('coin' as const)
+        type: 'coin' as const
+      })),
+      ...(cTokensData ?? []).map((d) => ({
+        ...d,
+        type: 'cToken' as const
       })),
       ...(lpsData ?? [])
         .filter((d) => !d.isTVLTooLow)
@@ -453,13 +489,14 @@ const TopLpPriceChanges = () => {
       if (a.type !== b.type) {
         return a.type === 'lp' ? 1 : a.type === 'cToken' && b.type !== 'lp' ? 1 : -1;
       } else {
+        console.log('changes', a, b);
         return (
-          parseFloat(b.changes[peroidSelected] ?? '-Infinity') -
-          parseFloat(a.changes[peroidSelected] ?? '-Infinity')
+          parseFloat(b.changes[periodSelected] ?? '-Infinity') -
+          parseFloat(a.changes[periodSelected] ?? '-Infinity')
         );
       }
     });
-  }, [coinsData, lpsData, peroidSelected]);
+  }, [cTokensData, coinsData, lpsData, periodSelected]);
 
   const data2 = useMemo(
     () =>
@@ -546,18 +583,18 @@ const TopLpPriceChanges = () => {
   );
   // const [isSelectedLpsInit, setIsSelectedLpsInit] = useState(selectedLps.length > 0);
   useEffect(() => {
-    if (mergedData && selectedLps.length === 0) {
-      setSelectedLps(mergedData.slice(0, 5).map((d) => d.coin));
+    if (mergedData && selectedTokens.length === 0) {
+      setSelectedTokens(mergedData.slice(0, 5).map((d) => d.coin));
       // setIsSelectedLpsInit(true);
     }
-  }, [mergedData, selectedLps.length, setSelectedLps]);
+  }, [mergedData, selectedTokens.length, setSelectedTokens]);
   useEffect(() => {
     const allCoins = mergedData.map((md) => md.coin);
-    const intersect = Array.from(selectedLps).filter((lp) => allCoins.includes(lp));
-    if (intersect.length < selectedLps.length) {
-      setSelectedLps(intersect);
+    const intersect = Array.from(selectedTokens).filter((lp) => allCoins.includes(lp));
+    if (intersect.length < selectedTokens.length) {
+      setSelectedTokens(intersect);
     }
-  }, [mergedData, selectedLps, setSelectedLps]);
+  }, [mergedData, selectedTokens, setSelectedTokens]);
 
   const cols = useMemo(
     () =>
@@ -577,12 +614,12 @@ const TopLpPriceChanges = () => {
             onClick={() => setPeriodSelected(a[0] as PriceChangePeriod)}>
             {a[1]}{' '}
             <CaretIcon
-              className={classNames('font-icon', { 'text-prime-500': peroidSelected === a[0] })}
+              className={classNames('font-icon', { 'text-prime-500': periodSelected === a[0] })}
             />
           </span>
         ))
       ].filter((c) => !!c),
-    [isMobile, isTablet, peroidSelected, setPeriodSelected]
+    [isMobile, isTablet, periodSelected, setPeriodSelected]
   );
   const flexs = !isTablet ? [3, 1.5, 2, 2, 3] : !isMobile ? [3, 1.5, 2, 3] : [3, 1.5, 2, 2];
 
@@ -590,23 +627,23 @@ const TopLpPriceChanges = () => {
     (r: number) => {
       if (mergedData) {
         const d = mergedData[r];
-        onCheck(d, !selectedLps.includes(d.coin));
+        onCheck(d, !selectedTokens.includes(d.coin));
       }
     },
-    [mergedData, onCheck, selectedLps]
+    [mergedData, onCheck, selectedTokens]
   );
 
   const selectedRows = useMemo(() => {
-    return selectedLps.map((lp) => mergedData.map((d) => d.coin).findIndex((s) => s === lp));
-  }, [mergedData, selectedLps]);
+    return selectedTokens.map((lp) => mergedData.map((d) => d.coin).findIndex((s) => s === lp));
+  }, [mergedData, selectedTokens]);
 
   const [hoveringRow, setHoveringRow] = useState<number>();
   const setHoveringToken = useYieldStore((state) => state.setHoveringToken);
 
   useEffect(() => {
     const token = hoveringRow !== undefined ? mergedData[hoveringRow].coin : undefined;
-    if (token === undefined || selectedLps.includes(token)) setHoveringToken(token);
-  }, [hoveringRow, mergedData, selectedLps, setHoveringToken]);
+    if (token === undefined || selectedTokens.includes(token)) setHoveringToken(token);
+  }, [hoveringRow, mergedData, selectedTokens, setHoveringToken]);
 
   return (
     <>
@@ -639,28 +676,67 @@ const TopLpPriceChanges = () => {
 };
 
 const YieldPage = () => {
-  const selectedCoins = useYieldStore((state) => state.selectedTokens);
-  const chartPeriod = useYieldStore((state) => state.chartPeriod);
+  const selectedTokens = useYieldStore((state) => state.selectedTokens);
+  const setSelectedTokens = useYieldStore((state) => state.setSelectedTokens);
+
+  const selectedCTokens = useYieldStore((state) => state.selectedCTokens);
+  const setSelectedCTokens = useYieldStore((state) => state.setSelectedCTokens);
+
+  const tokensFilter = useYieldStore((state) => state.tokensFilter);
+  const setTokensFilter = useYieldStore((state) => state.setTokensFilter);
+
+  const cTokensFilter = useYieldStore((state) => state.cTokensFilter);
+  const setCTokensFilter = useYieldStore((state) => state.setCTokensFilter);
+
   return (
     <div className="max-w-[1321px] mx-auto mt-[106px] tablet:mt-[64px] mobile:mt-[32px]">
       <div>
         <div className="mb-10 text-grey-900">
           <div className="h4">Tracking ROI over time</div>
           <div className="mt-1 large-label-regular">
-            The graph below shows your ROI of selected coins over a time period of{' '}
-            {daysOfPeriod(chartPeriod)} days
+            The graph below shows your ROI of selected coins over a time period
           </div>
         </div>
         <Card className="px-8 pb-11 tablet:px-2 mobile:px-1">
           <div className="pt-4 flex items-center">
-            <div className="w-25 mr-2 body-bold shrink-0">Selected Coins</div>
-            <TokenSelector className="min-w-0 flex-1" />
+            <div className="w-25 mr-2 body-bold shrink-0">Select Coins</div>
+            <TokenSelector
+              className="min-w-0 flex-1"
+              yieldTypes={['Single Coin', 'LP', 'Farm']}
+              selected={tokensFilter}
+              onSelected={setTokensFilter}
+            />
           </div>
           <div>
-            <YieldChangeChart coins={selectedCoins} />
+            <YieldChangeChart coins={selectedTokens} />
           </div>
           <div className="mt-14">
-            <TopLpPriceChanges />
+            <TopLpPriceChanges
+              tokenFilters={tokensFilter}
+              selectedTokens={selectedTokens}
+              setSelectedTokens={setSelectedTokens}
+            />
+          </div>
+        </Card>
+        <Card className="px-8 pb-11 mt-10 tablet:px-2 mobile:px-1">
+          <div className="pt-4 flex items-center">
+            <div className="w-30 mr-2 body-bold shrink-0">Select Lendings Tokens</div>
+            <TokenSelector
+              className="min-w-0 flex-1"
+              yieldTypes={['Lending']}
+              selected={cTokensFilter}
+              onSelected={setCTokensFilter}
+            />
+          </div>
+          <div>
+            <YieldChangeChart coins={selectedCTokens} />
+          </div>
+          <div className="mt-14">
+            <TopLpPriceChanges
+              tokenFilters={cTokensFilter}
+              selectedTokens={selectedCTokens}
+              setSelectedTokens={setSelectedCTokens}
+            />
           </div>
         </Card>
       </div>
