@@ -1,7 +1,7 @@
 import { hippo_aggregator } from '@manahippo/hippo-sdk';
 import { Segmented, Skeleton } from 'antd';
 import classNames from 'classnames';
-import PoolProvider from 'components/PoolProvider';
+import ProtocolProvider from 'components/PoolProvider';
 import { numberGroupFormat, numberOfAbbr } from 'components/PositiveFloatNumInput/numberFormats';
 import TradingPair from 'components/TradingPair';
 import useHippoClient from 'hooks/useHippoClient';
@@ -41,7 +41,7 @@ const Stats = () => {
         // eslint-disable-next-line react/jsx-key
         <div className="flex h-[65px] items-center">
           <span className="w-5 body-bold text-grey-700">{index + 1}</span>
-          <PoolProvider dexType={pp.dex_type.toJsNumber()} />
+          <ProtocolProvider dexType={pp.dex_type.toJsNumber()} />
         </div>,
         // eslint-disable-next-line react/jsx-key
         <>

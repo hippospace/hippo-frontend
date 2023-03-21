@@ -178,7 +178,7 @@ export const IconMultipleSelector = ({
                 );
               })}
           </div>
-          {['Lending', 'Farm'].includes(selectedSearchTab) && (
+          {['Farm'].includes(selectedSearchTab) && (
             <div className="absolute w-full h-full left-0 right-0 flex items-center justify-center bg-surface text-grey-500">
               Coming soon...
             </div>

@@ -12,19 +12,24 @@ import cetusLogo from 'resources/img/dexes/cetus.png';
 import pancakeLogo from 'resources/img/dexes/pancake.jpeg';
 import obricLogo from 'resources/img/dexes/obric.png';
 import hippoLogo from 'resources/img/hippo-icon.svg';
+import abelLogo from 'resources/img/protocols/abel.png';
+import eternalLogo from 'resources/img/protocols/eternal.jpeg';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';
 import { DexType } from '@manahippo/hippo-sdk/dist/aggregator/types';
 
+export type ProtocolId = 'Abel' | 'Eternal';
+
 interface IPoolProviderProps {
-  dexType: AggregatorTypes.DexType;
+  dexType?: AggregatorTypes.DexType;
+  protocolId?: ProtocolId;
   className?: string;
   isTitleEnabled?: boolean;
   isNameInvisible?: boolean;
   isClickable?: boolean;
 }
 
-interface IPoolIconProps extends IPoolProviderProps {
+interface IProtocolIconProps extends IPoolProviderProps {
   title?: string;
   isTitleEnabled?: boolean;
   style?: CSSProperties;
@@ -94,7 +99,7 @@ export const PoolStack = ({
         const scale = i === hoverIndex ? defaultScaleTimes : 1;
 
         return (
-          <PoolIcon
+          <ProtocolIcon
             dexType={d}
             title={titles[i]}
             key={i}
@@ -135,8 +140,9 @@ export const PoolStack = ({
   );
 };
 
-export const PoolIcon: FC<IPoolIconProps> = ({
+export const ProtocolIcon: FC<IProtocolIconProps> = ({
   dexType,
+  protocolId,
   className = '',
   title,
   isTitleEnabled = true,
@@ -146,7 +152,11 @@ export const PoolIcon: FC<IPoolIconProps> = ({
   tooltipMouseLeaveDelay = 0.1
 }) => {
   const imgSrc = useMemo(() => {
-    if (dexType === AggregatorTypes.DexType.Hippo) {
+    if (protocolId === 'Abel') {
+      return abelLogo;
+    } else if (protocolId === 'Eternal') {
+      return eternalLogo;
+    } else if (dexType === AggregatorTypes.DexType.Hippo) {
       return hippoLogo;
     } else if (dexType === AggregatorTypes.DexType.Econia) {
       return econiaLogo;
@@ -173,8 +183,8 @@ export const PoolIcon: FC<IPoolIconProps> = ({
     } else {
       return undefined;
     }
-  }, [dexType]);
-  const name = AggregatorTypes.DexType[dexType];
+  }, [dexType, protocolId]);
+  const name = dexType && AggregatorTypes.DexType[dexType];
   const [isHover, setIsHover] = useState(false);
 
   useEffect(() => {
@@ -190,7 +200,7 @@ export const PoolIcon: FC<IPoolIconProps> = ({
       mouseLeaveDelay={tooltipMouseLeaveDelay}>
       <img
         src={imgSrc}
-        alt={name}
+        alt={name || protocolId}
         className={classNames('w-6 h-6 rounded-full', className)}
         style={style}
         onMouseEnter={() => setIsHover(true)}
@@ -200,8 +210,9 @@ export const PoolIcon: FC<IPoolIconProps> = ({
   );
 };
 
-const PoolProvider: FC<IPoolProviderProps> = ({
+const ProtocolProvider: FC<IPoolProviderProps> = ({
   dexType,
+  protocolId,
   className = '',
   isTitleEnabled = false,
   isNameInvisible = false,
@@ -215,16 +226,22 @@ const PoolProvider: FC<IPoolProviderProps> = ({
         className
       )}
       onClick={() => isClickable && window.open(poolUrl(dexType), '_blank')}>
-      <PoolIcon dexType={dexType} isTitleEnabled={isTitleEnabled} />
+      <ProtocolIcon dexType={dexType} protocolId={protocolId} isTitleEnabled={isTitleEnabled} />
       {!isNameInvisible && (
-        <span className="body-bold text-grey-700 ml-2">{AggregatorTypes.DexType[dexType]}</span>
+        <span className="body-bold text-grey-700 ml-2">
+          {protocolId ?? (dexType && AggregatorTypes.DexType[dexType])}
+        </span>
       )}
     </div>
   );
 };
 
-export const poolUrl = (dexType: DexType) => {
-  if (dexType === AggregatorTypes.DexType.Econia) {
+export const poolUrl = (dexType?: DexType, protocolId?: ProtocolId) => {
+  if (protocolId === 'Abel') {
+    return 'https://abelfinance.xyz/';
+  } else if (protocolId === 'Eternal') {
+    return 'https://app.eternalfinance.io/';
+  } else if (dexType === AggregatorTypes.DexType.Econia) {
     return 'https://www.econia.dev/';
   } else if (dexType === AggregatorTypes.DexType.Pontem) {
     return 'https://pontem.network/';
@@ -249,4 +266,4 @@ export const poolUrl = (dexType: DexType) => {
   }
 };
 
-export default PoolProvider;
+export default ProtocolProvider;

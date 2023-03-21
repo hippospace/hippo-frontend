@@ -39,7 +39,7 @@ export interface ILpPriceChange {
 
 export interface ICoinPriceChange {
   coin: string;
-  type?: 'lp' | 'coin';
+  type?: 'lp' | 'coin' | 'cToken';
   changes: Record<PriceChangePeriod, string | undefined>;
 }
 

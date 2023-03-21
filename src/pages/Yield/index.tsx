@@ -4,7 +4,7 @@ import Card from 'components/Card';
 import CoinIcon from 'components/Coins/CoinIcon';
 import CoinLabel from 'components/Coins/CoinLabel';
 import IconMultipleSelector, { IYieldTokenSelectorOption } from 'pages/Yield/IconMultipleSelector';
-import PoolProvider from 'components/PoolProvider';
+import ProtocolProvider, { ProtocolId } from 'components/PoolProvider';
 import { percent } from 'components/PositiveFloatNumInput/numberFormats';
 import TradingPair from 'components/TradingPair';
 import { useBreakpoint } from 'hooks/useBreakpoint';
@@ -23,12 +23,15 @@ import openNotification, { openHttpErrorNotification } from 'utils/notifications
 import { RawCoinInfo } from '@manahippo/coin-list';
 import { coinBridge, coinPriority, daysOfPeriod } from 'utils/hippo';
 
-export const searchTabs = ['All', 'Single Coin', 'LP', 'Farm', 'Lending'] as const;
+export const CTOKEN_FILTER_PREFIX = 'cTokenFilter:';
+export const CTOKEN_PREFIX = 'cToken:';
+export const searchTabs = ['All', 'Single Coin', 'LP', 'Lending', 'Farm'] as const;
 export type YieldTokenType = Exclude<typeof searchTabs[number], 'All'>;
 
 interface IDistinctTokens {
   coins: string[];
   lps: string[];
+  cTokens: string[];
 }
 
 interface IYieldState {
@@ -55,7 +58,7 @@ export const useYieldStore = create<IYieldState>()(
         selectedTokens: [],
         setSelectedTokens: (v) => set((state) => ({ ...state, selectedTokens: v })),
 
-        tokensFilter: ['APT', '*:APT-USDC:*'],
+        tokensFilter: ['APT', '*:APT-USDC:*', `${CTOKEN_FILTER_PREFIX}USDC`],
         setTokensFilter: (v) => set((state) => ({ ...state, tokensFilter: v })),
 
         periodSelected: PriceChangePeriod['30D'],
@@ -103,7 +106,7 @@ const TokenSelector = ({ className }: { className?: string }) => {
       sortKey: tokenSortKey(c),
       icon: (
         <div className="flex items-center w-full gap-x-2">
-          <CoinIcon token={c} isShowSymbol={true} />
+          <CoinIcon token={c} isShowSymbol={false} />
           <CoinLabel coin={c} isShowBridge={true} isShowNonOfficalSymbol={true} />
         </div>
       ),
@@ -112,6 +115,35 @@ const TokenSelector = ({ className }: { className?: string }) => {
         <div className="h-10 flex items-center gap-x-1 bg-prime-400/20 p-1 rounded-full px-2">
           <CoinIcon token={c} />
           <CoinLabel coin={c} />
+        </div>
+      )
+    };
+  });
+
+  const cTokens =
+    (data?.cTokens
+      .map((c) => hippoAgg?.coinListClient.getCoinInfoBySymbol(c)[0])
+      .filter((c) => !!c) as RawCoinInfo[]) ?? [];
+  const cTokenOptions = cTokens.map((c) => {
+    return {
+      type: 'Lending' as const,
+      key: CTOKEN_FILTER_PREFIX + c.symbol,
+      sortKey: tokenSortKey(c) + 'cTokenFilter',
+      icon: (
+        <div className="flex items-center w-full gap-x-2">
+          <CoinIcon token={c} isShowSymbol={false} />
+          <CoinLabel coin={c} isShowBridge={true} isShowNonOfficalSymbol={true} />
+          <div className="px-1 rounded-lg border-prime-500 text-prime-500 border">Lending</div>
+        </div>
+      ),
+      name: false,
+      abbr: (
+        <div className="h-10 flex items-center gap-x-1 bg-prime-400/20 p-1 rounded-full px-2">
+          <CoinIcon token={c} />
+          <CoinLabel coin={c} />
+          <div className="px-1 rounded-lg border-prime-500 text-prime-500 label-small-bold">
+            Lending
+          </div>
         </div>
       )
     };
@@ -226,7 +258,9 @@ const TokenSelector = ({ className }: { className?: string }) => {
       };
     }) ?? [];
 
-  const options = [...coinOptions, ...lpOptions].sort((a, b) => (a.sortKey <= b.sortKey ? -1 : 1));
+  const options = [...coinOptions, ...lpOptions, ...cTokenOptions].sort((a, b) =>
+    a.sortKey <= b.sortKey ? -1 : 1
+  );
 
   const coinsFilter = useYieldStore((state) => state.tokensFilter);
   const setCoinsFilter = useYieldStore((state) => state.setTokensFilter);
@@ -283,17 +317,27 @@ const TopLpPriceChanges = () => {
   const setPeriodSelected = useYieldStore((state) => state.setPeriodSelected);
 
   const coinsFilter = useYieldStore((state) => state.tokensFilter);
-  const specifiedLps = useMemo(() => {
-    return coinsFilter.filter((c) => c.includes(':') && !c.includes('*'));
+  const [cTokenFilter, specifiedLps, lpsFilter, singleCoins] = useMemo(() => {
+    const result = [[], [], [], []] as string[][];
+    for (const c of coinsFilter) {
+      if (c.startsWith(CTOKEN_FILTER_PREFIX)) {
+        result[0].push(c);
+      } else if (c.includes(':') && !c.includes('*')) {
+        // specified lp pattern
+        result[1].push(c);
+      } else if (c.includes(':') && c.includes('*')) {
+        // lp pattern
+        result[2].push(c.split(':')[1]);
+      } else {
+        // single coin
+        result[3].push(c);
+      }
+    }
+    return result;
   }, [coinsFilter]);
-  const lpsFilter = useMemo(() => {
-    return coinsFilter
-      .filter((c) => c.includes(':') && c.includes('*'))
-      .map((c) => c.split(':')[1]);
-  }, [coinsFilter]);
-  const singleCoins = useMemo(() => {
-    return coinsFilter.filter((c) => !c.includes(':'));
-  }, [coinsFilter]);
+
+  console.log(`cTokenFilter`, cTokenFilter, singleCoins, lpsFilter, specifiedLps);
+
   const allDexes = useMemo(
     () =>
       [
@@ -333,9 +377,17 @@ const TopLpPriceChanges = () => {
 
   const coinsKey = useMemo(() => {
     return singleCoins.length > 0
-      ? `https://api.hippo.space/v1/lptracking/coins/prices/changes?coins=${singleCoins.join(',')}`
+      ? `https://api.hippo.space/v1/lptracking/coins/prices/changes?` +
+          [
+            singleCoins.length > 0 ? `coins=${singleCoins.join(',')}` : '',
+            cTokenFilter.length > 0
+              ? `cTokenFilters=${cTokenFilter.map((c) => c.split(':')[1]).join(',')}`
+              : ''
+          ]
+            .filter((s) => !!s)
+            .join('&')
       : null;
-  }, [singleCoins]);
+  }, [cTokenFilter, singleCoins]);
   const lpsKey = useMemo(() => {
     return lpsFilter.length > 0 || specifiedLps.length > 0
       ? `https://api.hippo.space/v1/lptracking/lps/prices/changes?` +
@@ -386,7 +438,10 @@ const TopLpPriceChanges = () => {
 
   const mergedData: ICoinPriceChange[] = useMemo(() => {
     return [
-      ...(coinsData ?? []),
+      ...(coinsData ?? []).map((d) => ({
+        ...d,
+        type: d.coin.startsWith(CTOKEN_PREFIX) ? ('cToken' as const) : ('coin' as const)
+      })),
       ...(lpsData ?? [])
         .filter((d) => !d.isTVLTooLow)
         .map((d) => ({
@@ -396,7 +451,7 @@ const TopLpPriceChanges = () => {
         }))
     ].sort((a, b) => {
       if (a.type !== b.type) {
-        return a.type === 'lp' ? 1 : -1;
+        return a.type === 'lp' ? 1 : a.type === 'cToken' && b.type !== 'lp' ? 1 : -1;
       } else {
         return (
           parseFloat(b.changes[peroidSelected] ?? '-Infinity') -
@@ -432,7 +487,7 @@ const TopLpPriceChanges = () => {
                 )}
               </div>,
               <span key={i} className="body-bold text-grey-700 flex items-center gap-x-1">
-                <PoolProvider
+                <ProtocolProvider
                   className={'h-[65px]'}
                   dexType={dexType}
                   isNameInvisible={true}
@@ -440,6 +495,26 @@ const TopLpPriceChanges = () => {
                   isClickable={false}
                 />
                 LP
+              </span>
+            ]
+          );
+        } else if (d.coin.startsWith(CTOKEN_PREFIX)) {
+          const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.coin.split(':')[2])[0];
+          nodes.push(
+            ...[
+              <div key={i} className="min-h-[65px] flex items-center gap-x-2">
+                <CoinIcon token={coin} />
+                {coin && <CoinLabel coin={coin} />}
+              </div>,
+              <span key={i} className="body-bold text-grey-700 flex items-center gap-x-1">
+                <ProtocolProvider
+                  className={'h-[65px]'}
+                  protocolId={d.coin.split(':')[1] as ProtocolId}
+                  isNameInvisible={true}
+                  isTitleEnabled={true}
+                  isClickable={false}
+                />
+                Lending
               </span>
             ]
           );
