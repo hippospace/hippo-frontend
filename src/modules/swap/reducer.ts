@@ -24,6 +24,8 @@ export const initState: SwapState = {
     trasactionDeadline: 60,
     maxGasFee: 20000,
     quoteChosen: undefined,
+    fromSymbolSaved: 'USDC',
+    toSymbolSaved: 'APT',
     currencyFrom: {
       token: undefined,
       amount: undefined,

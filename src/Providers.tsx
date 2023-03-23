@@ -68,7 +68,9 @@ store.subscribe(() => {
     'swap.swapSettings.slipTolerance',
     'swap.swapSettings.trasactionDeadline',
     'swap.swapSettings.maxGasFee',
-    'swap.isPriceChartOpen'
+    'swap.isPriceChartOpen',
+    'swap.swapSettings.fromSymbolSaved',
+    'swap.swapSettings.toSymbolSaved'
   ]);
 });
 

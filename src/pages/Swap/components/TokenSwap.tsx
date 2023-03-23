@@ -165,7 +165,6 @@ const CardHeader = ({
   const { isTablet } = useBreakpoint('tablet');
   const isPriceChartOpen = useSelector(getIsPriceChartOpen);
   const setIsPriceChartOpen = (is: boolean) => dispatch(swapAction.SET_IS_PRICE_CHART_OPEN(is));
-  const { values } = useFormikContext<ISwapSettings>();
   const dispatch = useDispatch();
 
   const nodeRef = useRef(null);
@@ -176,8 +175,8 @@ const CardHeader = ({
     } else {
       setIsMobileTxSettingsOpen(false);
     }
-    dispatch(swapAction.SET_SWAP_SETTING(values));
-  }, [dispatch, isTablet, values]);
+    // dispatch(swapAction.SET_SWAP_SETTING(values));
+  }, [isTablet]);
 
   return (
     <div className={classNames('w-full flex h-8 items-center mb-1 body-medium', className)}>
@@ -482,6 +481,11 @@ const TokenSwap = () => {
   const [isPeriodicRefreshPaused, setIsPeriodicRefreshPaused] = useState(false);
 
   const rpcEndpoint = useRpcEndpoint();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(swapAction.SET_SWAP_SETTING(values));
+  }, [dispatch, values]);
 
   // Reduce Coingecko Api requests as much as we can
   const [prices, , coingeckoApi] = useCoingeckoPrice(
@@ -539,7 +543,7 @@ const TokenSwap = () => {
           ? intialFromish.includes('::')
             ? hippoAgg.coinListClient.getCoinInfoByFullName(intialFromish)
             : hippoAgg.coinListClient.getCoinInfoBySymbol(intialFromish)[0]
-          : hippoAgg.coinListClient.getCoinInfoBySymbol('USDC')[0];
+          : hippoAgg.coinListClient.getCoinInfoBySymbol(values.fromSymbolSaved)[0];
         setFieldValue('currencyFrom', {
           ...values.currencyFrom,
           token: initialFromToken
@@ -550,7 +554,7 @@ const TokenSwap = () => {
           ? initialToish.includes('::')
             ? hippoAgg.coinListClient.getCoinInfoByFullName(initialToish)
             : hippoAgg.coinListClient.getCoinInfoBySymbol(initialToish)[0]
-          : hippoAgg.coinListClient.getCoinInfoBySymbol('APT')[0];
+          : hippoAgg.coinListClient.getCoinInfoBySymbol(values.toSymbolSaved)[0];
         setFieldValue('currencyTo', {
           ...values.currencyTo,
           token: initailToToken
@@ -580,8 +584,19 @@ const TokenSwap = () => {
     intialFromish,
     setFieldValue,
     values.currencyFrom,
-    values.currencyTo
+    values.currencyTo,
+    values.fromSymbolSaved,
+    values.toSymbolSaved
   ]);
+
+  useEffect(() => {
+    console.log('okkkkk');
+    if (fromToken?.symbol) {
+      console.log('okkkkk2', fromToken.symbol);
+      setFieldValue('fromSymbolSaved', fromToken?.symbol);
+    }
+    if (toToken?.symbol) setFieldValue('toSymbolSaved', toToken?.symbol);
+  }, [fromToken, setFieldValue, toToken]);
 
   useEffect(() => {
     if (fromToken && toToken) {
