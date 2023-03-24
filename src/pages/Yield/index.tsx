@@ -718,7 +718,13 @@ const YieldPage = () => {
             />
           </div>
         </Card>
-        <Card className="px-8 pb-11 mt-10 tablet:px-2 mobile:px-1">
+        <div className="mb-10 mt-20 text-grey-900">
+          <div className="h4">Tracking Deposit Growth Over Time</div>
+          <div className="mt-1 large-label-regular">
+            The graph below shows your deposit growth of selected coins over a time period
+          </div>
+        </div>
+        <Card className="px-8 pb-11 tablet:px-2 mobile:px-1">
           <div className="pt-4 flex items-center">
             <div className="w-30 mr-2 body-bold shrink-0">Select Lendings Tokens</div>
             <TokenSelector
