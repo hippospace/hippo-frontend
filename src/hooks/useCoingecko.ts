@@ -15,15 +15,16 @@ const onErrorRetry = (error: any /*, key, config, revalidate, { retryCount } */)
 export const useCoingeckoPrice = (
   token: RawCoinInfo | (RawCoinInfo | undefined)[] | undefined,
   options = {}
-): [number | number[] | undefined, any, string] => {
+): [Record<string, number>, any, string] => {
   const tokens = useMemo(() => {
     if (Array.isArray(token)) return token;
     else return [token];
   }, [token]);
   const key = useMemo(() => {
-    if (tokens.length === 0 || !tokens.every((t) => t?.coingecko_id)) return null;
+    if (!tokens.filter((t) => t?.coingecko_id).length) return null;
     return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
       tokens
+        .filter((t) => t?.coingecko_id)
         .map((t) => t!.coingecko_id)
         .sort()
         .join(',')
@@ -43,14 +44,13 @@ export const useCoingeckoPrice = (
     )
   );
   const api = key || '';
-  if (data) {
-    if (!Array.isArray(token) && tokens[0]) {
-      return [data[tokens[0].coingecko_id].usd, error, api];
-    } else if (tokens.length >= 1) {
-      return [tokens.map((t) => t && data[t.coingecko_id].usd), error, api];
+  const prices = tokens.reduce((pre, cur) => {
+    if (cur && data && data[cur.coingecko_id]) {
+      pre[cur.symbol] = data[cur.coingecko_id].usd ?? 0;
     }
-  }
-  return [undefined, error, api];
+    return pre;
+  }, {} as Record<string, number>);
+  return [prices, error, api];
 };
 
 export type CoingeckoMarketChartPrice = [number, number];

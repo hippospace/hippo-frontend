@@ -493,8 +493,10 @@ const TokenSwap = () => {
       ? [fromToken, toToken, hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]]
       : undefined
   );
+  const fromPrice = fromToken ? prices[fromToken.symbol] : undefined;
+  const toTokenPrice = toToken ? prices[toToken.symbol] : undefined;
+  const aptPrice = prices.APT;
 
-  const [fromPrice, toTokenPrice, aptPrice] = (prices as number[]) || [];
   const payValue = useMemo(() => {
     if (typeof fromPrice === 'number') {
       return cutDecimals('' + fromPrice * (fromUiAmt || 0), 2);

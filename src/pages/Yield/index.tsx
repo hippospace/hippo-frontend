@@ -623,7 +623,7 @@ const TopLpPriceChanges = ({
           </span>
         ))
       ].filter((c) => !!c),
-    [isMobile, isTablet, periodSelected, setPeriodSelected]
+    [isMobile, isTablet, metricLabel, metricLabelAbbr, periodSelected]
   );
   const flexs = !isTablet ? [3, 1.5, 2, 2, 3] : !isMobile ? [3, 1.5, 2, 3] : [3, 1.5, 2, 2];
 

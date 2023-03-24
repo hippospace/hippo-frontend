@@ -158,18 +158,9 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     [tokenListBalanceNotSorted]
   );
 
-  // todo options
-  const [prices] = useCoingeckoPrice(priceTokens, {
+  const [tokenPrices] = useCoingeckoPrice(priceTokens, {
     refreshInterval: 1000 * 60 * 10
   });
-  const tokenPrices = useMemo(
-    () =>
-      (prices as number[] | undefined)?.reduce((acc, cur, index) => {
-        acc[priceTokens[index].symbol] = cur;
-        return acc;
-      }, {} as Record<string, number>) ?? {},
-    [priceTokens, prices]
-  );
 
   const tokenListBalance = useMemo(() => {
     let tokenListFiltered = tokenListBalanceNotSorted;
@@ -189,11 +180,17 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     tokenListFiltered = tokenListFiltered?.filter((item) => isTokenOfFilter(item.token, filter));
     return tokenListFiltered
       .sort((a, b) => (a.token.symbol <= b.token.symbol ? -1 : 1))
-      .sort(
-        (a, b) =>
-          b.balance * (tokenPrices[b.token.symbol] ?? 1) -
-          a.balance * (tokenPrices[a.token.symbol] ?? 1)
-      );
+      .sort((a, b) => {
+        if (a.balance && b.balance) {
+          return (
+            b.balance * (tokenPrices[b.token.symbol] ?? 0) -
+            a.balance * (tokenPrices[a.token.symbol] ?? 0)
+          );
+        } else if (a.balance === 0 || b.balance === 0) {
+          return b.balance - a.balance;
+        }
+        return 0;
+      });
   }, [filter, searchPattern, tokenListBalanceNotSorted, tokenPrices]);
 
   const renderHeaderSearch = useMemo(() => {
