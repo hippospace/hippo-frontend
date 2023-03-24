@@ -20,7 +20,7 @@ export const initState: SwapState = {
   tokenList: [],
   isPriceChartOpen: false,
   swapSettings: {
-    slipTolerance: 0.5,
+    slipTolerance: 0.1,
     trasactionDeadline: 60,
     maxGasFee: 20000,
     quoteChosen: undefined,

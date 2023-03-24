@@ -43,7 +43,7 @@ const Selectable = ({
 };
 
 const SwapSetting: React.FC<TProps> = ({ onClose }) => {
-  const slippageOptions = [0.5, 1, 2];
+  const slippageOptions = [0.1, 0.5, 1];
 
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
 
