@@ -323,11 +323,15 @@ const MAX_TOKENS_SELECTED_COUNT = 6;
 const TopLpPriceChanges = ({
   tokenFilters,
   selectedTokens,
-  setSelectedTokens
+  setSelectedTokens,
+  metricLabel = 'Value Change(%)',
+  metricLabelAbbr = 'Change(%)'
 }: {
   tokenFilters: string[];
   selectedTokens: string[];
   setSelectedTokens: (v: string[]) => void;
+  metricLabel?: string;
+  metricLabelAbbr?: string;
 }) => {
   const { hippoAgg } = useHippoClient();
   const { isTablet } = useBreakpoint('tablet');
@@ -602,9 +606,9 @@ const TopLpPriceChanges = ({
         `# Coin`,
         'Type',
         ...[
-          ...(!isTablet ? [[PriceChangePeriod['1D'], '1D Change(%)', true]] : []),
-          [PriceChangePeriod['7D'], isMobile ? '7D(%)' : '7D Change(%)', true],
-          [PriceChangePeriod['30D'], isMobile ? '30D(%)' : '30D Value Change(%)', true]
+          ...(!isTablet ? [[PriceChangePeriod['1D'], `1D ${metricLabelAbbr}`, true]] : []),
+          [PriceChangePeriod['7D'], isMobile ? '7D(%)' : `7D ${metricLabelAbbr}`, true],
+          [PriceChangePeriod['30D'], isMobile ? '30D(%)' : `30D ${metricLabel}`, true]
         ].map((a, i) => (
           <span
             className={classNames('cursor-pointer', {
@@ -742,6 +746,8 @@ const YieldPage = () => {
               tokenFilters={cTokensFilter}
               selectedTokens={selectedCTokens}
               setSelectedTokens={setSelectedCTokens}
+              metricLabel={'Growth (% token amount)'}
+              metricLabelAbbr={'Growth'}
             />
           </div>
         </Card>
