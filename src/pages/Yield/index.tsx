@@ -712,7 +712,7 @@ const YieldPage = () => {
             />
           </div>
           <div>
-            <YieldChangeChart coins={selectedTokens} />
+            <YieldChangeChart coins={selectedTokens} dotInterval={6} />
           </div>
           <div className="mt-14">
             <TopLpPriceChanges

@@ -112,7 +112,13 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
 
 const LINE_COLORS = ['#8D78F7', '#FF8479', '#FFCB60', '#0086FB', '#7DD70B', '#21D4A5'];
 
-const YieldChangeChart = ({ coins }: { coins: string[] }) => {
+const YieldChangeChart = ({
+  coins,
+  dotInterval = 2
+}: {
+  coins: string[];
+  dotInterval?: 2 | 4 | 6;
+}) => {
   const [chartPeriod, setChartPeriod] = useState<PriceChangePeriod>(PriceChangePeriod['30D']);
 
   const keyCoins = useMemo(() => {
@@ -141,7 +147,10 @@ const YieldChangeChart = ({ coins }: { coins: string[] }) => {
     }
   }, [errorCoins]);
   const data = dataCoins0?.reduce((pre, cur, index) => {
-    pre[coins[index]] = cur;
+    pre[coins[index]] = cur.filter(
+      // a dot is displayed every 6 hoours for 30D
+      (v, i) => chartPeriod !== PriceChangePeriod['30D'] || i % (dotInterval / 2) === 0
+    );
     return pre;
   }, {} as Record<string, IPrice[]>);
 
