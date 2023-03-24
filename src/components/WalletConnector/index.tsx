@@ -36,7 +36,7 @@ const WalletConnector: React.FC = () => {
         <div className="flex gap-4 items-center">
           <Popover
             overlayClassName={styles.popover}
-            trigger="click"
+            trigger={activeWallet ? 'hover' : 'click'}
             visible={open && !!activeWallet}
             onVisibleChange={(visible) => (visible ? openModal() : closeModal())}
             content={
