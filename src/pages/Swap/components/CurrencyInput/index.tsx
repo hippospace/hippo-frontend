@@ -184,14 +184,13 @@ const CurrencyInput: React.FC<TProps> = ({
           {!isReady && <Skeleton width={30} />}
         </div>
       )}
-      {/* destroyOnClose is critical for getting the correct height of token list wrapper in CoinSelector */}
       <Modal
         visible={isCoinSelectorVisible}
         footer={null}
         closable={false}
         maskClosable={true}
         centered
-        destroyOnClose
+        destroyOnClose={true}
         width={400}
         onCancel={() => setIsCoinSelectorVisible(false)}>
         <div className="mobile:hidden">
@@ -207,7 +206,7 @@ const CurrencyInput: React.FC<TProps> = ({
         closable={false}
         height={'80vh'}
         placement={'bottom'}
-        destroyOnClose
+        destroyOnClose={true}
         onClose={() => setIsCSDrawerVisible(false)}
         visible={isCSDrawerVisible}>
         <CoinSelector actionType={actionType} dismissiModal={() => setIsCSDrawerVisible(false)} />

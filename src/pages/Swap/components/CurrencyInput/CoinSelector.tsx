@@ -16,6 +16,8 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { CloseCircleIcon } from 'resources/icons';
 import Button from 'components/Button';
+import { coinBridge } from 'utils/hippo';
+import { useCoingeckoPrice } from 'hooks/useCoingecko';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -109,7 +111,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const setSearchPattern = useCoinSelectorStore((state) => state.setSearchPattern);
 
   const { hippoWallet } = useHippoClient();
-  const [tokenListBalance, setTokenListBalance] = useState<ITokenBalance[]>();
+  // const [tokenListBalance, setTokenListBalance] = useState<ITokenBalance[]>();
 
   const filterTitles: Filter[] = useMemo(
     () => ['All', 'Native', 'LayerZero', 'Wormhole', 'Celer'],
@@ -136,38 +138,63 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     [actionType, addRecentSelectedToken, dismissiModal, hippoAgg, setFieldValue, values]
   );
 
-  const getFilteredTokenListWithBalance = useCallback(() => {
-    let tokenListFiltered = tokenList;
+  const tokenListBalanceNotSorted = useMemo<ITokenBalance[]>(() => {
+    return tokenList.map((t) => {
+      const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol];
+      const balance = !hippoWallet
+        ? -1
+        : tokenStore
+        ? tokenStore.coin.value.toJsNumber() / Math.pow(10, t.decimals)
+        : 0;
+      return {
+        token: t,
+        balance
+      };
+    });
+  }, [hippoWallet, tokenList]);
+
+  const priceTokens = useMemo(
+    () => tokenListBalanceNotSorted.filter((t) => t.balance > 0).map((t) => t.token),
+    [tokenListBalanceNotSorted]
+  );
+
+  // todo options
+  const [prices] = useCoingeckoPrice(priceTokens, {
+    refreshInterval: 1000 * 60 * 10
+  });
+  const tokenPrices = useMemo(
+    () =>
+      (prices as number[] | undefined)?.reduce((acc, cur, index) => {
+        acc[priceTokens[index].symbol] = cur;
+        return acc;
+      }, {} as Record<string, number>) ?? {},
+    [priceTokens, prices]
+  );
+
+  const tokenListBalance = useMemo(() => {
+    let tokenListFiltered = tokenListBalanceNotSorted;
     if (searchPattern) {
-      tokenListFiltered = tokenListFiltered?.filter((token) => {
-        const keysForFilter = [token.name, token.symbol].join(',').toLowerCase();
-        return keysForFilter.includes(searchPattern);
+      tokenListFiltered = tokenListFiltered?.filter((item) => {
+        const keysForFilter = [
+          item.token.symbol,
+          item.token.official_symbol,
+          item.token.name,
+          coinBridge(item.token)
+        ]
+          .join(',')
+          .toLowerCase();
+        return searchPattern.split(' ').every((s) => keysForFilter.includes(s.toLocaleLowerCase()));
       });
     }
-    tokenListFiltered = tokenListFiltered?.filter((token) => isTokenOfFilter(token, filter));
-
-    const tokenListMapped = tokenListFiltered
-      ?.sort((a, b) => (a.symbol <= b.symbol ? -1 : 1))
-      .map((t) => {
-        const tokenStore = hippoWallet?.symbolToCoinStore[t.symbol];
-        const balance = !hippoWallet
-          ? -1
-          : tokenStore
-          ? tokenStore.coin.value.toJsNumber() / Math.pow(10, t.decimals)
-          : 0;
-        return {
-          token: t,
-          balance
-        };
-      })
-      .sort((a, b) => b.balance - a.balance); // TODO: sort by values
-
-    setTokenListBalance(tokenListMapped);
-  }, [tokenList, searchPattern, filter, hippoWallet]);
-
-  useEffect(() => {
-    getFilteredTokenListWithBalance();
-  }, [getFilteredTokenListWithBalance]);
+    tokenListFiltered = tokenListFiltered?.filter((item) => isTokenOfFilter(item.token, filter));
+    return tokenListFiltered
+      .sort((a, b) => (a.token.symbol <= b.token.symbol ? -1 : 1))
+      .sort(
+        (a, b) =>
+          b.balance * (tokenPrices[b.token.symbol] ?? 1) -
+          a.balance * (tokenPrices[a.token.symbol] ?? 1)
+      );
+  }, [filter, searchPattern, tokenListBalanceNotSorted, tokenPrices]);
 
   const renderHeaderSearch = useMemo(() => {
     return (
@@ -189,7 +216,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
             className="bg-transparent flex-grow min-w-0 body-bold text-grey-900 focus:outline-none border-none"
             value={searchPattern}
             onChange={(e) => setSearchPattern(e.target.value.toLowerCase())}
-            placeholder="Search"
+            placeholder="Search: symbol, name, bridge"
           />
           {searchPattern && (
             <Button variant="icon" onClick={() => setSearchPattern('')}>

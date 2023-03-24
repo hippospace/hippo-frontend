@@ -13,14 +13,15 @@ const onErrorRetry = (error: any /*, key, config, revalidate, { retryCount } */)
 };
 
 export const useCoingeckoPrice = (
-  token: RawCoinInfo | (RawCoinInfo | undefined)[] | undefined
+  token: RawCoinInfo | (RawCoinInfo | undefined)[] | undefined,
+  options = {}
 ): [number | number[] | undefined, any, string] => {
   const tokens = useMemo(() => {
     if (Array.isArray(token)) return token;
     else return [token];
   }, [token]);
   const key = useMemo(() => {
-    if (!tokens.every((t) => t?.coingecko_id)) return null;
+    if (tokens.length === 0 || !tokens.every((t) => t?.coingecko_id)) return null;
     return `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
       tokens
         .map((t) => t!.coingecko_id)
@@ -29,10 +30,18 @@ export const useCoingeckoPrice = (
     )}&vs_currencies=usd`;
   }, [tokens]);
 
-  const { data, error } = useSWR(key, fetcher, {
-    refreshInterval: 2 * 60_000,
-    onErrorRetry
-  });
+  const { data, error } = useSWR(
+    key,
+    fetcher,
+    Object.assign(
+      {
+        refreshInterval: 2 * 60_000,
+        revalidateOnFocus: false,
+        onErrorRetry
+      },
+      options
+    )
+  );
   const api = key || '';
   if (data) {
     if (!Array.isArray(token) && tokens[0]) {
