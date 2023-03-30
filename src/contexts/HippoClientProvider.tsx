@@ -1,7 +1,7 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { AggregatorTypes, HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
 import { TradeAggregator } from '@manahippo/hippo-sdk';
-import { CoinListClient, RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
+import { CoinListClient, NetworkType, RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { GeneralRouteAndQuote, TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
@@ -81,7 +81,10 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [networkCfg.fullNodeUrl]
   );
 
-  const coinListCli = useMemo(() => new CoinListClient(false), []);
+  const coinListCli = useMemo(
+    () => new CoinListClient(false, networkCfg.name as NetworkType),
+    [networkCfg.name]
+  );
 
   const updateCoinlist = useCallback(() => {
     const tradableCoins = coinListCli?.getCoinInfoList();

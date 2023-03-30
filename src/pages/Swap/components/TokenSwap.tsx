@@ -592,9 +592,7 @@ const TokenSwap = () => {
   ]);
 
   useEffect(() => {
-    console.log('okkkkk');
     if (fromToken?.symbol) {
-      console.log('okkkkk2', fromToken.symbol);
       setFieldValue('fromSymbolSaved', fromToken?.symbol);
     }
     if (toToken?.symbol) setFieldValue('toSymbolSaved', toToken?.symbol);

@@ -279,9 +279,10 @@ const YieldChangeChart = ({
             />
             {data &&
               Object.keys(data)
-                .sort(
-                  (a, b) =>
-                    (dataForChart.slice(-1)[0][b] ?? 0) - (dataForChart.slice(-1)[0][a] ?? 0)
+                .sort((a, b) =>
+                  dataForChart.length > 0
+                    ? (dataForChart.slice(-1)[0][b] ?? 0) - (dataForChart.slice(-1)[0][a] ?? 0)
+                    : 0
                 )
                 .map((lp, index) => {
                   const isHover = lp === hoveringToken;
