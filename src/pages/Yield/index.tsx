@@ -22,6 +22,7 @@ import { devtools, persist } from 'zustand/middleware';
 import openNotification, { openHttpErrorNotification } from 'utils/notifications';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import { coinBridge, coinPriority } from 'utils/hippo';
+import Selectable from 'components/Selectable';
 
 export const CTOKEN_FILTER_PREFIX = 'cTokenFilter:';
 export const CTOKEN_PREFIX = 'cToken:';
@@ -51,6 +52,10 @@ interface IYieldState {
   setHoveringToken: (v: string | undefined) => void;
 }
 
+const STABLE_CTOKENS = ['USDC', 'zUSDC', 'ceUSDC', 'USDT', 'zUSDT', 'ceUSDT', 'BUSD', 'DAI'].map(
+  (c) => `${CTOKEN_FILTER_PREFIX}${c}`
+);
+
 export const useYieldStore = create<IYieldState>()(
   devtools(
     persist(
@@ -64,19 +69,61 @@ export const useYieldStore = create<IYieldState>()(
         tokensFilter: ['APT', '*:APT-USDC:*'],
         setTokensFilter: (v) => set((state) => ({ ...state, tokensFilter: v })),
 
-        cTokensFilter: [`${CTOKEN_FILTER_PREFIX}USDC`],
+        cTokensFilter: STABLE_CTOKENS,
         setCTokensFilter: (v) => set((state) => ({ ...state, cTokensFilter: v })),
 
         hoveringToken: undefined,
         setHoveringToken: (v) => set((state) => ({ ...state, hoveringToken: v }))
       }),
-      { name: 'hippo-yield-store-03212303' }
+      { name: 'hippo-yield-store-03312204' }
     )
   )
 );
 
 const tokenSortKey = (t: RawCoinInfo | undefined) =>
   t ? `${t.official_symbol}${coinBridge(t)}${t.symbol}` : '';
+
+const PreSetButton = ({ label, generalTokens }: { generalTokens: string[]; label: string }) => {
+  const tokensFilter = useYieldStore((s) => s.tokensFilter);
+  const cTokensFilter = useYieldStore((s) => s.cTokensFilter);
+  const setTokensFilter = useYieldStore((s) => s.setTokensFilter);
+  const setCTokensFilter = useYieldStore((s) => s.setCTokensFilter);
+
+  const isSelected = useMemo(() => {
+    return generalTokens.every((t) => tokensFilter.includes(t) || cTokensFilter.includes(t));
+  }, [cTokensFilter, generalTokens, tokensFilter]);
+
+  const onClick = useCallback(() => {
+    const tokens: string[] = [];
+    const cTokens: string[] = [];
+    generalTokens.forEach((t) => {
+      if (t.startsWith(CTOKEN_FILTER_PREFIX)) {
+        cTokens.push(t);
+      } else {
+        tokens.push(t);
+      }
+    });
+    if (isSelected) {
+      setTokensFilter(tokensFilter.filter((t) => !tokens.includes(t)));
+      setCTokensFilter(cTokensFilter.filter((t) => !cTokens.includes(t)));
+    } else {
+      // add
+      /*
+      setTokensFilter(Array.from(new Set([...tokensFilter, ...tokens])));
+      setCTokensFilter(Array.from(new Set([...cTokensFilter, ...cTokens])));
+      */
+      // replace
+      if (tokens.length) setTokensFilter(tokens);
+      if (cTokens.length) setCTokensFilter(cTokens);
+    }
+  }, [cTokensFilter, generalTokens, isSelected, setCTokensFilter, setTokensFilter, tokensFilter]);
+
+  return (
+    <Selectable className="!h-8" isSelected={isSelected} onClick={onClick}>
+      <span className="label-large-bold px-2">{label}</span>
+    </Selectable>
+  );
+};
 
 const TokenSelector = ({
   className,
@@ -285,7 +332,7 @@ const TokenSelector = ({
       yieldTypes={yieldTypes}
       options={options}
       isAllOptionEnabled={false}
-      defaultSelected={selected}
+      selected={selected}
       onSelectedUpdate={onSelected}
     />
   );
@@ -493,7 +540,6 @@ const TopLpPriceChanges = ({
       if (a.type !== b.type) {
         return a.type === 'lp' ? 1 : a.type === 'cToken' && b.type !== 'lp' ? 1 : -1;
       } else {
-        console.log('changes', a, b);
         return (
           parseFloat(b.changes[periodSelected] ?? '-Infinity') -
           parseFloat(a.changes[periodSelected] ?? '-Infinity')
@@ -711,6 +757,21 @@ const YieldPage = () => {
               onSelected={setTokensFilter}
             />
           </div>
+          <div className="flex items-center flex-wrap gap-x-1 mt-1">
+            <div className="body-bold mr-2">Presets</div>
+            <PreSetButton
+              label="APT & LP"
+              generalTokens={['APT', '*:APT-USDC:*', '*:APT-USDT:*']}
+            />
+            <PreSetButton
+              label="Stables & LP"
+              generalTokens={['*:BUSD-USDC:*', '*:USDT-USDC:*', '*:USDC-USDC:*']}
+            />
+            <PreSetButton
+              label="CAKE & LP"
+              generalTokens={['CAKE', '*:CAKE-USDC:*', '*:CAKE-USDT:*']}
+            />
+          </div>
           <div>
             <YieldChangeChart coins={selectedTokens} dotInterval={6} />
           </div>
@@ -736,6 +797,14 @@ const YieldPage = () => {
               yieldTypes={['Lending']}
               selected={cTokensFilter}
               onSelected={setCTokensFilter}
+            />
+          </div>
+          <div className="flex items-center flex-wrap gap-x-1 mt-1">
+            <div className="body-bold mr-2">Presets</div>
+            <PreSetButton label="Stables" generalTokens={STABLE_CTOKENS} />
+            <PreSetButton
+              label="APT & CAKE"
+              generalTokens={['APT', 'CAKE'].map((c) => `${CTOKEN_FILTER_PREFIX}${c}`)}
             />
           </div>
           <div>
