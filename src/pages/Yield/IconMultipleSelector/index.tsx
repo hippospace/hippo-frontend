@@ -23,31 +23,32 @@ export const IconMultipleSelector = ({
   yieldTypes,
   options,
   isAllOptionEnabled = true,
-  defaultSelected = [],
+  selected = [],
   onSelectedUpdate
 }: {
   title: string;
   className?: string;
   yieldTypes: YieldTokenType[];
   options: IYieldTokenSelectorOption[];
-  defaultSelected?: string[];
+  selected?: string[];
   isAllOptionEnabled?: boolean;
   onSelectedUpdate: (selected: string[]) => void;
 }) => {
-  const [selected, setSelected] = useState<Set<string>>(new Set(defaultSelected));
+  const [selectedState, setSelectedState] = useState<Set<string>>(new Set(selected));
+  useEffect(() => {
+    setSelectedState(new Set(selected));
+  }, [selected]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const onOptionClicked = useCallback(
     (key: string) => {
-      if (selected.has(key)) selected.delete(key);
-      else selected.add(key);
-      setSelected(new Set(selected));
+      const selectedState1 = new Set(selectedState);
+      if (selectedState1.has(key)) selectedState1.delete(key);
+      else selectedState1.add(key);
+      setSelectedState(selectedState1);
+      onSelectedUpdate(Array.from(selectedState1));
     },
-    [selected]
+    [onSelectedUpdate, selectedState]
   );
-  useEffect(() => {
-    onSelectedUpdate(Array.from(selected));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected]);
 
   const isCardClicked = useRef(false);
 
@@ -66,12 +67,12 @@ export const IconMultipleSelector = ({
     };
   }, [docuClickCallback]);
 
-  const isAllSelected = options.map((o) => o.key).every((k) => selected.has(k));
+  const isAllSelected = options.map((o) => o.key).every((k) => selectedState.has(k));
   const onAllClicked = useCallback(() => {
     if (isAllSelected) {
-      setSelected(new Set());
+      setSelectedState(new Set());
     } else {
-      setSelected(new Set(options.map((o) => o.key)));
+      setSelectedState(new Set(options.map((o) => o.key)));
     }
   }, [isAllSelected, options]);
 
@@ -80,7 +81,7 @@ export const IconMultipleSelector = ({
   // Assure that selected items be sorted at the front only when the list is re-opend.
   useEffect(() => {
     if (isPopupVisible) {
-      setSelectedSnap(new Set(selected));
+      setSelectedSnap(new Set(selectedState));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPopupVisible]);
@@ -165,7 +166,7 @@ export const IconMultipleSelector = ({
                     .every((r) => r)
               )
               .map((o, i) => {
-                const isSelected = selected.has(o.key);
+                const isSelected = selectedState.has(o.key);
                 return (
                   <div
                     key={i}
@@ -198,7 +199,7 @@ export const IconMultipleSelector = ({
     onOptionClicked,
     options,
     searchPattern,
-    selected,
+    selectedState,
     selectedSearchTab,
     selectedSnap,
     sortValue,
@@ -244,7 +245,7 @@ export const IconMultipleSelector = ({
         <div
           className="flex flex-1 items-center overflow-hidden gap-x-2 flex-wrap gap-y-1"
           ref={selectedContainerRef}>
-          {Array.from(selected).map((s, i) => {
+          {Array.from(selectedState).map((s, i) => {
             const op = options.find((o) => o.key === s);
             return <Fragment key={i}>{op?.abbr ?? op?.icon}</Fragment>;
           })}

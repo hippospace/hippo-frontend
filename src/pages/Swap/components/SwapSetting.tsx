@@ -1,10 +1,11 @@
 import { useFormikContext } from 'formik';
 import { ISwapSettings } from 'pages/Swap/types';
 import Button from 'components/Button';
-import { ReactNode, useCallback } from 'react';
+import { useCallback } from 'react';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import classNames from 'classnames';
 import { initState as swapInitState } from 'modules/swap/reducer';
+import Selectable from 'components/Selectable';
 
 interface TProps {
   onClose: () => void;
@@ -12,34 +13,6 @@ interface TProps {
 
 const SubTitle = ({ children }: { children: string }) => {
   return <div className="label-large-bold font-extrabold text-grey-700 mb-3">{children}</div>;
-};
-
-const Selectable = ({
-  isSelected,
-  className,
-  children,
-  onClick = () => {}
-}: {
-  isSelected: boolean;
-  className: string;
-  children: ReactNode;
-  onClick?: () => void;
-}) => {
-  return (
-    <div
-      className={classNames(
-        'rounded-full h-[40px] h6 border-[2px] border-transparent bg-field text-grey-700 cursor-pointer',
-        {
-          'bg-select-border bg-clip-border bg-origin-border bg-cover': isSelected
-        },
-        className
-      )}
-      onClick={onClick}>
-      <div className="h-full w-full rounded-full bg-field flex items-center justify-center">
-        {children}
-      </div>
-    </div>
-  );
 };
 
 const SwapSetting: React.FC<TProps> = ({ onClose }) => {
