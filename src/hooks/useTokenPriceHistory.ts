@@ -102,7 +102,7 @@ const useTokenNativePriceHistory = (
   return [data, error1 || error2, isLoading1 || isLoading2];
 };
 
-const IS_FORCE_USE_COINGECKO_PRICE = true;
+const IS_FORCE_USE_COINGECKO_PRICE = false;
 
 export const useTokenPriceHistory = (
   fromToken: RawCoinInfo,
@@ -115,7 +115,7 @@ export const useTokenPriceHistory = (
       fromToken.official_symbol === 'USDC') &&
     (tokensHavingHippoNativePriceHistory.includes(toToken.token_type.type) ||
       toToken.official_symbol === 'USDC') &&
-    days <= 7;
+    days <= 30;
 
   const lastTs = useRef(0);
   const toTs = useRef(0);
