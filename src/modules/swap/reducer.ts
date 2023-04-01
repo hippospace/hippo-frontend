@@ -10,6 +10,8 @@ interface SwapState {
   error: any;
   tokenList: RawCoinInfo[];
   isPriceChartOpen: boolean;
+  fromSymbolSaved: string;
+  toSymbolSaved: string;
   swapSettings: ISwapSettings;
 }
 
@@ -19,13 +21,13 @@ export const initState: SwapState = {
   error: null,
   tokenList: [],
   isPriceChartOpen: false,
+  fromSymbolSaved: 'USDC',
+  toSymbolSaved: 'APT',
   swapSettings: {
     slipTolerance: 0.1,
     trasactionDeadline: 60,
     maxGasFee: 20000,
     quoteChosen: undefined,
-    fromSymbolSaved: 'USDC',
-    toSymbolSaved: 'APT',
     currencyFrom: {
       token: undefined,
       amount: undefined,
@@ -60,6 +62,12 @@ export default createReducer(initState, (builder) => {
     })
     .addCase(actions.SET_IS_PRICE_CHART_OPEN, (state, { payload }) => {
       state.isPriceChartOpen = payload;
+    })
+    .addCase(actions.SET_FROM_SYMBOL_SAVED, (state, { payload }) => {
+      state.fromSymbolSaved = payload;
+    })
+    .addCase(actions.SET_TO_SYMBOL_SAVED, (state, { payload }) => {
+      state.toSymbolSaved = payload;
     });
 });
 
@@ -68,3 +76,5 @@ export const getIsFetchedTokenList = (state: RootState) => state.swap.isFetched;
 export const getTokenList = (state: RootState) => state.swap.tokenList;
 export const getSwapSettings = (state: RootState) => state.swap.swapSettings;
 export const getIsPriceChartOpen = (state: RootState) => state.swap.isPriceChartOpen;
+export const getFromSymbolSaved = (state: RootState) => state.swap.fromSymbolSaved;
+export const getToSymbolSaved = (state: RootState) => state.swap.toSymbolSaved;

@@ -6,8 +6,6 @@ export interface ISwapSettings {
   trasactionDeadline: number;
   maxGasFee: number;
   quoteChosen?: IApiRouteAndQuote;
-  fromSymbolSaved: string;
-  toSymbolSaved: string;
   currencyFrom?: {
     token?: TokenInfo;
     amount?: number;

@@ -37,7 +37,7 @@ import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 import swapAction from 'modules/swap/actions';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
-import { getIsPriceChartOpen } from 'modules/swap/reducer';
+import { getFromSymbolSaved, getIsPriceChartOpen, getToSymbolSaved } from 'modules/swap/reducer';
 import invariant from 'tiny-invariant';
 
 type RoutesSimulateResults = Map<string, Types.UserTransaction | undefined>;
@@ -166,7 +166,7 @@ const CardHeader = ({
   const isPriceChartOpen = useSelector(getIsPriceChartOpen);
   const setIsPriceChartOpen = (is: boolean) => dispatch(swapAction.SET_IS_PRICE_CHART_OPEN(is));
   const dispatch = useDispatch();
-
+  const { values } = useFormikContext<ISwapSettings>();
   const nodeRef = useRef(null);
 
   const onSwapSettingsClose = useCallback(() => {
@@ -175,8 +175,8 @@ const CardHeader = ({
     } else {
       setIsMobileTxSettingsOpen(false);
     }
-    // dispatch(swapAction.SET_SWAP_SETTING(values));
-  }, [isTablet]);
+    dispatch(swapAction.SET_SWAP_SETTING(values));
+  }, [dispatch, isTablet, values]);
 
   return (
     <div className={classNames('w-full flex h-8 items-center mb-1 body-medium', className)}>
@@ -470,6 +470,9 @@ const TokenSwap = () => {
   const fromUiAmt = values.currencyFrom?.amount;
   const toUiAmt = values.currencyTo?.amount;
 
+  const fromSymbolSaved = useSelector(getFromSymbolSaved);
+  const toSymbolSaved = useSelector(getToSymbolSaved);
+
   const [allRoutes, setAllRoutes] = useState<GeneralRouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<GeneralRouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState(''); // '' represents the first route
@@ -482,10 +485,6 @@ const TokenSwap = () => {
 
   const rpcEndpoint = useRpcEndpoint();
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(swapAction.SET_SWAP_SETTING(values));
-  }, [dispatch, values]);
 
   // Reduce Coingecko Api requests as much as we can
   const [prices, , coingeckoApi] = useCoingeckoPrice(
@@ -545,7 +544,7 @@ const TokenSwap = () => {
           ? intialFromish.includes('::')
             ? hippoAgg.coinListClient.getCoinInfoByFullName(intialFromish)
             : hippoAgg.coinListClient.getCoinInfoBySymbol(intialFromish)[0]
-          : hippoAgg.coinListClient.getCoinInfoBySymbol(values.fromSymbolSaved)[0];
+          : hippoAgg.coinListClient.getCoinInfoBySymbol(fromSymbolSaved)[0];
         setFieldValue('currencyFrom', {
           ...values.currencyFrom,
           token: initialFromToken
@@ -556,7 +555,7 @@ const TokenSwap = () => {
           ? initialToish.includes('::')
             ? hippoAgg.coinListClient.getCoinInfoByFullName(initialToish)
             : hippoAgg.coinListClient.getCoinInfoBySymbol(initialToish)[0]
-          : hippoAgg.coinListClient.getCoinInfoBySymbol(values.toSymbolSaved)[0];
+          : hippoAgg.coinListClient.getCoinInfoBySymbol(toSymbolSaved)[0];
         setFieldValue('currencyTo', {
           ...values.currencyTo,
           token: initailToToken
@@ -587,16 +586,18 @@ const TokenSwap = () => {
     setFieldValue,
     values.currencyFrom,
     values.currencyTo,
-    values.fromSymbolSaved,
-    values.toSymbolSaved
+    fromSymbolSaved,
+    toSymbolSaved
   ]);
 
   useEffect(() => {
     if (fromToken?.symbol) {
-      setFieldValue('fromSymbolSaved', fromToken?.symbol);
+      dispatch(swapAction.SET_FROM_SYMBOL_SAVED(fromToken.symbol));
     }
-    if (toToken?.symbol) setFieldValue('toSymbolSaved', toToken?.symbol);
-  }, [fromToken, setFieldValue, toToken]);
+    if (toToken?.symbol) {
+      dispatch(swapAction.SET_TO_SYMBOL_SAVED(toToken.symbol));
+    }
+  }, [dispatch, fromToken?.symbol, toToken?.symbol]);
 
   useEffect(() => {
     if (fromToken && toToken) {
