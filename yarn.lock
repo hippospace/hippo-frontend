@@ -1907,6 +1907,14 @@
     commander "^9.3.0"
     cross-fetch "^3.1.5"
 
+"@manahippo/coin-list@4.1.13":
+  version "4.1.13"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-4.1.13.tgz#4ea6360f2f836c49b5027ec986a1026cb8847cd2"
+  integrity sha512-eesRbyXs+iol11LlYOf/FCu7G+AGKUXj7MYxF6kFNYw0CRedrUsx4p9m7VtsJ0qr+jya4NmTq9/1bz/lLdu43g==
+  dependencies:
+    commander "^9.3.0"
+    cross-fetch "^3.1.5"
+
 "@manahippo/hippo-sdk@5.4.4":
   version "5.4.4"
   resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-5.4.4.tgz#86c9ffc6ca0d09cbb89b56a83ecfa5bf7e01b442"

@@ -11,6 +11,7 @@ import animeSwapLogo from 'resources/img/dexes/animeswap.png';
 import cetusLogo from 'resources/img/dexes/cetus.png';
 import pancakeLogo from 'resources/img/dexes/pancake.jpeg';
 import obricLogo from 'resources/img/dexes/obric.png';
+import thalaLogo from 'resources/img/dexes/thala.jpeg';
 import hippoLogo from 'resources/img/hippo-icon.svg';
 import abelLogo from 'resources/img/protocols/abel.png';
 import eternalLogo from 'resources/img/protocols/eternal.jpeg';
@@ -180,6 +181,8 @@ export const ProtocolIcon: FC<IProtocolIconProps> = ({
       return obricLogo;
     } else if (dexType === AggregatorTypes.DexType.CetusV2) {
       return cetusLogo;
+    } else if (dexType === AggregatorTypes.DexType.Thala) {
+      return thalaLogo;
     } else {
       return undefined;
     }
