@@ -1,6 +1,5 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { AggregatorTypes, HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
-import { TradeAggregator } from '@manahippo/hippo-sdk';
 import { CoinListClient, NetworkType, RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { GeneralRouteAndQuote, TTransaction } from 'types/hippo';
@@ -21,7 +20,9 @@ import { debounce } from 'lodash';
 
 interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
-  hippoAgg?: TradeAggregator;
+  // hippoAgg?: TradeAggregator;
+  coinListClient?: CoinListClient;
+  aptosClient?: AptosClient;
   getTokenStoreByFullName: (fullName: string) => stdlib.Coin.CoinStore | undefined | false;
   getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
   requestSwapByRoute: (
@@ -130,6 +131,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [activeWallet, aptosClient, coinListCli, networkCfg]
   );
 
+  /*
   const hippoAgg = useMemo(
     () => new TradeAggregator(aptosClient, networkCfg, coinListCli, 400, undefined, false, true),
     [aptosClient, coinListCli, networkCfg]
@@ -146,6 +148,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
       }
     })();
   }, [hippoAgg]);
+  */
 
   const getTokenInfoByFullName = useCallback(
     (fullName: string) => {
@@ -334,7 +337,9 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     <HippoClientContext.Provider
       value={{
         hippoWallet,
-        hippoAgg,
+        // hippoAgg,
+        coinListClient: coinListCli,
+        aptosClient: aptosClient,
         getTokenStoreByFullName,
         getTokenInfoByFullName,
         requestSwapByRoute,

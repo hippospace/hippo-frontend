@@ -34,7 +34,7 @@ interface IPrice {
 }
 
 const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload }) => {
-  const { hippoAgg } = useHippoClient();
+  const { coinListClient } = useHippoClient();
   if (active && payload && payload.length) {
     return (
       <Card className="p-4 z-100 dark:bg-field">
@@ -43,9 +43,7 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
           .sort((a, b) => (b.value as number) - (a.value as number))
           .map((p, index) => {
             if ((p.name as string).startsWith(CTOKEN_PREFIX)) {
-              const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(
-                (p.name as string).split(':')[2]
-              )[0];
+              const coin = coinListClient?.getCoinInfoBySymbol((p.name as string).split(':')[2])[0];
               return (
                 <p key={index} className="flex justify-between items-center py-2">
                   <ProtocolProvider
@@ -67,10 +65,10 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
               );
             } else if ((p.name as string).includes(':')) {
               const [dex, lp] = (p.name as string).split(':');
-              const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(lp.split('-')[0])[0]
-                ?.token_type.type;
-              const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(lp.split('-')[1])[0]
-                ?.token_type.type;
+              const base = coinListClient?.getCoinInfoBySymbol(lp.split('-')[0])[0]?.token_type
+                .type;
+              const quote = coinListClient?.getCoinInfoBySymbol(lp.split('-')[1])[0]?.token_type
+                .type;
               const dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
               return (
                 <p key={index} className="flex justify-between items-center py-2">
@@ -91,7 +89,7 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
                 </p>
               );
             } else {
-              const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(p.name as string)[0];
+              const coin = coinListClient?.getCoinInfoBySymbol(p.name as string)[0];
               return (
                 <p key={index} className="flex justify-between items-center py-2">
                   <CoinIcon className="mr-1" token={coin} />

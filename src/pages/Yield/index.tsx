@@ -149,10 +149,10 @@ const TokenSelector = ({
     }
   }, [error]);
 
-  const { hippoAgg } = useHippoClient();
+  const { coinListClient } = useHippoClient();
   const coins =
     (data?.coins
-      .map((c) => hippoAgg?.coinListClient.getCoinInfoBySymbol(c)[0])
+      .map((c) => coinListClient?.getCoinInfoBySymbol(c)[0])
       .filter((c) => c && !c?.symbol.startsWith('dev') && !!c?.coingecko_id) as RawCoinInfo[]) ??
     [];
 
@@ -179,7 +179,7 @@ const TokenSelector = ({
 
   const cTokens =
     (data?.cTokens
-      .map((c) => hippoAgg?.coinListClient.getCoinInfoBySymbol(c)[0])
+      .map((c) => coinListClient?.getCoinInfoBySymbol(c)[0])
       .filter((c) => !!c) as RawCoinInfo[]) ?? [];
   const cTokenOptions = cTokens.map((c) => {
     return {
@@ -219,8 +219,8 @@ const TokenSelector = ({
           if (coinPriority(left) < coinPriority(right)) {
             [left, right] = [right, left];
           }
-          const leftToken = hippoAgg?.coinListClient.getCoinInfoBySymbol(left)[0];
-          const rightToken = hippoAgg?.coinListClient.getCoinInfoBySymbol(right)[0];
+          const leftToken = coinListClient?.getCoinInfoBySymbol(left)[0];
+          const rightToken = coinListClient?.getCoinInfoBySymbol(right)[0];
           return {
             fullName: l,
             lp: [leftToken?.official_symbol, rightToken?.official_symbol].join('-'),
@@ -239,7 +239,7 @@ const TokenSelector = ({
           return pre;
         }, [] as { fullName: string; lp: string; tokens: (RawCoinInfo | undefined)[] }[]) ?? []
     );
-  }, [data?.lps, hippoAgg?.coinListClient]);
+  }, [coinListClient, data?.lps]);
 
   const lpOptions: IYieldTokenSelectorOption[] =
     lpPatterns.map((_lp) => {
@@ -380,7 +380,7 @@ const TopLpPriceChanges = ({
   metricLabel?: string;
   metricLabelAbbr?: string;
 }) => {
-  const { hippoAgg } = useHippoClient();
+  const { coinListClient } = useHippoClient();
   const { isTablet } = useBreakpoint('tablet');
   const { isMobile } = useBreakpoint('mobile');
 
@@ -554,10 +554,8 @@ const TopLpPriceChanges = ({
         const nodes = [];
         if (d.type === 'lp') {
           const [dex, lp] = d.coin.split(':');
-          const base = hippoAgg?.coinListClient.getCoinInfoBySymbol(lp.split('-')[0])[0]?.token_type
-            .type;
-          const quote = hippoAgg?.coinListClient.getCoinInfoBySymbol(lp.split('-')[1])[0]
-            ?.token_type.type;
+          const base = coinListClient?.getCoinInfoBySymbol(lp.split('-')[0])[0]?.token_type.type;
+          const quote = coinListClient?.getCoinInfoBySymbol(lp.split('-')[1])[0]?.token_type.type;
           const dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
 
           nodes.push(
@@ -586,7 +584,7 @@ const TopLpPriceChanges = ({
             ]
           );
         } else if (d.coin.startsWith(CTOKEN_PREFIX)) {
-          const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.coin.split(':')[2])[0];
+          const coin = coinListClient?.getCoinInfoBySymbol(d.coin.split(':')[2])[0];
           nodes.push(
             ...[
               <div key={i} className="min-h-[65px] flex items-center gap-x-2">
@@ -606,7 +604,7 @@ const TopLpPriceChanges = ({
             ]
           );
         } else {
-          const coin = hippoAgg?.coinListClient.getCoinInfoBySymbol(d.coin)[0];
+          const coin = coinListClient?.getCoinInfoBySymbol(d.coin)[0];
           nodes.push(
             ...[
               <div key={i} className="min-h-[65px] flex items-center gap-x-2">
@@ -629,7 +627,7 @@ const TopLpPriceChanges = ({
         );
         return nodes;
       }),
-    [hippoAgg?.coinListClient, isMobile, isTablet, mergedData]
+    [coinListClient, isMobile, isTablet, mergedData]
   );
   // const [isSelectedLpsInit, setIsSelectedLpsInit] = useState(selectedLps.length > 0);
   useEffect(() => {

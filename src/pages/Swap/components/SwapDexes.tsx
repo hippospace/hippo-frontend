@@ -1,6 +1,6 @@
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { PoolStack } from 'components/PoolProvider';
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { MultiplyIcon } from 'resources/icons';
 
 export const SplitSingleRouteDexes = ({
@@ -17,13 +17,15 @@ export const SplitSingleRouteDexes = ({
   const steps = sr.splitSteps.map((st) => [...st.units].sort((a, b) => b.scale - a.scale));
   const dexes = steps.flatMap((st) => st.map((u) => u.step.pool.dexType));
   const isSameDex = dexes.every((d) => d === dexes[0]);
-  return (
-    <div className="flex items-center">
-      {isShowDetails ? (
-        steps.map((units, index) => {
+
+  const stepsUnfoldedNode = useMemo(() => {
+    return (
+      <>
+        {steps.map((units, index) => {
           const titles = units.map(
             (u) =>
-              `${AggregatorTypes.DEX_TYPE_NAME[u.step.pool.dexType]}: ${Math.round(u.scale * 100)}%`
+              `${AggregatorTypes.DEX_TYPE_NAME[u.step.pool.dexType]}` +
+              (units.length > 1 ? `: ${Math.round(u.scale * 100)}%` : '')
           );
           return (
             <Fragment key={index}>
@@ -33,11 +35,25 @@ export const SplitSingleRouteDexes = ({
               )}
             </Fragment>
           );
-        })
-      ) : isInMultiRoute ? (
-        <PoolStack dexes={[AggregatorTypes.DexType.Hippo]} />
+        })}
+      </>
+    );
+  }, [sr.splitSteps.length, steps]);
+
+  return (
+    <div className="flex items-center">
+      {isInMultiRoute ? (
+        !isShowDetails ? (
+          <PoolStack dexes={[AggregatorTypes.DexType.Hippo]} />
+        ) : isSameDex ? (
+          <PoolStack dexes={[dexes[0]]} />
+        ) : (
+          <>{stepsUnfoldedNode}</>
+        )
       ) : isSameDex ? (
         <PoolStack dexes={[dexes[0]]} />
+      ) : isShowDetails ? (
+        <>{stepsUnfoldedNode}</>
       ) : (
         <PoolStack dexes={[AggregatorTypes.DexType.Hippo]} />
       )}

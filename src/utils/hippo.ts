@@ -45,3 +45,16 @@ export const daysOfPeriod = (p: PriceChangePeriod) => {
   if (p === PriceChangePeriod['7D']) return 7;
   if (p === PriceChangePeriod['30D']) return 30;
 };
+
+export function postMessageTyped<T>(
+  worker: Worker,
+  message: T,
+  transferList?: Transferable[],
+  options?: StructuredSerializeOptions
+) {
+  if (transferList && transferList.length > 0) {
+    worker.postMessage(message, transferList);
+  } else {
+    worker.postMessage(message, options);
+  }
+}

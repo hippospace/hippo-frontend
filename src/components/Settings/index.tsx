@@ -7,6 +7,7 @@ import { isValidUrl } from 'utils/utility';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import Hint from 'components/Hint';
+import invariant from 'tiny-invariant';
 
 export enum RPCType {
   Aptos = 'Aptos',
@@ -32,11 +33,12 @@ interface SettingsState {
 
 const DEFAULT_RPC = RPCType.Nodereal;
 
-const preSetRpcs = new Map();
-preSetRpcs.set(
-  RPCType.Nodereal,
-  'https://aptos-mainnet.nodereal.io/v1/3e18914c169e4dfaa5824895a8d1def9/v1'
+const preSetRpcs = new Map<string, string>();
+invariant(
+  process.env.REACT_APP_DEFAULT_NODEREAL_RPC_URL,
+  'REACT_APP_DEFAULT_NODEREAL_RPC_URL is not set'
 );
+preSetRpcs.set(RPCType.Nodereal, process.env.REACT_APP_DEFAULT_NODEREAL_RPC_URL);
 preSetRpcs.set(RPCType.Aptos, '');
 
 export const useSettingsStore = create<SettingsState>()(

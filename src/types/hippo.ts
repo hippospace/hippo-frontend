@@ -1,4 +1,5 @@
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
+import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import {
   IApiRouteAndQuote,
   SplitMultiRouteAndQuote,
@@ -22,6 +23,11 @@ export type GeneralRouteAndQuote =
   | IApiRouteAndQuote
   | SplitSingleRouteAndQuote
   | SplitMultiRouteAndQuote;
+
+export interface IRoutesGroupedByDex {
+  dex: AggregatorTypes.DexType;
+  routes: GeneralRouteAndQuote[];
+}
 
 export enum PriceChangePeriod {
   '1D' = '1D',

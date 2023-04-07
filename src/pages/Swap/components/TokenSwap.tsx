@@ -19,11 +19,11 @@ import usePrevious from 'hooks/usePrevious';
 import { openErrorNotification } from 'utils/notifications';
 // import Skeleton from 'components/Skeleton';
 import { Types, ApiError } from 'aptos';
-import { RPCType, useRpcEndpoint } from 'components/Settings';
+import { RPCType, useRPCURL, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import { useCoingeckoPrice } from 'hooks/useCoingecko';
 import { useParams } from 'react-router-dom';
-import { GeneralRouteAndQuote } from 'types/hippo';
+import { GeneralRouteAndQuote, IRoutesGroupedByDex } from 'types/hippo';
 import { ApiTradeStep } from '@manahippo/hippo-sdk/dist/aggregator/types/step/ApiTradeStep';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { RawCoinInfo } from '@manahippo/coin-list';
@@ -39,13 +39,22 @@ import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { getFromSymbolSaved, getIsPriceChartOpen, getToSymbolSaved } from 'modules/swap/reducer';
 import invariant from 'tiny-invariant';
+import {
+  IFetchRoutesArgs,
+  IFetchRoutesResult,
+  IQueryIfRoutesExistingArgs,
+  IQueryIfRoutesExistingResult,
+  IQueryStateResult,
+  IReloadPoolsArgs,
+  IReloadPoolsResult,
+  ISwapWorkerError,
+  ISwapWorkerInitArgs,
+  ISwapWorkerMessage,
+  ISwapWorkerReturn
+} from '../SwapWorker';
+import { postMessageTyped } from 'utils/hippo';
 
 type RoutesSimulateResults = Map<string, Types.UserTransaction | undefined>;
-
-interface IRoutesGroupedByDex {
-  dex: AggregatorTypes.DexType;
-  routes: GeneralRouteAndQuote[];
-}
 
 interface IRoutesProps {
   className?: string;
@@ -461,7 +470,7 @@ const TokenSwap = () => {
 
   const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
-  const { hippoAgg, simulateSwapByRoute } = useHippoClient();
+  const { coinListClient, simulateSwapByRoute } = useHippoClient();
 
   const fromToken = values.currencyFrom?.token;
   const toToken = values.currencyTo?.token;
@@ -473,6 +482,8 @@ const TokenSwap = () => {
   const fromSymbolSaved = useSelector(getFromSymbolSaved);
   const toSymbolSaved = useSelector(getToSymbolSaved);
 
+  const [hasRoutes, setHasRoutes] = useState(false);
+
   const [allRoutes, setAllRoutes] = useState<GeneralRouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<GeneralRouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState(''); // '' represents the first route
@@ -483,14 +494,21 @@ const TokenSwap = () => {
   const [refreshRoutesTimerTick, setRefreshRoutesTimerTick] = useState<null | number>(1_000); // ms
   const [isPeriodicRefreshPaused, setIsPeriodicRefreshPaused] = useState(false);
 
+  const [isWorkerReady, setIsWorkerReady] = useState(false);
+  const [workerInstance, setWorkerInstance] = useState<Worker>();
+  /*
+  const workerInstance = useMemo(
+    () => new Worker(new URL('../SwapWorker.ts', import.meta.url)),
+    []
+  );
+  */
+
   const rpcEndpoint = useRpcEndpoint();
   const dispatch = useDispatch();
 
   // Reduce Coingecko Api requests as much as we can
   const [prices, , coingeckoApi] = useCoingeckoPrice(
-    fromUiAmt
-      ? [fromToken, toToken, hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]]
-      : undefined
+    fromUiAmt ? [fromToken, toToken, coinListClient?.getCoinInfoBySymbol('APT')[0]] : undefined
   );
   const fromPrice = fromToken ? prices[fromToken.symbol] : undefined;
   const toTokenPrice = toToken ? prices[toToken.symbol] : undefined;
@@ -528,7 +546,8 @@ const TokenSwap = () => {
     error429WaitSeconds = 5 * 60;
   }
 
-  const hasRoute = useMemo(() => {
+  /*
+  const hasRoutes = useMemo(() => {
     return !!(
       fromToken &&
       toToken &&
@@ -536,15 +555,30 @@ const TokenSwap = () => {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, hippoAgg, hippoAgg?.allPools, toToken]);
+  */
+  useEffect(() => {
+    if (isWorkerReady && fromToken && toToken && workerInstance) {
+      postMessageTyped<ISwapWorkerMessage<IQueryIfRoutesExistingArgs>>(workerInstance, {
+        cmd: 'queryIfRoutesExisting',
+        args: {
+          x: fromToken,
+          y: toToken,
+          fixedOut: false,
+          maxSteps: 3,
+          allowRoundTrip: false
+        }
+      });
+    }
+  }, [fromToken, isWorkerReady, toToken, workerInstance]);
 
   useEffect(() => {
-    if (hippoAgg) {
+    if (coinListClient) {
       if (!values.currencyFrom?.token) {
         const initialFromToken = intialFromish
           ? intialFromish.includes('::')
-            ? hippoAgg.coinListClient.getCoinInfoByFullName(intialFromish)
-            : hippoAgg.coinListClient.getCoinInfoBySymbol(intialFromish)[0]
-          : hippoAgg.coinListClient.getCoinInfoBySymbol(fromSymbolSaved)[0];
+            ? coinListClient.getCoinInfoByFullName(intialFromish)
+            : coinListClient.getCoinInfoBySymbol(intialFromish)[0]
+          : coinListClient.getCoinInfoBySymbol(fromSymbolSaved)[0];
         setFieldValue('currencyFrom', {
           ...values.currencyFrom,
           token: initialFromToken
@@ -553,9 +587,9 @@ const TokenSwap = () => {
       if (!values.currencyTo?.token) {
         const initailToToken = initialToish
           ? initialToish.includes('::')
-            ? hippoAgg.coinListClient.getCoinInfoByFullName(initialToish)
-            : hippoAgg.coinListClient.getCoinInfoBySymbol(initialToish)[0]
-          : hippoAgg.coinListClient.getCoinInfoBySymbol(toSymbolSaved)[0];
+            ? coinListClient.getCoinInfoByFullName(initialToish)
+            : coinListClient.getCoinInfoBySymbol(initialToish)[0]
+          : coinListClient.getCoinInfoBySymbol(toSymbolSaved)[0];
         setFieldValue('currencyTo', {
           ...values.currencyTo,
           token: initailToToken
@@ -578,7 +612,6 @@ const TokenSwap = () => {
       }
     }
   }, [
-    hippoAgg,
     initialFromAmt,
     initialToAmt,
     initialToish,
@@ -587,7 +620,8 @@ const TokenSwap = () => {
     values.currencyFrom,
     values.currencyTo,
     fromSymbolSaved,
-    toSymbolSaved
+    toSymbolSaved,
+    coinListClient
   ]);
 
   useEffect(() => {
@@ -677,95 +711,71 @@ const TokenSwap = () => {
 
   const lastFetchTs = useRef(0);
 
-  const fetchSwapRoutes = useCallback(
-    async (isReload: boolean | undefined = undefined) => {
-      try {
-        if (process.env.NODE_ENV !== 'production') {
-          // Check the key press debounce
-          if (lastFetchTs.current !== 0) {
-            console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
-          }
-        }
-        const now = Date.now();
-        lastFetchTs.current = now;
+  useEffect(() => {
+    if (workerInstance)
+      workerInstance.onmessage = (message) => {
+        if (message.data.error) {
+          const { error, cmd } = message.data as ISwapWorkerError;
+          console.log(`Error from worker for ${cmd}`, error);
 
-        // console.log(`FetchSwapRoutes: timePassedRef.current: ${timePassedRef.current}`);
-        if (hippoAgg && fromToken && toToken) {
-          const maxSteps = 3;
-          // Using isFixedOutput is necessary as the other side amount would not change immediately to 0 when the input amount is cleared
-          if ((!isFixedOutput && fromUiAmt) || (isFixedOutput && toUiAmt)) {
-            const isReloadInternal =
-              isReload ??
-              // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
-              (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold);
-            setIsRefreshingRoutes(isReloadInternal);
-
-            const { routes, allRoutesCount } = await (async () => {
-              if (!isFixedOutput && fromUiAmt) {
-                console.time('GetQuotes');
-                const [routeAndQuotes, splitSingle, splitMulti] = await hippoAgg.getQuotesV1V2V3(
-                  fromUiAmt,
-                  fromToken,
-                  toToken,
-                  maxSteps,
-                  isReloadInternal,
-                  false,
-                  poolReloadMinInterval,
-                  isAllowHighGas
-                );
-                console.timeEnd('GetQuotes');
-                const apiRoutes: GeneralRouteAndQuote[] = routeAndQuotes.map((r) => ({
-                  ...r,
-                  route: r.route.toApiTradeRoute()
-                }));
-                if (splitSingle.length > 0) {
-                  console.log('Split single has a better output');
-                  apiRoutes.push(...splitSingle);
-                }
-                if (
-                  splitMulti.length > 0 &&
-                  splitMulti[0].quote.outputUiAmt > apiRoutes[0].quote.outputUiAmt
-                ) {
-                  console.log('Split multi has a better output');
-                  apiRoutes.unshift(splitMulti[0]);
-                }
-                /*
-                if (splitMulti.length > 0) {
-                  apiRoutes.push(...splitMulti);
-                }
-                */
-                apiRoutes.sort((a, b) => b.quote.outputUiAmt - a.quote.outputUiAmt);
-                return {
-                  allRoutesCount: routeAndQuotes.length,
-                  routes: apiRoutes
-                };
-              } else if (isFixedOutput && toUiAmt) {
-                const routeAndQuote = await hippoAgg.getQuotesWithFixedOutputWithChange(
-                  toUiAmt,
-                  fromToken,
-                  toToken,
-                  isReloadInternal,
-                  false,
-                  poolReloadMinInterval,
-                  isAllowHighGas
-                );
-                const fixedOutputRoutes = routeAndQuote
-                  ? [routeAndQuote].map((r) => ({
-                      ...r,
-                      route: r.route.toApiTradeRoute()
-                    }))
-                  : [];
-                return {
-                  allRoutesCount: fixedOutputRoutes.length,
-                  routes: fixedOutputRoutes
-                };
-              } else {
-                throw new Error('Unreachable branch');
+          if (error instanceof ApiError) {
+            // let detail = `${error.status} : ${error.errorCode} : ${error.vmErrorCode} : ${error.message}`;
+            const msg = JSON.parse(error.message);
+            let detail = msg.message ?? error.message;
+            if (msg.message === 'Generic Error') {
+              // detail = 'Too many requests. You need to wait 60s and try again';
+              detail = 'Network error. Please try again later';
+              if (cmd === 'fetchRoutes' || cmd === 'reloadPools') {
+                setIsPeriodicRefreshPaused(true);
               }
-            })();
+            }
+            if (cmd == 'fetchRoutes') openErrorNotification({ detail, title: 'Fetch API error' });
+          } else {
+            openErrorNotification({
+              detail: (error as { message: string }).message ?? '',
+              title: 'Unkown error'
+            });
+          }
+
+          if (cmd === 'fetchRoutes' || cmd === 'reloadPools') {
+            resetInputs();
+            setIsRefreshingRoutes(false);
+          }
+        } else if (message && coinListClient) {
+          const data = message.data as ISwapWorkerReturn<unknown>;
+          console.log(`Message from worker of cmd: ${data.cmd}`, data.result);
+
+          if (data.cmd === 'fetchRoutes') {
+            const { result } = message.data as ISwapWorkerReturn<IFetchRoutesResult>;
+            const {
+              ts,
+              allRoutes: routesByWorker,
+              allRoutesCount,
+              isReloadInternal,
+              isFixedOutput: isFixedOutputByWorker
+            } = result;
 
             // check if it's the latest reqeust
-            if (now === lastFetchTs.current) {
+            if (ts === lastFetchTs.current) {
+              let routes: GeneralRouteAndQuote[] = [];
+              if (!isFixedOutputByWorker) {
+                routes = routesByWorker.map((r) => {
+                  const route = r.route as AggregatorTypes.IApiSplitMultiRouteJSON;
+                  return {
+                    ...r,
+                    route: AggregatorTypes.SplitMultiRoute.fromJSON(route, coinListClient)
+                  };
+                });
+              } else {
+                routes = routesByWorker.map((r) => {
+                  const route = r.route as AggregatorTypes.IApiRouteJSON;
+                  return {
+                    ...r,
+                    route: AggregatorTypes.ApiTradeRoute.fromJSON(route, coinListClient)
+                  };
+                });
+              }
+
               if (routes.length > 0) {
                 setAllRoutes(routes);
                 setSelectedRouteFromRoutes(routes);
@@ -781,22 +791,12 @@ const TokenSwap = () => {
                 setIsPeriodicRefreshPaused(false);
               }
             }
-          } else {
-            const isReloadInternal =
-              isReload ??
-              ((!isFixedOutput && !previousFromUiAmt) || (isFixedOutput && !previousToUiAmt));
-            if (isReloadInternal) {
-              await hippoAgg.reloadPools(
-                fromToken,
-                toToken,
-                isFixedOutput,
-                maxSteps,
-                true,
-                false,
-                poolReloadMinInterval
-              );
-            }
-            if (now === lastFetchTs.current) {
+            setIsRefreshingRoutes(false);
+          } else if (data.cmd === 'reloadPools') {
+            const {
+              result: { ts, isReloadInternal }
+            } = message.data as ISwapWorkerReturn<IReloadPoolsResult>;
+            if (ts === lastFetchTs.current) {
               resetAllRoutes();
             }
             // stopTimer();
@@ -804,48 +804,125 @@ const TokenSwap = () => {
               restartTimer();
               setIsPeriodicRefreshPaused(false);
             }
-          }
-        }
-      } catch (error) {
-        console.log('Fetch swap routes:', error);
-        if (error instanceof ApiError) {
-          // let detail = `${error.status} : ${error.errorCode} : ${error.vmErrorCode} : ${error.message}`;
-          let detail = error.message;
-          const msg = JSON.parse(error.message);
-          if (msg.message === 'Generic Error') {
-            detail = 'Too many requests. You need to wait 60s and try again';
-            setIsPeriodicRefreshPaused(true);
-          }
-          if (fromUiAmt) openErrorNotification({ detail, title: 'Fetch API error' });
-        } else {
-          openErrorNotification({
-            detail: (error as { message: string }).message || JSON.stringify(error),
-            title: 'Fetch swap routes error'
-          });
-        }
+            setIsRefreshingRoutes(false);
+          } else if (data.cmd === 'queryIfRoutesExisting') {
+            const {
+              result: { hasRoutes: hasRoutesByWorker }
+            } = message.data as ISwapWorkerReturn<IQueryIfRoutesExistingResult>;
 
-        resetInputs();
-      } finally {
-        setIsRefreshingRoutes(false);
+            setHasRoutes(hasRoutesByWorker);
+          } else if (data.cmd === 'queryState') {
+            const {
+              result: { isReady }
+            } = message.data as ISwapWorkerReturn<IQueryStateResult>;
+            setIsWorkerReady(isReady);
+          }
+        }
+      };
+  }, [
+    coinListClient,
+    resetAllRoutes,
+    resetInputs,
+    restartTimer,
+    setSelectedRouteFromRoutes,
+    workerInstance
+  ]);
+
+  const rpcUrl = useRPCURL();
+  useEffect(() => {
+    let worker = workerInstance;
+    if (!workerInstance) {
+      // https://github.com/vercel/next.js/issues/31009#issuecomment-1146344161
+      worker = new Worker(new URL('../SwapWorker.ts', import.meta.url));
+      setWorkerInstance(worker);
+    }
+    if (rpcUrl && worker) {
+      postMessageTyped<ISwapWorkerMessage<ISwapWorkerInitArgs>>(worker, {
+        cmd: 'initWorker',
+        args: {
+          rpcUrl
+        }
+      });
+    }
+    return () => {
+      workerInstance?.terminate();
+    };
+  }, [rpcUrl, workerInstance]);
+
+  const fetchSwapRoutes = useCallback(
+    async (isReload: boolean | undefined = undefined) => {
+      if (process.env.NODE_ENV !== 'production') {
+        // Check the key press debounce
+        if (lastFetchTs.current !== 0) {
+          console.log(`Swap fetch route interval: ${Date.now() - lastFetchTs.current}`);
+        }
+      }
+      const now = Date.now();
+      lastFetchTs.current = now;
+
+      // console.log(`FetchSwapRoutes: timePassedRef.current: ${timePassedRef.current}`);
+      if (fromToken && toToken && workerInstance && isWorkerReady) {
+        const maxSteps = 3;
+        // Using isFixedOutput is necessary as the other side amount would not change immediately to 0 when the input amount is cleared
+        if ((!isFixedOutput && fromUiAmt) || (isFixedOutput && toUiAmt)) {
+          const isReloadInternal =
+            isReload ??
+            // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
+            (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold);
+          setIsRefreshingRoutes(isReloadInternal);
+
+          postMessageTyped<ISwapWorkerMessage<IFetchRoutesArgs>>(workerInstance, {
+            cmd: 'fetchRoutes',
+            args: {
+              ts: now,
+              inputUiAmt: fromUiAmt as number,
+              x: fromToken,
+              y: toToken,
+              maxSteps,
+              reloadState: isReloadInternal,
+              allowRoundTrip: false,
+              customReloadMinInterval: poolReloadMinInterval,
+              allowHighGas: isAllowHighGas,
+              isFixedOutput,
+              outputUiAmt: toUiAmt
+            }
+          });
+        } else {
+          const isReloadInternal =
+            isReload ??
+            ((!isFixedOutput && !previousFromUiAmt) || (isFixedOutput && !previousToUiAmt));
+          if (isReloadInternal) {
+            postMessageTyped<ISwapWorkerMessage<IReloadPoolsArgs>>(workerInstance, {
+              cmd: 'reloadPools',
+              args: {
+                ts: now,
+                x: fromToken,
+                y: toToken,
+                fixedOut: isFixedOutput,
+                maxSteps,
+                reloadState: true,
+                allowRoundTrip: false,
+                customReloadMinInterval: poolReloadMinInterval
+              }
+            });
+          }
+        }
       }
     },
     [
       fromToken,
       fromUiAmt,
-      hippoAgg,
       inputTriggerReloadThreshold,
+      isAllowHighGas,
       isFixedOutput,
       isInputAmtTriggerReload,
+      isWorkerReady,
       poolReloadMinInterval,
       previousFromUiAmt,
       previousToUiAmt,
-      resetAllRoutes,
-      resetInputs,
-      restartTimer,
-      setSelectedRouteFromRoutes,
       toToken,
       toUiAmt,
-      isAllowHighGas
+      workerInstance
     ]
   );
 
@@ -853,9 +930,7 @@ const TokenSwap = () => {
     new Map()
   );
   const simuTs = useRef(0);
-  const [aptBalance, isReady] = useTokenBalane(
-    hippoAgg?.coinListClient.getCoinInfoBySymbol('APT')[0]
-  );
+  const [aptBalance, isReady] = useTokenBalane(coinListClient?.getCoinInfoBySymbol('APT')[0]);
   const [baseBalance] = useTokenBalane(fromToken);
 
   const gasAvailable = useMemo(() => {
@@ -1008,18 +1083,18 @@ const TokenSwap = () => {
   const [minToTokenRateAfterLastInput, setMinToTokenRateAfterLastInput] = useState(Infinity);
 
   useEffect(() => {
-    if (!isFixedOutput) {
+    if (!isFixedOutput && isWorkerReady) {
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken, fromUiAmt, hippoAgg, isFixedOutput]);
+  }, [fromToken, toToken, fromUiAmt, isWorkerReady, isFixedOutput]);
 
   useEffect(() => {
-    if (isFixedOutput) {
+    if (isFixedOutput && isWorkerReady) {
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken, toUiAmt, hippoAgg, isFixedOutput]);
+  }, [fromToken, toToken, toUiAmt, isWorkerReady, isFixedOutput]);
 
   useInterval(() => {
     setTimePassedAfterRefresh(timePassedAfterRefresh + 1);
@@ -1057,8 +1132,8 @@ const TokenSwap = () => {
 
   const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromToken);
   const isSwapEnabled =
-    (hasRoute && !connected && values.currencyFrom?.token) || // to connect wallet
-    (hasRoute &&
+    (hasRoutes && !connected && values.currencyFrom?.token) || // to connect wallet
+    (hasRoutes &&
       values.quoteChosen &&
       fromUiAmt &&
       (!isCurrentBalanceReady || (fromCurrentBalance && fromUiAmt <= fromCurrentBalance)));
@@ -1066,7 +1141,7 @@ const TokenSwap = () => {
   const swapButtonText = useMemo(() => {
     if (!values.currencyFrom?.token) {
       return 'Loading Tokens...';
-    } else if (!hasRoute) {
+    } else if (!hasRoutes) {
       return 'No Available Route';
     } else if (!connected) {
       return 'Connect to Wallet';
@@ -1084,7 +1159,7 @@ const TokenSwap = () => {
     return 'SWAP';
   }, [
     values.currencyFrom?.token,
-    hasRoute,
+    hasRoutes,
     connected,
     fromUiAmt,
     isRefreshingRoutes,
@@ -1225,7 +1300,7 @@ const TokenSwap = () => {
           </div>
           <CurrencyInput
             actionType="currencyFrom"
-            isDisableAmountInput={!hasRoute}
+            isDisableAmountInput={!hasRoutes}
             trashButtonContainerWidth={cardXPadding}
           />
           <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
@@ -1237,7 +1312,7 @@ const TokenSwap = () => {
               <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
             )}
           </div>
-          <CurrencyInput actionType="currencyTo" isDisableAmountInput={!hasRoute} />
+          <CurrencyInput actionType="currencyTo" isDisableAmountInput={!hasRoutes} />
           {isTablet && isRoutesVisible && (
             <>
               <RoutesAvailable

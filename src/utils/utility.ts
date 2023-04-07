@@ -75,3 +75,5 @@ export function getPositiveHash(str: string) {
   }
   return Math.abs(hash);
 }
+
+export const delay = (time: number) => new Promise((resolve) => setTimeout(resolve, time));

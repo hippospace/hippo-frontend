@@ -85,7 +85,7 @@ const isTokenOfFilter = (token: TokenInfo, filter: Filter) => {
 };
 
 const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
-  const { hippoAgg } = useHippoClient();
+  const { coinListClient } = useHippoClient();
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const tokenList = useSelector(getTokenList);
   // const [filter, setFilter] = useState<Filter>('All');
@@ -99,11 +99,9 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   const commonCoins = useMemo(
     () =>
       preSetTokens
-        .map((s) => hippoAgg?.coinListClient.getCoinInfoBySymbol(s)[0])
-        .concat(
-          ...recentSelectedTokens.map((f) => hippoAgg?.coinListClient.getCoinInfoByFullName(f))
-        ),
-    [hippoAgg?.coinListClient, recentSelectedTokens]
+        .map((s) => coinListClient?.getCoinInfoBySymbol(s)[0])
+        .concat(...recentSelectedTokens.map((f) => coinListClient?.getCoinInfoByFullName(f))),
+    [coinListClient, recentSelectedTokens]
   );
 
   // const [searchPattern, setSearchPattern] = useState<string>('');
@@ -132,10 +130,10 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
         ...values[actionType],
         token
       });
-      if (hippoAgg) addRecentSelectedToken(token.token_type.type, hippoAgg.coinListClient);
+      if (coinListClient) addRecentSelectedToken(token.token_type.type, coinListClient);
       dismissiModal();
     },
-    [actionType, addRecentSelectedToken, dismissiModal, hippoAgg, setFieldValue, values]
+    [actionType, addRecentSelectedToken, coinListClient, dismissiModal, setFieldValue, values]
   );
 
   const tokenListBalanceNotSorted = useMemo<ITokenBalance[]>(() => {

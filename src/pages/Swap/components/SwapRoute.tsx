@@ -33,7 +33,7 @@ const SplitSingleRouteComp = ({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center min-w-0">
-        {scale && (
+        {scale && scale !== 1 && (
           <span className="mr-1 px-1 bg-prime-500 rounded text-grey-100">
             {Math.round(scale * 100)}%
           </span>
@@ -63,7 +63,7 @@ const SplitMultiRouteComp = ({
               r={u.route}
               scale={u.scale}
               isShowDetails={isShowDetails}
-              isInMultiRoute={true}
+              isInMultiRoute={r.units.length > 1}
             />
           );
         })}

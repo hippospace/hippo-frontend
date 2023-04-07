@@ -1,4 +1,4 @@
-import { hippo_aggregator } from '@manahippo/hippo-sdk';
+import { getProjectRepo, hippo_aggregator } from '@manahippo/hippo-sdk';
 import { Segmented, Skeleton } from 'antd';
 import classNames from 'classnames';
 import ProtocolProvider from 'components/PoolProvider';
@@ -10,6 +10,7 @@ import { addDays } from 'utils/utility';
 import styles from './Stats.module.scss';
 import TopList from '../../components/TopList';
 import VolumeChart from './VolumeChart';
+import { AptosLocalCache } from '@manahippo/move-to-ts';
 
 const Periods = ['24H', '1 Week'] as const;
 type Peroid = typeof Periods[number];
@@ -147,18 +148,26 @@ const Stats = () => {
     setStatsPeriod(v as Peroid);
   }, []);
 
-  const { hippoAgg } = useHippoClient();
+  const { aptosClient } = useHippoClient();
+
+  const volumeApp = useMemo(() => {
+    if (aptosClient) {
+      const repo = getProjectRepo();
+      const cache = new AptosLocalCache();
+      return new hippo_aggregator.Volume.App(aptosClient, repo, cache);
+    } else {
+      return null;
+    }
+  }, [aptosClient]);
 
   useEffect(() => {
     (async () => {
-      if (hippoAgg) {
-        const vol = await hippoAgg.app.hippo_aggregator.volume.loadVolume(
-          hippo_aggregator.Volume.moduleAddress
-        );
+      if (volumeApp) {
+        const vol = await volumeApp.loadVolume(hippo_aggregator.Volume.moduleAddress);
         setVolume(vol);
       }
     })();
-  }, [hippoAgg]);
+  }, [volumeApp]);
 
   return (
     <div className="max-w-[1321px] mx-auto mt-[106px] tablet:mt-[64px] mobile:mt-[32px]">
