@@ -352,7 +352,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   routeSelected,
   className = '',
   isDesktopScreen = false,
-  // isRefreshing = false,
+  isRefreshing = false,
   refreshButton,
   simuResults = new Map(),
   isFixedOutputMode = false
@@ -377,7 +377,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   return (
     <div className={className}>
       <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
-        {isEmpty ? (
+        {isEmpty || isRefreshing ? (
           <div>Loading routes...</div>
         ) : (
           <>
@@ -389,7 +389,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
       <div
         style={{ height }}
         className={classNames({ 'pointer-events-none': !isDesktopScreen && !isMore })}>
-        {isEmpty ? (
+        {isEmpty || isRefreshing ? (
           <div className="h-full flex flex-col justify-evenly">
             {new Array(rows).fill(0).map((r, index) => (
               <Skeleton key={index} title={false} paragraph={true} active />
@@ -829,25 +829,36 @@ const TokenSwap = () => {
   ]);
 
   const rpcUrl = useRPCURL();
+  const previousRpcUrl = usePrevious(rpcUrl);
   useEffect(() => {
-    let worker = workerInstance;
-    if (!workerInstance) {
+    if (!workerInstance && rpcUrl) {
       // https://github.com/vercel/next.js/issues/31009#issuecomment-1146344161
-      worker = new Worker(new URL('../SwapWorker.ts', import.meta.url));
-      setWorkerInstance(worker);
-    }
-    if (rpcUrl && worker) {
+      const worker = new Worker(new URL('../SwapWorker.ts', import.meta.url));
       postMessageTyped<ISwapWorkerMessage<ISwapWorkerInitArgs>>(worker, {
         cmd: 'initWorker',
         args: {
           rpcUrl
         }
       });
+      setWorkerInstance(worker);
     }
+  }, [rpcUrl, workerInstance]);
+  useEffect(() => {
     return () => {
+      console.log('worker terminates');
       workerInstance?.terminate();
     };
-  }, [rpcUrl, workerInstance]);
+  }, [workerInstance]);
+  useEffect(() => {
+    if (previousRpcUrl && rpcUrl && workerInstance && previousRpcUrl !== rpcUrl) {
+      postMessageTyped<ISwapWorkerMessage<ISwapWorkerInitArgs>>(workerInstance, {
+        cmd: 'initWorker',
+        args: {
+          rpcUrl
+        }
+      });
+    }
+  }, [previousRpcUrl, rpcUrl, workerInstance]);
 
   const fetchSwapRoutes = useCallback(
     async (isReload: boolean | undefined = undefined) => {
