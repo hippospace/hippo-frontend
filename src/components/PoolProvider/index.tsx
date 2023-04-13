@@ -264,6 +264,8 @@ export const poolUrl = (dexType?: DexType, protocolId?: ProtocolId) => {
     return 'https://pancakeswap.finance/';
   } else if (dexType === AggregatorTypes.DexType.Obric) {
     return 'https://obric.xyz/';
+  } else if (dexType === AggregatorTypes.DexType.Thala) {
+    return 'https://app.thala.fi/';
   } else {
     return undefined;
   }
