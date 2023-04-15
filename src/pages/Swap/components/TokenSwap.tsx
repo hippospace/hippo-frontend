@@ -498,7 +498,8 @@ const TokenSwap = () => {
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState(''); // '' represents the first route
   const [availableRoutesCount, setAvailableRoutesCount] = useState(0);
 
-  const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
+  // const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
+  const [isUIReloadingPools, setIsUIReloadingPools] = useState(false);
   const [timePassedAfterRefresh, setTimePassedAfterRefresh] = useState(0);
   const [refreshRoutesTimerTick, setRefreshRoutesTimerTick] = useState<null | number>(1_000); // ms
   const [isPeriodicRefreshPaused, setIsPeriodicRefreshPaused] = useState(false);
@@ -511,6 +512,30 @@ const TokenSwap = () => {
     []
   );
   */
+
+  const isRefreshingRoutes = useMemo(() => {
+    return (
+      !(
+        (!isFixedOutput &&
+          routeSelected?.quote.inputUiAmt === fromUiAmt &&
+          routeSelected?.quote.inputSymbol === fromToken?.symbol) ||
+        (isFixedOutput &&
+          routeSelected?.quote.outputUiAmt === toUiAmt &&
+          routeSelected?.quote.outputSymbol === toToken?.symbol)
+      ) || isUIReloadingPools
+    );
+  }, [
+    fromToken?.symbol,
+    fromUiAmt,
+    isFixedOutput,
+    isUIReloadingPools,
+    routeSelected?.quote.inputSymbol,
+    routeSelected?.quote.inputUiAmt,
+    routeSelected?.quote.outputSymbol,
+    routeSelected?.quote.outputUiAmt,
+    toToken?.symbol,
+    toUiAmt
+  ]);
 
   const rpcEndpoint = useRpcEndpoint();
   const dispatch = useDispatch();
@@ -541,8 +566,8 @@ const TokenSwap = () => {
     [payValue, toValue]
   );
 
-  let refreshInterval = 20; // seconds
-  let isInputAmtTriggerReload = false;
+  let refreshInterval = 30; // seconds
+  let isInputAmtTriggerReload = true;
   let inputTriggerReloadThreshold = 20;
   let poolReloadMinInterval = 10_000; // ms!
   let error429WaitSeconds = 60;
@@ -748,7 +773,7 @@ const TokenSwap = () => {
 
           if (cmd === 'fetchRoutes' || cmd === 'reloadPools') {
             resetInputs();
-            setIsRefreshingRoutes(false);
+            // setIsRefreshingRoutes(false);
           }
         } else if (message && coinListClient) {
           const data = message.data as ISwapWorkerReturn<unknown>;
@@ -800,7 +825,8 @@ const TokenSwap = () => {
                 setIsPeriodicRefreshPaused(false);
               }
             }
-            setIsRefreshingRoutes(false);
+            setIsUIReloadingPools(false);
+            // setIsRefreshingRoutes(false);
           } else if (data.cmd === 'reloadPools') {
             const {
               result: { ts, isReloadInternal }
@@ -813,7 +839,7 @@ const TokenSwap = () => {
               restartTimer();
               setIsPeriodicRefreshPaused(false);
             }
-            setIsRefreshingRoutes(false);
+            // setIsRefreshingRoutes(false);
           } else if (data.cmd === 'queryIfRoutesExisting') {
             const {
               result: { hasRoutes: hasRoutesByWorker }
@@ -890,7 +916,8 @@ const TokenSwap = () => {
             // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
             (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold);
           // setIsRefreshingRoutes(isReloadInternal);
-          setIsRefreshingRoutes(true);
+          // setIsRefreshingRoutes(true);
+          setIsUIReloadingPools(true);
 
           postMessageTyped<ISwapWorkerMessage<IFetchRoutesArgs>>(workerInstance, {
             cmd: 'fetchRoutes',
