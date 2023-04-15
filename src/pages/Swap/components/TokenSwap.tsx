@@ -374,10 +374,19 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
 
   const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
 
+  const [isRefreshingDelayed, setIsRefreshingDelayed] = useState(false);
+
+  useTimeout(
+    () => {
+      setIsRefreshingDelayed(isRefreshing);
+    },
+    isRefreshing ? 300 : 0
+  );
+
   return (
     <div className={className}>
       <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
-        {isEmpty || isRefreshing ? (
+        {isEmpty || isRefreshingDelayed ? (
           <div>Loading routes...</div>
         ) : (
           <>
@@ -389,7 +398,7 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
       <div
         style={{ height }}
         className={classNames({ 'pointer-events-none': !isDesktopScreen && !isMore })}>
-        {isEmpty || isRefreshing ? (
+        {isEmpty || isRefreshingDelayed ? (
           <div className="h-full flex flex-col justify-evenly">
             {new Array(rows).fill(0).map((r, index) => (
               <Skeleton key={index} title={false} paragraph={true} active />
@@ -880,7 +889,8 @@ const TokenSwap = () => {
             isReload ??
             // timePassedRef.current might be bigger than refresh interval due to the requests waiting time
             (isInputAmtTriggerReload && timePassedRef.current > inputTriggerReloadThreshold);
-          setIsRefreshingRoutes(isReloadInternal);
+          // setIsRefreshingRoutes(isReloadInternal);
+          setIsRefreshingRoutes(true);
 
           postMessageTyped<ISwapWorkerMessage<IFetchRoutesArgs>>(workerInstance, {
             cmd: 'fetchRoutes',
@@ -899,6 +909,9 @@ const TokenSwap = () => {
             }
           });
         } else {
+          if (now === lastFetchTs.current) {
+            resetAllRoutes();
+          }
           const isReloadInternal =
             isReload ??
             ((!isFixedOutput && !previousFromUiAmt) || (isFixedOutput && !previousToUiAmt));
@@ -931,6 +944,7 @@ const TokenSwap = () => {
       poolReloadMinInterval,
       previousFromUiAmt,
       previousToUiAmt,
+      resetAllRoutes,
       toToken,
       toUiAmt,
       workerInstance
