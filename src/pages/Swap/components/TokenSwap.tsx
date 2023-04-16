@@ -58,7 +58,6 @@ type RoutesSimulateResults = Map<string, Types.UserTransaction | undefined>;
 
 interface IRoutesProps {
   className?: string;
-  availableRoutesCount: number;
   routes: IRoutesGroupedByDex[];
   routeSelected: GeneralRouteAndQuote | null;
   onRouteSelected: (route: GeneralRouteAndQuote, index: number) => void;
@@ -150,7 +149,7 @@ const RefreshButton = ({
         onClick={onRefreshClicked}>
         <Tooltip
           placement="topRight"
-          title={`${timePassedAfterRefresh}s after last suceesful refreshing. Click to refresh manually`}>
+          title={`${timePassedAfterRefresh}s after last suceesful refresh. Click to refresh manually`}>
           <RefreshIcon className={classNames('font-icon', { 'animate-spin': isRefreshing })} />
         </Tooltip>
       </Button>
@@ -347,7 +346,6 @@ const RouteRow: React.FC<IRouteRowProps> = ({
 const RoutesAvailable: React.FC<IRoutesProps> = ({
   routes,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  availableRoutesCount,
   onRouteSelected,
   routeSelected,
   className = '',
@@ -496,7 +494,6 @@ const TokenSwap = () => {
   const [allRoutes, setAllRoutes] = useState<GeneralRouteAndQuote[]>([]);
   const [routeSelected, setRouteSelected] = useState<GeneralRouteAndQuote | null>(null);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState(''); // '' represents the first route
-  const [availableRoutesCount, setAvailableRoutesCount] = useState(0);
 
   // const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
   const [isUIReloadingPools, setIsUIReloadingPools] = useState(false);
@@ -706,7 +703,6 @@ const TokenSwap = () => {
     console.log('Reset all routes');
     setAllRoutes([]);
     setRoute(null);
-    setAvailableRoutesCount(0);
     setRouteSelectedSerialized('');
   }, [setRoute]);
 
@@ -784,7 +780,6 @@ const TokenSwap = () => {
             const {
               ts,
               allRoutes: routesByWorker,
-              allRoutesCount,
               isReloadInternal,
               isFixedOutput: isFixedOutputByWorker
             } = result;
@@ -813,7 +808,6 @@ const TokenSwap = () => {
               if (routes.length > 0) {
                 setAllRoutes(routes);
                 setSelectedRouteFromRoutes(routes);
-                setAvailableRoutesCount(allRoutesCount);
                 if (isReloadInternal) {
                   restartTimer();
                 }
@@ -1369,7 +1363,6 @@ const TokenSwap = () => {
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
-                availableRoutesCount={availableRoutesCount}
                 routes={mergedRoutes}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
@@ -1397,7 +1390,6 @@ const TokenSwap = () => {
                 className="tablet:hidden absolute top-0 w-[420px] right-[-440px] laptop:w-[368px] laptop:right-[-388px] -z-10 opacity-0">
                 <Card className={classNames('px-4 py-8 laptop:px-4')}>
                   <RoutesAvailable
-                    availableRoutesCount={availableRoutesCount}
                     isDesktopScreen={true}
                     routes={mergedRoutes}
                     routeSelected={routeSelected}
