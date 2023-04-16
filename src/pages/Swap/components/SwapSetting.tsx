@@ -8,6 +8,7 @@ import { initState as swapInitState } from 'modules/swap/reducer';
 import Selectable from 'components/Selectable';
 
 interface TProps {
+  maxGas?: number;
   onClose: () => void;
 }
 
@@ -15,7 +16,7 @@ const SubTitle = ({ children }: { children: string }) => {
   return <div className="label-large-bold font-extrabold text-grey-700 mb-3">{children}</div>;
 };
 
-const SwapSetting: React.FC<TProps> = ({ onClose }) => {
+const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
   const slippageOptions = [0.1, 0.5, 1];
 
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
@@ -99,6 +100,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose }) => {
             isConfine={true}
             placeholder="0"
             min={0}
+            max={maxGas}
             onAmountChange={(v) => setFieldValue('maxGasFee', v)}
           />
           <div className="h6 text-grey-700">Gas Units</div>

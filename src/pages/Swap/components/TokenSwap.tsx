@@ -161,8 +161,10 @@ const CardHeader = ({
   className = '',
   right,
   fromToken,
-  toToken
+  toToken,
+  maxGas
 }: {
+  maxGas?: number;
   className?: string;
   right?: ReactNode;
   fromToken: RawCoinInfo | undefined;
@@ -242,7 +244,7 @@ const CardHeader = ({
           width={500}
           destroyOnClose={true}
           onCancel={onSwapSettingsClose}>
-          <SwapSetting onClose={onSwapSettingsClose} />
+          <SwapSetting maxGas={maxGas} onClose={onSwapSettingsClose} />
         </Modal>
       )}
       {isTablet && (
@@ -253,7 +255,7 @@ const CardHeader = ({
           placement={'bottom'}
           onClose={onSwapSettingsClose}
           visible={isMobileTxSettingsOpen}>
-          <SwapSetting onClose={onSwapSettingsClose} />
+          <SwapSetting maxGas={maxGas} onClose={onSwapSettingsClose} />
         </Drawer>
       )}
     </div>
@@ -976,19 +978,21 @@ const TokenSwap = () => {
     new Map()
   );
   const simuTs = useRef(0);
-  const [aptBalance, isReady] = useTokenBalane(coinListClient?.getCoinInfoBySymbol('APT')[0]);
+  const [aptBalance, isBalanceReady] = useTokenBalane(
+    coinListClient?.getCoinInfoBySymbol('APT')[0]
+  );
   const [baseBalance] = useTokenBalane(fromToken);
 
   const gasAvailable = useMemo(() => {
     let aptAvailable = 0;
-    if (fromToken?.symbol !== 'APT' && isReady && aptBalance) {
+    if (fromToken?.symbol !== 'APT' && isBalanceReady && aptBalance) {
       aptAvailable = aptBalance;
-    } else if (fromToken?.symbol === 'APT' && isReady && aptBalance) {
+    } else if (fromToken?.symbol === 'APT' && isBalanceReady && aptBalance) {
       aptAvailable = aptBalance - (fromUiAmt || 0);
     }
-    aptAvailable = Math.min(aptAvailable, 0.25);
+    aptAvailable = Math.max(Math.min(aptAvailable, 0.25), 0);
     return Math.floor(aptToGas(aptAvailable));
-  }, [aptBalance, fromToken?.symbol, fromUiAmt, isReady]);
+  }, [aptBalance, fromToken?.symbol, fromUiAmt, isBalanceReady]);
 
   // merge dexes by Hippo or same dex
   const mergedRoutes: IRoutesGroupedByDex[] = useMemo(() => {
@@ -1051,7 +1055,7 @@ const TokenSwap = () => {
 
     if (
       mergedRoutes.flatMap((mr) => mr.routes).length > 0 &&
-      isReady &&
+      isBalanceReady &&
       aptBalance &&
       baseBalance &&
       fromUiAmt &&
@@ -1108,7 +1112,7 @@ const TokenSwap = () => {
     allRoutes,
     aptBalance,
     baseBalance,
-    isReady,
+    isBalanceReady,
     simulateSwapByRoute,
     values.maxGasFee,
     values.slipTolerance
@@ -1333,6 +1337,7 @@ const TokenSwap = () => {
         }
         fromToken={fromToken}
         toToken={toToken}
+        maxGas={isBalanceReady ? gasAvailable : undefined}
       />
       <Card className="w-full min-h-[430px] flex flex-col py-8 relative pointer-events-auto">
         <div
