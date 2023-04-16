@@ -364,15 +364,15 @@ const RoutesAvailable: React.FC<IRoutesProps> = ({
   const rowsWhenMore = 4;
   const rowsOnDesktop = 4;
 
-  const height = isDesktopScreen
+  const rows = isDesktopScreen
     ? isEmpty
-      ? rowsOnDesktop * routeRowMinHeight
-      : Math.min(rowsOnDesktop, routes.length) * routeRowMinHeight
+      ? rowsOnDesktop
+      : Math.min(rowsOnDesktop, routes.length)
     : isEmpty
-    ? rowsWhenLess * routeRowMinHeight
-    : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess) * routeRowMinHeight;
+    ? rowsWhenLess
+    : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess);
 
-  const rows = isDesktopScreen ? rowsOnDesktop : isMore ? rowsWhenMore : rowsWhenLess;
+  const height = rows * routeRowMinHeight;
 
   const [isRefreshingDelayed, setIsRefreshingDelayed] = useState(false);
 
