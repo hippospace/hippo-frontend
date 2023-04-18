@@ -1907,10 +1907,10 @@
     commander "^9.3.0"
     cross-fetch "^3.1.5"
 
-"@manahippo/hippo-sdk@6.0.2":
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-6.0.2.tgz#67050a7ea5563b2ea952b05e6aafc70ba58e79c2"
-  integrity sha512-14x2205ZlpqK7FgALV+JJME8hEqpuzTfXZTnDKAZZZKS19gSb4lTlIHWD8RFfSLVtLaK+CQkll2pxRHc+CXOLQ==
+"@manahippo/hippo-sdk@6.0.3":
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-6.0.3.tgz#92a048edf54aebbf94b470fce74f153a46594f80"
+  integrity sha512-lYsRFzaFeaPpXy52x5RByGwNkSXhnqBW6MfYatTOf8szINDb6rr2V9MJs2gUeGOs2FHZouYWIPn7EJlYVmXxlQ==
   dependencies:
     "@manahippo/coin-list" "4.1.13"
     "@manahippo/move-to-ts" "2.1.2"
