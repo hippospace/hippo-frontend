@@ -3,7 +3,7 @@ import {
   AggregatorTypes,
   CONFIGS,
   NetworkConfiguration,
-  TradeAggregator
+  TradeAggregatorV2
 } from '@manahippo/hippo-sdk';
 import { AptosClient } from 'aptos';
 import { delay } from 'utils/utility';
@@ -93,7 +93,7 @@ export interface IQueryStateResult {
   isReady: boolean;
 }
 
-let hippoAgg: TradeAggregator | undefined;
+let hippoAgg: TradeAggregatorV2 | undefined;
 let coinListCli: CoinListClient | undefined;
 let aptosClient: AptosClient | undefined;
 let network: NetworkConfiguration = (() => {
@@ -127,12 +127,16 @@ const initWorker = async (configs: ISwapWorkerInitArgs) => {
   await coinListCli.update();
 
   if (now !== initTs) return;
-  hippoAgg = new TradeAggregator(aptosClient, network, coinListCli, 400, undefined, false, true);
+  hippoAgg = new TradeAggregatorV2(aptosClient, {
+    netConfig: network,
+    coinListClient: coinListCli,
+    poolReloadRequestsRateOfSecond: 400,
+    buildDefaultPoolList: true
+  });
   try {
     // Important: load full pool list
     await hippoAgg.updatePoolLists();
   } catch (err) {
-    hippoAgg.buildDefaultPoolList();
     console.log('Update Hippo trade aggregator failed', err);
   }
   console.log('Worker init done');
@@ -177,7 +181,6 @@ self.onmessage = async (message: { data: ISwapWorkerMessage<unknown> }) => {
         y: toToken,
         maxSteps,
         reloadState: isReloadInternal,
-        allowRoundTrip: isAllowRoundTrip,
         customReloadMinInterval: poolReloadMinInterval,
         allowHighGas: isAllowHighGas,
         isFixedOutput,
@@ -187,16 +190,12 @@ self.onmessage = async (message: { data: ISwapWorkerMessage<unknown> }) => {
       const { routes: allRoutes, allRoutesCount } = await (async () => {
         if (!isFixedOutput && fromUiAmt) {
           console.time('GetQuotes');
-          const routes = await hippoAgg.getQuotesV3(
-            fromUiAmt,
-            fromToken,
-            toToken,
+          const routes = await hippoAgg.getQuotes(fromUiAmt, fromToken, toToken, {
             maxSteps,
-            isReloadInternal,
-            isAllowRoundTrip,
-            poolReloadMinInterval,
-            isAllowHighGas
-          );
+            reloadState: isReloadInternal,
+            customReloadMinInterval: poolReloadMinInterval,
+            allowHighGas: isAllowHighGas
+          });
           console.timeEnd('GetQuotes');
           return {
             allRoutesCount: routes.length,
@@ -210,10 +209,11 @@ self.onmessage = async (message: { data: ISwapWorkerMessage<unknown> }) => {
             toUiAmt,
             fromToken,
             toToken,
-            isReloadInternal,
-            isAllowRoundTrip,
-            poolReloadMinInterval,
-            isAllowHighGas
+            {
+              reloadState: isReloadInternal,
+              customReloadMinInterval: poolReloadMinInterval,
+              allowHighGas: isAllowHighGas
+            }
           );
           const fixedOutputRoutes = routeAndQuote
             ? [routeAndQuote].map((r) => ({
@@ -241,27 +241,14 @@ self.onmessage = async (message: { data: ISwapWorkerMessage<unknown> }) => {
       };
       postMessage(msg);
     } else if (cmd === 'reloadPools' && hippoAgg) {
-      const {
-        ts,
-        x,
-        y,
-        fixedOut,
+      const { ts, x, y, maxSteps, reloadState, customReloadMinInterval, allowHighGas } =
+        args as IReloadPoolsArgs;
+      await hippoAgg.reloadPools(x, y, {
         maxSteps,
         reloadState,
-        allowRoundTrip,
         customReloadMinInterval,
         allowHighGas
-      } = args as IReloadPoolsArgs;
-      await hippoAgg.reloadPools(
-        x,
-        y,
-        fixedOut,
-        maxSteps,
-        reloadState,
-        allowRoundTrip,
-        customReloadMinInterval,
-        allowHighGas
-      );
+      });
       const msg: ISwapWorkerReturn<IReloadPoolsResult> = {
         cmd,
         result: {
@@ -271,8 +258,8 @@ self.onmessage = async (message: { data: ISwapWorkerMessage<unknown> }) => {
       };
       postMessage(msg);
     } else if (cmd === 'queryIfRoutesExisting' && hippoAgg) {
-      const { x, y, fixedOut, maxSteps, allowRoundTrip } = args as IQueryIfRoutesExistingArgs;
-      const hasRoutes = hippoAgg.getAllRoutes(x, y, fixedOut, maxSteps, allowRoundTrip).length > 0;
+      const { x, y, maxSteps } = args as IQueryIfRoutesExistingArgs;
+      const hasRoutes = hippoAgg.hasRoute(x, y, { maxSteps });
       const msg: ISwapWorkerReturn<IQueryIfRoutesExistingResult> = {
         cmd,
         result: {
