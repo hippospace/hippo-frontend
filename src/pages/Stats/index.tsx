@@ -85,8 +85,8 @@ const Stats = () => {
     // Max length of total_volume_history_24h/total_volume_history_7d is now 30
     const tvh =
       statsPeriod === '24H'
-        ? volume.total_volume_history_24h.slice(0, 30)
-        : volume.total_volume_history_7d.slice(0, 30);
+        ? volume.total_volume_history_24h.slice(-30)
+        : volume.total_volume_history_7d.slice(-30);
     return tvh.map((v) => {
       const time = v.start_time.toJsNumber();
       const name =

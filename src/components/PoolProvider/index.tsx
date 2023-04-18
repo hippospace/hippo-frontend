@@ -260,6 +260,8 @@ export const poolUrl = (dexType?: DexType, protocolId?: ProtocolId) => {
     return 'https://animeswap.org/';
   } else if (dexType === AggregatorTypes.DexType.Cetus) {
     return 'https://www.cetus.zone/';
+  } else if (dexType === AggregatorTypes.DexType.CetusV2) {
+    return 'https://www.cetus.zone/';
   } else if (dexType === AggregatorTypes.DexType.Pancake) {
     return 'https://pancakeswap.finance/';
   } else if (dexType === AggregatorTypes.DexType.Obric) {
