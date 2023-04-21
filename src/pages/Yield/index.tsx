@@ -4,7 +4,7 @@ import Card from 'components/Card';
 import CoinIcon from 'components/Coins/CoinIcon';
 import CoinLabel from 'components/Coins/CoinLabel';
 import IconMultipleSelector, { IYieldTokenSelectorOption } from 'pages/Yield/IconMultipleSelector';
-import ProtocolProvider, { ProtocolId } from 'components/PoolProvider';
+import ProtocolProvider, { ProtocolId, poolUrl } from 'components/PoolProvider';
 import { percent } from 'components/PositiveFloatNumInput/numberFormats';
 import TradingPair from 'components/TradingPair';
 import { useBreakpoint } from 'hooks/useBreakpoint';
@@ -23,6 +23,8 @@ import openNotification, { openHttpErrorNotification } from 'utils/notifications
 import { RawCoinInfo } from '@manahippo/coin-list';
 import { coinBridge, coinPriority } from 'utils/hippo';
 import Selectable from 'components/Selectable';
+import { LinkIcon } from 'resources/icons';
+import Button from 'components/Button';
 
 export const CTOKEN_FILTER_PREFIX = 'cTokenFilter:';
 export const CTOKEN_PREFIX = 'cToken:';
@@ -552,11 +554,13 @@ const TopLpPriceChanges = ({
     () =>
       mergedData.map((d, i) => {
         const nodes = [];
+        let dexType: AggregatorTypes.DexType | undefined;
+        let protocolId: ProtocolId | undefined;
         if (d.type === 'lp') {
           const [dex, lp] = d.coin.split(':');
           const base = coinListClient?.getCoinInfoBySymbol(lp.split('-')[0])[0]?.token_type.type;
           const quote = coinListClient?.getCoinInfoBySymbol(lp.split('-')[1])[0]?.token_type.type;
-          const dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
+          dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
 
           nodes.push(
             ...[
@@ -585,6 +589,7 @@ const TopLpPriceChanges = ({
           );
         } else if (d.coin.startsWith(CTOKEN_PREFIX)) {
           const coin = coinListClient?.getCoinInfoBySymbol(d.coin.split(':')[2])[0];
+          protocolId = d.coin.split(':')[1] as ProtocolId;
           nodes.push(
             ...[
               <div key={i} className="min-h-[65px] flex items-center gap-x-2">
@@ -594,7 +599,7 @@ const TopLpPriceChanges = ({
               <span key={i} className="body-bold text-grey-700 flex items-center gap-x-1">
                 <ProtocolProvider
                   className={'h-[65px]'}
-                  protocolId={d.coin.split(':')[1] as ProtocolId}
+                  protocolId={protocolId}
                   isNameInvisible={true}
                   isTitleEnabled={true}
                   isClickable={false}
@@ -625,6 +630,21 @@ const TopLpPriceChanges = ({
             <ChangeLabel key={i} v={d.changes[PriceChangePeriod['30D']]} />
           ]
         );
+        if (!isTablet) {
+          nodes.push(
+            <Button
+              variant="icon"
+              className={classNames('!w-8 !h-8', {
+                'invisible pointer-events-none': !(dexType || protocolId)
+              })}
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(poolUrl(dexType, protocolId));
+              }}>
+              <LinkIcon className="font-icon text-grey-500 text-[16px]" />
+            </Button>
+          );
+        }
         return nodes;
       }),
     [coinListClient, isMobile, isTablet, mergedData]
@@ -665,11 +685,12 @@ const TopLpPriceChanges = ({
               className={classNames('font-icon', { 'text-prime-500': periodSelected === a[0] })}
             />
           </span>
-        ))
+        )),
+        !isTablet ? 'Link' : undefined
       ].filter((c) => !!c),
     [isMobile, isTablet, metricLabel, metricLabelAbbr, periodSelected]
   );
-  const flexs = !isTablet ? [3, 1.5, 2, 2, 3] : !isMobile ? [3, 1.5, 2, 3] : [3, 1.5, 2, 2];
+  const flexs = !isTablet ? [3, 1.5, 2, 2, 3, 0.5] : !isMobile ? [3, 1.5, 2, 3] : [3, 1.5, 2, 2];
 
   const onClickRow = useCallback(
     (r: number) => {
