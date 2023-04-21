@@ -1,5 +1,5 @@
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
-import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import econiaLogo from 'resources/img/dexes/econia.jpeg';
 import pontemLogo from 'resources/img/dexes/pontem.jpeg';
@@ -221,6 +221,15 @@ const ProtocolProvider: FC<IPoolProviderProps> = ({
   isNameInvisible = false,
   isClickable = true
 }) => {
+  const onClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isClickable) {
+        e.stopPropagation();
+        window.open(poolUrl(dexType, protocolId), '_blank');
+      }
+    },
+    [dexType, isClickable, protocolId]
+  );
   return (
     <div
       className={classNames(
@@ -228,7 +237,7 @@ const ProtocolProvider: FC<IPoolProviderProps> = ({
         { 'cursor-pointer': isClickable },
         className
       )}
-      onClick={() => isClickable && window.open(poolUrl(dexType), '_blank')}>
+      onClick={onClick}>
       <ProtocolIcon dexType={dexType} protocolId={protocolId} isTitleEnabled={isTitleEnabled} />
       {!isNameInvisible && (
         <span className="body-bold text-grey-700 ml-2">

@@ -556,6 +556,7 @@ const TopLpPriceChanges = ({
         const nodes = [];
         let dexType: AggregatorTypes.DexType | undefined;
         let protocolId: ProtocolId | undefined;
+
         if (d.type === 'lp') {
           const [dex, lp] = d.coin.split(':');
           const base = coinListClient?.getCoinInfoBySymbol(lp.split('-')[0])[0]?.token_type.type;
@@ -580,8 +581,8 @@ const TopLpPriceChanges = ({
                   className={'h-[65px]'}
                   dexType={dexType}
                   isNameInvisible={true}
-                  isTitleEnabled={true}
-                  isClickable={false}
+                  isTitleEnabled={!isTablet}
+                  isClickable={isTablet}
                 />
                 LP
               </span>
@@ -601,10 +602,10 @@ const TopLpPriceChanges = ({
                   className={'h-[65px]'}
                   protocolId={protocolId}
                   isNameInvisible={true}
-                  isTitleEnabled={true}
-                  isClickable={false}
+                  isTitleEnabled={!isTablet}
+                  isClickable={isTablet}
                 />
-                Lending
+                {!isMobile && <>Lending</>}
               </span>
             ]
           );
