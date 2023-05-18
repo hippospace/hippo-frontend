@@ -34,13 +34,22 @@ export enum PriceChangePeriod {
   '7D' = '7D',
   '30D' = '30D'
 }
-export interface ILpPriceChange {
+
+export interface ILp {
   lp: string;
   dex: string;
   poolType: number;
+  extra: string;
+}
+export interface ILpPriceChange extends ILp {
   isTVLTooLow?: boolean;
   latestLpPrice?: string;
   priceChanges: Record<PriceChangePeriod, string | undefined>;
+}
+
+export interface IExtra {
+  stable?: boolean;
+  weights?: number[];
 }
 
 export interface ICoinPriceChange {

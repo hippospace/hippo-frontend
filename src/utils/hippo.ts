@@ -1,5 +1,5 @@
 import { RawCoinInfo } from '@manahippo/coin-list';
-import { PriceChangePeriod } from 'types/hippo';
+import { ILp, PriceChangePeriod } from 'types/hippo';
 
 export const tokensHavingHippoNativePriceHistory = [
   '0x1::aptos_coin::AptosCoin',
@@ -57,4 +57,18 @@ export function postMessageTyped<T>(
   } else {
     worker.postMessage(message, options);
   }
+}
+
+export function lpOfUniqueStr(str: string): ILp {
+  const [dex, lp, poolType, ...extra] = str.split(':');
+  return {
+    dex,
+    lp,
+    poolType: parseInt(poolType),
+    extra: extra.join(':')
+  };
+}
+
+export function uniqueStrOfLp(lp: ILp) {
+  return [lp.dex, lp.lp, lp.poolType, lp.extra].filter((s) => s !== '').join(':');
 }

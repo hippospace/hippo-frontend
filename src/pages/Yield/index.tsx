@@ -13,7 +13,7 @@ import TopList from 'components/TopList';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CaretIcon } from 'resources/icons';
 import useSWR from 'swr';
-import { ICoinPriceChange, ILpPriceChange, PriceChangePeriod } from 'types/hippo';
+import { ICoinPriceChange, IExtra, ILpPriceChange, PriceChangePeriod } from 'types/hippo';
 import { fetcher, multipleFetcher } from 'utils/utility';
 // import CheckboxInput from 'components/CheckboxInput';
 import YieldChangeChart from './YieldChangeChart';
@@ -21,10 +21,11 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import openNotification, { openHttpErrorNotification } from 'utils/notifications';
 import { RawCoinInfo } from '@manahippo/coin-list';
-import { coinBridge, coinPriority } from 'utils/hippo';
+import { coinBridge, coinPriority, lpOfUniqueStr, uniqueStrOfLp } from 'utils/hippo';
 import Selectable from 'components/Selectable';
 import { LinkIcon } from 'resources/icons';
 import Button from 'components/Button';
+import { Tooltip } from 'antd';
 
 export const CTOKEN_FILTER_PREFIX = 'cTokenFilter:';
 export const CTOKEN_PREFIX = 'cToken:';
@@ -155,8 +156,7 @@ const TokenSelector = ({
   const coins =
     (data?.coins
       .map((c) => coinListClient?.getCoinInfoBySymbol(c)[0])
-      .filter((c) => c && !c?.symbol.startsWith('dev') && !!c?.coingecko_id) as RawCoinInfo[]) ??
-    [];
+      .filter((c) => c && !c?.symbol.startsWith('dev')) as RawCoinInfo[]) ?? [];
 
   const coinOptions: IYieldTokenSelectorOption[] = coins.map((c) => {
     return {
@@ -366,7 +366,6 @@ const ChangeLabel = ({
   );
 };
 
-const uniqueLpStr = (d: ILpPriceChange) => [d.dex, d.lp, d.poolType].join(':');
 const MAX_TOKENS_SELECTED_COUNT = 6;
 
 const TopLpPriceChanges = ({
@@ -416,7 +415,8 @@ const TopLpPriceChanges = ({
         AggregatorTypes.DexType.Pontem,
         AggregatorTypes.DexType.Aux,
         AggregatorTypes.DexType.AnimeSwap,
-        AggregatorTypes.DexType.Aptoswap
+        AggregatorTypes.DexType.Aptoswap,
+        AggregatorTypes.DexType.Thala
       ].map((d) => AggregatorTypes.DEX_TYPE_NAME[d]),
     []
   );
@@ -535,7 +535,7 @@ const TopLpPriceChanges = ({
         .filter((d) => !d.isTVLTooLow)
         .map((d) => ({
           type: 'lp' as const,
-          coin: uniqueLpStr(d),
+          coin: uniqueStrOfLp(d),
           changes: d.priceChanges
         }))
     ].sort((a, b) => {
@@ -558,24 +558,40 @@ const TopLpPriceChanges = ({
         let protocolId: ProtocolId | undefined;
 
         if (d.type === 'lp') {
-          const [dex, lp] = d.coin.split(':');
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+          const { dex, lp, poolType, extra } = lpOfUniqueStr(d.coin);
+          dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
+
+          let lpTitle = '';
+          if (extra) {
+            const extractObj = JSON.parse(extra) as IExtra;
+            lpTitle = extractObj.stable
+              ? 'Stable pool'
+              : `Weighted pool: ${extractObj.weights?.map((s) => `${s}%`).join(' ,')}`;
+          }
+          /*
+          if (poolType >= 0 && dexType === AggregatorTypes.DexType.Obric) {
+            lpTitle = `V${poolType}`;
+          }
+          */
           const base = coinListClient?.getCoinInfoBySymbol(lp.split('-')[0])[0]?.token_type.type;
           const quote = coinListClient?.getCoinInfoBySymbol(lp.split('-')[1])[0]?.token_type.type;
-          dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
 
           nodes.push(
             ...[
-              <div key={i} className="flex items-center gap-x-3 tablet:gap-x-2">
-                {base && quote && (
-                  <TradingPair
-                    key={i}
-                    base={base}
-                    quote={quote}
-                    isLp={true}
-                    isIconsInvisible={isMobile}
-                  />
-                )}
-              </div>,
+              <Tooltip title={lpTitle} placement="topLeft" key={i}>
+                <div className="flex items-center gap-x-3 tablet:gap-x-2">
+                  {base && quote && (
+                    <TradingPair
+                      key={i}
+                      base={base}
+                      quote={quote}
+                      isLp={true}
+                      isIconsInvisible={isMobile}
+                    />
+                  )}
+                </div>
+              </Tooltip>,
               <span key={i} className="body-bold text-grey-700 flex items-center gap-x-1">
                 <ProtocolProvider
                   className={'h-[65px]'}
