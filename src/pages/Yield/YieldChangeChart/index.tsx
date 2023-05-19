@@ -2,7 +2,7 @@ import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { Segmented, Spin } from 'antd';
 import Card from 'components/Card';
 import ProtocolProvider, { ProtocolId } from 'components/PoolProvider';
-import { percent } from 'components/PositiveFloatNumInput/numberFormats';
+import { cutDecimals, percent } from 'components/PositiveFloatNumInput/numberFormats';
 import useHippoClient from 'hooks/useHippoClient';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -94,7 +94,9 @@ const CustomTooltip: FC<TooltipProps<ValueType, NameType>> = ({ active, payload 
                 <p key={index} className="flex justify-between items-center py-2">
                   <CoinIcon className="mr-1" token={coin} />
                   {coin && <CoinLabel className="mr-2" coin={coin} />}
-                  <span className="mr-2">${p.payload.prices[p.name as string]}</span>
+                  <span className="mr-2">
+                    ${cutDecimals(p.payload.prices[p.name as string], 2)}
+                  </span>
                   <span style={{ color: p.color }} className="ml-auto">
                     {percent(p.value as unknown as number, 2, true)}
                   </span>
