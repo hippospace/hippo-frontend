@@ -17,7 +17,9 @@ export const coinPriority = (symbol: string) => {
     ['USDC', 'zUSDC', 'ceUSDC'], // 10
     ['USDT', 'zUSDT', 'ceUSDT'], // 100
     ['BUSD', 'zBUSD', 'ceBUSD'], // ...
-    ['DAI', 'zDAI', 'ceDAI']
+    ['DAI', 'zDAI', 'ceDAI'],
+    ['MOD'],
+    ['THL']
   ];
   const prios = stables.reduce((pre, cur, index) => {
     const ob = cur.reduce((pre1, cur1, index1) => {

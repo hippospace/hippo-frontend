@@ -561,25 +561,28 @@ const TopLpPriceChanges = ({
           // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
           const { dex, lp, poolType, extra } = lpOfUniqueStr(d.coin);
           dexType = AggregatorTypes.DexType[dex as keyof typeof AggregatorTypes.DexType];
+          const [left, right] = lp.split('-');
 
           let lpTitle = '';
           if (extra) {
             const extractObj = JSON.parse(extra) as IExtra;
             lpTitle = extractObj.stable
               ? 'Stable pool'
-              : `Weighted pool: ${extractObj.weights?.map((s) => `${s}%`).join(' ,')}`;
+              : `Weighted pool: ${extractObj.weights
+                  ?.map((s, j) => `${lp.split('-')[j]} ${s}%`)
+                  .join(', ')}`;
           }
           /*
           if (poolType >= 0 && dexType === AggregatorTypes.DexType.Obric) {
             lpTitle = `V${poolType}`;
           }
           */
-          const base = coinListClient?.getCoinInfoBySymbol(lp.split('-')[0])[0]?.token_type.type;
-          const quote = coinListClient?.getCoinInfoBySymbol(lp.split('-')[1])[0]?.token_type.type;
+          const base = coinListClient?.getCoinInfoBySymbol(left)[0]?.token_type.type;
+          const quote = coinListClient?.getCoinInfoBySymbol(right)[0]?.token_type.type;
 
           nodes.push(
             ...[
-              <Tooltip title={lpTitle} placement="topLeft" key={i}>
+              <Tooltip title={lpTitle} placement="topLeft" overlayClassName="max-w-[300px]" key={i}>
                 <div className="flex items-center gap-x-3 tablet:gap-x-2">
                   {base && quote && (
                     <TradingPair
@@ -797,11 +800,17 @@ const YieldPage = () => {
             <div className="body-bold mr-2">Presets</div>
             <PreSetButton
               label="APT & LP"
-              generalTokens={['APT', '*:APT-USDC:*', '*:APT-USDT:*']}
+              generalTokens={['APT', '*:APT-USDC:*', '*:APT-USDT:*', '*:APT-MOD:*']}
             />
             <PreSetButton
               label="Stables & LP"
-              generalTokens={['*:BUSD-USDC:*', '*:USDT-USDC:*', '*:USDC-USDC:*']}
+              generalTokens={[
+                '*:BUSD-USDC:*',
+                '*:USDT-USDC:*',
+                '*:USDC-USDC:*',
+                '*:MOD-USDC:*',
+                '*:MOD-USDT:*'
+              ]}
             />
             <PreSetButton
               label="CAKE & LP"
