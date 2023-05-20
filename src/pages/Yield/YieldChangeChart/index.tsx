@@ -147,10 +147,12 @@ const YieldChangeChart = ({
     }
   }, [errorCoins]);
   const data = dataCoins0?.reduce((pre, cur, index) => {
-    pre[coins[index]] = cur.filter(
-      // a dot is displayed every 6 hoours for 30D
-      (v, i) => chartPeriod !== PriceChangePeriod['30D'] || i % (dotInterval / 2) === 0
-    );
+    pre[coins[index]] = cur
+      .sort((a, b) => (a.ts < b.ts ? -1 : 1))
+      .filter(
+        // a dot is displayed every 6 hoours for 30D
+        (v, i) => chartPeriod !== PriceChangePeriod['30D'] || i % (dotInterval / 2) === 0
+      );
     return pre;
   }, {} as Record<string, IPrice[]>);
 
