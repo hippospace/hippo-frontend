@@ -8,8 +8,6 @@ import { useCallback, useRef, useState } from 'react';
 import CoinIcon from 'components/Coins/CoinIcon';
 import { Modal, Drawer } from 'components/Antd';
 import useTokenBalane from 'hooks/useTokenBalance';
-import { useSelector } from 'react-redux';
-import { getTokenList } from 'modules/swap/reducer';
 import classNames from 'classnames';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import useDebouncedCallback from 'hooks/useDebouncedCallback';
@@ -20,6 +18,7 @@ import Skeleton from 'components/Skeleton';
 import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import CoinLabel from 'components/Coins/CoinLabel';
+import useHippoClient from 'hooks/useHippoClient';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';
@@ -80,7 +79,7 @@ const CurrencyInput: React.FC<TProps> = ({
   const selectedCurrency = values[actionType];
   const selectedToken = selectedCurrency?.token;
   const [uiBalance, isReady] = useTokenBalane(selectedToken);
-  const tokenList = useSelector(getTokenList);
+  const tokenList = useHippoClient().rawCoinInfos;
   const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
 
   // The debounce delay should be bigger than the average of key input intervals

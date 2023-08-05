@@ -1,11 +1,9 @@
 import { createContext, FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { AggregatorTypes, HippoWalletClient, stdlib } from '@manahippo/hippo-sdk';
-import { CoinListClient, NetworkType, RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
+import { CoinListClient, NetworkType, RawCoinInfo } from '@manahippo/coin-list';
 import useAptosWallet from 'hooks/useAptosWallet';
 import { GeneralRouteAndQuote, TTransaction } from 'types/hippo';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
-import { useDispatch } from 'react-redux';
-import swapAction from 'modules/swap/actions';
 import { AptosClient, HexString, TxnBuilderTypes, Types } from 'aptos';
 import {
   openErrorNotification,
@@ -22,9 +20,10 @@ interface HippoClientContextType {
   hippoWallet?: HippoWalletClient;
   // hippoAgg?: TradeAggregator;
   coinListClient?: CoinListClient;
+  rawCoinInfos: RawCoinInfo[];
   aptosClient?: AptosClient;
   getTokenStoreByFullName: (fullName: string) => stdlib.Coin.CoinStore | undefined | false;
-  getTokenInfoByFullName: (fullName: string) => CoinInfo | undefined;
+  getTokenInfoByFullName: (fullName: string) => RawCoinInfo | undefined;
   requestSwapByRoute: (
     routeAndQuote: GeneralRouteAndQuote,
     slipTolerance: number,
@@ -50,7 +49,6 @@ interface TProviderProps {
 const errorHandler = debounce(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (_err: any) => {
-    // store.dispatch(commonActions.SET_RESOURCES_NOT_FOUND(true));
     openErrorNotification({ detail: 'Resource not found or loaded' });
     throw _err;
   },
@@ -69,7 +67,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
   const [refreshWalletClient, setRefreshWalletClient] = useState(false);
   const [lastUpdateVersion, setLastUpdateVersion] = useState<bigint | undefined>(undefined);
   const [transaction, setTransaction] = useState<TTransaction>();
-  const dispatch = useDispatch();
 
   const { networkCfg } = useNetworkConfiguration();
 
@@ -87,25 +84,24 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
     [networkCfg.name]
   );
 
-  const updateCoinlist = useCallback(() => {
-    const tradableCoins = coinListCli?.getCoinInfoList();
-    dispatch(swapAction.SET_TOKEN_LIST(tradableCoins));
-  }, [coinListCli, dispatch]);
+  const initialRawCoinInfos = useMemo(() => {
+    return coinListCli?.getCoinInfoList() || [];
+  }, [coinListCli]);
 
-  useEffect(updateCoinlist, [updateCoinlist]);
+  const [rawCoinInfos, setRawCoinInfos] = useState<RawCoinInfo[]>(initialRawCoinInfos);
 
   useEffect(() => {
     (async () => {
       try {
         // Important: load full coin list
         await coinListCli.update();
-        updateCoinlist();
+        setRawCoinInfos(coinListCli.getCoinInfoList());
       } catch (err) {
         console.log('Update coin list client failed', err);
         errorHandler(err);
       }
     })();
-  }, [aptosClient, coinListCli, updateCoinlist]);
+  }, [aptosClient, coinListCli]);
 
   const getHippoWalletClient = useCallback(
     async (version: undefined | number | bigint = undefined) => {
@@ -339,6 +335,7 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         hippoWallet,
         // hippoAgg,
         coinListClient: coinListCli,
+        rawCoinInfos,
         aptosClient: aptosClient,
         getTokenStoreByFullName,
         getTokenInfoByFullName,

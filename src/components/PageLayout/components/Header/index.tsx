@@ -10,8 +10,6 @@ import { CloseIcon, MenuIcon, SettingIcon } from 'resources/icons';
 import { Drawer, Popover } from 'antd';
 import { useCallback, useState } from 'react';
 import Button from 'components/Button';
-import { useSelector } from 'react-redux';
-import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Settings from 'components/Settings';
 import BridgeIcon from 'resources/img/bridges/bridge-3x.png';
 import AptosBridgeIcon from 'resources/img/bridges/AptosBridge-3x.png';
@@ -136,7 +134,6 @@ const SideMenu = ({ currentPageName, onRouteSelected }: ISideMenuProps) => {
 const PageHeader: React.FC = () => {
   const [currentPageName] = useCurrentPage();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-  const isResourcesNotFound = useSelector(getIsResourcesNotFound);
 
   const renderNavItems = useCallback(() => {
     return routes.map(({ name, path, hidden, type }) => {
@@ -190,7 +187,7 @@ const PageHeader: React.FC = () => {
               'flex justify-center h-full min-w-[200px] w-full !bg-transparent tablet:hidden'
             )}
             selectedKeys={[currentPageName]}>
-            {!isResourcesNotFound && renderNavItems()}
+            {renderNavItems()}
           </Antd.Menu>
         </div>
         <div className="absolute right-0 top-0 h-full w-fit flex items-center gap-x-2">
@@ -229,12 +226,12 @@ const PageHeader: React.FC = () => {
         closeIcon={<CloseIcon className="font-icon h5 text-grey-500" />}
         width="70%"
         onClose={() => setIsSideMenuOpen(false)}>
-        {!isResourcesNotFound && (
+        {
           <SideMenu
             currentPageName={currentPageName}
             onRouteSelected={() => setIsSideMenuOpen(false)}
           />
-        )}
+        }
       </Drawer>
     </Header>
   );

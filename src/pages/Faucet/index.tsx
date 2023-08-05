@@ -6,8 +6,6 @@ import useAptosWallet from 'hooks/useAptosWallet';
 import useHippoClient from 'hooks/useHippoClient';
 import useTokenBalane from 'hooks/useTokenBalance';
 import { useCallback, useMemo, useState } from 'react';
-import { getTokenList } from 'modules/swap/reducer';
-import { useSelector } from 'react-redux';
 import { Skeleton } from 'antd';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
@@ -64,7 +62,8 @@ const TokenCard = ({ tokenInfo }: { tokenInfo: CoinInfo }) => {
 
 const Faucet: React.FC = () => {
   const { activeWallet, openModal } = useAptosWallet();
-  const tokenList = useSelector(getTokenList).filter((t) => t.symbol !== 'APT' && !!t.logo_url);
+  const { rawCoinInfos } = useHippoClient();
+  const tokenList = rawCoinInfos.filter((t) => t.symbol !== 'APT' && !!t.logo_url);
 
   const renderTokenList = useMemo(() => {
     if (!activeWallet) {

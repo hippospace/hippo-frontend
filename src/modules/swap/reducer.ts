@@ -2,13 +2,9 @@ import { createReducer } from '@reduxjs/toolkit';
 import { RootState } from 'modules/rootReducer';
 import { ISwapSettings } from 'pages/Swap/types';
 import actions from './actions';
-import { RawCoinInfo } from '@manahippo/coin-list';
 
 interface SwapState {
-  isFetching: boolean;
-  isFetched: boolean;
   error: any;
-  tokenList: RawCoinInfo[];
   isPriceChartOpen: boolean;
   fromSymbolSaved: string;
   toSymbolSaved: string;
@@ -16,10 +12,7 @@ interface SwapState {
 }
 
 export const initState: SwapState = {
-  isFetching: false,
-  isFetched: false,
   error: null,
-  tokenList: [],
   isPriceChartOpen: false,
   fromSymbolSaved: 'USDC',
   toSymbolSaved: 'APT',
@@ -45,15 +38,6 @@ export const initState: SwapState = {
 
 export default createReducer(initState, (builder) => {
   builder
-    .addCase(actions.SET_IS_FETCHING, (state, { payload }) => {
-      state.isFetching = payload;
-      state.isFetched = false;
-    })
-    .addCase(actions.SET_TOKEN_LIST, (state, { payload }) => {
-      state.tokenList = payload;
-      state.isFetching = false;
-      state.isFetched = true;
-    })
     .addCase(actions.SET_SWAP_SETTING, (state, { payload }) => {
       state.swapSettings = payload;
     })
@@ -71,9 +55,6 @@ export default createReducer(initState, (builder) => {
     });
 });
 
-export const getIsFetchingTokenList = (state: RootState) => state.swap.isFetching;
-export const getIsFetchedTokenList = (state: RootState) => state.swap.isFetched;
-export const getTokenList = (state: RootState) => state.swap.tokenList;
 export const getSwapSettings = (state: RootState) => state.swap.swapSettings;
 export const getIsPriceChartOpen = (state: RootState) => state.swap.isPriceChartOpen;
 export const getFromSymbolSaved = (state: RootState) => state.swap.fromSymbolSaved;

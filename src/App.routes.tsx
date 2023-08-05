@@ -1,10 +1,8 @@
-import { Navigate, RouteObject, useLocation, useNavigate, useRoutes } from 'react-router-dom';
+import { Navigate, RouteObject, useRoutes } from 'react-router-dom';
 
 import Swap from 'pages/Swap';
 import Faucet from 'pages/Faucet';
 import Home from 'pages/Home';
-import { useSelector } from 'react-redux';
-import { getIsResourcesNotFound } from 'modules/common/reducer';
 import Stats from 'pages/Stats';
 import YieldPage from 'pages/Yield';
 
@@ -69,20 +67,6 @@ export const routes: TRoute[] = [
 
 const Routes = () => {
   const activeRoutes = [...routes];
-  const isResourcesNotFound = useSelector(getIsResourcesNotFound);
-  const nav = useNavigate();
-  const location = useLocation();
-  if (isResourcesNotFound) {
-    activeRoutes.forEach((r) => {
-      if (['Swap', 'Faucet'].includes(r.name)) {
-        r.hidden = true;
-      }
-    });
-    setTimeout(() => {
-      if (location.pathname !== '/') nav('/');
-    });
-  }
-
   const elements = useRoutes(activeRoutes as RouteObject[]);
   return elements;
 };

@@ -1,9 +1,7 @@
 import { List } from 'components/Antd';
 import { useFormikContext } from 'formik';
-import { getTokenList } from 'modules/swap/reducer';
 import { ISwapSettings } from 'pages/Swap/types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import VirtualList from 'rc-virtual-list';
 import CoinRow from './CoinRow';
 
@@ -85,9 +83,9 @@ const isTokenOfFilter = (token: TokenInfo, filter: Filter) => {
 };
 
 const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
-  const { coinListClient } = useHippoClient();
+  const { coinListClient, rawCoinInfos } = useHippoClient();
   const { values, setFieldValue } = useFormikContext<ISwapSettings>();
-  const tokenList = useSelector(getTokenList);
+  const tokenList = rawCoinInfos;
   // const [filter, setFilter] = useState<Filter>('All');
 
   const filter = useCoinSelectorStore((state) => state.filter);

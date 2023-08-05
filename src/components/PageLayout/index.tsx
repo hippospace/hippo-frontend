@@ -1,10 +1,6 @@
 import { Antd } from 'components';
-import { useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import commonAction from 'modules/common/actions';
+import { useRef } from 'react';
 import { Footer, Header } from './components';
-import { getLayoutHeight } from 'modules/common/reducer';
-import { useSelector } from 'react-redux';
 import useCurrentPage from 'hooks/useCurrentPage';
 import classNames from 'classnames';
 import SwapIllu from 'resources/img/swap-illu.png';
@@ -15,13 +11,6 @@ const { Content } = Antd.Layout;
 
 const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const dispatch = useDispatch();
-  const contentHeight = useSelector(getLayoutHeight);
-
-  useEffect(() => {
-    if (containerRef?.current && containerRef?.current?.clientHeight && !contentHeight)
-      dispatch(commonAction.SET_LAYOUT_HEIGHT(containerRef?.current?.clientHeight));
-  }, [containerRef, contentHeight, dispatch]);
 
   const [currentPageName] = useCurrentPage();
 
