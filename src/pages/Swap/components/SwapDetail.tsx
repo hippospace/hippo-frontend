@@ -4,13 +4,13 @@ import { useFormikContext } from 'formik';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useState } from 'react';
 import { ExchangeIcon } from 'resources/icons';
-import { ISwapSettings } from '../types';
 import { RawCoinInfo as CoinInfo } from '@manahippo/coin-list';
 import TextLink from 'components/TextLink';
 import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 import { useBinanceRate } from 'hooks/useBinance';
 import Hint from 'components/Hint';
 import { GeneralRouteAndQuote } from 'types/hippo';
+import { ISwapSettings } from './TokenSwap';
 
 const RateCompare = ({
   rate,
@@ -85,7 +85,7 @@ const SwapDetail = ({
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
     output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken?.symbol}`;
     minimum = `${tokenAmountFormatter(
-      outputUiAmt * (1 - swapSettings.slipTolerance / 100),
+      outputUiAmt * (1 - swapSettings.slippageTolerance / 100),
       toToken
     )} ${toToken?.symbol}`;
     priceImpact = Math.abs(routeAndQuote.quote.priceImpact || 0);
@@ -170,7 +170,7 @@ const SwapDetail = ({
     },
     {
       label: 'Slippage Tolerance',
-      value: `${swapSettings.slipTolerance} %`
+      value: `${swapSettings.slippageTolerance} %`
     }
   ];
 

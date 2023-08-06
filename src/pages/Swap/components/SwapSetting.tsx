@@ -1,11 +1,11 @@
 import { useFormikContext } from 'formik';
-import { ISwapSettings } from 'pages/Swap/types';
 import Button from 'components/Button';
 import { useCallback } from 'react';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import classNames from 'classnames';
 import { initState as swapInitState } from 'modules/swap/reducer';
 import Selectable from 'components/Selectable';
+import { ISwapSettings } from './TokenSwap';
 
 interface TProps {
   maxGas?: number;
@@ -26,13 +26,13 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
   }, [onClose]);
 
   const onResetSwapSetting = useCallback(() => {
-    setFieldValue('slipTolerance', swapInitState.swapSettings.slipTolerance);
-    setFieldValue('trasactionDeadline', swapInitState.swapSettings.trasactionDeadline);
+    setFieldValue('slippageTolerance', swapInitState.swapSettings.slippageTolerance);
+    setFieldValue('transactionDeadline', swapInitState.swapSettings.transactionDeadline);
     setFieldValue('maxGasFee', swapInitState.swapSettings.maxGasFee);
   }, [setFieldValue]);
 
   // TODO: manage state here!
-  const isCustomSlippage = !slippageOptions.includes(values.slipTolerance);
+  const isCustomSlippage = !slippageOptions.includes(values.slippageTolerance);
 
   return (
     <div className="w-full">
@@ -44,8 +44,8 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
               <Selectable
                 key={`st-${i}`}
                 className="flex-auto body-bold"
-                isSelected={values.slipTolerance === s}
-                onClick={() => setFieldValue('slipTolerance', s)}>
+                isSelected={values.slippageTolerance === s}
+                onClick={() => setFieldValue('slippageTolerance', s)}>
                 {s}%
               </Selectable>
             );
@@ -54,7 +54,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
             isSelected={isCustomSlippage}
             className={classNames('flex items-center relative w-full')}>
             <PositiveFloatNumInput
-              inputAmount={!isCustomSlippage ? 0 : values.slipTolerance}
+              inputAmount={!isCustomSlippage ? 0 : values.slippageTolerance}
               min={0}
               max={10}
               isConfine={true}
@@ -62,7 +62,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
               className={classNames(
                 'h6 rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 body-bold !px-4'
               )}
-              onAmountChange={(v) => setFieldValue('slipTolerance', v)}
+              onAmountChange={(v) => setFieldValue('slippageTolerance', v)}
             />
             <div
               className={classNames('mx-4 text-grey-500 body-bold', {
@@ -78,12 +78,12 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
             className="grow rounded-full bg-field !px-4 w-[140px] h-[40px] body-bold text-grey-700"
-            inputAmount={values.trasactionDeadline}
+            inputAmount={values.transactionDeadline}
             isConfine={true}
             placeholder="0"
             min={0}
             max={600}
-            onAmountChange={(v) => setFieldValue('trasactionDeadline', v)}
+            onAmountChange={(v) => setFieldValue('transactionDeadline', v)}
           />
           <div className="body-bold text-grey-700">Seconds</div>
         </div>

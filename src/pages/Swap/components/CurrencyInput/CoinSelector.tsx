@@ -1,6 +1,5 @@
 import { List } from 'components/Antd';
 import { useFormikContext } from 'formik';
-import { ISwapSettings } from 'pages/Swap/types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import VirtualList from 'rc-virtual-list';
 import CoinRow from './CoinRow';
@@ -16,6 +15,7 @@ import { CloseCircleIcon } from 'resources/icons';
 import Button from 'components/Button';
 import { coinBridge } from 'utils/hippo';
 import { useCoingeckoPrice } from 'hooks/useCoingecko';
+import { ISwapSettings } from '../TokenSwap';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';

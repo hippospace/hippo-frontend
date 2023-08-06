@@ -1,5 +1,4 @@
 import { useFormikContext } from 'formik';
-import { ISwapSettings } from 'pages/Swap/types';
 import { CaretIcon, TrashIcon } from 'resources/icons';
 import cx from 'classnames';
 import styles from './CurrencyInput.module.scss';
@@ -19,6 +18,7 @@ import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import CoinLabel from 'components/Coins/CoinLabel';
 import useHippoClient from 'hooks/useHippoClient';
+import { ISwapSettings } from '../TokenSwap';
 
 interface TProps {
   actionType: 'currencyTo' | 'currencyFrom';

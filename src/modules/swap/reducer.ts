@@ -1,10 +1,9 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { RootState } from 'modules/rootReducer';
-import { ISwapSettings } from 'pages/Swap/types';
 import actions from './actions';
+import { ISwapSettings } from 'pages/Swap/components/TokenSwap';
 
 interface SwapState {
-  error: any;
   isPriceChartOpen: boolean;
   fromSymbolSaved: string;
   toSymbolSaved: string;
@@ -12,13 +11,12 @@ interface SwapState {
 }
 
 export const initState: SwapState = {
-  error: null,
   isPriceChartOpen: false,
   fromSymbolSaved: 'USDC',
   toSymbolSaved: 'APT',
   swapSettings: {
-    slipTolerance: 0.1,
-    trasactionDeadline: 60,
+    slippageTolerance: 0.1,
+    transactionDeadline: 60,
     maxGasFee: 20000,
     quoteChosen: undefined,
     currencyFrom: {
@@ -40,9 +38,6 @@ export default createReducer(initState, (builder) => {
   builder
     .addCase(actions.SET_SWAP_SETTING, (state, { payload }) => {
       state.swapSettings = payload;
-    })
-    .addCase(actions.RESET, (state) => {
-      state.swapSettings = initState.swapSettings;
     })
     .addCase(actions.SET_IS_PRICE_CHART_OPEN, (state, { payload }) => {
       state.isPriceChartOpen = payload;

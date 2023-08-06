@@ -3,9 +3,8 @@ import { useCallback } from 'react';
 import * as yup from 'yup';
 import { useSelector } from 'react-redux';
 import { getSwapSettings } from 'modules/swap/reducer';
-import TokenSwap from './components/TokenSwap';
+import TokenSwap, { ISwapSettings } from './components/TokenSwap';
 import useHippoClient from 'hooks/useHippoClient';
-import { ISwapSettings } from './types';
 import { Types } from 'aptos';
 import { openErrorNotification } from 'utils/notifications';
 
@@ -40,12 +39,12 @@ const Swap: React.FC = () => {
       if (fromSymbol && toSymbol && fromUiAmt && quote) {
         const options: Partial<Types.SubmitTransactionRequest> = {
           expiration_timestamp_secs:
-            '' + (Math.floor(Date.now() / 1000) + values.trasactionDeadline),
+            '' + (Math.floor(Date.now() / 1000) + values.transactionDeadline),
           max_gas_amount: '' + values.maxGasFee
         };
         const result = await requestSwapByRoute(
           quote,
-          values.slipTolerance,
+          values.slippageTolerance,
           options,
           values.isFixedOutput
         );

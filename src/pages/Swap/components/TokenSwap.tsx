@@ -2,7 +2,6 @@ import Button from 'components/Button';
 import { useFormikContext } from 'formik';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AdjustIcon, MoreArrowDown, RefreshIcon, SwapIcon, WarningIcon } from 'resources/icons';
-import { ISwapSettings } from '../types';
 import CurrencyInput from './CurrencyInput';
 import SwapDetail from './SwapDetail';
 import useHippoClient from 'hooks/useHippoClient';
@@ -53,6 +52,7 @@ import {
   ISwapWorkerReturn
 } from '../SwapWorker';
 import { postMessageTyped } from 'utils/hippo';
+import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
 
 type RoutesSimulateResults = Map<string, Types.UserTransaction | undefined>;
 
@@ -73,6 +73,25 @@ interface IRouteRowProps {
   isSelected?: boolean;
   isBestPrice: boolean;
   simuResult?: Types.UserTransaction;
+}
+
+export interface ISwapSettings {
+  slippageTolerance: number;
+  transactionDeadline: number;
+  maxGasFee: number;
+  quoteChosen?: IApiRouteAndQuote;
+  currencyFrom?: {
+    token?: RawCoinInfo;
+    amount?: number;
+    balance: number;
+  };
+  currencyTo?: {
+    token?: RawCoinInfo;
+    amount?: number;
+    balance: number;
+  };
+
+  isFixedOutput: boolean;
 }
 
 const serializeRouteQuote = (rq: GeneralRouteAndQuote) => {
@@ -121,7 +140,7 @@ const SettingsButton = ({
       variant="icon"
       size="small"
       onClick={onClick}>
-      {values.slipTolerance}% <AdjustIcon className="font-icon ml-1 !h6" />
+      {values.slippageTolerance}% <AdjustIcon className="font-icon ml-1 !h6" />
     </Button>
   );
 };
@@ -1075,7 +1094,7 @@ const TokenSwap = () => {
         (async () => {
           const result = await simulateSwapByRoute(
             route,
-            values.slipTolerance,
+            values.slippageTolerance,
             gasAvailable,
             undefined,
             isFixedOutput
@@ -1115,7 +1134,7 @@ const TokenSwap = () => {
     isBalanceReady,
     simulateSwapByRoute,
     values.maxGasFee,
-    values.slipTolerance
+    values.slippageTolerance
   ]);
 
   const coingeckoRate = useMemo(
