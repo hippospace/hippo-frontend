@@ -241,7 +241,7 @@ const CardHeader = ({
           closable={false}
           maskClosable={true}
           centered
-          width={500}
+          width={400}
           destroyOnClose={true}
           onCancel={onSwapSettingsClose}>
           <SwapSetting maxGas={maxGas} onClose={onSwapSettingsClose} />
@@ -1354,10 +1354,10 @@ const TokenSwap = () => {
             isDisableAmountInput={!hasRoutes}
             trashButtonContainerWidth={cardXPadding}
           />
-          <Button variant="icon" className="mx-auto my-4" onClick={onClickSwapToken}>
-            <SwapIcon className="font-icon text-[40px] text-grey-700" />
+          <Button variant="icon" className="mx-auto mt-8" onClick={onClickSwapToken}>
+            <SwapIcon className="font-icon text-[35px] text-grey-500" />
           </Button>
-          <div className="body-bold mb-2 flex items-end">
+          <div className="body-bold mt-1 mb-2 flex items-end">
             <div className="mr-auto">Receive</div>
             {!!(toValue && fromUiAmt) && (
               <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
