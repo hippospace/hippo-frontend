@@ -1,6 +1,5 @@
 import classNames from 'classnames';
 import Button from 'components/Button';
-import { useFormikContext } from 'formik';
 import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useState } from 'react';
 import { ExchangeIcon } from 'resources/icons';
@@ -10,7 +9,7 @@ import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
 import { useBinanceRate } from 'hooks/useBinance';
 import Hint from 'components/Hint';
 import { GeneralRouteAndQuote } from 'types/hippo';
-import { ISwapSettings } from './TokenSwap';
+import { SwapContextType } from '..';
 
 const RateCompare = ({
   rate,
@@ -53,6 +52,7 @@ const RateCompare = ({
 };
 
 const SwapDetail = ({
+  ctx,
   routeAndQuote,
   fromToken,
   toToken,
@@ -61,6 +61,7 @@ const SwapDetail = ({
   className = '',
   isPriceImpactEnabled = true
 }: {
+  ctx: SwapContextType;
   routeAndQuote: GeneralRouteAndQuote | null | undefined;
   fromToken: CoinInfo | undefined;
   toToken: CoinInfo | undefined;
@@ -71,7 +72,6 @@ const SwapDetail = ({
 }) => {
   const [binanceRate, binanceApi] = useBinanceRate(fromToken, toToken);
 
-  const { values: swapSettings } = useFormikContext<ISwapSettings>();
   const [isPriceYToX, setIsPriceYToX] = useState(false);
   const [tokenAmountFormatter] = useTokenAmountFormatter();
 
@@ -84,10 +84,9 @@ const SwapDetail = ({
   if (routeAndQuote) {
     const outputUiAmt = routeAndQuote.quote.outputUiAmt;
     output = `${tokenAmountFormatter(outputUiAmt, toToken)} ${toToken?.symbol}`;
-    minimum = `${tokenAmountFormatter(
-      outputUiAmt * (1 - swapSettings.slippageTolerance / 100),
-      toToken
-    )} ${toToken?.symbol}`;
+    minimum = `${tokenAmountFormatter(outputUiAmt * (1 - ctx.slippageTolerance / 100), toToken)} ${
+      toToken?.symbol
+    }`;
     priceImpact = Math.abs(routeAndQuote.quote.priceImpact || 0);
     if (isPriceImpactEnabled) {
       priceImpactText = priceImpact >= 0.0001 ? `${(priceImpact * 100).toFixed(2)}%` : '<0.01%';
@@ -170,7 +169,7 @@ const SwapDetail = ({
     },
     {
       label: 'Slippage Tolerance',
-      value: `${swapSettings.slippageTolerance} %`
+      value: `${ctx.slippageTolerance} %`
     }
   ];
 

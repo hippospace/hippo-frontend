@@ -1,12 +1,10 @@
 import { List } from 'components/Antd';
-import { useFormikContext } from 'formik';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import VirtualList from 'rc-virtual-list';
 import CoinRow from './CoinRow';
-
 import CommonCoinButton from './CommonCoinButton';
 import useHippoClient from 'hooks/useHippoClient';
-import { CoinListClient, RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
+import { CoinListClient, RawCoinInfo } from '@manahippo/coin-list';
 import { ITokenBalance } from 'types/hippo';
 import classNames from 'classnames';
 import create from 'zustand';
@@ -15,19 +13,16 @@ import { CloseCircleIcon } from 'resources/icons';
 import Button from 'components/Button';
 import { coinBridge } from 'utils/hippo';
 import { useCoingeckoPrice } from 'hooks/useCoingecko';
-import { ISwapSettings } from '../TokenSwap';
+import { SwapContextType } from 'pages/Swap';
 
 interface TProps {
+  ctx: SwapContextType;
   actionType: 'currencyTo' | 'currencyFrom';
   // isVisible: boolean;
   dismissiModal: () => void;
 }
 
 type Filter = 'All' | 'Native' | 'LayerZero' | 'Wormhole' | 'Celer';
-
-// interface TokenWithBalance extends ITokenInfo {
-//   balance: string;
-// }
 
 const preSetTokens = ['APT', 'WBTC', 'WETH', 'USDT', 'USDC'];
 
@@ -76,17 +71,20 @@ const useCoinSelectorStore = create<ICoinSelectorState>()(
   )
 );
 
-const isTokenOfFilter = (token: TokenInfo, filter: Filter) => {
+const isTokenOfFilter = (token: RawCoinInfo, filter: Filter) => {
   if (filter === 'All') return true;
   const bridgeArray = token.extensions.data.find((a) => a[0] === 'bridge');
   return bridgeArray && bridgeArray[1]?.startsWith(filter.toLowerCase());
 };
 
-const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
+const CoinSelector: React.FC<TProps> = ({ ctx, dismissiModal, actionType }) => {
   const { coinListClient, rawCoinInfos } = useHippoClient();
-  const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const tokenList = rawCoinInfos;
-  // const [filter, setFilter] = useState<Filter>('All');
+  const thisIsFrom = actionType === 'currencyFrom';
+  const thisSymbol = thisIsFrom ? ctx.fromSymbol : ctx.toSymbol;
+  const otherSymbol = !thisIsFrom ? ctx.fromSymbol : ctx.toSymbol;
+  const setThisSymbol = thisIsFrom ? ctx.setFromSymbol : ctx.setToSymbol;
+  const setOtherSymbol = !thisIsFrom ? ctx.setFromSymbol : ctx.setToSymbol;
 
   const filter = useCoinSelectorStore((state) => state.filter);
   const setFilter = useCoinSelectorStore((state) => state.setFilter);
@@ -102,12 +100,10 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
     [coinListClient, recentSelectedTokens]
   );
 
-  // const [searchPattern, setSearchPattern] = useState<string>('');
   const searchPattern = useCoinSelectorStore((state) => state.searchPattern);
   const setSearchPattern = useCoinSelectorStore((state) => state.setSearchPattern);
 
   const { hippoWallet } = useHippoClient();
-  // const [tokenListBalance, setTokenListBalance] = useState<ITokenBalance[]>();
 
   const filterTitles: Filter[] = useMemo(
     () => ['All', 'Native', 'LayerZero', 'Wormhole', 'Celer'],
@@ -115,23 +111,23 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
   );
 
   const onSelectToken = useCallback(
-    (token: TokenInfo) => {
-      const otherActionType: TProps['actionType'] =
-        actionType === 'currencyFrom' ? 'currencyTo' : 'currencyFrom';
-      if (token.symbol === values[otherActionType]?.token?.symbol) {
-        setFieldValue(otherActionType, {
-          ...values[otherActionType],
-          token: values[actionType]?.token
-        });
+    (token: RawCoinInfo) => {
+      if (token.symbol === otherSymbol) {
+        setOtherSymbol(thisSymbol);
       }
-      setFieldValue(actionType, {
-        ...values[actionType],
-        token
-      });
+      setThisSymbol(token.symbol);
       if (coinListClient) addRecentSelectedToken(token.token_type.type, coinListClient);
       dismissiModal();
     },
-    [actionType, addRecentSelectedToken, coinListClient, dismissiModal, setFieldValue, values]
+    [
+      addRecentSelectedToken,
+      coinListClient,
+      dismissiModal,
+      setThisSymbol,
+      setOtherSymbol,
+      thisSymbol,
+      otherSymbol
+    ]
   );
 
   const tokenListBalanceNotSorted = useMemo<ITokenBalance[]>(() => {
@@ -261,7 +257,7 @@ const CoinSelector: React.FC<TProps> = ({ dismissiModal, actionType }) => {
           {tokenListBalance && (
             <List
               className="overflow-y-scroll no-scrollbar border-0 h-full"
-              rowKey={(item) => `list-row-${(item as TokenInfo).symbol}`}>
+              rowKey={(item) => `list-row-${(item as RawCoinInfo).symbol}`}>
               <VirtualList
                 data={tokenListBalance || []}
                 height={listHeight}

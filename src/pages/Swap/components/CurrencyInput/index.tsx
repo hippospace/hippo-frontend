@@ -1,4 +1,3 @@
-import { useFormikContext } from 'formik';
 import { CaretIcon, TrashIcon } from 'resources/icons';
 import cx from 'classnames';
 import styles from './CurrencyInput.module.scss';
@@ -18,9 +17,10 @@ import { RawCoinInfo as TokenInfo } from '@manahippo/coin-list';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import CoinLabel from 'components/Coins/CoinLabel';
 import useHippoClient from 'hooks/useHippoClient';
-import { ISwapSettings } from '../TokenSwap';
+import { SwapContextType } from 'pages/Swap';
 
 interface TProps {
+  ctx: SwapContextType;
   actionType: 'currencyTo' | 'currencyFrom';
   trashButtonContainerWidth?: string;
   isDisableAmountInput?: boolean;
@@ -66,6 +66,7 @@ const CoinSelectButton = ({
 };
 
 const CurrencyInput: React.FC<TProps> = ({
+  ctx,
   actionType,
   isDisableAmountInput = false,
   trashButtonContainerWidth = '32px'
@@ -73,12 +74,17 @@ const CurrencyInput: React.FC<TProps> = ({
   const [tokenAmountFormatter] = useTokenAmountFormatter();
   const [isCoinSelectorVisible, setIsCoinSelectorVisible] = useState(false);
   const [isCSDrawerVisible, setIsCSDrawerVisible] = useState(false);
-  const { values, setFieldValue } = useFormikContext<ISwapSettings>();
   const { connected } = useWallet();
+  const coinlist = useHippoClient().coinListClient!;
 
-  const selectedCurrency = values[actionType];
-  const selectedToken = selectedCurrency?.token;
-  const [uiBalance, isReady] = useTokenBalane(selectedToken);
+  const thisIsFrom = actionType === 'currencyFrom';
+  const setSelectedAmount = thisIsFrom ? ctx.setFromAmount : ctx.setToAmount;
+  const selectedSymbol = thisIsFrom ? ctx.fromSymbol : ctx.toSymbol;
+  const selectedAmount = thisIsFrom ? ctx.fromAmount : ctx.toAmount;
+  const selectedCoinInfo = selectedSymbol
+    ? coinlist.getCoinInfoBySymbol(selectedSymbol)[0]
+    : undefined;
+  const [uiBalance, isReady] = useTokenBalane(selectedCoinInfo);
   const tokenList = useHippoClient().rawCoinInfos;
   const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
 
@@ -86,27 +92,20 @@ const CurrencyInput: React.FC<TProps> = ({
   const onAmountChange = useDebouncedCallback(
     useCallback(
       (a: number) => {
-        console.log(`${actionType} input num: ${a} of type ${typeof a}`);
-        setFieldValue('isFixedOutput', actionType === 'currencyTo');
-        setFieldValue(actionType, {
-          ...selectedCurrency,
-          amount: a
-        });
+        ctx.setIsFixedOutput(!thisIsFrom);
+        setSelectedAmount(a);
       },
-      [actionType, selectedCurrency, setFieldValue]
+      [thisIsFrom, setSelectedAmount, ctx]
     ),
     0
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
   const onTrashClick = useCallback(() => {
-    setFieldValue('isFixedOutput', actionType === 'currencyTo');
-    setFieldValue(actionType, {
-      ...selectedCurrency,
-      amount: 0
-    });
+    ctx.setIsFixedOutput(!thisIsFrom);
+    setSelectedAmount(0);
     inputRef.current?.focus();
-  }, [actionType, selectedCurrency, setFieldValue]);
+  }, [setSelectedAmount, ctx, thisIsFrom]);
 
   const { isMobile } = useBreakpoint('mobile');
 
@@ -121,7 +120,7 @@ const CurrencyInput: React.FC<TProps> = ({
           <CoinSelectButton
             className="flex mobile:hidden"
             isDisabled={isCoinSelectorDisabled}
-            token={selectedCurrency?.token}
+            token={selectedCoinInfo}
             onClick={() => setIsCoinSelectorVisible(true)}
           />
         )}
@@ -129,7 +128,7 @@ const CurrencyInput: React.FC<TProps> = ({
           <CoinSelectButton
             className="hidden mobile:flex"
             isDisabled={isCSDrawerVisible}
-            token={selectedCurrency?.token}
+            token={selectedCoinInfo}
             onClick={() => setIsCSDrawerVisible(true)}
           />
         )}
@@ -137,14 +136,14 @@ const CurrencyInput: React.FC<TProps> = ({
           ref={inputRef}
           min={0}
           max={1e11}
-          maxDecimals={values[actionType]?.token?.decimals || 9}
+          maxDecimals={selectedCoinInfo?.decimals || 9}
           isDisabled={isDisableAmountInput}
           placeholder="0.00"
           className="grow h5 bg-transparent text-right pr-0 pl-1 text-grey-900"
-          inputAmount={selectedCurrency?.amount || 0}
+          inputAmount={selectedAmount || 0}
           onAmountChange={onAmountChange}
         />
-        {!isDisableAmountInput && !!selectedCurrency?.amount && (
+        {!isDisableAmountInput && !!selectedAmount && (
           <div
             style={{ width: trashButtonContainerWidth, right: `-${trashButtonContainerWidth}` }}
             className="mobile:hidden tablet:hidden absolute h-full flex opacity-0 group-hover:opacity-100 hover:opacity-100 items-center justify-center">
@@ -167,17 +166,14 @@ const CurrencyInput: React.FC<TProps> = ({
                 if (actionType === 'currencyFrom' && !isDisableAmountInput) {
                   let amount = uiBalance;
                   if (typeof amount === 'number') {
-                    if (selectedCurrency?.token?.symbol === 'APT') {
+                    if (selectedSymbol === 'APT') {
                       amount = Math.max(amount - 0.05, 0);
                     }
-                    setFieldValue(actionType, {
-                      ...selectedCurrency,
-                      amount
-                    });
+                    setSelectedAmount(amount);
                   }
                 }
               }}>
-              {tokenAmountFormatter(uiBalance, selectedToken)}
+              {tokenAmountFormatter(uiBalance, selectedCoinInfo)}
             </div>
           )}
           {!isReady && <Skeleton width={30} />}
@@ -194,6 +190,7 @@ const CurrencyInput: React.FC<TProps> = ({
         onCancel={() => setIsCoinSelectorVisible(false)}>
         <div className="mobile:hidden">
           <CoinSelector
+            ctx={ctx}
             actionType={actionType}
             dismissiModal={() => setIsCoinSelectorVisible(false)}
           />
@@ -208,7 +205,11 @@ const CurrencyInput: React.FC<TProps> = ({
         destroyOnClose={true}
         onClose={() => setIsCSDrawerVisible(false)}
         visible={isCSDrawerVisible}>
-        <CoinSelector actionType={actionType} dismissiModal={() => setIsCSDrawerVisible(false)} />
+        <CoinSelector
+          ctx={ctx}
+          actionType={actionType}
+          dismissiModal={() => setIsCSDrawerVisible(false)}
+        />
       </Drawer>
     </div>
   );

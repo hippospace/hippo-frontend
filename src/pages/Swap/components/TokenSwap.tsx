@@ -1,17 +1,14 @@
 import Button from 'components/Button';
-import { useFormikContext } from 'formik';
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AdjustIcon, MoreArrowDown, RefreshIcon, SwapIcon, WarningIcon } from 'resources/icons';
+import { AdjustIcon, RefreshIcon, SwapIcon, WarningIcon } from 'resources/icons';
 import CurrencyInput from './CurrencyInput';
 import SwapDetail from './SwapDetail';
 import useHippoClient from 'hooks/useHippoClient';
 import useAptosWallet from 'hooks/useAptosWallet';
 import classNames from 'classnames';
-import { Drawer, Tooltip, Modal, Skeleton } from 'antd';
-import VirtualList from 'rc-virtual-list';
+import { Drawer, Tooltip, Modal } from 'antd';
 import useTokenBalane from 'hooks/useTokenBalance';
 import Card from 'components/Card';
-import useTokenAmountFormatter from 'hooks/useTokenAmountFormatter';
 import { useInterval, useTimeout } from 'usehooks-ts';
 import SwapSetting from './SwapSetting';
 import usePrevious from 'hooks/usePrevious';
@@ -21,23 +18,15 @@ import { Types, ApiError } from 'aptos';
 import { RPCType, useRPCURL, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import { useCoingeckoPrice } from 'hooks/useCoingecko';
-import { useParams } from 'react-router-dom';
 import { GeneralRouteAndQuote, IRoutesGroupedByDex } from 'types/hippo';
-import { ApiTradeStep } from '@manahippo/hippo-sdk/dist/aggregator/types/step/ApiTradeStep';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { RawCoinInfo } from '@manahippo/coin-list';
-import SwapRoute from './SwapRoute';
 import { aptToGas, gasToApt } from 'utils/aptosUtils';
 import PriceSwitch from './PriceSwitch';
 import PriceChart from './PriceChart';
 import { CSSTransition } from 'react-transition-group';
 import './TokenSwap.scss';
 import { cutDecimals } from 'components/PositiveFloatNumInput/numberFormats';
-import swapAction from 'modules/swap/actions';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
-import { getFromSymbolSaved, getIsPriceChartOpen, getToSymbolSaved } from 'modules/swap/reducer';
-import invariant from 'tiny-invariant';
 import {
   IFetchRoutesArgs,
   IFetchRoutesResult,
@@ -52,95 +41,28 @@ import {
   ISwapWorkerReturn
 } from '../SwapWorker';
 import { postMessageTyped } from 'utils/hippo';
-import { IApiRouteAndQuote } from '@manahippo/hippo-sdk/dist/aggregator/types';
+import { RoutesAvailable } from './RoutesAvailable';
+import { getMergedRoutes, serializeRouteQuote } from './TokenSwapUtil';
+import { SwapContextType } from '..';
 
-type RoutesSimulateResults = Map<string, Types.UserTransaction | undefined>;
-
-interface IRoutesProps {
-  className?: string;
-  routes: IRoutesGroupedByDex[];
-  routeSelected: GeneralRouteAndQuote | null;
-  onRouteSelected: (route: GeneralRouteAndQuote, index: number) => void;
-  isDesktopScreen?: boolean;
-  isRefreshing?: boolean;
-  refreshButton?: ReactNode;
-  simuResults?: RoutesSimulateResults;
-  isFixedOutputMode?: boolean;
-}
-
-interface IRouteRowProps {
-  route: GeneralRouteAndQuote;
-  isSelected?: boolean;
-  isBestPrice: boolean;
-  simuResult?: Types.UserTransaction;
-}
-
-export interface ISwapSettings {
-  slippageTolerance: number;
-  transactionDeadline: number;
-  maxGasFee: number;
-  quoteChosen?: IApiRouteAndQuote;
-  currencyFrom?: {
-    token?: RawCoinInfo;
-    amount?: number;
-    balance: number;
-  };
-  currencyTo?: {
-    token?: RawCoinInfo;
-    amount?: number;
-    balance: number;
-  };
-
-  isFixedOutput: boolean;
-}
-
-const serializeRouteQuote = (rq: GeneralRouteAndQuote) => {
-  const stepStr = (s: ApiTradeStep) => `${s.dexType}(${s.poolType.toJsNumber()})`;
-
-  const tokensStr = (tokens: RawCoinInfo[]) => tokens.map((t) => t.symbol).join('->');
-
-  const routesStr = (
-    r:
-      | AggregatorTypes.ApiTradeRoute
-      | AggregatorTypes.SplitSingleRoute
-      | AggregatorTypes.SplitMultiRoute
-  ): string | string[] => {
-    if (r instanceof AggregatorTypes.ApiTradeRoute) {
-      return r.steps.map((s) => stepStr(s)).join('x') + `:${tokensStr(r.tokens)}`;
-    } else if (r instanceof AggregatorTypes.SplitSingleRoute) {
-      return (
-        r.splitSteps
-          .map((ss) =>
-            ss.units.map((u) => `${u.scale}*${stepStr(u.step.toApiTradeStep())}`).join('|')
-          )
-          .join('x') + `:${tokensStr(r.tokens)}`
-      );
-    } else if (r instanceof AggregatorTypes.SplitMultiRoute) {
-      return r.units.map((u) => `[${u.scale}*${routesStr(u.route)}]`);
-    } else {
-      throw new Error('Invalid route type to print steps');
-    }
-  };
-
-  // Same dexType might have different poolTypes
-  return `${rq.quote.inputUiAmt}->${rq.quote.outputUiAmt}:${routesStr(rq.route)}`;
-};
+export type RoutesSimulateResults = Map<string, Types.UserTransaction | undefined>;
 
 const SettingsButton = ({
+  ctx,
   className = '',
   onClick
 }: {
+  ctx: SwapContextType;
   className?: string;
   onClick: () => void;
 }) => {
-  const { values } = useFormikContext<ISwapSettings>();
   return (
     <Button
       className={classNames('!h-full !pr-2 !pl-3  text-grey-700', className)}
       variant="icon"
       size="small"
       onClick={onClick}>
-      {values.slippageTolerance}% <AdjustIcon className="font-icon ml-1 !h6" />
+      {ctx.slippageTolerance}% <AdjustIcon className="font-icon ml-1 !h6" />
     </Button>
   );
 };
@@ -176,26 +98,26 @@ const RefreshButton = ({
   );
 };
 
-const CardHeader = ({
+const TokenSwapHeader = ({
+  ctx,
   className = '',
   right,
-  fromToken,
-  toToken,
+  fromCoinInfo: fromToken,
+  toCoinInfo: toToken,
   maxGas
 }: {
+  ctx: SwapContextType;
   maxGas?: number;
   className?: string;
   right?: ReactNode;
-  fromToken: RawCoinInfo | undefined;
-  toToken: RawCoinInfo | undefined;
+  fromCoinInfo: RawCoinInfo | undefined;
+  toCoinInfo: RawCoinInfo | undefined;
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileTxSettingsOpen, setIsMobileTxSettingsOpen] = useState(false);
   const { isTablet } = useBreakpoint('tablet');
-  const isPriceChartOpen = useSelector(getIsPriceChartOpen);
-  const setIsPriceChartOpen = (is: boolean) => dispatch(swapAction.SET_IS_PRICE_CHART_OPEN(is));
-  const dispatch = useDispatch();
-  const { values } = useFormikContext<ISwapSettings>();
+  const isPriceChartOpen = ctx.isPriceChartOpen;
+  const setIsPriceChartOpen = ctx.setIsPriceChartOpen;
   const nodeRef = useRef(null);
 
   const onSwapSettingsClose = useCallback(() => {
@@ -204,8 +126,7 @@ const CardHeader = ({
     } else {
       setIsMobileTxSettingsOpen(false);
     }
-    dispatch(swapAction.SET_SWAP_SETTING(values));
-  }, [dispatch, isTablet, values]);
+  }, [isTablet]);
 
   return (
     <div className={classNames('w-full flex h-8 items-center mb-1 body-medium', className)}>
@@ -213,12 +134,14 @@ const CardHeader = ({
       <Card className="mr-auto h-full relative w-fit ml-[10px] shadow-subTitle">
         {!isTablet && (
           <SettingsButton
+            ctx={ctx}
             className="tablet:hidden"
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
           />
         )}
         {isTablet && (
           <SettingsButton
+            ctx={ctx}
             className="cursor-pointer hidden tablet:flex"
             onClick={() => setIsMobileTxSettingsOpen(true)}
           />
@@ -263,7 +186,7 @@ const CardHeader = ({
           width={400}
           destroyOnClose={true}
           onCancel={onSwapSettingsClose}>
-          <SwapSetting maxGas={maxGas} onClose={onSwapSettingsClose} />
+          <SwapSetting ctx={ctx} maxGas={maxGas} onClose={onSwapSettingsClose} />
         </Modal>
       )}
       {isTablet && (
@@ -274,191 +197,8 @@ const CardHeader = ({
           placement={'bottom'}
           onClose={onSwapSettingsClose}
           visible={isMobileTxSettingsOpen}>
-          <SwapSetting maxGas={maxGas} onClose={onSwapSettingsClose} />
+          <SwapSetting ctx={ctx} maxGas={maxGas} onClose={onSwapSettingsClose} />
         </Drawer>
-      )}
-    </div>
-  );
-};
-
-const routeRowMinHeight = 70;
-const RouteRow: React.FC<IRouteRowProps> = ({
-  route,
-  isSelected = false,
-  isBestPrice = false,
-  simuResult
-}) => {
-  const { values } = useFormikContext<ISwapSettings>();
-  const toToken = route.route.yCoinInfo;
-  const outputUiAmt = route.quote.outputUiAmt;
-  const outputValue = 0; // TOD0: calculate the output value
-  const [tokenAmountFormatter] = useTokenAmountFormatter();
-  const outputFormatted = tokenAmountFormatter(outputUiAmt, toToken);
-  const customMaxGasAmount = values.maxGasFee;
-
-  let rowH = routeRowMinHeight;
-  if (route.route instanceof AggregatorTypes.SplitMultiRoute) {
-    const routesCount = route.route.units.length;
-    rowH += (routesCount - 1) * 24;
-  }
-
-  const [isShowDetails, setIsShowDetails] = useState(false);
-
-  return (
-    <div
-      className={classNames('pt-2')}
-      style={{ height: `${rowH}px` }}
-      onTouchStart={() => setIsShowDetails(true)}
-      onTouchEnd={() => setIsShowDetails(false)}
-      onMouseEnter={() => setIsShowDetails(true)}
-      onMouseLeave={() => setIsShowDetails(false)}>
-      <div
-        className={classNames(
-          'relative h-full flex flex-col justify-center bg-clip-border rounded-lg border-2 cursor-pointer bg-field border-transparent',
-          {
-            'bg-select-border bg-origin-border bg-cover': isSelected
-          }
-        )}>
-        <div
-          className={classNames('w-full h-full px-2 pt-2 pb-[6px] rounded-lg space-y-1', {
-            'bg-prime-100/90 dark:bg-prime-900/70': isSelected,
-            'bg-field': !isSelected
-          })}>
-          <div className="flex justify-between items-center body-bold text-grey-700">
-            <div className="body-bold mr-1">{outputFormatted}</div>
-            <div className="whitespace-nowrap text-grey-500 label-small-bold">
-              {simuResult?.success && (
-                <Tooltip
-                  title={
-                    customMaxGasAmount >= parseFloat(simuResult.gas_used)
-                      ? 'Simulated Gas cost'
-                      : 'Simulated Gas cost is bigger than the custom max gas amount'
-                  }>
-                  <div
-                    className={classNames({
-                      'text-error-500': customMaxGasAmount < parseFloat(simuResult.gas_used)
-                    })}>
-                    {gasToApt(simuResult.gas_used).toFixed(6)} APT Gas
-                  </div>
-                </Tooltip>
-              )}
-              {simuResult && !simuResult.success && (
-                <Tooltip title={simuResult.vm_status}>
-                  <div className={'text-error-500'}>Simulation failed</div>
-                </Tooltip>
-              )}
-              <div className="hidden">${outputValue}</div>
-            </div>
-          </div>
-          <div className="text-grey-500 label-small-bold">
-            <SwapRoute r={route} isShowDetails={isShowDetails} />
-          </div>
-        </div>
-        {isBestPrice && (
-          <div className="absolute -left-[2px] -top-2 h-4 px-2 label-large-bold bg-[#D483FF] rounded-lg rounded-bl-none flex items-center text-white">
-            Best price
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const RoutesAvailable: React.FC<IRoutesProps> = ({
-  routes,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onRouteSelected,
-  routeSelected,
-  className = '',
-  isDesktopScreen = false,
-  isRefreshing = false,
-  refreshButton,
-  simuResults = new Map(),
-  isFixedOutputMode = false
-}) => {
-  const isEmpty = !(routes?.length > 0);
-
-  const [isMore, setIsMore] = useState(false);
-  const rowsWhenLess = 2;
-  const rowsWhenMore = 4;
-  const rowsOnDesktop = 4;
-
-  const rows = isDesktopScreen
-    ? isEmpty
-      ? rowsOnDesktop
-      : Math.min(rowsOnDesktop, routes.length)
-    : isEmpty
-    ? rowsWhenLess
-    : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess);
-
-  const height = rows * routeRowMinHeight;
-
-  const [isRefreshingDelayed, setIsRefreshingDelayed] = useState(false);
-
-  useTimeout(
-    () => {
-      setIsRefreshingDelayed(isRefreshing);
-    },
-    isRefreshing ? 300 : 0
-  );
-
-  return (
-    <div className={className}>
-      <div className="label-small-bold text-grey-500 mb-2 flex justify-between items-center">
-        {isEmpty || isRefreshingDelayed ? (
-          <div>Loading routes...</div>
-        ) : (
-          <>
-            <div> Routes from all DEXes {isFixedOutputMode && '(Exact-output mode)'}</div>
-            <div>{refreshButton}</div>
-          </>
-        )}
-      </div>
-      <div
-        style={{ height }}
-        className={classNames({ 'pointer-events-none': !isDesktopScreen && !isMore })}>
-        {isEmpty || isRefreshingDelayed ? (
-          <div className="h-full flex flex-col justify-evenly">
-            {new Array(rows).fill(0).map((r, index) => (
-              <Skeleton key={index} title={false} paragraph={true} active />
-            ))}
-          </div>
-        ) : (
-          <VirtualList
-            className="pr-1 scrollbar"
-            height={height}
-            itemHeight={routeRowMinHeight}
-            data={routes}
-            itemKey={(item) => serializeRouteQuote(item.routes[0])}>
-            {(ro, index) => (
-              <div onClick={() => onRouteSelected(ro.routes[0], index)}>
-                <RouteRow
-                  route={ro.routes[0]}
-                  isSelected={ro.routes[0] === routeSelected}
-                  isBestPrice={index === 0}
-                  simuResult={simuResults.get(serializeRouteQuote(ro.routes[0]))}
-                />
-              </div>
-            )}
-          </VirtualList>
-        )}
-      </div>
-      {!isDesktopScreen && !isEmpty && routes.length > rowsWhenLess && (
-        <div className="flex label-small-bold text-grey-500 mt-2 justify-between">
-          <div
-            className="ml-auto cursor-pointer hover:opacity-50"
-            onClick={() => setIsMore(!isMore)}>
-            {isMore ? (
-              <>
-                Show less <MoreArrowDown className="font-icon rotate-180 align-baseline" />
-              </>
-            ) : (
-              <>
-                Show more <MoreArrowDown className="font-icon !align-bottom" />
-              </>
-            )}
-          </div>
-        </div>
       )}
     </div>
   );
@@ -486,34 +226,30 @@ const ErrorBody = ({
   );
 };
 
-const TokenSwap = () => {
-  const {
-    fromSymbol: intialFromish,
-    toSymbol: initialToish,
-    fromAmount: initialFromAmt,
-    toAmount: initialToAmt
-  } = useParams();
+interface TProps {
+  ctx: SwapContextType;
+}
 
+const TokenSwap: React.FC<TProps> = ({ ctx }) => {
   // console.log('Token swap rendering');
 
-  const { values, setFieldValue, submitForm, isSubmitting } = useFormikContext<ISwapSettings>();
   const { connected, openModal } = useAptosWallet();
   const { coinListClient, simulateSwapByRoute } = useHippoClient();
 
-  const fromToken = values.currencyFrom?.token;
-  const toToken = values.currencyTo?.token;
+  const isFixedOutput = ctx.isFixedOutput;
+  const fromUiAmt = ctx.fromAmount;
+  const toUiAmt = ctx.toAmount;
 
-  const isFixedOutput = values.isFixedOutput;
-  const fromUiAmt = values.currencyFrom?.amount;
-  const toUiAmt = values.currencyTo?.amount;
+  const fromSymbol = ctx.fromSymbol;
+  const toSymbol = ctx.toSymbol;
 
-  const fromSymbolSaved = useSelector(getFromSymbolSaved);
-  const toSymbolSaved = useSelector(getToSymbolSaved);
+  const fromCoinInfo = fromSymbol ? coinListClient?.getCoinInfoBySymbol(fromSymbol)[0] : undefined;
+  const toCoinInfo = toSymbol ? coinListClient?.getCoinInfoBySymbol(toSymbol)[0] : undefined;
 
   const [hasRoutes, setHasRoutes] = useState(false);
 
   const [allRoutes, setAllRoutes] = useState<GeneralRouteAndQuote[]>([]);
-  const [routeSelected, setRouteSelected] = useState<GeneralRouteAndQuote | null>(null);
+  const [routeSelected, setRouteSelected] = useState<GeneralRouteAndQuote | undefined>(undefined);
   const [routeSelectedSerialized, setRouteSelectedSerialized] = useState(''); // '' represents the first route
 
   // const [isRefreshingRoutes, setIsRefreshingRoutes] = useState(false);
@@ -531,39 +267,27 @@ const TokenSwap = () => {
   );
   */
 
-  const isRefreshingRoutes = useMemo(() => {
-    return (
-      !(
-        (!isFixedOutput &&
-          routeSelected?.quote.inputUiAmt === fromUiAmt &&
-          routeSelected?.quote.inputSymbol === fromToken?.symbol) ||
-        (isFixedOutput &&
-          routeSelected?.quote.outputUiAmt === toUiAmt &&
-          routeSelected?.quote.outputSymbol === toToken?.symbol)
-      ) || isUIReloadingPools
-    );
-  }, [
-    fromToken?.symbol,
-    fromUiAmt,
-    isFixedOutput,
-    isUIReloadingPools,
-    routeSelected?.quote.inputSymbol,
-    routeSelected?.quote.inputUiAmt,
-    routeSelected?.quote.outputSymbol,
-    routeSelected?.quote.outputUiAmt,
-    toToken?.symbol,
-    toUiAmt
-  ]);
+  const isUserInputChanged = !(
+    (!isFixedOutput &&
+      routeSelected?.quote.inputUiAmt === fromUiAmt &&
+      routeSelected?.quote.inputSymbol === fromCoinInfo?.symbol) ||
+    (isFixedOutput &&
+      routeSelected?.quote.outputUiAmt === toUiAmt &&
+      routeSelected?.quote.outputSymbol === toCoinInfo?.symbol)
+  );
+
+  const isRefreshingRoutes = isUIReloadingPools;
 
   const rpcEndpoint = useRpcEndpoint();
-  const dispatch = useDispatch();
 
   // Reduce Coingecko Api requests as much as we can
   const [prices, , coingeckoApi] = useCoingeckoPrice(
-    fromUiAmt ? [fromToken, toToken, coinListClient?.getCoinInfoBySymbol('APT')[0]] : undefined
+    fromUiAmt
+      ? [fromCoinInfo, toCoinInfo, coinListClient?.getCoinInfoBySymbol('APT')[0]]
+      : undefined
   );
-  const fromPrice = fromToken ? prices[fromToken.symbol] : undefined;
-  const toTokenPrice = toToken ? prices[toToken.symbol] : undefined;
+  const fromPrice = fromCoinInfo ? prices[fromCoinInfo.symbol] : undefined;
+  const toTokenPrice = toCoinInfo ? prices[toCoinInfo.symbol] : undefined;
   const aptPrice = prices.APT;
 
   const payValue = useMemo(() => {
@@ -574,10 +298,10 @@ const TokenSwap = () => {
   }, [fromPrice, fromUiAmt]);
   const toValue = useMemo(() => {
     if (typeof toTokenPrice === 'number') {
-      return cutDecimals('' + toTokenPrice * (values.currencyTo?.amount || 0), 2);
+      return cutDecimals('' + toTokenPrice * (toUiAmt || 0), 2);
     }
     return undefined;
-  }, [toTokenPrice, values.currencyTo?.amount]);
+  }, [toTokenPrice, toUiAmt]);
 
   const isAllowHighGas = useMemo(
     () => !!payValue && !!toValue && (parseFloat(payValue) > 100 || parseFloat(toValue) > 100),
@@ -598,113 +322,41 @@ const TokenSwap = () => {
     error429WaitSeconds = 5 * 60;
   }
 
-  /*
-  const hasRoutes = useMemo(() => {
-    return !!(
-      fromToken &&
-      toToken &&
-      hippoAgg?.getAllRoutes(fromToken, toToken, false, 3, false).length
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, hippoAgg, hippoAgg?.allPools, toToken]);
-  */
   useEffect(() => {
-    if (isWorkerReady && fromToken && toToken && workerInstance) {
+    if (isWorkerReady && fromCoinInfo && toCoinInfo && workerInstance) {
       postMessageTyped<ISwapWorkerMessage<IQueryIfRoutesExistingArgs>>(workerInstance, {
         cmd: 'queryIfRoutesExisting',
         args: {
-          x: fromToken,
-          y: toToken,
+          x: fromCoinInfo,
+          y: toCoinInfo,
           fixedOut: false,
           maxSteps: 3,
           allowRoundTrip: false
         }
       });
     }
-  }, [fromToken, isWorkerReady, toToken, workerInstance]);
+  }, [fromCoinInfo, isWorkerReady, toCoinInfo, workerInstance]);
 
   useEffect(() => {
-    if (coinListClient) {
-      if (!values.currencyFrom?.token) {
-        const initialFromToken = intialFromish
-          ? intialFromish.includes('::')
-            ? coinListClient.getCoinInfoByFullName(intialFromish)
-            : coinListClient.getCoinInfoBySymbol(intialFromish)[0]
-          : coinListClient.getCoinInfoBySymbol(fromSymbolSaved)[0];
-        setFieldValue('currencyFrom', {
-          ...values.currencyFrom,
-          token: initialFromToken
-        });
-      }
-      if (!values.currencyTo?.token) {
-        const initailToToken = initialToish
-          ? initialToish.includes('::')
-            ? coinListClient.getCoinInfoByFullName(initialToish)
-            : coinListClient.getCoinInfoBySymbol(initialToish)[0]
-          : coinListClient.getCoinInfoBySymbol(toSymbolSaved)[0];
-        setFieldValue('currencyTo', {
-          ...values.currencyTo,
-          token: initailToToken
-        });
-      }
-
-      if (values.currencyFrom?.amount === undefined && initialFromAmt) {
-        setFieldValue('isFixedOutput', false);
-        setFieldValue('currencyFrom', {
-          ...values.currencyFrom,
-          amount: parseFloat(initialFromAmt) || undefined
-        });
-      }
-      if (values.currencyTo?.amount === undefined && initialToAmt) {
-        setFieldValue('isFixedOutput', true);
-        setFieldValue('currencyTo', {
-          ...values.currencyTo,
-          amount: parseFloat(initialToAmt) || undefined
-        });
-      }
-    }
-  }, [
-    initialFromAmt,
-    initialToAmt,
-    initialToish,
-    intialFromish,
-    setFieldValue,
-    values.currencyFrom,
-    values.currencyTo,
-    fromSymbolSaved,
-    toSymbolSaved,
-    coinListClient
-  ]);
-
-  useEffect(() => {
-    if (fromToken?.symbol) {
-      dispatch(swapAction.SET_FROM_SYMBOL_SAVED(fromToken.symbol));
-    }
-    if (toToken?.symbol) {
-      dispatch(swapAction.SET_TO_SYMBOL_SAVED(toToken.symbol));
-    }
-  }, [dispatch, fromToken?.symbol, toToken?.symbol]);
-
-  useEffect(() => {
-    if (fromToken && toToken) {
+    if (fromCoinInfo && toCoinInfo) {
       // Prevents browser from storing history of every change
       window.history.replaceState(
         {},
         '',
         location.origin +
-          `/swap/from/${fromToken.symbol}${
+          `/swap/from/${fromCoinInfo.symbol}${
             !isFixedOutput && fromUiAmt ? `/amt/${fromUiAmt}` : ''
-          }/to/${toToken.symbol}${isFixedOutput && toUiAmt ? `/amt/${toUiAmt}` : ''}`
+          }/to/${toCoinInfo.symbol}${isFixedOutput && toUiAmt ? `/amt/${toUiAmt}` : ''}`
       );
     }
-  }, [fromToken, toToken, fromUiAmt, isFixedOutput, toUiAmt]);
+  }, [fromCoinInfo, toCoinInfo, fromUiAmt, isFixedOutput, toUiAmt]);
 
   const setRoute = useCallback(
-    (ro: GeneralRouteAndQuote | null) => {
+    (ro: GeneralRouteAndQuote | undefined) => {
       setRouteSelected(ro);
-      setFieldValue('quoteChosen', ro);
+      ctx.setQuoteChosen(ro);
     },
-    [setFieldValue]
+    [ctx]
   );
 
   const setSelectedRouteFromRoutes = useCallback(
@@ -715,7 +367,7 @@ const TokenSwap = () => {
           (r) => serializeRouteQuote(r) === routeSelectedSerialized
         );
       }
-      setRoute(manuallySelectedRoute || routes[0] || null);
+      setRoute(manuallySelectedRoute || routes[0] || undefined);
     },
     [routeSelectedSerialized, setRoute]
   );
@@ -723,7 +375,7 @@ const TokenSwap = () => {
   const resetAllRoutes = useCallback(() => {
     console.log('Reset all routes');
     setAllRoutes([]);
-    setRoute(null);
+    setRoute(undefined);
     setRouteSelectedSerialized('');
   }, [setRoute]);
 
@@ -753,12 +405,9 @@ const TokenSwap = () => {
   */
 
   const resetInputs = useCallback(() => {
-    setFieldValue('isFixedOutput', false);
-    setFieldValue('currencyFrom', {
-      ...values.currencyFrom,
-      amount: 0
-    });
-  }, [setFieldValue, values.currencyFrom]);
+    ctx.setIsFixedOutput(false);
+    ctx.setFromAmount(0);
+  }, [ctx]);
 
   const lastFetchTs = useRef(0);
 
@@ -922,7 +571,7 @@ const TokenSwap = () => {
       lastFetchTs.current = now;
 
       // console.log(`FetchSwapRoutes: timePassedRef.current: ${timePassedRef.current}`);
-      if (fromToken && toToken && workerInstance && isWorkerReady) {
+      if (fromCoinInfo && toCoinInfo && workerInstance && isWorkerReady) {
         const maxSteps = 3;
         // Using isFixedOutput is necessary as the other side amount would not change immediately to 0 when the input amount is cleared
         if ((!isFixedOutput && fromUiAmt) || (isFixedOutput && toUiAmt)) {
@@ -939,8 +588,8 @@ const TokenSwap = () => {
             args: {
               ts: now,
               inputUiAmt: fromUiAmt as number,
-              x: fromToken,
-              y: toToken,
+              x: fromCoinInfo,
+              y: toCoinInfo,
               maxSteps,
               reloadState: isReloadInternal,
               allowRoundTrip: false,
@@ -962,8 +611,8 @@ const TokenSwap = () => {
               cmd: 'reloadPools',
               args: {
                 ts: now,
-                x: fromToken,
-                y: toToken,
+                x: fromCoinInfo,
+                y: toCoinInfo,
                 fixedOut: isFixedOutput,
                 maxSteps,
                 reloadState: true,
@@ -976,7 +625,7 @@ const TokenSwap = () => {
       }
     },
     [
-      fromToken,
+      fromCoinInfo,
       fromUiAmt,
       inputTriggerReloadThreshold,
       isAllowHighGas,
@@ -987,7 +636,7 @@ const TokenSwap = () => {
       previousFromUiAmt,
       previousToUiAmt,
       resetAllRoutes,
-      toToken,
+      toCoinInfo,
       toUiAmt,
       workerInstance
     ]
@@ -1000,71 +649,24 @@ const TokenSwap = () => {
   const [aptBalance, isBalanceReady] = useTokenBalane(
     coinListClient?.getCoinInfoBySymbol('APT')[0]
   );
-  const [baseBalance] = useTokenBalane(fromToken);
+  const [baseBalance] = useTokenBalane(fromCoinInfo);
 
   const gasAvailable = useMemo(() => {
     let aptAvailable = 0;
-    if (fromToken?.symbol !== 'APT' && isBalanceReady && aptBalance) {
+    if (fromCoinInfo?.symbol !== 'APT' && isBalanceReady && aptBalance) {
       aptAvailable = aptBalance;
-    } else if (fromToken?.symbol === 'APT' && isBalanceReady && aptBalance) {
+    } else if (fromCoinInfo?.symbol === 'APT' && isBalanceReady && aptBalance) {
       aptAvailable = aptBalance - (fromUiAmt || 0);
     }
     aptAvailable = Math.max(Math.min(aptAvailable, 0.25), 0);
     return Math.floor(aptToGas(aptAvailable));
-  }, [aptBalance, fromToken?.symbol, fromUiAmt, isBalanceReady]);
+  }, [aptBalance, fromCoinInfo?.symbol, fromUiAmt, isBalanceReady]);
 
   // merge dexes by Hippo or same dex
-  const mergedRoutes: IRoutesGroupedByDex[] = useMemo(() => {
-    const mRoutes: Map<AggregatorTypes.DexType, GeneralRouteAndQuote[]> = new Map();
-
-    allRoutes.forEach((r) => {
-      let dex: AggregatorTypes.DexType | undefined = undefined;
-      if (r.route instanceof AggregatorTypes.ApiTradeRoute) {
-        const dexes = r.route.steps.map((s) => s.dexType);
-        if (dexes.every((d) => d === dexes[0])) {
-          dex = dexes[0];
-        }
-      } else if (r.route instanceof AggregatorTypes.SplitSingleRoute) {
-        // do nothing
-      } else if (r.route instanceof AggregatorTypes.SplitMultiRoute) {
-        const unitRoutes = r.route.units.map((u) => u.route);
-        const dexes = unitRoutes.flatMap((ur) =>
-          ur.splitSteps.flatMap((ss) => ss.units.map((u) => u.step.pool.dexType))
-        );
-        if (dexes.every((d) => d === dexes[0])) {
-          dex = dexes[0];
-        }
-      } else {
-        throw new Error('Invalid route type for mergedRoutes');
-      }
-
-      if (dex === undefined) {
-        if (!mRoutes.has(AggregatorTypes.DexType.Hippo)) {
-          mRoutes.set(AggregatorTypes.DexType.Hippo, []);
-        }
-        mRoutes.get(AggregatorTypes.DexType.Hippo)?.push(r);
-      } else {
-        if (!mRoutes.has(dex)) {
-          mRoutes.set(dex, []);
-        }
-        mRoutes.get(dex)?.push(r);
-      }
-    });
-    const mRoutesValues = Array.from(mRoutes.values());
-    invariant(
-      mRoutesValues.length === 0 || mRoutesValues.every((routes) => routes.length > 0),
-      'Make sure routes in mRoutes is not empty'
-    );
-    const mRoutesArr = [];
-    for (const [key, value] of mRoutes) {
-      mRoutesArr.push({
-        dex: key,
-        routes: value
-      });
-    }
-    mRoutesArr.sort((a, b) => b.routes[0].quote.outputUiAmt - a.routes[0].quote.outputUiAmt);
-    return mRoutesArr;
-  }, [allRoutes]);
+  const mergedRoutes: IRoutesGroupedByDex[] = useMemo(
+    () => getMergedRoutes(allRoutes),
+    [allRoutes]
+  );
 
   useEffect(() => {
     const ts = Date.now();
@@ -1094,7 +696,7 @@ const TokenSwap = () => {
         (async () => {
           const result = await simulateSwapByRoute(
             route,
-            values.slippageTolerance,
+            ctx.slippageTolerance,
             gasAvailable,
             undefined,
             isFixedOutput
@@ -1133,8 +735,7 @@ const TokenSwap = () => {
     baseBalance,
     isBalanceReady,
     simulateSwapByRoute,
-    values.maxGasFee,
-    values.slippageTolerance
+    ctx.slippageTolerance
   ]);
 
   const coingeckoRate = useMemo(
@@ -1156,14 +757,14 @@ const TokenSwap = () => {
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken, fromUiAmt, isWorkerReady, isFixedOutput]);
+  }, [fromCoinInfo, toCoinInfo, fromUiAmt, isWorkerReady, isFixedOutput]);
 
   useEffect(() => {
     if (isFixedOutput && isWorkerReady) {
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken, toUiAmt, isWorkerReady, isFixedOutput]);
+  }, [fromCoinInfo, toCoinInfo, toUiAmt, isWorkerReady, isFixedOutput]);
 
   useInterval(() => {
     setTimePassedAfterRefresh(timePassedAfterRefresh + 1);
@@ -1179,36 +780,33 @@ const TokenSwap = () => {
   useEffect(() => {
     // Note we compare amount with undefined to avoid initial states
     if (!isFixedOutput && fromUiAmt !== undefined) {
-      setFieldValue('currencyTo', {
-        ...values.currencyTo,
-        amount: routeSelected?.quote.outputUiAmt || 0
-      });
-    } else if (toUiAmt !== undefined) {
-      setFieldValue('currencyFrom', {
-        ...values.currencyFrom,
-        amount: routeSelected?.quote.inputUiAmt || 0
-      });
+      ctx.setToAmount(routeSelected?.quote.outputUiAmt || 0);
+    } else if (isFixedOutput && toUiAmt !== undefined) {
+      ctx.setFromAmount(routeSelected?.quote.inputUiAmt || 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeSelected, setFieldValue, isFixedOutput]);
+  }, [routeSelected, ctx, fromUiAmt, toUiAmt, isFixedOutput]);
 
   const onClickSwapToken = useCallback(() => {
-    const tokenFrom = values.currencyFrom;
-    const tokenTo = values.currencyTo;
-    setFieldValue('currencyFrom', tokenTo);
-    setFieldValue('currencyTo', tokenFrom);
-  }, [values, setFieldValue]);
+    const tokenFrom = fromSymbol;
+    const tokenTo = toSymbol;
+    const amtFrom = fromUiAmt;
+    const amtTo = toUiAmt;
+    ctx.setFromSymbol(tokenTo);
+    ctx.setToSymbol(tokenFrom);
+    ctx.setFromAmount(amtTo);
+    ctx.setToAmount(amtFrom);
+  }, [ctx, fromSymbol, toSymbol, fromUiAmt, toUiAmt]);
 
-  const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromToken);
+  const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromCoinInfo);
   const isSwapEnabled =
-    (hasRoutes && !connected && values.currencyFrom?.token) || // to connect wallet
+    (hasRoutes && !connected && fromCoinInfo) || // to connect wallet
     (hasRoutes &&
-      values.quoteChosen &&
+      ctx.quoteChosen &&
       fromUiAmt &&
       (!isCurrentBalanceReady || (fromCurrentBalance && fromUiAmt <= fromCurrentBalance)));
 
   const swapButtonText = useMemo(() => {
-    if (!values.currencyFrom?.token) {
+    if (!fromCoinInfo) {
       return 'Loading Tokens...';
     } else if (!hasRoutes) {
       return 'No Available Route';
@@ -1216,8 +814,10 @@ const TokenSwap = () => {
       return 'Connect to Wallet';
     } else if (!fromUiAmt) {
       return 'Enter an Amount';
-    } else if (isRefreshingRoutes) {
+    } else if (isUserInputChanged) {
       return 'Loading Routes...';
+    } else if (isRefreshingRoutes) {
+      return 'Refreshing Routes...';
     } else if (
       isCurrentBalanceReady &&
       typeof fromCurrentBalance === 'number' &&
@@ -1227,11 +827,12 @@ const TokenSwap = () => {
     }
     return 'SWAP';
   }, [
-    values.currencyFrom?.token,
+    fromCoinInfo,
     hasRoutes,
     connected,
     fromUiAmt,
     isRefreshingRoutes,
+    isUserInputChanged,
     isCurrentBalanceReady,
     fromCurrentBalance
   ]);
@@ -1266,19 +867,19 @@ const TokenSwap = () => {
       !routeSelectedSerialized &&
       fromUiAmt &&
       toUiAmt &&
-      routeSelected.quote.inputSymbol === fromToken?.symbol &&
-      routeSelected.quote.outputSymbol === toToken?.symbol &&
+      routeSelected.quote.inputSymbol === fromCoinInfo?.symbol &&
+      routeSelected.quote.outputSymbol === toCoinInfo?.symbol &&
       ((routeSelected.quote.inputUiAmt === fromUiAmt && !isFixedOutput) ||
         (routeSelected.quote.outputUiAmt === toUiAmt && isFixedOutput))
         ? routeSelected.quote.inputUiAmt / routeSelected.quote.outputUiAmt
         : Infinity,
     [
-      fromToken?.symbol,
+      fromCoinInfo?.symbol,
       fromUiAmt,
       isFixedOutput,
       routeSelected,
       routeSelectedSerialized,
-      toToken?.symbol,
+      toCoinInfo?.symbol,
       toUiAmt
     ]
   );
@@ -1310,9 +911,24 @@ const TokenSwap = () => {
     [rateChangeBeforeSubmit]
   ); // output has decreased to 1 / 1.01 =~ 0.99
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const requestSwapByRoute = useHippoClient().requestSwapByRoute;
+
   const onSwap = useCallback(async () => {
-    await submitForm();
-  }, [submitForm]);
+    if (!ctx.quoteChosen) {
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await requestSwapByRoute(
+        ctx.quoteChosen,
+        ctx.slippageTolerance,
+        undefined,
+        ctx.isFixedOutput
+      );
+    } catch {}
+    setIsSubmitting(false);
+  }, [ctx.isFixedOutput, ctx.quoteChosen, ctx.slippageTolerance, requestSwapByRoute]);
 
   const isPriceImpactEnabled = !!payValue && parseFloat(payValue) >= 50;
 
@@ -1341,7 +957,8 @@ const TokenSwap = () => {
   const cardXPadding = '32px';
   return (
     <div className="w-full min-h-[620px] tablet:h-auto" ref={swapRef}>
-      <CardHeader
+      <TokenSwapHeader
+        ctx={ctx}
         className="pointer-events-auto"
         right={
           isTablet && (
@@ -1354,8 +971,8 @@ const TokenSwap = () => {
             />
           )
         }
-        fromToken={fromToken}
-        toToken={toToken}
+        fromCoinInfo={fromCoinInfo}
+        toCoinInfo={toCoinInfo}
         maxGas={isBalanceReady ? gasAvailable : undefined}
       />
       <Card className="w-full min-h-[430px] flex flex-col py-8 relative pointer-events-auto">
@@ -1369,6 +986,7 @@ const TokenSwap = () => {
             )}
           </div>
           <CurrencyInput
+            ctx={ctx}
             actionType="currencyFrom"
             isDisableAmountInput={!hasRoutes}
             trashButtonContainerWidth={cardXPadding}
@@ -1382,15 +1000,17 @@ const TokenSwap = () => {
               <div className="label-large-bold text-grey-500 leading-none">${toValue}</div>
             )}
           </div>
-          <CurrencyInput actionType="currencyTo" isDisableAmountInput={!hasRoutes} />
+          <CurrencyInput ctx={ctx} actionType="currencyTo" isDisableAmountInput={!hasRoutes} />
           {isTablet && isRoutesVisible && (
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
                 routes={mergedRoutes}
+                ctx={ctx}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
                 isRefreshing={isRefreshingRoutes}
+                isUserInputChanged={isUserInputChanged}
                 simuResults={routesSimulatedResults}
                 isFixedOutputMode={isFixedOutput}
               />
@@ -1416,9 +1036,11 @@ const TokenSwap = () => {
                   <RoutesAvailable
                     isDesktopScreen={true}
                     routes={mergedRoutes}
+                    ctx={ctx}
                     routeSelected={routeSelected}
                     onRouteSelected={onUserSelectRoute}
                     isRefreshing={isRefreshingRoutes}
+                    isUserInputChanged={isUserInputChanged}
                     refreshButton={
                       <RefreshButton
                         isDisabled={!refreshRoutesTimerTick}
@@ -1431,9 +1053,10 @@ const TokenSwap = () => {
                     isFixedOutputMode={isFixedOutput}
                   />
                   <SwapDetail
+                    ctx={ctx}
                     routeAndQuote={routeSelected}
-                    fromToken={fromToken}
-                    toToken={toToken}
+                    fromToken={fromCoinInfo}
+                    toToken={toCoinInfo}
                     coingeckoRate={coingeckoRate}
                     coingeckoApi={coingeckoApi}
                     isPriceImpactEnabled={isPriceImpactEnabled}
@@ -1452,10 +1075,11 @@ const TokenSwap = () => {
           </Button>
           {isTablet && routeSelected && (
             <SwapDetail
+              ctx={ctx}
               className="hidden tablet:flex"
               routeAndQuote={routeSelected}
-              fromToken={fromToken}
-              toToken={toToken}
+              fromToken={fromCoinInfo}
+              toToken={toCoinInfo}
               coingeckoRate={coingeckoRate}
               coingeckoApi={coingeckoApi}
               isPriceImpactEnabled={isPriceImpactEnabled}
@@ -1463,6 +1087,7 @@ const TokenSwap = () => {
           )}
         </div>
       </Card>
+
       {hasErrors && (
         <Card className="px-8 py-2 my-4">
           {priceImpactTooHigh && (
@@ -1473,7 +1098,7 @@ const TokenSwap = () => {
           )}
           {isRateChangeAfterSubmitTooBig && (
             <ErrorBody
-              title={`The ${toToken?.symbol} rate has changed ${(
+              title={`The ${toCoinInfo?.symbol} rate has changed ${(
                 rateChangeBeforeSubmit * 100
               ).toFixed(2)}%`}
               detail={

@@ -1,13 +1,12 @@
-import { useFormikContext } from 'formik';
 import Button from 'components/Button';
 import { useCallback } from 'react';
 import PositiveFloatNumInput from 'components/PositiveFloatNumInput';
 import classNames from 'classnames';
-import { initState as swapInitState } from 'modules/swap/reducer';
 import Selectable from 'components/Selectable';
-import { ISwapSettings } from './TokenSwap';
+import { SwapContextType } from '..';
 
 interface TProps {
+  ctx: SwapContextType;
   maxGas?: number;
   onClose: () => void;
 }
@@ -16,23 +15,21 @@ const SubTitle = ({ children }: { children: string }) => {
   return <div className="label-large-bold text-grey-900 mb-3">{children}</div>;
 };
 
-const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
+const SwapSetting: React.FC<TProps> = ({ ctx, onClose, maxGas }) => {
   const slippageOptions = [0.1, 0.5, 1];
-
-  const { values, setFieldValue } = useFormikContext<ISwapSettings>();
 
   const onConfirm = useCallback(() => {
     onClose();
   }, [onClose]);
 
   const onResetSwapSetting = useCallback(() => {
-    setFieldValue('slippageTolerance', swapInitState.swapSettings.slippageTolerance);
-    setFieldValue('transactionDeadline', swapInitState.swapSettings.transactionDeadline);
-    setFieldValue('maxGasFee', swapInitState.swapSettings.maxGasFee);
-  }, [setFieldValue]);
+    ctx.setSlippageTolerance(0.1);
+    ctx.setTransactionDeadline(60);
+    ctx.setMaxGasFee(20000);
+  }, [ctx]);
 
   // TODO: manage state here!
-  const isCustomSlippage = !slippageOptions.includes(values.slippageTolerance);
+  const isCustomSlippage = !slippageOptions.includes(ctx.slippageTolerance);
 
   return (
     <div className="w-full">
@@ -44,8 +41,8 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
               <Selectable
                 key={`st-${i}`}
                 className="flex-auto body-bold"
-                isSelected={values.slippageTolerance === s}
-                onClick={() => setFieldValue('slippageTolerance', s)}>
+                isSelected={ctx.slippageTolerance === s}
+                onClick={() => ctx.setSlippageTolerance(s)}>
                 {s}%
               </Selectable>
             );
@@ -54,7 +51,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
             isSelected={isCustomSlippage}
             className={classNames('flex items-center relative w-full')}>
             <PositiveFloatNumInput
-              inputAmount={!isCustomSlippage ? 0 : values.slippageTolerance}
+              inputAmount={!isCustomSlippage ? 0 : ctx.slippageTolerance}
               min={0}
               max={10}
               isConfine={true}
@@ -62,7 +59,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
               className={classNames(
                 'h6 rounded-xl w-full h-full mr-1 bg-transparent text-grey-900 body-bold !px-4'
               )}
-              onAmountChange={(v) => setFieldValue('slippageTolerance', v)}
+              onAmountChange={(v) => ctx.setSlippageTolerance(v)}
             />
             <div
               className={classNames('mx-4 text-grey-500 body-bold', {
@@ -78,12 +75,12 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
             className="grow rounded-full bg-field !px-4 w-[140px] h-[40px] body-bold text-grey-700"
-            inputAmount={values.transactionDeadline}
+            inputAmount={ctx.transactionDeadline}
             isConfine={true}
             placeholder="0"
             min={0}
             max={600}
-            onAmountChange={(v) => setFieldValue('transactionDeadline', v)}
+            onAmountChange={(v) => ctx.setTransactionDeadline(v)}
           />
           <div className="body-bold text-grey-700">Seconds</div>
         </div>
@@ -93,12 +90,12 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
             className="grow rounded-full bg-field !px-4 w-[140px] h-[40px] body-bold text-grey-700"
-            inputAmount={values.maxGasFee}
+            inputAmount={ctx.maxGasFee}
             isConfine={true}
             placeholder="0"
             min={0}
             max={maxGas}
-            onAmountChange={(v) => setFieldValue('maxGasFee', v)}
+            onAmountChange={(v) => ctx.setMaxGasFee(v)}
           />
           <div className="body-bold text-grey-700">Gas Units</div>
         </div>
