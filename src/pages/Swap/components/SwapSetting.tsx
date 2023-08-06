@@ -13,7 +13,7 @@ interface TProps {
 }
 
 const SubTitle = ({ children }: { children: string }) => {
-  return <div className="label-large-bold font-extrabold text-grey-700 mb-3">{children}</div>;
+  return <div className="label-large-bold text-grey-900 mb-3">{children}</div>;
 };
 
 const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
@@ -36,17 +36,14 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
 
   return (
     <div className="w-full">
-      <div className="h6 font-bold text-grey-900 text-center tablet:hidden">
-        Transaction Settings
-      </div>
-      <div className="mt-6 mobile:mt-0">
+      <div className="">
         <SubTitle>Slippage Tolerance</SubTitle>
-        <div className="flex gap-x-2 gap-y-3 flex-wrap">
+        <div className="flex gap-x-4 gap-y-3 flex-wrap">
           {slippageOptions.map((s, i) => {
             return (
               <Selectable
                 key={`st-${i}`}
-                className="flex-1"
+                className="flex-auto body-bold"
                 isSelected={values.slipTolerance === s}
                 onClick={() => setFieldValue('slipTolerance', s)}>
                 {s}%
@@ -80,7 +77,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
         <SubTitle>Transaction Deadline</SubTitle>
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="grow rounded-full bg-field !px-4 w-[180px] h-[40px] h6 text-grey-700"
+            className="grow rounded-full bg-field !px-4 w-[140px] h-[40px] body-bold text-grey-700"
             inputAmount={values.trasactionDeadline}
             isConfine={true}
             placeholder="0"
@@ -88,14 +85,14 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
             max={600}
             onAmountChange={(v) => setFieldValue('trasactionDeadline', v)}
           />
-          <div className="h6 text-grey-700">Seconds</div>
+          <div className="body-bold text-grey-700">Seconds</div>
         </div>
       </div>
       <div className="mt-6">
         <SubTitle>Max Gas Fee</SubTitle>
         <div className="flex w-fit items-center gap-x-2">
           <PositiveFloatNumInput
-            className="grow rounded-full bg-field !px-4 w-[180px] h-[40px] h6 text-grey-700"
+            className="grow rounded-full bg-field !px-4 w-[140px] h-[40px] body-bold text-grey-700"
             inputAmount={values.maxGasFee}
             isConfine={true}
             placeholder="0"
@@ -103,7 +100,7 @@ const SwapSetting: React.FC<TProps> = ({ onClose, maxGas }) => {
             max={maxGas}
             onAmountChange={(v) => setFieldValue('maxGasFee', v)}
           />
-          <div className="h6 text-grey-700">Gas Units</div>
+          <div className="body-bold text-grey-700">Gas Units</div>
         </div>
       </div>
       <div className="mt-6 flex gap-6">
