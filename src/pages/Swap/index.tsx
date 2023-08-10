@@ -92,20 +92,26 @@ const Swap: React.FC = () => {
     toAmount: urlToAmt
   } = useParams();
 
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
   useEffect(() => {
-    if (urlFromSymbol) {
-      setFromSymbol(urlFromSymbol);
-    }
-    if (urlToSymbol) {
-      setToSymbol(urlToSymbol);
-    }
-    if (urlFromAmt) {
-      setFromAmount(parseFloat(urlFromAmt) || 0);
-    }
-    if (urlToAmt) {
-      setToAmount(parseFloat(urlToAmt) || 0);
+    if (isFirstLoad) {
+      if (urlFromSymbol) {
+        setFromSymbol(urlFromSymbol);
+      }
+      if (urlToSymbol) {
+        setToSymbol(urlToSymbol);
+      }
+      if (urlFromAmt) {
+        setFromAmount(parseFloat(urlFromAmt) || 0);
+      }
+      if (urlToAmt) {
+        setToAmount(parseFloat(urlToAmt) || 0);
+      }
+      setIsFirstLoad(false);
     }
   }, [
+    isFirstLoad,
     urlFromSymbol,
     urlFromAmt,
     urlToSymbol,
