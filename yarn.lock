@@ -1907,13 +1907,13 @@
     commander "^9.3.0"
     cross-fetch "^3.1.5"
 
-"@manahippo/hippo-sdk@6.1.7":
-  version "6.1.7"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-6.1.7.tgz#17d4fe6389cac737b81d111739279ca766bb49b2"
-  integrity sha512-DScDw13Chq/C+ndE82suyWbrcFVr55WNJs6cma5mopBwFfH+fGGy11Ra9AmuNqvwpRDYsUrvgPWmbXAWXS+c0Q==
+"@manahippo/hippo-sdk@7.1.0":
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-7.1.0.tgz#5b3fffa603283f8067f3829bbaac2d04c2c6b415"
+  integrity sha512-DoK31yUw03HcFMzMFXa5beF0dZAnNa3sGBX5ByhDEHxmDm3XGC95kJRkc698YpaaRnGMqyHTdeQ8QJUTkP0UIw==
   dependencies:
     "@manahippo/coin-list" "4.1.13"
-    "@manahippo/move-to-ts" "2.2.4"
+    "@manahippo/move-to-ts" "3.0.2"
     "@vividnetwork/swap-sdk" "^0.2.2"
     aptos "1.10.0"
     bn.js "^5.2.1"
@@ -1923,10 +1923,10 @@
     promise-throttle "1.1.2"
     yaml "^2.1.1"
 
-"@manahippo/move-to-ts@2.2.4":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-2.2.4.tgz#8df438e9847aeeb729400e168e1959c6b8229df3"
-  integrity sha512-2Aq9K9vsBGeqoWrC+NZHPzE6bmoxlpxkEaTAAOamTx4BurCu7BmGlfoJ8pH6BygTqJ+eTMUoAfuThIX6KOmiPA==
+"@manahippo/move-to-ts@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@manahippo/move-to-ts/-/move-to-ts-3.0.2.tgz#38ba64285814a924716550486c5273f9485c3958"
+  integrity sha512-dTL+DQqi3BNd3w10nbYHDlSVt7FoIKS8xFvR6viak7GGszvoZQRQ02CknCklIprz4BjmRAT2Q3M1M2LkLhidPg==
   dependencies:
     aptos "1.10.0"
     big-integer "^1.6.51"
