@@ -75,15 +75,12 @@ const CurrencyInput: React.FC<TProps> = ({
   const [isCoinSelectorVisible, setIsCoinSelectorVisible] = useState(false);
   const [isCSDrawerVisible, setIsCSDrawerVisible] = useState(false);
   const { connected } = useWallet();
-  const coinlist = useHippoClient().coinListClient!;
 
   const thisIsFrom = actionType === 'currencyFrom';
   const setSelectedAmount = thisIsFrom ? ctx.setFromAmount : ctx.setToAmount;
-  const selectedSymbol = thisIsFrom ? ctx.fromSymbol : ctx.toSymbol;
+  const selectedSymbol = thisIsFrom ? ctx.fromCoin : ctx.toCoin;
   const selectedAmount = thisIsFrom ? ctx.fromAmount : ctx.toAmount;
-  const selectedCoinInfo = selectedSymbol
-    ? coinlist.getCoinInfoBySymbol(selectedSymbol)[0]
-    : undefined;
+  const selectedCoinInfo = selectedSymbol;
   const [uiBalance, isReady] = useTokenBalane(selectedCoinInfo);
   const tokenList = useHippoClient().rawCoinInfos;
   const isCoinSelectorDisabled = !tokenList || tokenList.length === 0;
@@ -166,7 +163,7 @@ const CurrencyInput: React.FC<TProps> = ({
                 if (actionType === 'currencyFrom' && !isDisableAmountInput) {
                   let amount = uiBalance;
                   if (typeof amount === 'number') {
-                    if (selectedSymbol === 'APT') {
+                    if (selectedSymbol?.symbol === 'APT') {
                       amount = Math.max(amount - 0.05, 0);
                     }
                     setSelectedAmount(amount);

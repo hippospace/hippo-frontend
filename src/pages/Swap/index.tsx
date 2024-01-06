@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import TokenSwap from './components/TokenSwap';
 import { useParams } from 'react-router-dom';
 import { GeneralRouteAndQuote } from 'types/hippo';
+import { RawCoinInfo } from '@manahippo/coin-list';
+import useHippoClient from 'hooks/useHippoClient';
 
 export interface SwapContextType {
   isPriceChartOpen: boolean;
@@ -14,10 +16,10 @@ export interface SwapContextType {
   maxGasFee: number;
   quoteChosen: GeneralRouteAndQuote | undefined;
 
-  fromSymbol: string | undefined;
+  fromCoin: RawCoinInfo | undefined;
   fromAmount: number;
 
-  toSymbol: string | undefined;
+  toCoin: RawCoinInfo | undefined;
   toAmount: number;
 
   setIsPriceChartOpen(open: boolean): void;
@@ -27,10 +29,10 @@ export interface SwapContextType {
   setMaxGasFee(maxGasFee: number): void;
   setQuoteChosen(quote: GeneralRouteAndQuote | undefined): void;
 
-  setFromSymbol(symbol: string | undefined): void;
+  setFromCoin(symbol: RawCoinInfo | undefined): void;
   setFromAmount(amount: number): void;
 
-  setToSymbol(symbol: string | undefined): void;
+  setToCoin(symbol: RawCoinInfo | undefined): void;
   setToAmount(amount: number): void;
 }
 
@@ -54,9 +56,25 @@ const Swap: React.FC = () => {
   const [slippageTolerance, setSlippageTolerance] = useLocalState('slippageTolerance', 0.1);
   const [transactionDeadline, setTransactionDeadline] = useLocalState('transactionDeadline', 60);
   const [maxGasFee, setMaxGasFee] = useLocalState('maxGasFee', 20000);
-  const [fromSymbol, setFromSymbol] = useLocalState<string | undefined>('fromSymbol', 'zUSDC');
-  const [toSymbol, setToSymbol] = useLocalState<string | undefined>('toSymbol', 'APT');
+  const [fromSymbol, setFromSymbol] = useLocalState<string | number | undefined>(
+    'fromSymbol',
+    'zUSDC'
+  );
+  const [toSymbol, setToSymbol] = useLocalState<string | number | undefined>('toSymbol', 'APT');
 
+  const { coinListClient } = useHippoClient();
+
+  const initialFromCoin =
+    typeof fromSymbol === 'number'
+      ? coinListClient?.getCoinInfoByIndex(fromSymbol)
+      : coinListClient?.getCoinInfoBySymbol(fromSymbol)[0];
+  const initialToCoin =
+    typeof toSymbol === 'number'
+      ? coinListClient?.getCoinInfoByIndex(toSymbol)
+      : coinListClient?.getCoinInfoBySymbol(toSymbol)[0];
+
+  const [fromCoin, setFromCoin] = useState<RawCoinInfo | undefined>(initialFromCoin);
+  const [toCoin, setToCoin] = useState<RawCoinInfo | undefined>(initialToCoin);
   const [quoteChosen, setQuoteChosen] = useState<GeneralRouteAndQuote | undefined>(undefined);
   const [fromAmount, setFromAmount] = useState(0);
   const [toAmount, setToAmount] = useState(0);
@@ -68,9 +86,9 @@ const Swap: React.FC = () => {
     transactionDeadline,
     maxGasFee,
     quoteChosen,
-    fromSymbol,
+    fromCoin,
     fromAmount,
-    toSymbol,
+    toCoin,
     toAmount,
     setIsPriceChartOpen,
     setIsFixedOutput,
@@ -78,9 +96,23 @@ const Swap: React.FC = () => {
     setTransactionDeadline,
     setMaxGasFee,
     setQuoteChosen,
-    setFromSymbol,
+    setFromCoin: (from: RawCoinInfo) => {
+      setFromCoin(from);
+      if (coinListClient?.getCoinInfoBySymbol(from.symbol).length === 1) {
+        setFromSymbol(from.symbol);
+      } else {
+        setFromSymbol(from.unique_index);
+      }
+    },
     setFromAmount,
-    setToSymbol,
+    setToCoin: (to: RawCoinInfo) => {
+      setToCoin(to);
+      if (coinListClient?.getCoinInfoBySymbol(to.symbol).length === 1) {
+        setFromSymbol(to.symbol);
+      } else {
+        setFromSymbol(to.unique_index);
+      }
+    },
     setToAmount
   };
 

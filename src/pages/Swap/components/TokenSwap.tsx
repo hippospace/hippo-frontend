@@ -240,11 +240,8 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
   const fromUiAmt = ctx.fromAmount;
   const toUiAmt = ctx.toAmount;
 
-  const fromSymbol = ctx.fromSymbol;
-  const toSymbol = ctx.toSymbol;
-
-  const fromCoinInfo = fromSymbol ? coinListClient?.getCoinInfoBySymbol(fromSymbol)[0] : undefined;
-  const toCoinInfo = toSymbol ? coinListClient?.getCoinInfoBySymbol(toSymbol)[0] : undefined;
+  const fromCoin = ctx.fromCoin;
+  const toCoin = ctx.toCoin;
 
   const [hasRoutes, setHasRoutes] = useState(false);
 
@@ -270,10 +267,10 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
   const isUserInputChanged = !(
     (!isFixedOutput &&
       routeSelected?.quote.inputUiAmt === fromUiAmt &&
-      routeSelected?.quote.inputSymbol === fromCoinInfo?.symbol) ||
+      routeSelected?.quote.inputSymbol === fromCoin?.symbol) ||
     (isFixedOutput &&
       routeSelected?.quote.outputUiAmt === toUiAmt &&
-      routeSelected?.quote.outputSymbol === toCoinInfo?.symbol)
+      routeSelected?.quote.outputSymbol === toCoin?.symbol)
   );
 
   const isRefreshingRoutes = isUIReloadingPools;
@@ -282,12 +279,10 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
 
   // Reduce Coingecko Api requests as much as we can
   const [prices, , coingeckoApi] = useCoingeckoPrice(
-    fromUiAmt
-      ? [fromCoinInfo, toCoinInfo, coinListClient?.getCoinInfoBySymbol('APT')[0]]
-      : undefined
+    fromUiAmt ? [fromCoin, toCoin, coinListClient?.getCoinInfoBySymbol('APT')[0]] : undefined
   );
-  const fromPrice = fromCoinInfo ? prices[fromCoinInfo.symbol] : undefined;
-  const toTokenPrice = toCoinInfo ? prices[toCoinInfo.symbol] : undefined;
+  const fromPrice = fromCoin ? prices[fromCoin.symbol] : undefined;
+  const toTokenPrice = toCoin ? prices[toCoin.symbol] : undefined;
   const aptPrice = prices.APT;
 
   const payValue = useMemo(() => {
@@ -323,33 +318,33 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
   }
 
   useEffect(() => {
-    if (isWorkerReady && fromCoinInfo && toCoinInfo && workerInstance) {
+    if (isWorkerReady && fromCoin && toCoin && workerInstance) {
       postMessageTyped<ISwapWorkerMessage<IQueryIfRoutesExistingArgs>>(workerInstance, {
         cmd: 'queryIfRoutesExisting',
         args: {
-          x: fromCoinInfo,
-          y: toCoinInfo,
+          x: fromCoin,
+          y: toCoin,
           fixedOut: false,
           maxSteps: 3,
           allowRoundTrip: false
         }
       });
     }
-  }, [fromCoinInfo, isWorkerReady, toCoinInfo, workerInstance]);
+  }, [fromCoin, isWorkerReady, toCoin, workerInstance]);
 
   useEffect(() => {
-    if (fromCoinInfo && toCoinInfo) {
+    if (fromCoin && toCoin) {
       // Prevents browser from storing history of every change
       window.history.replaceState(
         {},
         '',
         location.origin +
-          `/swap/from/${fromCoinInfo.symbol}${
+          `/swap/from/${fromCoin.symbol}${
             !isFixedOutput && fromUiAmt ? `/amt/${fromUiAmt}` : ''
-          }/to/${toCoinInfo.symbol}${isFixedOutput && toUiAmt ? `/amt/${toUiAmt}` : ''}`
+          }/to/${toCoin.symbol}${isFixedOutput && toUiAmt ? `/amt/${toUiAmt}` : ''}`
       );
     }
-  }, [fromCoinInfo, toCoinInfo, fromUiAmt, isFixedOutput, toUiAmt]);
+  }, [fromCoin, toCoin, fromUiAmt, isFixedOutput, toUiAmt]);
 
   const setRoute = useCallback(
     (ro: GeneralRouteAndQuote | undefined) => {
@@ -571,7 +566,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
       lastFetchTs.current = now;
 
       // console.log(`FetchSwapRoutes: timePassedRef.current: ${timePassedRef.current}`);
-      if (fromCoinInfo && toCoinInfo && workerInstance && isWorkerReady) {
+      if (fromCoin && toCoin && workerInstance && isWorkerReady) {
         const maxSteps = 3;
         // Using isFixedOutput is necessary as the other side amount would not change immediately to 0 when the input amount is cleared
         if ((!isFixedOutput && fromUiAmt) || (isFixedOutput && toUiAmt)) {
@@ -588,8 +583,8 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
             args: {
               ts: now,
               inputUiAmt: fromUiAmt as number,
-              x: fromCoinInfo,
-              y: toCoinInfo,
+              x: fromCoin,
+              y: toCoin,
               maxSteps,
               reloadState: isReloadInternal,
               allowRoundTrip: false,
@@ -611,8 +606,8 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
               cmd: 'reloadPools',
               args: {
                 ts: now,
-                x: fromCoinInfo,
-                y: toCoinInfo,
+                x: fromCoin,
+                y: toCoin,
                 fixedOut: isFixedOutput,
                 maxSteps,
                 reloadState: true,
@@ -625,7 +620,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
       }
     },
     [
-      fromCoinInfo,
+      fromCoin,
       fromUiAmt,
       inputTriggerReloadThreshold,
       isAllowHighGas,
@@ -636,7 +631,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
       previousFromUiAmt,
       previousToUiAmt,
       resetAllRoutes,
-      toCoinInfo,
+      toCoin,
       toUiAmt,
       workerInstance
     ]
@@ -649,18 +644,18 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
   const [aptBalance, isBalanceReady] = useTokenBalane(
     coinListClient?.getCoinInfoBySymbol('APT')[0]
   );
-  const [baseBalance] = useTokenBalane(fromCoinInfo);
+  const [baseBalance] = useTokenBalane(fromCoin);
 
   const gasAvailable = useMemo(() => {
     let aptAvailable = 0;
-    if (fromCoinInfo?.symbol !== 'APT' && isBalanceReady && aptBalance) {
+    if (fromCoin?.symbol !== 'APT' && isBalanceReady && aptBalance) {
       aptAvailable = aptBalance;
-    } else if (fromCoinInfo?.symbol === 'APT' && isBalanceReady && aptBalance) {
+    } else if (fromCoin?.symbol === 'APT' && isBalanceReady && aptBalance) {
       aptAvailable = aptBalance - (fromUiAmt || 0);
     }
     aptAvailable = Math.max(Math.min(aptAvailable, 0.25), 0);
     return Math.floor(aptToGas(aptAvailable));
-  }, [aptBalance, fromCoinInfo?.symbol, fromUiAmt, isBalanceReady]);
+  }, [aptBalance, fromCoin?.symbol, fromUiAmt, isBalanceReady]);
 
   // merge dexes by Hippo or same dex
   const mergedRoutes: IRoutesGroupedByDex[] = useMemo(
@@ -757,14 +752,14 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromCoinInfo, toCoinInfo, fromUiAmt, isWorkerReady, isFixedOutput]);
+  }, [fromCoin, toCoin, fromUiAmt, isWorkerReady, isFixedOutput]);
 
   useEffect(() => {
     if (isFixedOutput && isWorkerReady) {
       fetchSwapRoutes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromCoinInfo, toCoinInfo, toUiAmt, isWorkerReady, isFixedOutput]);
+  }, [fromCoin, toCoin, toUiAmt, isWorkerReady, isFixedOutput]);
 
   useInterval(() => {
     setTimePassedAfterRefresh(timePassedAfterRefresh + 1);
@@ -787,26 +782,26 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
   }, [routeSelected, ctx, fromUiAmt, toUiAmt, isFixedOutput]);
 
   const onClickSwapToken = useCallback(() => {
-    const tokenFrom = fromSymbol;
-    const tokenTo = toSymbol;
+    const tokenFrom = fromCoin;
+    const tokenTo = toCoin;
     const amtFrom = fromUiAmt;
     const amtTo = toUiAmt;
-    ctx.setFromSymbol(tokenTo);
-    ctx.setToSymbol(tokenFrom);
+    ctx.setFromCoin(tokenTo);
+    ctx.setToCoin(tokenFrom);
     ctx.setFromAmount(amtTo);
     ctx.setToAmount(amtFrom);
-  }, [ctx, fromSymbol, toSymbol, fromUiAmt, toUiAmt]);
+  }, [ctx, fromCoin, toCoin, fromUiAmt, toUiAmt]);
 
-  const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromCoinInfo);
+  const [fromCurrentBalance, isCurrentBalanceReady] = useTokenBalane(fromCoin);
   const isSwapEnabled =
-    (hasRoutes && !connected && fromCoinInfo) || // to connect wallet
+    (hasRoutes && !connected && fromCoin) || // to connect wallet
     (hasRoutes &&
       ctx.quoteChosen &&
       fromUiAmt &&
       (!isCurrentBalanceReady || (fromCurrentBalance && fromUiAmt <= fromCurrentBalance)));
 
   const swapButtonText = useMemo(() => {
-    if (!fromCoinInfo) {
+    if (!fromCoin) {
       return 'Loading Tokens...';
     } else if (!hasRoutes) {
       return 'No Available Route';
@@ -827,7 +822,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
     }
     return 'SWAP';
   }, [
-    fromCoinInfo,
+    fromCoin,
     hasRoutes,
     connected,
     fromUiAmt,
@@ -867,19 +862,19 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
       !routeSelectedSerialized &&
       fromUiAmt &&
       toUiAmt &&
-      routeSelected.quote.inputSymbol === fromCoinInfo?.symbol &&
-      routeSelected.quote.outputSymbol === toCoinInfo?.symbol &&
+      routeSelected.quote.inputSymbol === fromCoin?.symbol &&
+      routeSelected.quote.outputSymbol === toCoin?.symbol &&
       ((routeSelected.quote.inputUiAmt === fromUiAmt && !isFixedOutput) ||
         (routeSelected.quote.outputUiAmt === toUiAmt && isFixedOutput))
         ? routeSelected.quote.inputUiAmt / routeSelected.quote.outputUiAmt
         : Infinity,
     [
-      fromCoinInfo?.symbol,
+      fromCoin?.symbol,
       fromUiAmt,
       isFixedOutput,
       routeSelected,
       routeSelectedSerialized,
-      toCoinInfo?.symbol,
+      toCoin?.symbol,
       toUiAmt
     ]
   );
@@ -971,8 +966,8 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
             />
           )
         }
-        fromCoinInfo={fromCoinInfo}
-        toCoinInfo={toCoinInfo}
+        fromCoinInfo={fromCoin}
+        toCoinInfo={toCoin}
         maxGas={isBalanceReady ? gasAvailable : undefined}
       />
       <Card className="w-full min-h-[430px] flex flex-col py-8 relative pointer-events-auto">
@@ -1055,8 +1050,8 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
                   <SwapDetail
                     ctx={ctx}
                     routeAndQuote={routeSelected}
-                    fromToken={fromCoinInfo}
-                    toToken={toCoinInfo}
+                    fromToken={fromCoin}
+                    toToken={toCoin}
                     coingeckoRate={coingeckoRate}
                     coingeckoApi={coingeckoApi}
                     isPriceImpactEnabled={isPriceImpactEnabled}
@@ -1078,8 +1073,8 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
               ctx={ctx}
               className="hidden tablet:flex"
               routeAndQuote={routeSelected}
-              fromToken={fromCoinInfo}
-              toToken={toCoinInfo}
+              fromToken={fromCoin}
+              toToken={toCoin}
               coingeckoRate={coingeckoRate}
               coingeckoApi={coingeckoApi}
               isPriceImpactEnabled={isPriceImpactEnabled}
@@ -1098,7 +1093,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
           )}
           {isRateChangeAfterSubmitTooBig && (
             <ErrorBody
-              title={`The ${toCoinInfo?.symbol} rate has changed ${(
+              title={`The ${toCoin?.symbol} rate has changed ${(
                 rateChangeBeforeSubmit * 100
               ).toFixed(2)}%`}
               detail={

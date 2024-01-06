@@ -81,10 +81,10 @@ const CoinSelector: React.FC<TProps> = ({ ctx, dismissiModal, actionType }) => {
   const { coinListClient, rawCoinInfos } = useHippoClient();
   const tokenList = rawCoinInfos;
   const thisIsFrom = actionType === 'currencyFrom';
-  const thisSymbol = thisIsFrom ? ctx.fromSymbol : ctx.toSymbol;
-  const otherSymbol = !thisIsFrom ? ctx.fromSymbol : ctx.toSymbol;
-  const setThisSymbol = thisIsFrom ? ctx.setFromSymbol : ctx.setToSymbol;
-  const setOtherSymbol = !thisIsFrom ? ctx.setFromSymbol : ctx.setToSymbol;
+  const thisCoin = thisIsFrom ? ctx.fromCoin : ctx.toCoin;
+  const otherCoin = !thisIsFrom ? ctx.fromCoin : ctx.toCoin;
+  const setThisCoin = thisIsFrom ? ctx.setFromCoin : ctx.setToCoin;
+  const setOtherCoin = !thisIsFrom ? ctx.setFromCoin : ctx.setToCoin;
 
   const filter = useCoinSelectorStore((state) => state.filter);
   const setFilter = useCoinSelectorStore((state) => state.setFilter);
@@ -112,10 +112,10 @@ const CoinSelector: React.FC<TProps> = ({ ctx, dismissiModal, actionType }) => {
 
   const onSelectToken = useCallback(
     (token: RawCoinInfo) => {
-      if (token.symbol === otherSymbol) {
-        setOtherSymbol(thisSymbol);
+      if (token.unique_index === otherCoin?.unique_index) {
+        setOtherCoin(thisCoin);
       }
-      setThisSymbol(token.symbol);
+      setThisCoin(token);
       if (coinListClient) addRecentSelectedToken(token.token_type.type, coinListClient);
       dismissiModal();
     },
@@ -123,10 +123,10 @@ const CoinSelector: React.FC<TProps> = ({ ctx, dismissiModal, actionType }) => {
       addRecentSelectedToken,
       coinListClient,
       dismissiModal,
-      setThisSymbol,
-      setOtherSymbol,
-      thisSymbol,
-      otherSymbol
+      setThisCoin,
+      setOtherCoin,
+      thisCoin,
+      otherCoin
     ]
   );
 
