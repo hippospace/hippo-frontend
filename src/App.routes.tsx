@@ -4,7 +4,6 @@ import Swap from 'pages/Swap';
 import Faucet from 'pages/Faucet';
 import Home from 'pages/Home';
 import Stats from 'pages/Stats';
-import YieldPage from 'pages/Yield';
 
 export type TRoute = RouteObject & {
   name: 'Home' | 'Swap' | '404' | 'Faucet' | 'Stats' | 'Bridge' | 'Yield';
@@ -47,11 +46,6 @@ export const routes: TRoute[] = [
     name: 'Faucet',
     hidden: true,
     element: <Faucet />
-  },
-  {
-    path: 'yield',
-    name: 'Yield',
-    element: <YieldPage />
   },
   {
     path: 'stats',
