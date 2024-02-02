@@ -317,7 +317,6 @@ const HippoClientProvider: FC<TProviderProps> = ({ children }) => {
         };
         // console.log(`simulate gas availabel: ${gasAvailable}`);
         const result = await simulatePayloadTxAndLog(aptosClient, simkeys, payload, options, false);
-        console.log('simulate swap', result);
         return result;
       } catch (error) {
         if (error instanceof Error) {

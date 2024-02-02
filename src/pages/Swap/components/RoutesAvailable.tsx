@@ -58,7 +58,6 @@ const RouteRow: React.FC<IRouteRowProps> = ({
   }
 
   const [isShowDetails, setIsShowDetails] = useState(false);
-  console.log(simuResult);
 
   return (
     <div
