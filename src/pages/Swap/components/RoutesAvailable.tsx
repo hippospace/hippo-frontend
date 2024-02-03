@@ -134,7 +134,15 @@ export const RoutesAvailable: React.FC<IRoutesProps> = ({
   isFixedOutputMode = false
 }) => {
   const isEmpty = !(routes?.length > 0);
-
+  const routesToShow = [
+    ...routes.flatMap((route) => {
+      if (route.dex === AggregatorTypes.DexType.Hippo) {
+        return route.routes.slice(0, 3);
+      } else {
+        return route.routes.slice(0, 1);
+      }
+    })
+  ];
   const [isMore, setIsMore] = useState(false);
   const rowsWhenLess = 2;
   const rowsWhenMore = 4;
@@ -143,10 +151,10 @@ export const RoutesAvailable: React.FC<IRoutesProps> = ({
   const rows = isDesktopScreen
     ? isEmpty
       ? rowsOnDesktop
-      : Math.min(rowsOnDesktop, routes.length)
+      : Math.min(rowsOnDesktop, routesToShow.length)
     : isEmpty
     ? rowsWhenLess
-    : Math.min(routes.length, isMore ? rowsWhenMore : rowsWhenLess);
+    : Math.min(routesToShow.length, isMore ? rowsWhenMore : rowsWhenLess);
 
   const height = rows * routeRowMinHeight;
 
@@ -185,23 +193,23 @@ export const RoutesAvailable: React.FC<IRoutesProps> = ({
             className="pr-1 scrollbar"
             height={height}
             itemHeight={routeRowMinHeight}
-            data={routes}
-            itemKey={(item) => serializeRouteQuote(item.routes[0])}>
+            data={routesToShow}
+            itemKey={(item) => serializeRouteQuote(item)}>
             {(ro, index) => (
-              <div onClick={() => onRouteSelected(ro.routes[0], index)}>
+              <div onClick={() => onRouteSelected(ro, index)}>
                 <RouteRow
-                  route={ro.routes[0]}
+                  route={ro}
                   ctx={ctx}
-                  isSelected={ro.routes[0] === routeSelected}
+                  isSelected={ro === routeSelected}
                   isBestPrice={index === 0}
-                  simuResult={simuResults.get(serializeRouteQuote(ro.routes[0]))}
+                  simuResult={simuResults.get(serializeRouteQuote(ro))}
                 />
               </div>
             )}
           </VirtualList>
         )}
       </div>
-      {!isDesktopScreen && !isEmpty && routes.length > rowsWhenLess && (
+      {!isDesktopScreen && !isEmpty && routesToShow.length > rowsWhenLess && (
         <div className="flex label-small-bold text-grey-500 mt-2 justify-between">
           <div
             className="ml-auto cursor-pointer hover:opacity-50"
