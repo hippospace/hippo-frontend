@@ -8,7 +8,7 @@
     "@ethersproject/providers": "^5.6.6",
     "@manahippo/aptos-wallet-adapter": "1.0.10",
     "@manahippo/coin-list": "4.1.13",
-    "@manahippo/hippo-sdk": "7.3.2",
+    "@manahippo/hippo-sdk": "7.3.3",
     "@manahippo/move-to-ts": "3.0.2",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/line-clamp": "^0.4.0",
