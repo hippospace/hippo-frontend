@@ -18,7 +18,7 @@ import { Types, ApiError } from 'aptos';
 import { RPCType, useRPCURL, useRpcEndpoint } from 'components/Settings';
 import { useBreakpoint } from 'hooks/useBreakpoint';
 import { useCoingeckoPrice } from 'hooks/useCoingecko';
-import { GeneralRouteAndQuote, IRoutesGroupedByDex } from 'types/hippo';
+import { GeneralRouteAndQuote } from 'types/hippo';
 import { AggregatorTypes } from '@manahippo/hippo-sdk';
 import { RawCoinInfo } from '@manahippo/coin-list';
 import { aptToGas, gasToApt } from 'utils/aptosUtils';
@@ -658,10 +658,16 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
   }, [aptBalance, fromCoin?.symbol, fromUiAmt, isBalanceReady]);
 
   // merge dexes by Hippo or same dex
-  const mergedRoutes: IRoutesGroupedByDex[] = useMemo(
-    () => getMergedRoutes(allRoutes),
-    [allRoutes]
-  );
+  const routesToShow: GeneralRouteAndQuote[] = useMemo(() => {
+    const mergedRoutes = getMergedRoutes(allRoutes);
+    return mergedRoutes.flatMap((route) => {
+      if (route.dex === AggregatorTypes.DexType.Hippo) {
+        return route.routes.slice(0, 3);
+      } else {
+        return route.routes.slice(0, 1);
+      }
+    });
+  }, [allRoutes]);
 
   useEffect(() => {
     const ts = Date.now();
@@ -670,7 +676,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
     setRoutesSimulatedResults(simuResults);
 
     if (
-      mergedRoutes.flatMap((mr) => mr.routes).length > 0 &&
+      routesToShow.length > 0 &&
       isBalanceReady &&
       aptBalance &&
       baseBalance &&
@@ -678,14 +684,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
       aptBalance >= 0.02 &&
       baseBalance >= fromUiAmt
     ) {
-      const routesToSimulate = [
-        ...(mergedRoutes.find((m) => m.dex === AggregatorTypes.DexType.Hippo)?.routes.slice(0, 3) ??
-          []),
-        ...mergedRoutes
-          .filter((m) => m.dex !== AggregatorTypes.DexType.Hippo)
-          .slice(0, 2)
-          .map((mr) => mr.routes[0])
-      ];
+      const routesToSimulate = routesToShow.slice(0, 3);
 
       routesToSimulate.forEach((route) => {
         (async () => {
@@ -700,10 +699,6 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
             simuResults.set(serializeRouteQuote(route), result);
             setRoutesSimulatedResults(simuResults);
             if (simuResults.keys.length === routesToSimulate.length) {
-              const hippoRoutes = mergedRoutes.find(
-                (mr) => mr.dex === AggregatorTypes.DexType.Hippo
-              )?.routes;
-
               const routeCompareVal = (r: GeneralRouteAndQuote) => {
                 const key = serializeRouteQuote(r);
                 const simResult = routesSimulatedResults.get(key);
@@ -712,12 +707,9 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
                   : 0;
               };
 
-              hippoRoutes?.sort((a, b) => routeCompareVal(b) - routeCompareVal(a));
-              mergedRoutes.sort(
-                (a, b) => routeCompareVal(b.routes[0]) - routeCompareVal(a.routes[0])
-              );
+              routesToShow.sort((a, b) => routeCompareVal(b) - routeCompareVal(a));
 
-              setSelectedRouteFromRoutes(mergedRoutes.flatMap((mr) => mr.routes));
+              setSelectedRouteFromRoutes(routesToShow);
             }
           }
         })();
@@ -1000,7 +992,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
             <>
               <RoutesAvailable
                 className="mt-4 hidden tablet:block"
-                routes={mergedRoutes}
+                routes={routesToShow}
                 ctx={ctx}
                 routeSelected={routeSelected}
                 onRouteSelected={onUserSelectRoute}
@@ -1030,7 +1022,7 @@ const TokenSwap: React.FC<TProps> = ({ ctx }) => {
                 <Card className={classNames('px-4 py-8 laptop:px-4')}>
                   <RoutesAvailable
                     isDesktopScreen={true}
-                    routes={mergedRoutes}
+                    routes={routesToShow}
                     ctx={ctx}
                     routeSelected={routeSelected}
                     onRouteSelected={onUserSelectRoute}
