@@ -257,12 +257,12 @@ const CoinSelector: React.FC<TProps> = ({ ctx, dismissiModal, actionType }) => {
           {tokenListBalance && (
             <List
               className="overflow-y-scroll no-scrollbar border-0 h-full"
-              rowKey={(item) => `list-row-${(item as RawCoinInfo).symbol}`}>
+              rowKey={(item) => `list-row-${(item as RawCoinInfo).unique_index}`}>
               <VirtualList
                 data={tokenListBalance || []}
                 height={listHeight}
                 itemHeight={69} // minimum height
-                itemKey={(item) => `list-item-${item.token.symbol}`}>
+                itemKey={(item) => `list-item-${item.token.unique_index}`}>
                 {(item) => (
                   <List.Item
                     className="!border-b-0 !px-0 cursor-pointer p-1"
