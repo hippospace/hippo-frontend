@@ -1899,20 +1899,20 @@
     js-sha3 "^0.8.0"
     msafe-wallet "~2.1.3"
 
-"@manahippo/coin-list@4.1.13":
-  version "4.1.13"
-  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-4.1.13.tgz#4ea6360f2f836c49b5027ec986a1026cb8847cd2"
-  integrity sha512-eesRbyXs+iol11LlYOf/FCu7G+AGKUXj7MYxF6kFNYw0CRedrUsx4p9m7VtsJ0qr+jya4NmTq9/1bz/lLdu43g==
+"@manahippo/coin-list@4.1.22":
+  version "4.1.22"
+  resolved "https://registry.yarnpkg.com/@manahippo/coin-list/-/coin-list-4.1.22.tgz#cfa67708ba19fa3abc261a3312f46d0147ebbb45"
+  integrity sha512-neFaRnKxl35vdYHfFDfoWe3Fbqoj4/D47iShOoFo1kGk8GXAIPMXezD3XOGugoMnXRN5nVm58S3twIIE8v7qFg==
   dependencies:
     commander "^9.3.0"
     cross-fetch "^3.1.5"
 
-"@manahippo/hippo-sdk@7.3.4":
-  version "7.3.4"
-  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-7.3.4.tgz#7ef8b258fb840022f1063a62cc56ea58374767d5"
-  integrity sha512-+u0Fm7raTDP0PKkZp2DFrHaqvFZzciF04FYrNy6+UrPcBS70Vky61BpgmVYdz7fMDbncLllt8RQkmfdTKA94kg==
+"@manahippo/hippo-sdk@7.3.6":
+  version "7.3.6"
+  resolved "https://registry.yarnpkg.com/@manahippo/hippo-sdk/-/hippo-sdk-7.3.6.tgz#097237fd42a74d90c0b6f30c5cc73d34f55310d0"
+  integrity sha512-7KoHsvrnzw8r7SnVCbi5E2m6x6VISs2ZhzE0UOtDoCto5AS/XSGyB1NlptALERsnbznllsIYVipHJU3ba1DCaQ==
   dependencies:
-    "@manahippo/coin-list" "4.1.13"
+    "@manahippo/coin-list" "4.1.22"
     "@manahippo/move-to-ts" "3.0.2"
     "@vividnetwork/swap-sdk" "^0.2.2"
     aptos "1.10.0"
@@ -4115,9 +4115,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001370, caniuse-lite@^1.0.30001373:
-  version "1.0.30001519"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001519.tgz"
-  integrity sha512-0QHgqR+Jv4bxHMp8kZ1Kn8CH55OikjKJ6JmKkZYP1F3D7w+lnFXF70nG5eNfsZS89jadi5Ywy5UCSKLAglIRkg==
+  version "1.0.30001589"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001589.tgz"
+  integrity sha512-vNQWS6kI+q6sBlHbh71IIeC+sRwK2N3EDySc/updIGhIee2x5z00J4c1242/5/d6EpEMdOnk/m+6tuk4/tcsqg==
 
 case-sensitive-paths-webpack-plugin@^2.4.0:
   version "2.4.0"
